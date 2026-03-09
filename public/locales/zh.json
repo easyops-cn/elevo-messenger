@@ -76,7 +76,6 @@
     "loadingAuthFlow": "正在加载认证流程",
     "failedAuthFlow": "加载认证流程失败",
     "about": "关于",
-    "twitter": "Twitter",
     "poweredByMatrix": "由 Matrix 提供支持",
     "continueWith": "使用 {{name}} 继续",
     "continueWithSSO": "使用 SSO 继续",
@@ -419,10 +418,7 @@
       "verified": "已验证",
       "verifyStepsIntro": "从其他设备验证的步骤。",
       "verifyStepOpenDevice": "打开您的其他已验证设备。",
-      "verifyStepOpenSettings": "打开<i>设置</i>。",
-      "verifyStepFindDevice": "在<i>设备/会话</i>部分找到此设备。",
       "verifyStepInitiate": "发起验证。",
-      "verifyNoDeviceHint": "如果您没有任何已验证的设备，请点击<b>\"手动验证\"</b>按钮。",
       "startVerificationDesc": "从其他设备开始验证或手动验证。",
       "verifyManually": "手动验证",
       "verifyDeviceDesc": "验证设备身份并授权访问加密消息。",
@@ -492,11 +488,7 @@
       "clearCacheDesc": "清除所有本地存储的数据并从服务器重新加载。",
       "clearCacheBtn": "清除缓存",
       "credits": "致谢",
-      "cinnyLogo": "Cinny 图标",
-      "creditMatrixJsSdk": "<a href=\"https://github.com/matrix-org/matrix-js-sdk\" rel=\"noreferrer noopener\" target=\"_blank\">matrix-js-sdk</a> 版权所有 © <a href=\"https://matrix.org/foundation\" rel=\"noreferrer noopener\" target=\"_blank\">The Matrix.org Foundation C.I.C</a>，依据 <a href=\"http://www.apache.org/licenses/LICENSE-2.0\" rel=\"noreferrer noopener\" target=\"_blank\">Apache 2.0</a> 许可使用。",
-      "creditTwemojiColr": "<a href=\"https://github.com/mozilla/twemoji-colr\" target=\"_blank\" rel=\"noreferrer noopener\">twemoji-colr</a> 字体版权所有 © <a href=\"https://mozilla.org/\" target=\"_blank\" rel=\"noreferrer noopener\">Mozilla Foundation</a>，依据 <a href=\"http://www.apache.org/licenses/LICENSE-2.0\" target=\"_blank\" rel=\"noreferrer noopener\">Apache 2.0</a> 许可使用。",
-      "creditTwemoji": "<a href=\"https://twemoji.twitter.com\" target=\"_blank\" rel=\"noreferrer noopener\">Twemoji</a> 表情符号艺术版权所有 © <a href=\"https://twemoji.twitter.com\" target=\"_blank\" rel=\"noreferrer noopener\">Twitter, Inc 及其他贡献者</a>，依据 <a href=\"https://creativecommons.org/licenses/by/4.0/\" target=\"_blank\" rel=\"noreferrer noopener\">CC-BY 4.0</a> 许可使用。",
-      "creditMaterialSound": "<a href=\"https://material.io/design/sound/sound-resources.html\" target=\"_blank\" rel=\"noreferrer noopener\">Material 声音资源</a> 版权所有 © <a href=\"https://google.com\" target=\"_blank\" rel=\"noreferrer noopener\">Google</a>，依据 <a href=\"https://creativecommons.org/licenses/by/4.0/\" target=\"_blank\" rel=\"noreferrer noopener\">CC-BY 4.0</a> 许可使用。"
+      "cinnyLogo": "Cinny 图标"
     }
   },
   "sidebar": {

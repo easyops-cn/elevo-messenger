@@ -76,7 +76,6 @@
     "loadingAuthFlow": "Loading authentication flow",
     "failedAuthFlow": "Failed to load authentication flow",
     "about": "About",
-    "twitter": "Twitter",
     "poweredByMatrix": "Powered by Matrix",
     "continueWith": "Continue with {{name}}",
     "continueWithSSO": "Continue with SSO",
@@ -419,10 +418,7 @@
       "verified": "Verified",
       "verifyStepsIntro": "Steps to verify from other device.",
       "verifyStepOpenDevice": "Open your other verified device.",
-      "verifyStepOpenSettings": "Open <i>Settings</i>.",
-      "verifyStepFindDevice": "Find this device in <i>Devices/Sessions</i> section.",
       "verifyStepInitiate": "Initiate verification.",
-      "verifyNoDeviceHint": "If you do not have any verified device press the <b>\"Verify Manually\"</b> button.",
       "startVerificationDesc": "Start verification from other device or verify manually.",
       "verifyManually": "Verify Manually",
       "verifyDeviceDesc": "Verify device identity and grant access to encrypted messages.",
@@ -492,11 +488,7 @@
       "clearCacheDesc": "Clear all your locally stored data and reload from server.",
       "clearCacheBtn": "Clear Cache",
       "credits": "Credits",
-      "cinnyLogo": "Cinny logo",
-      "creditMatrixJsSdk": "The <a href=\"https://github.com/matrix-org/matrix-js-sdk\" rel=\"noreferrer noopener\" target=\"_blank\">matrix-js-sdk</a> is © <a href=\"https://matrix.org/foundation\" rel=\"noreferrer noopener\" target=\"_blank\">The Matrix.org Foundation C.I.C</a> used under the terms of <a href=\"http://www.apache.org/licenses/LICENSE-2.0\" rel=\"noreferrer noopener\" target=\"_blank\">Apache 2.0</a>.",
-      "creditTwemojiColr": "The <a href=\"https://github.com/mozilla/twemoji-colr\" target=\"_blank\" rel=\"noreferrer noopener\">twemoji-colr</a> font is © <a href=\"https://mozilla.org/\" target=\"_blank\" rel=\"noreferrer noopener\">Mozilla Foundation</a> used under the terms of <a href=\"http://www.apache.org/licenses/LICENSE-2.0\" target=\"_blank\" rel=\"noreferrer noopener\">Apache 2.0</a>.",
-      "creditTwemoji": "The <a href=\"https://twemoji.twitter.com\" target=\"_blank\" rel=\"noreferrer noopener\">Twemoji</a> emoji art is © <a href=\"https://twemoji.twitter.com\" target=\"_blank\" rel=\"noreferrer noopener\">Twitter, Inc and other contributors</a> used under the terms of <a href=\"https://creativecommons.org/licenses/by/4.0/\" target=\"_blank\" rel=\"noreferrer noopener\">CC-BY 4.0</a>.",
-      "creditMaterialSound": "The <a href=\"https://material.io/design/sound/sound-resources.html\" target=\"_blank\" rel=\"noreferrer noopener\">Material sound resources</a> are © <a href=\"https://google.com\" target=\"_blank\" rel=\"noreferrer noopener\">Google</a> used under the terms of <a href=\"https://creativecommons.org/licenses/by/4.0/\" target=\"_blank\" rel=\"noreferrer noopener\">CC-BY 4.0</a>."
+      "cinnyLogo": "Cinny logo"
     }
   },
   "sidebar": {
