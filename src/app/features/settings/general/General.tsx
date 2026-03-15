@@ -50,6 +50,7 @@ import { stopPropagation } from '../../../utils/keyboard';
 import { useMessageLayoutItems } from '../../../hooks/useMessageLayout';
 import { useMessageSpacingItems } from '../../../hooks/useMessageSpacing';
 import { useDateFormatItems } from '../../../hooks/useDateFormat';
+import { useClientConfig } from '../../../hooks/useClientConfig';
 import { SequenceCardStyle } from '../styles.css';
 
 type ThemeSelectorProps = {
@@ -1002,11 +1003,6 @@ function Messages() {
   );
 }
 
-const SUPPORTED_LANGUAGES = [
-  { code: 'en', name: 'English' },
-  { code: 'zh', name: '简体中文' },
-];
-
 function Language() {
   const { t, i18n } = useTranslation();
   const [menuCords, setMenuCords] = useState<RectCords>();
@@ -1020,8 +1016,15 @@ function Language() {
     setMenuCords(undefined);
   };
 
-  const currentLang =
-    SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) ?? SUPPORTED_LANGUAGES[0];
+  const { supportedLanguages } = useClientConfig();
+
+  const currentLang = supportedLanguages?.find((l) => l.code === i18n.language) ??
+    supportedLanguages?.[0] ?? { code: 'en', name: 'English' };
+
+  if ((supportedLanguages?.length ?? 1) <= 1) {
+    // Hide the language setting if there is only one or no supported languages
+    return null;
+  }
 
   return (
     <Box direction="Column" gap="100">
@@ -1061,7 +1064,7 @@ function Language() {
                     }}
                   >
                     <Menu>
-                      {SUPPORTED_LANGUAGES.map((lang) => (
+                      {supportedLanguages?.map((lang) => (
                         <MenuItem
                           key={lang.code}
                           size="300"

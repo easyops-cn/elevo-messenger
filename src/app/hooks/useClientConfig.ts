@@ -5,6 +5,11 @@ export type HashRouterConfig = {
   basename?: string;
 };
 
+export type LanguageOption = {
+  code: string;
+  name: string;
+};
+
 export type ClientConfig = {
   defaultHomeserver?: number;
   homeserverList?: string[];
@@ -18,6 +23,8 @@ export type ClientConfig = {
   };
 
   hashRouter?: HashRouterConfig;
+
+  supportedLanguages?: LanguageOption[];
 };
 
 const ClientConfigContext = createContext<ClientConfig | null>(null);
