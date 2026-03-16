@@ -50,7 +50,6 @@ import { stopPropagation } from '../../../utils/keyboard';
 import { useMessageLayoutItems } from '../../../hooks/useMessageLayout';
 import { useMessageSpacingItems } from '../../../hooks/useMessageSpacing';
 import { useDateFormatItems } from '../../../hooks/useDateFormat';
-import { useClientConfig } from '../../../hooks/useClientConfig';
 import { SequenceCardStyle } from '../styles.css';
 
 type ThemeSelectorProps = {
@@ -1003,90 +1002,6 @@ function Messages() {
   );
 }
 
-function Language() {
-  const { t, i18n } = useTranslation();
-  const [menuCords, setMenuCords] = useState<RectCords>();
-
-  const handleMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
-    setMenuCords(evt.currentTarget.getBoundingClientRect());
-  };
-
-  const handleSelect = (langCode: string) => {
-    i18n.changeLanguage(langCode);
-    setMenuCords(undefined);
-  };
-
-  const { supportedLanguages } = useClientConfig();
-
-  const currentLang = supportedLanguages?.find((l) => l.code === i18n.language) ??
-    supportedLanguages?.[0] ?? { code: 'en', name: 'English' };
-
-  if ((supportedLanguages?.length ?? 1) <= 1) {
-    // Hide the language setting if there is only one or no supported languages
-    return null;
-  }
-
-  return (
-    <Box direction="Column" gap="100">
-      <Text size="L400">{t('settings.language.title')}</Text>
-      <SequenceCard className={SequenceCardStyle} variant="SurfaceVariant" direction="Column">
-        <SettingTile
-          title={t('settings.language.selectLanguage')}
-          after={
-            <>
-              <Button
-                size="300"
-                variant="Secondary"
-                outlined
-                fill="Soft"
-                radii="300"
-                after={<Icon size="300" src={Icons.ChevronBottom} />}
-                onClick={handleMenu}
-              >
-                <Text size="T300">{currentLang.name}</Text>
-              </Button>
-              <PopOut
-                anchor={menuCords}
-                offset={5}
-                position="Bottom"
-                align="End"
-                content={
-                  <FocusTrap
-                    focusTrapOptions={{
-                      initialFocus: false,
-                      onDeactivate: () => setMenuCords(undefined),
-                      clickOutsideDeactivates: true,
-                      isKeyForward: (evt: KeyboardEvent) =>
-                        evt.key === 'ArrowDown' || evt.key === 'ArrowRight',
-                      isKeyBackward: (evt: KeyboardEvent) =>
-                        evt.key === 'ArrowUp' || evt.key === 'ArrowLeft',
-                      escapeDeactivates: stopPropagation,
-                    }}
-                  >
-                    <Menu>
-                      {supportedLanguages?.map((lang) => (
-                        <MenuItem
-                          key={lang.code}
-                          size="300"
-                          radii="300"
-                          aria-pressed={lang.code === i18n.language}
-                          onClick={() => handleSelect(lang.code)}
-                        >
-                          <Text size="T300">{lang.name}</Text>
-                        </MenuItem>
-                      ))}
-                    </Menu>
-                  </FocusTrap>
-                }
-              />
-            </>
-          }
-        />
-      </SequenceCard>
-    </Box>
-  );
-}
-
 type GeneralProps = {
   requestClose: () => void;
 };
@@ -1116,7 +1031,6 @@ export function General({ requestClose }: GeneralProps) {
               <DateAndTime />
               <Editor />
               <Messages />
-              <Language />
             </Box>
           </PageContent>
         </Scroll>

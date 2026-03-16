@@ -27,7 +27,5 @@
   "hashRouter": {
     "enabled": false,
     "basename": "/"
-  },
-
-  "supportedLanguages": [{ "code": "en", "name": "English" }]
+  }
 }
