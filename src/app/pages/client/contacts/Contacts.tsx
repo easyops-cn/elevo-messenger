@@ -1,5 +1,6 @@
 import React from 'react';
-import { Avatar, Box, Icon, Icons, Text } from 'folds';
+import { Avatar, Box, Icon, Text } from 'folds';
+import { UsersIcon } from '../../../icons/UsersIcon';
 import { NavCategory, NavItem, NavItemContent, NavLink } from '../../../components/nav';
 import { getContactsContactsPath } from '../../pathUtils';
 import { useContactsContactsSelected } from '../../../hooks/router/useContacts';
@@ -30,7 +31,7 @@ export function Contacts() {
                 <NavItemContent>
                   <Box as="span" grow="Yes" alignItems="Center" gap="200">
                     <Avatar size="200" radii="400">
-                      <Icon src={Icons.UserPlus} size="100" filled={contactsSelected} />
+                      <Icon src={UsersIcon} size="100" filled={contactsSelected} />
                     </Avatar>
                     <Box as="span" grow="Yes">
                       <Text as="span" size="Inherit" truncate>

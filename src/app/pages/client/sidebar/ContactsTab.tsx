@@ -1,7 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Icon, Icons } from 'folds';
+import { Icon } from 'folds';
 import { useAtomValue } from 'jotai';
+import { UsersIcon } from '../../../icons/UsersIcon';
 import {
   SidebarAvatar,
   SidebarItem,
@@ -37,7 +38,7 @@ export function ContactsTab() {
       <SidebarItemTooltip tooltip="Contacts">
         {(triggerRef) => (
           <SidebarAvatar as="button" ref={triggerRef} outlined onClick={handleContactsClick}>
-            <Icon src={Icons.UserPlus} filled={contactsSelected} />
+            <Icon src={UsersIcon} filled={contactsSelected} />
           </SidebarAvatar>
         )}
       </SidebarItemTooltip>
