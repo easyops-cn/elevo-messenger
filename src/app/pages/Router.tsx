@@ -29,12 +29,15 @@ import {
   _SEARCH_PATH,
   _SERVER_PATH,
   CREATE_PATH,
+  CONTACTS_PATH,
+  _CONTACTS_CONTACTS_PATH,
 } from './paths';
 import {
   getAppPathFromHref,
   getExploreFeaturedPath,
   getHomePath,
   getInboxNotificationsPath,
+  getContactsContactsPath,
   getLoginPath,
   getOriginBaseUrl,
   getSpaceLobbyPath,
@@ -45,6 +48,7 @@ import { Direct, DirectCreate, DirectRouteRoomProvider } from './client/direct';
 import { RouteSpaceProvider, Space, SpaceRouteRoomProvider, SpaceSearch } from './client/space';
 import { Explore, FeaturedRooms, PublicRooms } from './client/explore';
 import { Notifications, Inbox, Invites } from './client/inbox';
+import { Contacts, ContactsPage } from './client/contacts';
 import { setAfterLoginRedirectPath } from './afterLoginRedirectPath';
 import { Room } from '../features/room';
 import { Lobby } from '../features/lobby';
@@ -294,6 +298,29 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           )}
           <Route path={_NOTIFICATIONS_PATH} element={<Notifications />} />
           <Route path={_INVITES_PATH} element={<Invites />} />
+        </Route>
+        <Route
+          path={CONTACTS_PATH}
+          element={
+            <PageRoot
+              nav={
+                <MobileFriendlyPageNav path={CONTACTS_PATH}>
+                  <Contacts />
+                </MobileFriendlyPageNav>
+              }
+            >
+              <Outlet />
+            </PageRoot>
+          }
+        >
+          {mobile ? null : (
+            <Route
+              index
+              loader={() => redirect(getContactsContactsPath())}
+              element={<WelcomePage />}
+            />
+          )}
+          <Route path={_CONTACTS_CONTACTS_PATH} element={<ContactsPage />} />
         </Route>
       </Route>
       <Route path="/*" element={<p>Page not found</p>} />

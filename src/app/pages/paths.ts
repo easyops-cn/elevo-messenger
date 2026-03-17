@@ -88,3 +88,7 @@ export const INBOX_INVITES_PATH = `/inbox/${_INVITES_PATH}`;
 export const SPACE_SETTINGS_PATH = '/space-settings/';
 
 export const ROOM_SETTINGS_PATH = '/room-settings/';
+
+export const CONTACTS_PATH = '/contacts/';
+export const _CONTACTS_CONTACTS_PATH = 'contacts/';
+export const CONTACTS_CONTACTS_PATH = `/contacts/${_CONTACTS_CONTACTS_PATH}`;

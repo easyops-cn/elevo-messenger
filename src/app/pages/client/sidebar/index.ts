@@ -1,5 +1,6 @@
 export * from './HomeTab';
 export * from './DirectTab';
+export * from './ContactsTab';
 export * from './SpaceTabs';
 export * from './InboxTab';
 export * from './ExploreTab';
