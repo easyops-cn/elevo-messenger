@@ -386,6 +386,10 @@
       "urlPreviewEncrypted": "Url Preview in Encrypted Room",
       "showHiddenEvents": "Show Hidden Events"
     },
+    "language": {
+      "title": "Language",
+      "selectLanguage": "Select Language"
+    },
     "accountSettings": {
       "contactInfo": "Contact Information",
       "emailAddress": "Email Address",
