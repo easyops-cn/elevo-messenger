@@ -2,18 +2,16 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Icon } from 'folds';
 import { useAtomValue } from 'jotai';
+import { useTranslation } from 'react-i18next';
 import { UsersIcon } from '../../../icons/UsersIcon';
-import {
-  SidebarAvatar,
-  SidebarItem,
-  SidebarItemTooltip,
-} from '../../../components/sidebar';
+import { SidebarAvatar, SidebarItem, SidebarItemTooltip } from '../../../components/sidebar';
 import { getContactsContactsPath, getContactsPath, joinPathComponent } from '../../pathUtils';
 import { useContactsSelected } from '../../../hooks/router/useContacts';
 import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { useNavToActivePathAtom } from '../../../state/hooks/navToActivePath';
 
 export function ContactsTab() {
+  const { t } = useTranslation();
   const screenSize = useScreenSizeContext();
   const navigate = useNavigate();
   const navToActivePath = useAtomValue(useNavToActivePathAtom());
@@ -35,7 +33,7 @@ export function ContactsTab() {
 
   return (
     <SidebarItem active={contactsSelected}>
-      <SidebarItemTooltip tooltip="Contacts">
+      <SidebarItemTooltip tooltip={t('contacts.title')}>
         {(triggerRef) => (
           <SidebarAvatar as="button" ref={triggerRef} outlined onClick={handleContactsClick}>
             <Icon src={UsersIcon} filled={contactsSelected} />

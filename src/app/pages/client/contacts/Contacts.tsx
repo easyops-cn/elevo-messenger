@@ -1,5 +1,6 @@
 import React from 'react';
 import { Avatar, Box, Icon, Text } from 'folds';
+import { useTranslation } from 'react-i18next';
 import { UsersIcon } from '../../../icons/UsersIcon';
 import { NavCategory, NavItem, NavItemContent, NavLink } from '../../../components/nav';
 import { getContactsContactsPath } from '../../pathUtils';
@@ -8,6 +9,7 @@ import { useNavToActivePathMapper } from '../../../hooks/useNavToActivePathMappe
 import { PageNav, PageNavContent, PageNavHeader } from '../../../components/page';
 
 export function Contacts() {
+  const { t } = useTranslation();
   useNavToActivePathMapper('contacts');
   const contactsSelected = useContactsContactsSelected();
 
@@ -17,7 +19,7 @@ export function Contacts() {
         <Box grow="Yes" gap="300">
           <Box grow="Yes">
             <Text size="H4" truncate>
-              Contacts
+              {t('contacts.title')}
             </Text>
           </Box>
         </Box>
@@ -35,7 +37,7 @@ export function Contacts() {
                     </Avatar>
                     <Box as="span" grow="Yes">
                       <Text as="span" size="Inherit" truncate>
-                        Contacts
+                        {t('contacts.title')}
                       </Text>
                     </Box>
                   </Box>

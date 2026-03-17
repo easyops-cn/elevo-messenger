@@ -846,6 +846,18 @@
     "joinNewSpace": "Join New Space",
     "failedJoinReplacement": "Failed to join replacement space!"
   },
+  "contacts": {
+    "title": "Contacts",
+    "search": "Search",
+    "searchPlaceholder": "Search for contacts",
+    "resultCount_one": "{{count}} Result",
+    "resultCount_other": "{{count}} Results",
+    "noResults": "No Results",
+    "noMembersOfType": "No \"{{type}}\" Members",
+    "scrollToTop": "Scroll to Top",
+    "roomNotFound": "Room not found",
+    "roomNotFoundDesc": "The contacts room could not be found."
+  },
   "Organisms": {
     "RoomCommon": {
       "changed_room_name": " changed room name"

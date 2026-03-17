@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Avatar,
   Badge,
@@ -66,6 +67,7 @@ import { useSpaceOptionally } from '../../../hooks/useSpace';
 import { useFlattenPowerTagMembers, useGetMemberPowerTag } from '../../../hooks/useMemberPowerTag';
 import { useRoomCreators } from '../../../hooks/useRoomCreators';
 import * as css from '../../../features/room/MembersDrawer.css';
+import { UsersIcon } from '../../../icons/UsersIcon';
 
 const CONTACTS_ROOM_ID = '!soqAfmrZyVbUygvYFp:m.easyops.local';
 
@@ -145,6 +147,7 @@ type ContactsMemberListProps = {
   members: RoomMember[];
 };
 function ContactsMemberList({ room, members }: ContactsMemberListProps) {
+  const { t } = useTranslation();
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -217,190 +220,192 @@ function ContactsMemberList({ room, members }: ContactsMemberListProps) {
       <PageContent>
         <PageContentCenter>
           <Box direction="Column" gap="600">
-          <Box ref={scrollTopAnchorRef} direction="Column" gap="400">
-            <Box direction="Column" gap="100">
-              <span data-spacing-node />
-              <Text size="L400">Search</Text>
-              <Input
-                ref={searchInputRef}
-                onChange={handleSearchChange}
-                style={{ paddingRight: config.space.S300 }}
-                placeholder="Search for contacts"
-                variant="Background"
-                size="500"
-                radii="400"
-                before={<Icon size="200" src={Icons.Search} />}
-                after={
-                  result && (
-                    <Chip
-                      type="button"
-                      variant="Secondary"
-                      size="400"
-                      radii="Pill"
-                      outlined
-                      after={<Icon size="50" src={Icons.Cross} />}
-                      onClick={() => {
-                        if (searchInputRef.current) {
-                          searchInputRef.current.value = '';
-                          searchInputRef.current.focus();
+            <Box ref={scrollTopAnchorRef} direction="Column" gap="400">
+              <Box direction="Column" gap="100">
+                <span data-spacing-node />
+                <Text size="L400">{t('contacts.search')}</Text>
+                <Input
+                  ref={searchInputRef}
+                  onChange={handleSearchChange}
+                  style={{ paddingRight: config.space.S300 }}
+                  placeholder={t('contacts.searchPlaceholder')}
+                  variant="Background"
+                  size="500"
+                  radii="400"
+                  before={<Icon size="200" src={Icons.Search} />}
+                  after={
+                    result && (
+                      <Chip
+                        type="button"
+                        variant="Secondary"
+                        size="400"
+                        radii="Pill"
+                        outlined
+                        after={<Icon size="50" src={Icons.Cross} />}
+                        onClick={() => {
+                          if (searchInputRef.current) {
+                            searchInputRef.current.value = '';
+                            searchInputRef.current.focus();
+                          }
+                          resetSearch();
+                        }}
+                      >
+                        <Text size="B300">
+                          {result.items.length
+                            ? t('contacts.resultCount_other', { count: result.items.length })
+                            : t('contacts.noResults')}
+                        </Text>
+                      </Chip>
+                    )
+                  }
+                />
+              </Box>
+              <Box alignItems="Center" justifyContent="SpaceBetween" gap="200">
+                <UseStateProvider initial={undefined}>
+                  {(anchor: RectCords | undefined, setAnchor) => (
+                    <PopOut
+                      anchor={anchor}
+                      position="Bottom"
+                      align="Start"
+                      offset={4}
+                      content={
+                        <MembershipFilterMenu
+                          selected={membershipFilterIndex}
+                          onSelect={setMembershipFilterIndex}
+                          requestClose={() => setAnchor(undefined)}
+                        />
+                      }
+                    >
+                      <Chip
+                        onClick={
+                          ((evt) =>
+                            setAnchor(
+                              evt.currentTarget.getBoundingClientRect()
+                            )) as MouseEventHandler<HTMLButtonElement>
                         }
-                        resetSearch();
-                      }}
-                    >
-                      <Text size="B300">{`${result.items.length || 'No'} ${
-                        result.items.length === 1 ? 'Result' : 'Results'
-                      }`}</Text>
-                    </Chip>
-                  )
-                }
-              />
-            </Box>
-            <Box alignItems="Center" justifyContent="SpaceBetween" gap="200">
-              <UseStateProvider initial={undefined}>
-                {(anchor: RectCords | undefined, setAnchor) => (
-                  <PopOut
-                    anchor={anchor}
-                    position="Bottom"
-                    align="Start"
-                    offset={4}
-                    content={
-                      <MembershipFilterMenu
-                        selected={membershipFilterIndex}
-                        onSelect={setMembershipFilterIndex}
-                        requestClose={() => setAnchor(undefined)}
-                      />
-                    }
-                  >
-                    <Chip
-                      onClick={
-                        ((evt) =>
-                          setAnchor(
-                            evt.currentTarget.getBoundingClientRect()
-                          )) as MouseEventHandler<HTMLButtonElement>
+                        variant="Background"
+                        size="400"
+                        radii="300"
+                        before={<Icon src={Icons.Filter} size="50" />}
+                      >
+                        <Text size="T200">{membershipFilter.name}</Text>
+                      </Chip>
+                    </PopOut>
+                  )}
+                </UseStateProvider>
+                <UseStateProvider initial={undefined}>
+                  {(anchor: RectCords | undefined, setAnchor) => (
+                    <PopOut
+                      anchor={anchor}
+                      position="Bottom"
+                      align="End"
+                      offset={4}
+                      content={
+                        <MemberSortMenu
+                          selected={sortFilterIndex}
+                          onSelect={setSortFilterIndex}
+                          requestClose={() => setAnchor(undefined)}
+                        />
                       }
-                      variant="Background"
-                      size="400"
-                      radii="300"
-                      before={<Icon src={Icons.Filter} size="50" />}
                     >
-                      <Text size="T200">{membershipFilter.name}</Text>
-                    </Chip>
-                  </PopOut>
-                )}
-              </UseStateProvider>
-              <UseStateProvider initial={undefined}>
-                {(anchor: RectCords | undefined, setAnchor) => (
-                  <PopOut
-                    anchor={anchor}
-                    position="Bottom"
-                    align="End"
-                    offset={4}
-                    content={
-                      <MemberSortMenu
-                        selected={sortFilterIndex}
-                        onSelect={setSortFilterIndex}
-                        requestClose={() => setAnchor(undefined)}
-                      />
-                    }
-                  >
-                    <Chip
-                      onClick={
-                        ((evt) =>
-                          setAnchor(
-                            evt.currentTarget.getBoundingClientRect()
-                          )) as MouseEventHandler<HTMLButtonElement>
-                      }
-                      variant="Background"
-                      size="400"
-                      radii="300"
-                      after={<Icon src={Icons.Sort} size="50" />}
-                    >
-                      <Text size="T200">{memberSort.name}</Text>
-                    </Chip>
-                  </PopOut>
-                )}
-              </UseStateProvider>
+                      <Chip
+                        onClick={
+                          ((evt) =>
+                            setAnchor(
+                              evt.currentTarget.getBoundingClientRect()
+                            )) as MouseEventHandler<HTMLButtonElement>
+                        }
+                        variant="Background"
+                        size="400"
+                        radii="300"
+                        after={<Icon src={Icons.Sort} size="50" />}
+                      >
+                        <Text size="T200">{memberSort.name}</Text>
+                      </Chip>
+                    </PopOut>
+                  )}
+                </UseStateProvider>
+              </Box>
             </Box>
-          </Box>
 
-          <ScrollTopContainer scrollRef={scrollRef} anchorRef={scrollTopAnchorRef}>
-            <IconButton
-              onClick={() => virtualizer.scrollToOffset(0)}
-              variant="Surface"
-              radii="Pill"
-              outlined
-              size="300"
-              aria-label="Scroll to Top"
-            >
-              <Icon src={Icons.ChevronTop} size="300" />
-            </IconButton>
-          </ScrollTopContainer>
+            <ScrollTopContainer scrollRef={scrollRef} anchorRef={scrollTopAnchorRef}>
+              <IconButton
+                onClick={() => virtualizer.scrollToOffset(0)}
+                variant="Surface"
+                radii="Pill"
+                outlined
+                size="300"
+                aria-label={t('contacts.scrollToTop')}
+              >
+                <Icon src={Icons.ChevronTop} size="300" />
+              </IconButton>
+            </ScrollTopContainer>
 
-          {!fetchingMembers && !result && processMembers.length === 0 && (
-            <Text style={{ padding: config.space.S300 }} align="Center">
-              {`No "${membershipFilter.name}" Members`}
-            </Text>
-          )}
+            {!fetchingMembers && !result && processMembers.length === 0 && (
+              <Text style={{ padding: config.space.S300 }} align="Center">
+                {t('contacts.noMembersOfType', { type: membershipFilter.name })}
+              </Text>
+            )}
 
-          <Box className={css.MembersGroup} direction="Column" gap="100">
-            <div
-              style={{
-                position: 'relative',
-                height: virtualizer.getTotalSize(),
-              }}
-            >
-              {virtualizer.getVirtualItems().map((vItem) => {
-                const tagOrMember = PLTagOrRoomMember[vItem.index];
-                if (!('userId' in tagOrMember)) {
+            <Box className={css.MembersGroup} direction="Column" gap="100">
+              <div
+                style={{
+                  position: 'relative',
+                  height: virtualizer.getTotalSize(),
+                }}
+              >
+                {virtualizer.getVirtualItems().map((vItem) => {
+                  const tagOrMember = PLTagOrRoomMember[vItem.index];
+                  if (!('userId' in tagOrMember)) {
+                    return (
+                      <Text
+                        style={{
+                          transform: `translateY(${vItem.start}px)`,
+                        }}
+                        data-index={vItem.index}
+                        ref={virtualizer.measureElement}
+                        key={`${room.roomId}-${vItem.index}`}
+                        className={classNames(css.MembersGroupLabel, css.DrawerVirtualItem)}
+                        size="L400"
+                      >
+                        {tagOrMember.name}
+                      </Text>
+                    );
+                  }
+
                   return (
-                    <Text
+                    <div
                       style={{
                         transform: `translateY(${vItem.start}px)`,
+                        paddingBottom: config.space.S200,
                       }}
+                      className={css.DrawerVirtualItem}
                       data-index={vItem.index}
+                      key={`${room.roomId}-${tagOrMember.userId}`}
                       ref={virtualizer.measureElement}
-                      key={`${room.roomId}-${vItem.index}`}
-                      className={classNames(css.MembersGroupLabel, css.DrawerVirtualItem)}
-                      size="L400"
                     >
-                      {tagOrMember.name}
-                    </Text>
+                      <MemberItem
+                        mx={mx}
+                        useAuthentication={useAuthentication}
+                        room={room}
+                        member={tagOrMember}
+                        onClick={handleMemberClick}
+                        pressed={openProfileUserId === tagOrMember.userId}
+                        typing={typingMembers.some(
+                          (receipt) => receipt.userId === tagOrMember.userId
+                        )}
+                      />
+                    </div>
                   );
-                }
-
-                return (
-                  <div
-                    style={{
-                      transform: `translateY(${vItem.start}px)`,
-                      paddingBottom: config.space.S200,
-                    }}
-                    className={css.DrawerVirtualItem}
-                    data-index={vItem.index}
-                    key={`${room.roomId}-${tagOrMember.userId}`}
-                    ref={virtualizer.measureElement}
-                  >
-                    <MemberItem
-                      mx={mx}
-                      useAuthentication={useAuthentication}
-                      room={room}
-                      member={tagOrMember}
-                      onClick={handleMemberClick}
-                      pressed={openProfileUserId === tagOrMember.userId}
-                      typing={typingMembers.some(
-                        (receipt) => receipt.userId === tagOrMember.userId
-                      )}
-                    />
-                  </div>
-                );
-              })}
-            </div>
-          </Box>
-
-          {fetchingMembers && (
-            <Box justifyContent="Center">
-              <Spinner />
+                })}
+              </div>
             </Box>
-          )}
+
+            {fetchingMembers && (
+              <Box justifyContent="Center">
+                <Spinner />
+              </Box>
+            )}
           </Box>
         </PageContentCenter>
       </PageContent>
@@ -424,6 +429,7 @@ function ContactsRoomMembers({ room }: ContactsRoomMembersProps) {
 }
 
 export function ContactsPage() {
+  const { t } = useTranslation();
   const mx = useMatrixClient();
   const screenSize = useScreenSizeContext();
   const room = mx.getRoom(CONTACTS_ROOM_ID);
@@ -444,9 +450,9 @@ export function ContactsPage() {
             )}
           </Box>
           <Box alignItems="Center" gap="200">
-            {screenSize !== ScreenSize.Mobile && <Icon size="400" src={Icons.UserPlus} />}
+            {screenSize !== ScreenSize.Mobile && <Icon size="400" src={UsersIcon} />}
             <Text size="H3" truncate>
-              Contacts
+              {t('contacts.title')}
             </Text>
           </Box>
           <Box grow="Yes" basis="No" />
@@ -469,8 +475,8 @@ export function ContactsPage() {
                   direction="Column"
                   gap="200"
                 >
-                  <Text>Room not found</Text>
-                  <Text size="T200">The contacts room could not be found.</Text>
+                  <Text>{t('contacts.roomNotFound')}</Text>
+                  <Text size="T200">{t('contacts.roomNotFoundDesc')}</Text>
                 </Box>
               </PageContentCenter>
             </PageContent>
