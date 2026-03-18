@@ -851,7 +851,7 @@
     "failedJoinReplacement": "加入替代空间失败！"
   },
   "contacts": {
-    "title": "联系人",
+    "title": "通讯录",
     "search": "搜索",
     "searchPlaceholder": "搜索联系人",
     "resultCount_one": "{{count}} 个结果",
@@ -860,7 +860,8 @@
     "noMembersOfType": "没有 \"{{type}}\" 成员",
     "scrollToTop": "滚动到顶部",
     "roomNotFound": "未找到房间",
-    "roomNotFoundDesc": "无法找到联系人房间。"
+    "roomNotFoundDesc": "无法找到通讯录房间。",
+    "unknown": "未知"
   },
   "Organisms": {
     "RoomCommon": {

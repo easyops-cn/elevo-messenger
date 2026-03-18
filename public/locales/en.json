@@ -860,7 +860,8 @@
     "noMembersOfType": "No \"{{type}}\" Members",
     "scrollToTop": "Scroll to Top",
     "roomNotFound": "Room not found",
-    "roomNotFoundDesc": "The contacts room could not be found."
+    "roomNotFoundDesc": "The contacts room could not be found.",
+    "unknown": "Unknown"
   },
   "Organisms": {
     "RoomCommon": {

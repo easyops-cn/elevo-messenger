@@ -25,6 +25,7 @@ import {
   CREATE_PATH,
   CONTACTS_PATH,
   CONTACTS_CONTACTS_PATH,
+  CONTACTS_ROLE_PATH,
 } from './paths';
 import { trimLeadingSlash, trimTrailingSlash } from '../utils/common';
 import { HashRouterConfig } from '../hooks/useClientConfig';
@@ -163,3 +164,5 @@ export const getInboxInvitesPath = (): string => INBOX_INVITES_PATH;
 
 export const getContactsPath = (): string => CONTACTS_PATH;
 export const getContactsContactsPath = (): string => CONTACTS_CONTACTS_PATH;
+export const getContactsRolePath = (roleName: string): string =>
+  CONTACTS_ROLE_PATH.replace(':roleName', encodeURIComponent(roleName));

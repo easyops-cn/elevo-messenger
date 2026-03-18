@@ -31,6 +31,7 @@ import {
   CREATE_PATH,
   CONTACTS_PATH,
   _CONTACTS_CONTACTS_PATH,
+  _CONTACTS_ROLE_PATH,
 } from './paths';
 import {
   getAppPathFromHref,
@@ -48,7 +49,7 @@ import { Direct, DirectCreate, DirectRouteRoomProvider } from './client/direct';
 import { RouteSpaceProvider, Space, SpaceRouteRoomProvider, SpaceSearch } from './client/space';
 import { Explore, FeaturedRooms, PublicRooms } from './client/explore';
 import { Notifications, Inbox, Invites } from './client/inbox';
-import { Contacts, ContactsPage } from './client/contacts';
+import { Contacts, ContactsPage, ContactsProvider, ContactsRolePage } from './client/contacts';
 import { setAfterLoginRedirectPath } from './afterLoginRedirectPath';
 import { Room } from '../features/room';
 import { Lobby } from '../features/lobby';
@@ -302,15 +303,17 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
         <Route
           path={CONTACTS_PATH}
           element={
-            <PageRoot
-              nav={
-                <MobileFriendlyPageNav path={CONTACTS_PATH}>
-                  <Contacts />
-                </MobileFriendlyPageNav>
-              }
-            >
-              <Outlet />
-            </PageRoot>
+            <ContactsProvider>
+              <PageRoot
+                nav={
+                  <MobileFriendlyPageNav path={CONTACTS_PATH}>
+                    <Contacts />
+                  </MobileFriendlyPageNav>
+                }
+              >
+                <Outlet />
+              </PageRoot>
+            </ContactsProvider>
           }
         >
           {mobile ? null : (
@@ -321,6 +324,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             />
           )}
           <Route path={_CONTACTS_CONTACTS_PATH} element={<ContactsPage />} />
+          <Route path={_CONTACTS_ROLE_PATH} element={<ContactsRolePage />} />
         </Route>
       </Route>
       <Route path="/*" element={<p>Page not found</p>} />

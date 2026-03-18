@@ -90,5 +90,7 @@ export const SPACE_SETTINGS_PATH = '/space-settings/';
 export const ROOM_SETTINGS_PATH = '/room-settings/';
 
 export const CONTACTS_PATH = '/contacts/';
-export const _CONTACTS_CONTACTS_PATH = 'contacts/';
+export const _CONTACTS_CONTACTS_PATH = 'all/';
 export const CONTACTS_CONTACTS_PATH = `/contacts/${_CONTACTS_CONTACTS_PATH}`;
+export const _CONTACTS_ROLE_PATH = 'role/:roleName/';
+export const CONTACTS_ROLE_PATH = `/contacts/${_CONTACTS_ROLE_PATH}`;

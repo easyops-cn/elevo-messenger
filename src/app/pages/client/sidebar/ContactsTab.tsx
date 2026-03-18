@@ -22,7 +22,7 @@ export function ContactsTab() {
       navigate(getContactsPath());
       return;
     }
-    const activePath = navToActivePath.get('contacts');
+    const activePath = navToActivePath.get('all');
     if (activePath) {
       navigate(joinPathComponent(activePath));
       return;

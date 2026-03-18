@@ -33,12 +33,7 @@ import { BackRouteHandler } from '../../../components/BackRouteHandler';
 import { ContainerColor } from '../../../styles/ContainerColor.css';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useRoomMembers } from '../../../hooks/useRoomMembers';
-import {
-  PowerLevelsContextProvider,
-  usePowerLevels,
-  usePowerLevelsContext,
-  useGetMemberPowerLevel,
-} from '../../../hooks/usePowerLevels';
+import { PowerLevelsContextProvider, usePowerLevels } from '../../../hooks/usePowerLevels';
 import { UseStateProvider } from '../../../components/UseStateProvider';
 import {
   SearchItemStrGetter,
@@ -56,7 +51,7 @@ import { UserAvatar } from '../../../components/user-avatar';
 import { useRoomTypingMember } from '../../../hooks/useRoomTypingMembers';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { useMembershipFilter, useMembershipFilterMenu } from '../../../hooks/useMemberFilter';
-import { useMemberPowerSort, useMemberSort, useMemberSortMenu } from '../../../hooks/useMemberSort';
+import { useMemberSort, useMemberSortMenu } from '../../../hooks/useMemberSort';
 import { MembershipFilterMenu } from '../../../components/MembershipFilterMenu';
 import { MemberSortMenu } from '../../../components/MemberSortMenu';
 import {
@@ -64,12 +59,9 @@ import {
   useUserRoomProfileState,
 } from '../../../state/hooks/userRoomProfile';
 import { useSpaceOptionally } from '../../../hooks/useSpace';
-import { useFlattenPowerTagMembers, useGetMemberPowerTag } from '../../../hooks/useMemberPowerTag';
-import { useRoomCreators } from '../../../hooks/useRoomCreators';
 import * as css from '../../../features/room/MembersDrawer.css';
 import { UsersIcon } from '../../../icons/UsersIcon';
-
-const CONTACTS_ROOM_ID = '!soqAfmrZyVbUygvYFp:m.easyops.local';
+import { useContactsContext, CONTACTS_ROOM_ID } from './ContactsContext';
 
 type MemberItemProps = {
   mx: MatrixClient;
@@ -145,18 +137,18 @@ const getRoomMemberStr: SearchItemStrGetter<RoomMember> = (m, query) =>
 type ContactsMemberListProps = {
   room: Room;
   members: RoomMember[];
+  filterRole?: string;
 };
-function ContactsMemberList({ room, members }: ContactsMemberListProps) {
+
+type RoleGroupItem = { type: 'label'; name: string } | { type: 'member'; member: RoomMember };
+
+export function ContactsMemberList({ room, members, filterRole }: ContactsMemberListProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const scrollRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const scrollTopAnchorRef = useRef<HTMLDivElement>(null);
-  const powerLevels = usePowerLevelsContext();
-  const creators = useRoomCreators(room);
-  const getPowerTag = useGetMemberPowerTag(room, creators, powerLevels);
-  const getPowerLevel = useGetMemberPowerLevel(powerLevels);
 
   const fetchingMembers = members.length < room.getJoinedMemberCount();
   const openUserRoomProfile = useOpenUserRoomProfile();
@@ -170,13 +162,14 @@ function ContactsMemberList({ room, members }: ContactsMemberListProps) {
 
   const membershipFilter = useMembershipFilter(membershipFilterIndex, membershipFilterMenu);
   const memberSort = useMemberSort(sortFilterIndex, sortFilterMenu);
-  const memberPowerSort = useMemberPowerSort(creators, getPowerLevel);
 
   const typingMembers = useRoomTypingMember(room.roomId);
 
+  const { javisRoleMap } = useContactsContext();
+
   const filteredMembers = useMemo(
-    () => members.filter(membershipFilter.filterFn).sort(memberSort.sortFn).sort(memberPowerSort),
-    [members, membershipFilter, memberSort, memberPowerSort]
+    () => members.filter(membershipFilter.filterFn).sort(memberSort.sortFn),
+    [members, membershipFilter, memberSort]
   );
 
   const [result, search, resetSearch] = useAsyncSearch(
@@ -188,10 +181,47 @@ function ContactsMemberList({ room, members }: ContactsMemberListProps) {
 
   const processMembers = result ? result.items : filteredMembers;
 
-  const PLTagOrRoomMember = useFlattenPowerTagMembers(processMembers, getPowerTag);
+  const roleGroupedItems = useMemo<RoleGroupItem[]>(() => {
+    const membersToShow = filterRole
+      ? processMembers.filter((m) => {
+          const localpart = getMxIdLocalPart(m.userId);
+          const role = localpart ? javisRoleMap[localpart] : undefined;
+          return filterRole === 'Unknown' ? !role : role === filterRole;
+        })
+      : processMembers;
+
+    if (filterRole) {
+      return membersToShow.map((m): RoleGroupItem => ({ type: 'member', member: m }));
+    }
+
+    const groups = membersToShow.reduce<Map<string, RoomMember[]>>((acc, member) => {
+      const localpart = getMxIdLocalPart(member.userId);
+      const role = localpart ? javisRoleMap[localpart] : undefined;
+      const key = role ?? '__others__';
+      const existing = acc.get(key);
+      if (existing) existing.push(member);
+      else acc.set(key, [member]);
+      return acc;
+    }, new Map());
+
+    const namedGroups = Array.from(groups.entries()).filter(([key]) => key !== '__others__');
+    const othersGroup = groups.get('__others__');
+
+    const items: RoleGroupItem[] = namedGroups.flatMap(([key, groupMembers]) => [
+      { type: 'label', name: key } as RoleGroupItem,
+      ...groupMembers.map((m): RoleGroupItem => ({ type: 'member', member: m })),
+    ]);
+
+    if (othersGroup) {
+      items.push({ type: 'label', name: t('contacts.unknown') });
+      othersGroup.forEach((m) => items.push({ type: 'member', member: m }));
+    }
+
+    return items;
+  }, [processMembers, javisRoleMap, filterRole, t]);
 
   const virtualizer = useVirtualizer({
-    count: PLTagOrRoomMember.length,
+    count: roleGroupedItems.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => 40,
     overscan: 10,
@@ -355,8 +385,8 @@ function ContactsMemberList({ room, members }: ContactsMemberListProps) {
                 }}
               >
                 {virtualizer.getVirtualItems().map((vItem) => {
-                  const tagOrMember = PLTagOrRoomMember[vItem.index];
-                  if (!('userId' in tagOrMember)) {
+                  const item = roleGroupedItems[vItem.index];
+                  if (item.type === 'label') {
                     return (
                       <Text
                         style={{
@@ -364,15 +394,16 @@ function ContactsMemberList({ room, members }: ContactsMemberListProps) {
                         }}
                         data-index={vItem.index}
                         ref={virtualizer.measureElement}
-                        key={`${room.roomId}-${vItem.index}`}
+                        key={`${room.roomId}-label-${vItem.index}`}
                         className={classNames(css.MembersGroupLabel, css.DrawerVirtualItem)}
                         size="L400"
                       >
-                        {tagOrMember.name}
+                        {item.name}
                       </Text>
                     );
                   }
 
+                  const { member } = item;
                   return (
                     <div
                       style={{
@@ -381,18 +412,18 @@ function ContactsMemberList({ room, members }: ContactsMemberListProps) {
                       }}
                       className={css.DrawerVirtualItem}
                       data-index={vItem.index}
-                      key={`${room.roomId}-${tagOrMember.userId}`}
+                      key={`${room.roomId}-${member.userId}`}
                       ref={virtualizer.measureElement}
                     >
                       <MemberItem
                         mx={mx}
                         useAuthentication={useAuthentication}
                         room={room}
-                        member={tagOrMember}
+                        member={member}
                         onClick={handleMemberClick}
-                        pressed={openProfileUserId === tagOrMember.userId}
+                        pressed={openProfileUserId === member.userId}
                         typing={typingMembers.some(
-                          (receipt) => receipt.userId === tagOrMember.userId
+                          (receipt) => receipt.userId === member.userId
                         )}
                       />
                     </div>
