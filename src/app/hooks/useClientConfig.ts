@@ -18,6 +18,8 @@ export type ClientConfig = {
   };
 
   hashRouter?: HashRouterConfig;
+  elevoWorkspacesApiBaseUrl?: string;
+  elevoTenantNames?: Record<string, string>;
 };
 
 const ClientConfigContext = createContext<ClientConfig | null>(null);
