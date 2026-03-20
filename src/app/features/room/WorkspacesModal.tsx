@@ -356,6 +356,8 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
                             <Input
                               type="password"
                               value={tokenInput}
+                              variant="Secondary"
+                              radii="300"
                               onChange={(e) => setTokenInput((e.target as HTMLInputElement).value)}
                               placeholder={t('workspaces.enterToken')}
                               style={{ width: 200 }}
@@ -409,7 +411,7 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
                                   <IconButton
                                     size="300"
                                     variant="Secondary"
-                                    fill="Soft"
+                                    fill="None"
                                     radii="300"
                                     onClick={() => handleSync(ws)}
                                     disabled={syncingId === ws.id}
