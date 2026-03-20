@@ -863,6 +863,35 @@
     "roomNotFoundDesc": "The contacts room could not be found.",
     "unknown": "Unknown"
   },
+  "workspaces": {
+    "title": "Workspaces",
+    "settings": "Settings",
+    "apiToken": "Workspaces API Token",
+    "apiTokenNotConfigured": "elevoWorkspacesApiBaseUrl is not configured in config.json",
+    "apiTokenStoredLocally": "Token is stored locally in your browser",
+    "enterToken": "Enter token",
+    "saved": "Saved!",
+    "linkedWorkspaces": "Linked Workspaces",
+    "noWorkspacesLinked": "No workspaces linked",
+    "noWorkspacesLinkedDesc": "Use the Add Workspace button below to link one.",
+    "sync": "Sync",
+    "remove": "Remove",
+    "addWorkspace": "Add Workspace",
+    "browseAvailable": "Browse available workspaces",
+    "browseAvailableDesc": "Fetch workspaces accessible to your account",
+    "add": "Add",
+    "searchWorkspaces": "Search workspaces",
+    "failedToLoad": "Failed to load",
+    "noMatchFound": "No Match Found",
+    "noMatchFoundDesc": "No match found for \"{{query}}\".",
+    "noWorkspaces": "No Workspaces",
+    "noWorkspacesDesc": "No accessible workspaces found.",
+    "filterHint": "Type to filter workspaces by name or description",
+    "prev": "Prev",
+    "next": "Next",
+    "syncFailed": "Sync failed",
+    "failedToFetch": "Failed to fetch workspaces"
+  },
   "Organisms": {
     "RoomCommon": {
       "changed_room_name": " changed room name"

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
@@ -61,6 +62,7 @@ type AddWorkspaceModalProps = {
 function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAdd, requestClose }: AddWorkspaceModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
   const [availableWorkspaces, setAvailableWorkspaces] = useState<WorkspaceItem[]>([]);
   const [loadingAvailable, setLoadingAvailable] = useState(false);
   const [availableError, setAvailableError] = useState<string | null>(null);
@@ -84,12 +86,12 @@ function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAdd, requ
         setAvailableTotal(data.total ?? 0);
         setAvailablePage(page);
       } catch (e: any) {
-        setAvailableError(e.message ?? 'Failed to fetch workspaces');
+        setAvailableError(e.message ?? t('workspaces.failedToFetch'));
       } finally {
         setLoadingAvailable(false);
       }
     },
-    [baseUrl, token]
+    [baseUrl, token, t]
   );
 
   useEffect(() => {
@@ -130,7 +132,7 @@ function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAdd, requ
                 variant="Background"
                 radii="400"
                 outlined
-                placeholder="Search workspaces"
+                placeholder={t('workspaces.searchWorkspaces')}
                 before={<Icon size="200" src={Icons.Search} />}
                 value={query}
                 onChange={(e) => setQuery((e.target as HTMLInputElement).value)}
@@ -144,15 +146,15 @@ function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAdd, requ
               )}
               {availableError && (
                 <Box justifyContent="Center" alignItems="Center" grow="Yes" direction="Column" gap="100" style={{ padding: config.space.S700 }}>
-                  <Text size="H6" align="Center">Failed to load</Text>
+                  <Text size="H6" align="Center">{t('workspaces.failedToLoad')}</Text>
                   <Text size="T200" align="Center">{availableError}</Text>
                 </Box>
               )}
               {!loadingAvailable && !availableError && filteredWorkspaces.length === 0 && (
                 <Box justifyContent="Center" alignItems="Center" grow="Yes" direction="Column" gap="100" style={{ padding: config.space.S700 }}>
-                  <Text size="H6" align="Center">{query.trim() ? 'No Match Found' : 'No Workspaces'}</Text>
+                  <Text size="H6" align="Center">{query.trim() ? t('workspaces.noMatchFound') : t('workspaces.noWorkspaces')}</Text>
                   <Text size="T200" align="Center">
-                    {query.trim() ? `No match found for "${query.trim()}".` : 'No accessible workspaces found.'}
+                    {query.trim() ? t('workspaces.noMatchFoundDesc', { query: query.trim() }) : t('workspaces.noWorkspacesDesc')}
                   </Text>
                 </Box>
               )}
@@ -199,7 +201,7 @@ function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAdd, requ
                     disabled={availablePage <= 1}
                     onClick={() => fetchAvailable(availablePage - 1)}
                   >
-                    <Text size="B300">Prev</Text>
+                    <Text size="B300">{t('workspaces.prev')}</Text>
                   </Button>
                   <Text size="T300">{availablePage} / {totalPages}</Text>
                   <Button
@@ -211,7 +213,7 @@ function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAdd, requ
                     disabled={availablePage >= totalPages}
                     onClick={() => fetchAvailable(availablePage + 1)}
                   >
-                    <Text size="B300">Next</Text>
+                    <Text size="B300">{t('workspaces.next')}</Text>
                   </Button>
                 </Box>
               </>
@@ -219,7 +221,7 @@ function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAdd, requ
             <Line size="300" />
             <Box shrink="No" justifyContent="Center" style={{ padding: config.space.S200 }}>
               <Text size="T200" priority="300">
-                Type to filter workspaces by name or description
+                {t('workspaces.filterHint')}
               </Text>
             </Box>
           </Modal>
@@ -234,6 +236,7 @@ type WorkspacesModalProps = {
 };
 
 export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
+  const { t } = useTranslation();
   const mx = useMatrixClient();
   const room = useRoom();
   const powerLevels = usePowerLevelsContext();
@@ -301,7 +304,7 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
         ''
       );
     } catch (e: any) {
-      setSyncError(e.message ?? 'Sync failed');
+      setSyncError(e.message ?? t('workspaces.syncFailed'));
     } finally {
       setSyncingId(null);
     }
@@ -317,7 +320,7 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
             <Box grow="Yes" gap="200">
               <Box grow="Yes" alignItems="Center" gap="200">
                 <Text size="H3" truncate>
-                  Workspaces
+                  {t('workspaces.title')}
                 </Text>
               </Box>
               <Box shrink="No">
@@ -334,7 +337,7 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
 
                   {/* Workspaces API Token */}
                   <Box direction="Column" gap="100">
-                    <Text size="L400">Settings</Text>
+                    <Text size="L400">{t('workspaces.settings')}</Text>
                     <SequenceCard
                       className={SequenceCardStyle}
                       variant="SurfaceVariant"
@@ -342,11 +345,11 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
                       gap="400"
                     >
                       <SettingTile
-                        title="Workspaces API Token"
+                        title={t('workspaces.apiToken')}
                         description={
                           !baseUrl
-                            ? 'elevoWorkspacesApiBaseUrl is not configured in config.json'
-                            : 'Token is stored locally in your browser'
+                            ? t('workspaces.apiTokenNotConfigured')
+                            : t('workspaces.apiTokenStoredLocally')
                         }
                         after={
                           <Box gap="200" alignItems="Center">
@@ -354,7 +357,7 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
                               type="password"
                               value={tokenInput}
                               onChange={(e) => setTokenInput((e.target as HTMLInputElement).value)}
-                              placeholder="Enter token"
+                              placeholder={t('workspaces.enterToken')}
                               style={{ width: 200 }}
                             />
                             <Button
@@ -365,7 +368,7 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
                               outlined
                               onClick={handleSaveToken}
                             >
-                              <Text size="B300">{tokenSaved ? 'Saved!' : 'Save'}</Text>
+                              <Text size="B300">{tokenSaved ? t('workspaces.saved') : t('common.save')}</Text>
                             </Button>
                           </Box>
                         }
@@ -375,7 +378,7 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
 
                   {/* Linked Workspaces */}
                   <Box direction="Column" gap="100">
-                    <Text size="L400">Linked Workspaces</Text>
+                    <Text size="L400">{t('workspaces.linkedWorkspaces')}</Text>
                     {linkedWorkspaces.length === 0 ? (
                       <SequenceCard
                         className={SequenceCardStyle}
@@ -384,8 +387,8 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
                         gap="400"
                       >
                         <SettingTile
-                          title="No workspaces linked"
-                          description={isModerator ? 'Use the Add Workspace button below to link one.' : undefined}
+                          title={t('workspaces.noWorkspacesLinked')}
+                          description={isModerator ? t('workspaces.noWorkspacesLinkedDesc') : undefined}
                         />
                       </SequenceCard>
                     ) : (
@@ -410,7 +413,7 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
                                     radii="300"
                                     onClick={() => handleSync(ws)}
                                     disabled={syncingId === ws.id}
-                                    title="Sync"
+                                    title={t('workspaces.sync')}
                                   >
                                     {syncingId === ws.id ? (
                                       <Spinner size="100" variant="Secondary" />
@@ -424,7 +427,7 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
                                     fill="None"
                                     radii="300"
                                     onClick={() => handleRemove(ws.id)}
-                                    title="Remove"
+                                    title={t('workspaces.remove')}
                                   >
                                     <Icon src={Icons.Cross} size="100" />
                                   </IconButton>
@@ -451,7 +454,7 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
                   {/* Add Workspace (Moderator only) */}
                   {isModerator && (
                     <Box direction="Column" gap="100">
-                      <Text size="L400">Add Workspace</Text>
+                      <Text size="L400">{t('workspaces.addWorkspace')}</Text>
                       <SequenceCard
                         className={SequenceCardStyle}
                         variant="SurfaceVariant"
@@ -459,8 +462,8 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
                         gap="400"
                       >
                         <SettingTile
-                          title="Browse available workspaces"
-                          description="Fetch workspaces accessible to your account"
+                          title={t('workspaces.browseAvailable')}
+                          description={t('workspaces.browseAvailableDesc')}
                           after={
                             <Button
                               onClick={() => setShowAddModal(true)}
@@ -471,7 +474,7 @@ export function WorkspacesModal({ requestClose }: WorkspacesModalProps) {
                               outlined
                               before={<Icon src={Icons.Plus} size="100" filled />}
                             >
-                              <Text size="B300">Add</Text>
+                              <Text size="B300">{t('workspaces.add')}</Text>
                             </Button>
                           }
                         />
