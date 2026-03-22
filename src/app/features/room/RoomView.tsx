@@ -1,8 +1,9 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { Box, Text, config } from 'folds';
-import { EventType } from 'matrix-js-sdk';
+import { EventTimelineSetHandlerMap, EventType, RoomEvent } from 'matrix-js-sdk';
 import { ReactEditor } from 'slate-react';
 import { isKeyHotkey } from 'is-hotkey';
+import { invoke } from '@tauri-apps/api/core';
 import { useStateEvent } from '../../hooks/useStateEvent';
 import { StateEvent } from '../../../types/matrix/room';
 import { usePowerLevelsContext } from '../../hooks/usePowerLevels';
@@ -22,6 +23,7 @@ import { useSetting } from '../../state/hooks/settings';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoom } from '../../hooks/useRoom';
+import { useSdkMessageListener, type SdkMessagePayload } from '../../plugins/useTauriOpener';
 
 const FN_KEYS_REGEX = /^F\d+$/;
 const shouldFocusMessageField = (evt: KeyboardEvent): boolean => {
@@ -72,6 +74,56 @@ export function RoomView({ eventId }: { eventId?: string }) {
 
   const permissions = useRoomPermissions(creators, powerLevels);
   const canMessage = permissions.event(EventType.RoomMessage, mx.getSafeUserId());
+
+  const handleClientToolExecuteMessage = useCallback((payload: SdkMessagePayload) => {
+    mx.sendEvent(roomId, 'vip.elevo.client_tool.register' as any, payload.data);
+  }, [mx, roomId]);
+
+  useSdkMessageListener(
+    'client_tool_register',
+    handleClientToolExecuteMessage
+  );
+
+  const handleClientToolOutputMessage = useCallback((payload: SdkMessagePayload) => {
+    mx.sendEvent(roomId, 'vip.elevo.client_tool.output' as any, payload.data);
+  }, [mx, roomId]);
+
+  useSdkMessageListener(
+    'client_tool_output',
+    handleClientToolOutputMessage
+  );
+
+  useEffect(() => {
+    const handleTimelineEvent: EventTimelineSetHandlerMap[RoomEvent.Timeline] = (
+      mEvent,
+      eventRoom,
+      _toStart,
+      _removed,
+      data
+    ) => {
+      if (eventRoom?.roomId !== roomId || !data.liveEvent) return;
+      if (mEvent.getType() === 'vip.elevo.client_tool.execute') {
+        const content = mEvent.getContent();
+
+        // eslint-disable-next-line no-console
+        console.log('[elevo] client_tool.execute event:', content);
+
+        invoke('send_to_webview', {
+          label: 'mermaid_playground',
+          channel: 'client_tool_execute',
+          data: content,
+        }).catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to send message to webview:', err);
+        });
+      }
+    };
+
+    room.on(RoomEvent.Timeline, handleTimelineEvent);
+    return () => {
+      room.removeListener(RoomEvent.Timeline, handleTimelineEvent);
+    };
+  }, [mx, room, roomId]);
 
   useKeyDown(
     window,

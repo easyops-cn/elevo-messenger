@@ -12,6 +12,7 @@ const isDesktopTauri = isTauri && !mobileOrTablet();
 // Keep in sync with ALLOWED_DOMAINS in src-tauri/src/lib.rs.
 // Replace placeholders with real domains before shipping.
 const ALLOWED_DOMAINS: string[] = [
+  'localhost',
   '192.168.0.79',
   'easyops.local',
   'github.com',
@@ -52,13 +53,15 @@ export function useTauriOpener() {
       if (!anchor) return;
       const href = anchor.getAttribute('href');
       const target = anchor.getAttribute('target');
-      if (!(target === '_blank' && href && /^https?:\/\//.test(href))) return;
+      if (!(href && /^https?:\/\//.test(href) && (target === '_blank' || href.startsWith("http://localhost:5173/")))) return;
 
       e.preventDefault();
 
       if (isDesktopTauri && isDomainAllowed(href)) {
         // Open in an in-app WebviewWindow with ElevoMessengerSDK injected.
-        invoke('open_webview', { url: href, label: labelFromUrl(href) }).catch(() => {
+        invoke('open_webview', { url: href, label: 'mermaid_playground' /* labelFromUrl(href) */ }).catch((error) => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to open link in webview, falling back to system browser:', error);
           // Fallback to system browser if the command fails.
           openInSystemBrowser(href);
         });
