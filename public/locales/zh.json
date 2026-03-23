@@ -331,6 +331,7 @@
     "devices": "设备",
     "emojisStickers": "表情和贴纸",
     "developerTools": "开发者工具",
+    "connectors": "连接器",
     "about": "关于",
     "appearance": {
       "title": "外观",
@@ -389,6 +390,13 @@
     "language": {
       "title": "语言",
       "selectLanguage": "选择语言"
+    },
+    "connectorSettings": {
+      "javis": "Javis",
+      "accessToken": "访问令牌",
+      "accessTokenDesc": "您的 Javis 账户个人访问令牌。",
+      "save": "保存",
+      "reset": "重置"
     },
     "accountSettings": {
       "contactInfo": "联系信息",

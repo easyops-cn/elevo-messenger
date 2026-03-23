@@ -331,6 +331,7 @@
     "devices": "Devices",
     "emojisStickers": "Emojis & Stickers",
     "developerTools": "Developer Tools",
+    "connectors": "Connectors",
     "about": "About",
     "appearance": {
       "title": "Appearance",
@@ -389,6 +390,13 @@
     "language": {
       "title": "Language",
       "selectLanguage": "Select Language"
+    },
+    "connectorSettings": {
+      "javis": "Javis",
+      "accessToken": "Access Token",
+      "accessTokenDesc": "Personal access token for your Javis account.",
+      "save": "Save",
+      "reset": "Reset"
     },
     "accountSettings": {
       "contactInfo": "Contact Information",
