@@ -13,9 +13,6 @@ const isDesktopTauri = isTauri && !mobileOrTablet();
 // Replace placeholders with real domains before shipping.
 const ALLOWED_DOMAINS: string[] = [
   'localhost',
-  '192.168.0.79',
-  'easyops.local',
-  'github.com',
 ];
 
 function isDomainAllowed(href: string): boolean {
@@ -31,9 +28,9 @@ function isDomainAllowed(href: string): boolean {
 
 function labelFromUrl(href: string): string {
   try {
-    const { hostname } = new URL(href);
-    // Use a stable label per hostname so repeated clicks reuse the same window.
-    return `webview-${hostname.replace(/\./g, '-')}`;
+    const { hostname, port } = new URL(href);
+    // Use a stable label per hostname and port so repeated clicks reuse the same window.
+    return `webview-${hostname.replace(/\./g, '-')}-${port}`;
   } catch {
     return `webview-${Date.now()}`;
   }
@@ -59,7 +56,7 @@ export function useTauriOpener() {
 
       if (isDesktopTauri && isDomainAllowed(href)) {
         // Open in an in-app WebviewWindow with ElevoMessengerSDK injected.
-        invoke('open_webview', { url: href, label: 'mermaid_playground' /* labelFromUrl(href) */ }).catch((error) => {
+        invoke('open_webview', { url: href, label: labelFromUrl(href) }).catch((error) => {
           // eslint-disable-next-line no-console
           console.error('Failed to open link in webview, falling back to system browser:', error);
           // Fallback to system browser if the command fails.

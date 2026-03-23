@@ -75,13 +75,22 @@ export function RoomView({ eventId }: { eventId?: string }) {
   const permissions = useRoomPermissions(creators, powerLevels);
   const canMessage = permissions.event(EventType.RoomMessage, mx.getSafeUserId());
 
-  const handleClientToolExecuteMessage = useCallback((payload: SdkMessagePayload) => {
+  const handleClientToolRegisterMessage = useCallback((payload: SdkMessagePayload) => {
     mx.sendEvent(roomId, 'vip.elevo.client_tool.register' as any, payload.data);
   }, [mx, roomId]);
 
   useSdkMessageListener(
     'client_tool_register',
-    handleClientToolExecuteMessage
+    handleClientToolRegisterMessage
+  );
+
+  const handleClientToolUnregisterMessage = useCallback((payload: SdkMessagePayload) => {
+    mx.sendEvent(roomId, 'vip.elevo.client_tool.unregister' as any, payload.data);
+  }, [mx, roomId]);
+
+  useSdkMessageListener(
+    'client_tool_unregister',
+    handleClientToolUnregisterMessage
   );
 
   const handleClientToolOutputMessage = useCallback((payload: SdkMessagePayload) => {
@@ -108,8 +117,7 @@ export function RoomView({ eventId }: { eventId?: string }) {
         // eslint-disable-next-line no-console
         console.log('[elevo] client_tool.execute event:', content);
 
-        invoke('send_to_webview', {
-          label: 'mermaid_playground',
+        invoke('send_to_all_webviews', {
           channel: 'client_tool_execute',
           data: content,
         }).catch((err) => {
