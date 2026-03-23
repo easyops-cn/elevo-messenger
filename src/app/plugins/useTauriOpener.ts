@@ -27,12 +27,13 @@ function isDomainAllowed(href: string): boolean {
 }
 
 function labelFromUrl(href: string, roomId: string): string {
+  const roomIdSafe = roomId.replace(/[^a-zA-Z0-9_/:-]/g, '_');
   try {
     const { hostname, port } = new URL(href);
     // Use a stable label per room + hostname + port so repeated clicks reuse the same window.
-    return `room-${roomId}-${hostname.replace(/\./g, '-')}-${port}`;
+    return `room-${roomIdSafe}-${hostname.replace(/\./g, '-')}-${port}`;
   } catch {
-    return `room-${roomId}-${Date.now()}`;
+    return `room-${roomIdSafe}-${Date.now()}`;
   }
 }
 

@@ -1,9 +1,8 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import { Box, Text, config } from 'folds';
-import { EventTimelineSetHandlerMap, EventType, RoomEvent } from 'matrix-js-sdk';
+import { EventType } from 'matrix-js-sdk';
 import { ReactEditor } from 'slate-react';
 import { isKeyHotkey } from 'is-hotkey';
-import { invoke } from '@tauri-apps/api/core';
 import { useStateEvent } from '../../hooks/useStateEvent';
 import { StateEvent } from '../../../types/matrix/room';
 import { usePowerLevelsContext } from '../../hooks/usePowerLevels';
@@ -76,38 +75,6 @@ export function RoomView({ eventId }: { eventId?: string }) {
   const canMessage = permissions.event(EventType.RoomMessage, mx.getSafeUserId());
 
   useTauriOpener(roomId);
-
-  useEffect(() => {
-    const handleTimelineEvent: EventTimelineSetHandlerMap[RoomEvent.Timeline] = (
-      mEvent,
-      eventRoom,
-      _toStart,
-      _removed,
-      data
-    ) => {
-      if (eventRoom?.roomId !== roomId || !data.liveEvent) return;
-      if (mEvent.getType() === 'vip.elevo.client_tool.execute') {
-        const content = mEvent.getContent();
-
-        // eslint-disable-next-line no-console
-        console.log('[elevo] client_tool.execute event:', content);
-
-        invoke('send_to_all_webviews', {
-          roomId,
-          channel: 'client_tool_execute',
-          data: content,
-        }).catch((err) => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to send message to webview:', err);
-        });
-      }
-    };
-
-    room.on(RoomEvent.Timeline, handleTimelineEvent);
-    return () => {
-      room.removeListener(RoomEvent.Timeline, handleTimelineEvent);
-    };
-  }, [mx, room, roomId]);
 
   useKeyDown(
     window,

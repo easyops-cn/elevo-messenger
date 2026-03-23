@@ -1,7 +1,8 @@
 import { useAtomValue } from 'jotai';
 import React, { ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { RoomEvent, RoomEventHandlerMap } from 'matrix-js-sdk';
+import { RoomEvent, RoomEventHandlerMap, type EventTimelineSetHandlerMap } from 'matrix-js-sdk';
+import { invoke } from '@tauri-apps/api/core';
 import { roomToUnreadAtom, unreadEqual, unreadInfoToUnread } from '../../state/room/roomToUnread';
 import LogoSVG from '../../../../public/res/svg/cinny.svg';
 import LogoUnreadSVG from '../../../../public/res/svg/cinny-unread.svg';
@@ -278,6 +279,38 @@ function ClientToolSdkHandler() {
       // eslint-disable-next-line no-console
       .catch(console.error);
   });
+
+  useEffect(() => {
+    const handleTimelineEvent: EventTimelineSetHandlerMap[RoomEvent.Timeline] = (
+      mEvent,
+      eventRoom,
+      _toStart,
+      _removed,
+      data
+    ) => {
+      if (!eventRoom?.roomId || !data.liveEvent) return;
+      if (mEvent.getType() === 'vip.elevo.client_tool.execute') {
+        const content = mEvent.getContent();
+
+        // eslint-disable-next-line no-console
+        console.log('[elevo] client_tool.execute event:', content);
+
+        invoke('send_to_all_webviews', {
+          roomId: eventRoom.roomId,
+          channel: 'client_tool_execute',
+          data: content,
+        }).catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to send message to webview:', err);
+        });
+      }
+    };
+
+    mx.on(RoomEvent.Timeline, handleTimelineEvent);
+    return () => {
+      mx.removeListener(RoomEvent.Timeline, handleTimelineEvent);
+    };
+  }, [mx]);
 
   return null;
 }
