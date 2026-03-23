@@ -23,7 +23,7 @@ import { useSetting } from '../../state/hooks/settings';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoom } from '../../hooks/useRoom';
-import { useSdkMessageListener, type SdkMessagePayload } from '../../plugins/useTauriOpener';
+import { useTauriOpener } from '../../plugins/useTauriOpener';
 
 const FN_KEYS_REGEX = /^F\d+$/;
 const shouldFocusMessageField = (evt: KeyboardEvent): boolean => {
@@ -75,32 +75,7 @@ export function RoomView({ eventId }: { eventId?: string }) {
   const permissions = useRoomPermissions(creators, powerLevels);
   const canMessage = permissions.event(EventType.RoomMessage, mx.getSafeUserId());
 
-  const handleClientToolRegisterMessage = useCallback((payload: SdkMessagePayload) => {
-    mx.sendEvent(roomId, 'vip.elevo.client_tool.register' as any, payload.data);
-  }, [mx, roomId]);
-
-  useSdkMessageListener(
-    'client_tool_register',
-    handleClientToolRegisterMessage
-  );
-
-  const handleClientToolUnregisterMessage = useCallback((payload: SdkMessagePayload) => {
-    mx.sendEvent(roomId, 'vip.elevo.client_tool.unregister' as any, payload.data);
-  }, [mx, roomId]);
-
-  useSdkMessageListener(
-    'client_tool_unregister',
-    handleClientToolUnregisterMessage
-  );
-
-  const handleClientToolOutputMessage = useCallback((payload: SdkMessagePayload) => {
-    mx.sendEvent(roomId, 'vip.elevo.client_tool.output' as any, payload.data);
-  }, [mx, roomId]);
-
-  useSdkMessageListener(
-    'client_tool_output',
-    handleClientToolOutputMessage
-  );
+  useTauriOpener(roomId);
 
   useEffect(() => {
     const handleTimelineEvent: EventTimelineSetHandlerMap[RoomEvent.Timeline] = (
@@ -118,6 +93,7 @@ export function RoomView({ eventId }: { eventId?: string }) {
         console.log('[elevo] client_tool.execute event:', content);
 
         invoke('send_to_all_webviews', {
+          roomId,
           channel: 'client_tool_execute',
           data: content,
         }).catch((err) => {

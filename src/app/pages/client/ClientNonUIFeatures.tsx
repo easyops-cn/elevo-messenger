@@ -26,6 +26,7 @@ import { getMxIdLocalPart, mxcUrlToHttp } from '../../utils/matrix';
 import { useSelectedRoom } from '../../hooks/router/useSelectedRoom';
 import { useInboxNotificationsSelected } from '../../hooks/router/useInbox';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
+import { useSdkMessageListener, type SdkMessagePayload } from '../../plugins/useTauriOpener';
 
 function SystemEmojiFeature() {
   const [twitterEmoji] = useSetting(settingsAtom, 'twitterEmoji');
@@ -257,6 +258,30 @@ type ClientNonUIFeaturesProps = {
   children: ReactNode;
 };
 
+function ClientToolSdkHandler() {
+  const mx = useMatrixClient();
+
+  useSdkMessageListener('client_tool_register', (payload: SdkMessagePayload) => {
+    mx.sendEvent(payload.roomId, 'vip.elevo.client_tool.register' as any, payload.data)
+      // eslint-disable-next-line no-console
+      .catch(console.error);
+  });
+
+  useSdkMessageListener('client_tool_unregister', (payload: SdkMessagePayload) => {
+    mx.sendEvent(payload.roomId, 'vip.elevo.client_tool.unregister' as any, payload.data)
+      // eslint-disable-next-line no-console
+      .catch(console.error);
+  });
+
+  useSdkMessageListener('client_tool_output', (payload: SdkMessagePayload) => {
+    mx.sendEvent(payload.roomId, 'vip.elevo.client_tool.output' as any, payload.data)
+      // eslint-disable-next-line no-console
+      .catch(console.error);
+  });
+
+  return null;
+}
+
 export function ClientNonUIFeatures({ children }: ClientNonUIFeaturesProps) {
   return (
     <>
@@ -265,6 +290,7 @@ export function ClientNonUIFeatures({ children }: ClientNonUIFeaturesProps) {
       <FaviconUpdater />
       <InviteNotifications />
       <MessageNotifications />
+      <ClientToolSdkHandler />
       {children}
     </>
   );

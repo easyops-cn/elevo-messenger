@@ -12,14 +12,12 @@ import { FeatureCheck } from './FeatureCheck';
 import { createRouter } from './Router';
 import { ScreenSizeProvider, useScreenSize } from '../hooks/useScreenSize';
 import { useCompositionEndTracking } from '../hooks/useComposingCheck';
-import { useTauriOpener/* , useSdkMessageListener */ } from '../plugins/useTauriOpener';
 
 const queryClient = new QueryClient();
 
 function App() {
   const screenSize = useScreenSize();
   useCompositionEndTracking();
-  useTauriOpener();
 
   // useSdkMessageListener('test-channel', (payload) => {
   //   console.log('Received SDK message:', payload.channel, payload.data);

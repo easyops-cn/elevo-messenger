@@ -26,13 +26,13 @@ function isDomainAllowed(href: string): boolean {
   }
 }
 
-function labelFromUrl(href: string): string {
+function labelFromUrl(href: string, roomId: string): string {
   try {
     const { hostname, port } = new URL(href);
-    // Use a stable label per hostname and port so repeated clicks reuse the same window.
-    return `webview-${hostname.replace(/\./g, '-')}-${port}`;
+    // Use a stable label per room + hostname + port so repeated clicks reuse the same window.
+    return `room-${roomId}-${hostname.replace(/\./g, '-')}-${port}`;
   } catch {
-    return `webview-${Date.now()}`;
+    return `room-${roomId}-${Date.now()}`;
   }
 }
 
@@ -41,7 +41,7 @@ async function openInSystemBrowser(href: string) {
   openUrl(href);
 }
 
-export function useTauriOpener() {
+export function useTauriOpener(roomId: string) {
   useEffect(() => {
     if (!isTauri) return undefined;
 
@@ -56,7 +56,7 @@ export function useTauriOpener() {
 
       if (isDesktopTauri && isDomainAllowed(href)) {
         // Open in an in-app WebviewWindow with ElevoMessengerSDK injected.
-        invoke('open_webview', { url: href, label: labelFromUrl(href) }).catch((error) => {
+        invoke('open_webview', { url: href, label: labelFromUrl(href, roomId), roomId }).catch((error) => {
           // eslint-disable-next-line no-console
           console.error('Failed to open link in webview, falling back to system browser:', error);
           // Fallback to system browser if the command fails.
@@ -71,11 +71,12 @@ export function useTauriOpener() {
 
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
-  }, []);
+  }, [roomId]);
 }
 
 export type SdkMessagePayload = {
   source: string;
+  roomId: string;
   channel: string;
   data: unknown;
 };
