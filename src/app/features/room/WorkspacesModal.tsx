@@ -102,7 +102,6 @@ function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAdd, requ
   const totalPages = Math.ceil(availableTotal / PAGE_SIZE);
 
   const filteredWorkspaces = availableWorkspaces
-    .filter((ws) => !linkedIds.has(ws.id))
     .filter((ws) => {
       if (!query.trim()) return true;
       const q = query.trim().toLowerCase();
@@ -175,11 +174,16 @@ function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAdd, requ
                             as="button"
                             variant="Surface"
                             radii="400"
-                            disabled={adding}
+                            disabled={adding || linkedIds.has(ws.id)}
                             onClick={() => {
                               setAdding(true);
                               onAdd(ws).then(requestClose).finally(() => setAdding(false));
                             }}
+                            before={
+                              linkedIds.has(ws.id)
+                                ? <Icon size="200" src={Icons.Check} />
+                                : <span style={{ display: 'inline-block', width: toRem(20) }} />
+                            }
                             after={
                               tenantNames[ws.owner_tenant_id] ? (
                                 <Text size="T200" priority="300" truncate>
