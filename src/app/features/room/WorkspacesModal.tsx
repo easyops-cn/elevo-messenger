@@ -69,6 +69,7 @@ function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAdd, requ
   const [availablePage, setAvailablePage] = useState(1);
   const [availableTotal, setAvailableTotal] = useState(0);
   const [query, setQuery] = useState('');
+  const [adding, setAdding] = useState(false);
 
   const fetchAvailable = useCallback(
     async (page: number) => {
@@ -139,53 +140,66 @@ function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAdd, requ
               />
             </Box>
             <Box grow="Yes">
-              {loadingAvailable && (
-                <Box justifyContent="Center" alignItems="Center" grow="Yes" style={{ padding: config.space.S700 }}>
-                  <Spinner size="200" variant="Secondary" />
-                </Box>
-              )}
-              {availableError && (
+              {!token ? (
                 <Box justifyContent="Center" alignItems="Center" grow="Yes" direction="Column" gap="100" style={{ padding: config.space.S700 }}>
-                  <Text size="H6" align="Center">{t('workspaces.failedToLoad')}</Text>
-                  <Text size="T200" align="Center">{availableError}</Text>
+                  <Text size="H6" align="Center">{t('workspaces.notConfigured')}</Text>
+                  <Text size="T200" align="Center">{t('workspaces.notConfiguredDesc')}</Text>
                 </Box>
-              )}
-              {!loadingAvailable && !availableError && filteredWorkspaces.length === 0 && (
-                <Box justifyContent="Center" alignItems="Center" grow="Yes" direction="Column" gap="100" style={{ padding: config.space.S700 }}>
-                  <Text size="H6" align="Center">{query.trim() ? t('workspaces.noMatchFound') : t('workspaces.noWorkspaces')}</Text>
-                  <Text size="T200" align="Center">
-                    {query.trim() ? t('workspaces.noMatchFoundDesc', { query: query.trim() }) : t('workspaces.noWorkspacesDesc')}
-                  </Text>
-                </Box>
-              )}
-              {!loadingAvailable && filteredWorkspaces.length > 0 && (
-                <Scroll ref={scrollRef} size="300" hideTrack>
-                  <div style={{ padding: config.space.S400, paddingRight: config.space.S200 }}>
-                    {filteredWorkspaces.map((ws) => (
-                      <MenuItem
-                        key={ws.id}
-                        as="button"
-                        variant="Surface"
-                        radii="400"
-                        onClick={() => onAdd(ws)}
-                        after={
-                          tenantNames[ws.owner_tenant_id] ? (
-                            <Text size="T200" priority="300" truncate>
-                              <b>{tenantNames[ws.owner_tenant_id]}</b>
-                            </Text>
-                          ) : undefined
-                        }
-                      >
-                        <Box grow="Yes" direction="Column" style={{ minWidth: 0 }}>
-                          <Text size="T300" truncate>{ws.name}</Text>
-                          {ws.description ? (
-                            <Text size="T200" priority="300" truncate>{ws.description}</Text>
-                          ) : null}
-                        </Box>
-                      </MenuItem>
-                    ))}
-                  </div>
-                </Scroll>
+              ) : (
+                <>
+                  {loadingAvailable && (
+                    <Box justifyContent="Center" alignItems="Center" grow="Yes" style={{ padding: config.space.S700 }}>
+                      <Spinner size="200" variant="Secondary" />
+                    </Box>
+                  )}
+                  {availableError && (
+                    <Box justifyContent="Center" alignItems="Center" grow="Yes" direction="Column" gap="100" style={{ padding: config.space.S700 }}>
+                      <Text size="H6" align="Center">{t('workspaces.failedToLoad')}</Text>
+                      <Text size="T200" align="Center">{availableError}</Text>
+                    </Box>
+                  )}
+                  {!loadingAvailable && !availableError && filteredWorkspaces.length === 0 && (
+                    <Box justifyContent="Center" alignItems="Center" grow="Yes" direction="Column" gap="100" style={{ padding: config.space.S700 }}>
+                      <Text size="H6" align="Center">{query.trim() ? t('workspaces.noMatchFound') : t('workspaces.noWorkspaces')}</Text>
+                      <Text size="T200" align="Center">
+                        {query.trim() ? t('workspaces.noMatchFoundDesc', { query: query.trim() }) : t('workspaces.noWorkspacesDesc')}
+                      </Text>
+                    </Box>
+                  )}
+                  {!loadingAvailable && filteredWorkspaces.length > 0 && (
+                    <Scroll ref={scrollRef} size="300" hideTrack>
+                      <div style={{ padding: config.space.S400, paddingRight: config.space.S200 }}>
+                        {filteredWorkspaces.map((ws) => (
+                          <MenuItem
+                            key={ws.id}
+                            as="button"
+                            variant="Surface"
+                            radii="400"
+                            disabled={adding}
+                            onClick={() => {
+                              setAdding(true);
+                              onAdd(ws).then(requestClose).finally(() => setAdding(false));
+                            }}
+                            after={
+                              tenantNames[ws.owner_tenant_id] ? (
+                                <Text size="T200" priority="300" truncate>
+                                  <b>{tenantNames[ws.owner_tenant_id]}</b>
+                                </Text>
+                              ) : undefined
+                            }
+                          >
+                            <Box grow="Yes" direction="Column" style={{ minWidth: 0 }}>
+                              <Text size="T300" truncate>{ws.name}</Text>
+                              {ws.description ? (
+                                <Text size="T200" priority="300" truncate>{ws.description}</Text>
+                              ) : null}
+                            </Box>
+                          </MenuItem>
+                        ))}
+                      </div>
+                    </Scroll>
+                  )}
+                </>
               )}
             </Box>
             {totalPages > 1 && (

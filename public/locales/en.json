@@ -898,7 +898,9 @@
     "prev": "Prev",
     "next": "Next",
     "syncFailed": "Sync failed",
-    "failedToFetch": "Failed to fetch workspaces"
+    "failedToFetch": "Failed to fetch workspaces",
+    "notConfigured": "Token Not Set",
+    "notConfiguredDesc": "Please enter your API token in the Settings section first."
   },
   "Organisms": {
     "RoomCommon": {
