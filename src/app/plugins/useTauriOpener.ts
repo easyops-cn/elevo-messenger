@@ -6,7 +6,7 @@ import { mobileOrTablet } from '../utils/user-agent';
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 // Desktop = running inside Tauri on a non-mobile OS.
 // Mobile (iOS/Android) will use a different code path in the future.
-const isDesktopTauri = isTauri && !mobileOrTablet();
+export const isDesktopTauri = isTauri && !mobileOrTablet();
 
 // Domains whose links open in an in-app WebviewWindow with the ElevoMessengerSDK injected.
 // Keep in sync with ALLOWED_DOMAINS in src-tauri/src/lib.rs.

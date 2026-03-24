@@ -1,8 +1,9 @@
+import { listen } from '@tauri-apps/api/event';
+import { invoke } from '@tauri-apps/api/core';
 import { useAtomValue } from 'jotai';
 import React, { ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoomEvent, RoomEventHandlerMap, type EventTimelineSetHandlerMap } from 'matrix-js-sdk';
-import { invoke } from '@tauri-apps/api/core';
 import { roomToUnreadAtom, unreadEqual, unreadInfoToUnread } from '../../state/room/roomToUnread';
 import LogoSVG from '../../../../public/res/svg/cinny.svg';
 import LogoUnreadSVG from '../../../../public/res/svg/cinny-unread.svg';
@@ -27,7 +28,7 @@ import { getMxIdLocalPart, mxcUrlToHttp } from '../../utils/matrix';
 import { useSelectedRoom } from '../../hooks/router/useSelectedRoom';
 import { useInboxNotificationsSelected } from '../../hooks/router/useInbox';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
-import { useSdkMessageListener, type SdkMessagePayload } from '../../plugins/useTauriOpener';
+import { useSdkMessageListener, isDesktopTauri, type SdkMessagePayload } from '../../plugins/useTauriOpener';
 
 function SystemEmojiFeature() {
   const [twitterEmoji] = useSetting(settingsAtom, 'twitterEmoji');
@@ -262,14 +263,32 @@ type ClientNonUIFeaturesProps = {
 function ClientToolSdkHandler() {
   const mx = useMatrixClient();
 
+  // Track registered tools per webview label: Map<label, Map<toolName, { roomId, data }>>
+  const registeredToolsRef = useRef<Map<string, Map<string, { roomId: string; data: unknown }>>>(new Map());
+
   useSdkMessageListener('client_tool_register', (payload: SdkMessagePayload) => {
-    mx.sendEvent(payload.roomId, 'vip.elevo.client_tool.register' as any, payload.data)
+    const { source, roomId, data } = payload;
+    const toolName = (data as { name: string }).name;
+
+    // Track the registered tool
+    if (!registeredToolsRef.current.has(source)) {
+      registeredToolsRef.current.set(source, new Map());
+    }
+    registeredToolsRef.current.get(source)?.set(toolName, { roomId, data });
+
+    mx.sendEvent(roomId, 'vip.elevo.client_tool.register' as any, data)
       // eslint-disable-next-line no-console
       .catch(console.error);
   });
 
   useSdkMessageListener('client_tool_unregister', (payload: SdkMessagePayload) => {
-    mx.sendEvent(payload.roomId, 'vip.elevo.client_tool.unregister' as any, payload.data)
+    const { source, roomId, data } = payload;
+    const toolName = (data as { name: string }).name;
+
+    // Remove from tracking
+    registeredToolsRef.current.get(source)?.delete(toolName);
+
+    mx.sendEvent(roomId, 'vip.elevo.client_tool.unregister' as any, data)
       // eslint-disable-next-line no-console
       .catch(console.error);
   });
@@ -279,6 +298,34 @@ function ClientToolSdkHandler() {
       // eslint-disable-next-line no-console
       .catch(console.error);
   });
+
+  // When a webview is closed, unregister all its tools
+  useEffect(() => {
+    if (!isDesktopTauri) return undefined;
+
+    let cancelled = false;
+    const unlistenPromise = listen<{ label: string }>('webview-closed', async (event) => {
+      if (cancelled) return;
+      const { label } = event.payload;
+      const tools = registeredToolsRef.current.get(label);
+      if (!tools) return;
+
+      // Send unregister events for all tools, then clear tracking
+      Array.from(tools.entries()).forEach(([toolName, { roomId }]) => {
+        mx.sendEvent(roomId, 'vip.elevo.client_tool.unregister' as any, { name: toolName })
+          // eslint-disable-next-line no-console
+          .catch(console.error);
+      });
+      registeredToolsRef.current.delete(label);
+    });
+
+    return () => {
+      cancelled = true;
+      unlistenPromise.then((unlisten) => {
+        if (cancelled) unlisten();
+      });
+    };
+  }, [mx]);
 
   useEffect(() => {
     const handleTimelineEvent: EventTimelineSetHandlerMap[RoomEvent.Timeline] = (
