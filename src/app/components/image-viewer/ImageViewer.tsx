@@ -1,9 +1,9 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React from 'react';
-import FileSaver from 'file-saver';
 import classNames from 'classnames';
 import { Box, Chip, Header, Icon, IconButton, Icons, Text, as } from 'folds';
 import { useTranslation } from 'react-i18next';
+import { saveFile } from '../../utils/file-saver';
 import * as css from './ImageViewer.css';
 import { useZoom } from '../../hooks/useZoom';
 import { usePan } from '../../hooks/usePan';
@@ -23,7 +23,7 @@ export const ImageViewer = as<'div', ImageViewerProps>(
 
     const handleDownload = async () => {
       const fileContent = await downloadMedia(src);
-      FileSaver.saveAs(fileContent, alt);
+      await saveFile(fileContent, alt);
     };
 
     return (

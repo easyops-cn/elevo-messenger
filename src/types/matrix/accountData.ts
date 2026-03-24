@@ -12,6 +12,8 @@ export enum AccountDataEvent {
 
   SecretStorageDefaultKey = 'm.secret_storage.default_key',
 
+  ElevoConnectors = 'vip.elevo.connectors',
+
   CrossSigningMaster = 'm.cross_signing.master',
   CrossSigningSelf = 'm.cross_signing.self',
   CrossSigningUser = 'm.cross_signing.user',
@@ -47,4 +49,10 @@ export type SecretContent = {
 
 export type SecretAccountData = {
   encrypted: Record<string, SecretContent>;
+};
+
+export type ConnectorsContent = {
+  javis?: {
+    accessToken?: string;
+  };
 };

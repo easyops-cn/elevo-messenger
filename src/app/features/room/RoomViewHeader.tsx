@@ -68,6 +68,7 @@ import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { InviteUserPrompt } from '../../components/invite-user-prompt';
 import { ContainerColor } from '../../styles/ContainerColor.css';
 import { RoomSettingsPage } from '../../state/roomSettings';
+import { WorkspacesModal } from './WorkspacesModal';
 
 type RoomMenuProps = {
   room: Room;
@@ -262,6 +263,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const space = useSpaceOptionally();
   const [menuAnchor, setMenuAnchor] = useState<RectCords>();
   const [pinMenuAnchor, setPinMenuAnchor] = useState<RectCords>();
+  const [workspacesOpen, setWorkspacesOpen] = useState(false);
   const direct = useIsDirectRoom();
 
   const pinnedEvents = useRoomPinnedEvents(room);
@@ -476,6 +478,29 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
             </TooltipProvider>
           )}
 
+          {workspacesOpen && (
+            <WorkspacesModal requestClose={() => setWorkspacesOpen(false)} />
+          )}
+          <TooltipProvider
+            position="Bottom"
+            offset={4}
+            tooltip={
+              <Tooltip>
+                <Text>Workspaces</Text>
+              </Tooltip>
+            }
+          >
+            {(triggerRef) => (
+              <IconButton
+                fill="None"
+                ref={triggerRef}
+                onClick={() => setWorkspacesOpen(true)}
+                aria-pressed={workspacesOpen}
+              >
+                <Icon size="400" src={Icons.Category} />
+              </IconButton>
+            )}
+          </TooltipProvider>
           <TooltipProvider
             position="Bottom"
             align="End"
