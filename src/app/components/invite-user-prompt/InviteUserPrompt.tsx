@@ -32,6 +32,7 @@ import {
 import { Room } from 'matrix-js-sdk';
 import { isKeyHotkey } from 'is-hotkey';
 import FocusTrap from 'focus-trap-react';
+import { useTranslation } from 'react-i18next';
 import { stopPropagation } from '../../utils/keyboard';
 import { useDirectUsers } from '../../hooks/useDirectUsers';
 import { getMxIdLocalPart, getMxIdServer, isUserId } from '../../utils/matrix';
@@ -40,9 +41,9 @@ import { useAsyncSearch, UseAsyncSearchOptions } from '../../hooks/useAsyncSearc
 import { highlightText, makeHighlightRegex } from '../../plugins/react-custom-html-parser';
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { useTranslation } from 'react-i18next';
 import { BreakWord } from '../../styles/Text.css';
 import { useAlive } from '../../hooks/useAlive';
+import { useClientConfig } from '../../hooks/useClientConfig';
 
 const SEARCH_OPTIONS: UseAsyncSearchOptions = {
   limit: 1000,
@@ -50,7 +51,6 @@ const SEARCH_OPTIONS: UseAsyncSearchOptions = {
     contain: true,
   },
 };
-const getUserIdString = (userId: string) => getMxIdLocalPart(userId) ?? userId;
 
 type InviteUserProps = {
   room: Room;
@@ -60,22 +60,43 @@ export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const alive = useAlive();
+  const { elevoContactsRoomId } = useClientConfig();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const directUsers = useDirectUsers();
   const [validUserId, setValidUserId] = useState<string>();
 
-  const filteredUsers = useMemo(
-    () =>
-      directUsers.filter((userId) => {
-        const membership = room.getMember(userId)?.membership;
-        return membership !== Membership.Join;
-      }),
-    [directUsers, room]
+  const contactsMembers = useMemo(() => {
+    const map = new Map<string, string>();
+    if (!elevoContactsRoomId) return map;
+    const contactsRoom = mx.getRoom(elevoContactsRoomId);
+    if (!contactsRoom) return map;
+    contactsRoom.getJoinedMembers().forEach((m) => {
+      map.set(m.userId, m.name);
+    });
+    return map;
+  }, [mx, elevoContactsRoomId]);
+
+  const filteredUsers = useMemo(() => {
+    const merged = [...new Set([...directUsers, ...contactsMembers.keys()])];
+    return merged.filter((userId) => {
+      const membership = room.getMember(userId)?.membership;
+      return membership !== Membership.Join;
+    });
+  }, [directUsers, contactsMembers, room]);
+
+  const getSearchStr = useCallback(
+    (userId: string) => {
+      const localPart = getMxIdLocalPart(userId) ?? userId;
+      const displayName = contactsMembers.get(userId);
+      return displayName ? [localPart, displayName] : localPart;
+    },
+    [contactsMembers]
   );
+
   const [result, search, resetSearch] = useAsyncSearch(
     filteredUsers,
-    getUserIdString,
+    getSearchStr,
     SEARCH_OPTIONS
   );
   const queryHighlighRegex = result?.query
@@ -223,6 +244,7 @@ export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
                                 {result.items.map((userId) => {
                                   const username = `${getMxIdLocalPart(userId)}`;
                                   const userServer = getMxIdServer(userId);
+                                  const displayName = contactsMembers.get(userId);
 
                                   return (
                                     <MenuItem
@@ -242,6 +264,15 @@ export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
                                       <Box grow="Yes">
                                         <Text size="T300" truncate>
                                           <b>
+                                            {displayName && (
+                                              <>
+                                                (
+                                                {queryHighlighRegex
+                                                  ? highlightText(queryHighlighRegex, [displayName])
+                                                  : displayName}
+                                                {') '}
+                                              </>
+                                            )}
                                             {queryHighlighRegex
                                               ? highlightText(queryHighlighRegex, [
                                                   username ?? userId,

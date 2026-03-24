@@ -61,7 +61,7 @@ import {
 import { useSpaceOptionally } from '../../../hooks/useSpace';
 import * as css from '../../../features/room/MembersDrawer.css';
 import { UsersIcon } from '../../../icons/UsersIcon';
-import { useContactsContext, CONTACTS_ROOM_ID } from './ContactsContext';
+import { useContactsContext } from './ContactsContext';
 
 type MemberItemProps = {
   mx: MatrixClient;
@@ -461,9 +461,8 @@ function ContactsRoomMembers({ room }: ContactsRoomMembersProps) {
 
 export function ContactsPage() {
   const { t } = useTranslation();
-  const mx = useMatrixClient();
   const screenSize = useScreenSizeContext();
-  const room = mx.getRoom(CONTACTS_ROOM_ID);
+  const { room } = useContactsContext();
 
   return (
     <Page>

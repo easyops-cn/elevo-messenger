@@ -1,16 +1,17 @@
 import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import { EventTimeline, Room, RoomStateEvent } from 'matrix-js-sdk';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
-
-export const CONTACTS_ROOM_ID = '!soqAfmrZyVbUygvYFp:m.easyops.local';
+import { useClientConfig } from '../../../hooks/useClientConfig';
 
 type ContactsContextValue = {
+  contactsRoomId: string;
   room: Room | null;
   javisRoleMap: Record<string, string>;
   roles: string[];
 };
 
 const ContactsContext = createContext<ContactsContextValue>({
+  contactsRoomId: '',
   room: null,
   javisRoleMap: {},
   roles: [],
@@ -18,7 +19,8 @@ const ContactsContext = createContext<ContactsContextValue>({
 
 export function ContactsProvider({ children }: { children: ReactNode }) {
   const mx = useMatrixClient();
-  const room = mx.getRoom(CONTACTS_ROOM_ID);
+  const { elevoContactsRoomId = '' } = useClientConfig();
+  const room = mx.getRoom(elevoContactsRoomId);
   const [stateVersion, setStateVersion] = useState(0);
 
   useEffect(() => {
@@ -45,8 +47,13 @@ export function ContactsProvider({ children }: { children: ReactNode }) {
     [javisRoleMap]
   );
 
+  const contextValue = useMemo(
+    () => ({ contactsRoomId: elevoContactsRoomId, room, javisRoleMap, roles }),
+    [elevoContactsRoomId, room, javisRoleMap, roles]
+  );
+
   return (
-    <ContactsContext.Provider value={{ room, javisRoleMap, roles }}>
+    <ContactsContext.Provider value={contextValue}>
       {children}
     </ContactsContext.Provider>
   );

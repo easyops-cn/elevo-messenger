@@ -10,7 +10,7 @@ import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';
 import { ContainerColor } from '../../../styles/ContainerColor.css';
 import { useContactsRoleSelected } from '../../../hooks/router/useContacts';
-import { CONTACTS_ROOM_ID } from './ContactsContext';
+import { useContactsContext } from './ContactsContext';
 import { ContactsMemberList } from './ContactsPage';
 import { UsersIcon } from '../../../icons/UsersIcon';
 
@@ -28,10 +28,9 @@ function ContactsRoleRoomMembers({ room, filterRole }: { room: Room; filterRole:
 
 export function ContactsRolePage() {
   const { t } = useTranslation();
-  const mx = useMatrixClient();
   const screenSize = useScreenSizeContext();
   const selectedRole = useContactsRoleSelected();
-  const room = mx.getRoom(CONTACTS_ROOM_ID);
+  const { room } = useContactsContext();
   const roleName = selectedRole ?? '';
 
   return (
