@@ -54,6 +54,8 @@ import {
   getBeginCommand,
   trimCommand,
   getMentions,
+  getFileReferences,
+  createFileRefElement,
 } from '../../components/editor';
 import { EmojiBoard, EmojiBoardTab } from '../../components/emoji-board';
 import { UseStateProvider } from '../../components/UseStateProvider';
@@ -118,6 +120,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { useRoomCreatorsTag } from '../../hooks/useRoomCreatorsTag';
 import { usePowerLevelTags } from '../../hooks/usePowerLevelTags';
 import { useComposingCheck } from '../../hooks/useComposingCheck';
+import { useSdkMessageListener, SdkMessagePayload } from '../../plugins/useTauriOpener';
 
 interface RoomInputProps {
   editor: Editor;
@@ -177,6 +180,25 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       useState<AutocompleteQuery<AutocompletePrefix>>();
 
     const sendTypingStatus = useTypingStatusUpdater(mx, roomId);
+
+    const handleWorkspaceFileRef = useCallback(
+      (payload: SdkMessagePayload) => {
+        const { data } = payload;
+        if (
+          typeof data === 'object' &&
+          data !== null &&
+          (data as Record<string, unknown>).type === 'reference-file' &&
+          typeof (data as Record<string, unknown>).filePath === 'string'
+        ) {
+          const filePath = (data as Record<string, string>).filePath;
+          const fileName = filePath.split('/').pop() || filePath;
+          const element = createFileRefElement(filePath, fileName);
+          Transforms.insertNodes(editor, element, { at: [0, 0] });
+        }
+      },
+      [editor]
+    );
+    useSdkMessageListener('workspace-explorer', handleWorkspaceFileRef);
 
     const handleFiles = useCallback(
       async (files: File[]) => {
@@ -345,11 +367,16 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       const body = plainText;
       const formattedBody = customHtml;
       const mentionData = getMentions(mx, roomId, editor);
+      const fileRefs = getFileReferences(editor);
 
       const content: IContent = {
         msgtype: msgType,
         body,
       };
+
+      if (fileRefs.length > 0) {
+        content['vip.elevo.file_references'] = fileRefs;
+      }
 
       if (replyDraft && replyDraft.userId !== mx.getUserId()) {
         mentionData.users.add(replyDraft.userId);

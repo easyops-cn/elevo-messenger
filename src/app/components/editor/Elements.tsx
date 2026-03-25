@@ -9,7 +9,7 @@ import {
 } from 'slate-react';
 
 import * as css from '../../styles/CustomHtml.css';
-import { CommandElement, EmoticonElement, LinkElement, MentionElement } from './slate';
+import { CommandElement, EmoticonElement, FileRefElement, LinkElement, MentionElement } from './slate';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { getBeginCommand } from './utils';
 import { BlockType } from './types';
@@ -118,6 +118,29 @@ function RenderLinkElement({
   );
 }
 
+function RenderFileRefElement({
+  attributes,
+  element,
+  children,
+}: { element: FileRefElement } & RenderElementProps) {
+  const selected = useSelected();
+  const focused = useFocused();
+
+  return (
+    <span
+      {...attributes}
+      className={css.FileRef({
+        focus: selected && focused,
+      })}
+      contentEditable={false}
+      title={element.filePath}
+    >
+      {`\uD83D\uDCCE ${element.fileName}`}
+      {children}
+    </span>
+  );
+}
+
 export function RenderElement({ attributes, element, children }: RenderElementProps) {
   switch (element.type) {
     case BlockType.Paragraph:
@@ -215,6 +238,12 @@ export function RenderElement({ attributes, element, children }: RenderElementPr
         <RenderCommandElement attributes={attributes} element={element}>
           {children}
         </RenderCommandElement>
+      );
+    case BlockType.FileRef:
+      return (
+        <RenderFileRefElement attributes={attributes} element={element}>
+          {children}
+        </RenderFileRefElement>
       );
     default:
       return (

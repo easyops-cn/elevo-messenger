@@ -196,6 +196,28 @@ export const Command = recipe({
   },
 });
 
+export const FileRef = recipe({
+  base: [
+    DefaultReset,
+    {
+      backgroundColor: color.Secondary.Container,
+      color: color.Secondary.OnContainer,
+      boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.Secondary.ContainerLine}`,
+      padding: `0 ${toRem(4)}`,
+      borderRadius: config.radii.R300,
+      fontWeight: config.fontWeight.W500,
+      fontSize: config.fontSize.T200,
+    },
+  ],
+  variants: {
+    focus: {
+      true: {
+        boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.Secondary.OnContainer}`,
+      },
+    },
+  },
+});
+
 export const EmoticonBase = style([
   DefaultReset,
   {

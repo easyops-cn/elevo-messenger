@@ -81,6 +81,8 @@ const elementToCustomHtml = (node: CustomElement, children: string): string => {
       return `<a href="${encodeURI(node.href)}">${node.children}</a>`;
     case BlockType.Command:
       return `/${sanitizeText(node.command)}`;
+    case BlockType.FileRef:
+      return `<span data-file-ref="${sanitizeText(node.filePath)}">[\uD83D\uDCCE ${sanitizeText(node.fileName)}]</span>`;
     default:
       return children;
   }
@@ -159,6 +161,8 @@ const elementToPlainText = (node: CustomElement, children: string): string => {
       return `[${node.children}](${node.href})`;
     case BlockType.Command:
       return `/${node.command}`;
+    case BlockType.FileRef:
+      return `[\uD83D\uDCCE ${node.fileName}]`;
     default:
       return children;
   }
@@ -229,4 +233,24 @@ export const getMentions = (mx: MatrixClient, roomId: string, editor: Editor): M
   editor.children.forEach(parseMentions);
 
   return mentionData;
+};
+
+export type FileRefData = {
+  filePath: string;
+  fileName: string;
+};
+export const getFileReferences = (editor: Editor): FileRefData[] => {
+  const refs: FileRefData[] = [];
+
+  const collect = (node: Descendant): void => {
+    if (Text.isText(node)) return;
+    if (node.type === BlockType.FileRef) {
+      refs.push({ filePath: node.filePath, fileName: node.fileName });
+      return;
+    }
+    node.children.forEach(collect);
+  };
+
+  editor.children.forEach(collect);
+  return refs;
 };

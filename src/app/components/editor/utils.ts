@@ -3,6 +3,7 @@ import { BlockType, MarkType } from './types';
 import {
   CommandElement,
   EmoticonElement,
+  FileRefElement,
   FormattedText,
   HeadingLevel,
   LinkElement,
@@ -190,6 +191,13 @@ export const createLinkElement = (
 export const createCommandElement = (command: string): CommandElement => ({
   type: BlockType.Command,
   command,
+  children: [{ text: '' }],
+});
+
+export const createFileRefElement = (filePath: string, fileName: string): FileRefElement => ({
+  type: BlockType.FileRef,
+  filePath,
+  fileName,
   children: [{ text: '' }],
 });
 

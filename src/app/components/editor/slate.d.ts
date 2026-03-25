@@ -46,8 +46,14 @@ export type CommandElement = {
   command: string;
   children: Text[];
 };
+export type FileRefElement = {
+  type: BlockType.FileRef;
+  filePath: string;
+  fileName: string;
+  children: Text[];
+};
 
-export type InlineElement = Text | LinkElement | MentionElement | EmoticonElement | CommandElement;
+export type InlineElement = Text | LinkElement | MentionElement | EmoticonElement | CommandElement | FileRefElement;
 
 export type ParagraphElement = {
   type: BlockType.Paragraph;
@@ -92,6 +98,7 @@ export type CustomElement =
   | MentionElement
   | EmoticonElement
   | CommandElement
+  | FileRefElement
   | ParagraphElement
   | HeadingElement
   | CodeLineElement
