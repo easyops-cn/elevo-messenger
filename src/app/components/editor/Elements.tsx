@@ -1,4 +1,4 @@
-import { Scroll, Text } from 'folds';
+import { Icon, Icons, Scroll, Text, toRem } from 'folds';
 import React from 'react';
 import {
   RenderElementProps,
@@ -133,9 +133,10 @@ function RenderFileRefElement({
         focus: selected && focused,
       })}
       contentEditable={false}
-      title={element.filePath}
+      title={element.path}
     >
-      {`\uD83D\uDCCE ${element.fileName}`}
+      <Icon src={Icons.File} style={{ width: toRem(12), height: toRem(12) }} />
+      {` ${element.name}`}
       {children}
     </span>
   );

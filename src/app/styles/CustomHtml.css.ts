@@ -200,10 +200,15 @@ export const FileRef = recipe({
   base: [
     DefaultReset,
     {
-      backgroundColor: color.Secondary.Container,
-      color: color.Secondary.OnContainer,
-      boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.Secondary.ContainerLine}`,
-      padding: `0 ${toRem(4)}`,
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: toRem(4),
+      verticalAlign: 'middle',
+      lineHeight: toRem(18),
+      backgroundColor: color.SurfaceVariant.Container,
+      color: color.SurfaceVariant.OnContainer,
+      boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.SurfaceVariant.ContainerLine}`,
+      padding: `${toRem(1)} ${toRem(6)}`,
       borderRadius: config.radii.R300,
       fontWeight: config.fontWeight.W500,
       fontSize: config.fontSize.T200,
@@ -212,7 +217,7 @@ export const FileRef = recipe({
   variants: {
     focus: {
       true: {
-        boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.Secondary.OnContainer}`,
+        boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.SurfaceVariant.OnContainer}`,
       },
     },
   },

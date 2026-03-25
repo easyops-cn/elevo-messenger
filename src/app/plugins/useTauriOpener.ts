@@ -102,11 +102,11 @@ export function useTauriOpener(roomId: string) {
   }, [roomId]);
 }
 
-export type SdkMessagePayload = {
+export type SdkMessagePayload<T = unknown> = {
   source: string;
   roomId: string;
   channel: string;
-  data: unknown;
+  data: T;
 };
 
 /**
@@ -115,16 +115,16 @@ export type SdkMessagePayload = {
  * On mobile (future), this hook is a no-op – the mobile in-app browser will
  * deliver messages via a different mechanism while keeping the same API shape.
  */
-export function useSdkMessageListener(
+export function useSdkMessageListener<T = unknown>(
   channel: string,
-  handler: (payload: SdkMessagePayload) => void
+  handler: (payload: SdkMessagePayload<T>) => void
 ) {
   useEffect(() => {
     // Mobile: no-op for now; will be wired up when mobile support is added.
     if (!isDesktopTauri) return undefined;
 
     let cancelled = false;
-    const unlistenPromise = listen<SdkMessagePayload>('elevo-messenger-sdk-message', (event) => {
+    const unlistenPromise = listen<SdkMessagePayload<T>>('elevo-messenger-sdk-message', (event) => {
       if (event.payload.channel === channel) {
         handler(event.payload);
       }

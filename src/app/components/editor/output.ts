@@ -11,7 +11,7 @@ import {
 } from '../../plugins/markdown';
 import { findAndReplace } from '../../utils/findAndReplace';
 import { sanitizeForRegex } from '../../utils/regex';
-import { getCanonicalAliasOrRoomId, isUserId } from '../../utils/matrix';
+import { isUserId } from '../../utils/matrix';
 
 export type OutputOptions = {
   allowTextFormatting?: boolean;
@@ -82,7 +82,7 @@ const elementToCustomHtml = (node: CustomElement, children: string): string => {
     case BlockType.Command:
       return `/${sanitizeText(node.command)}`;
     case BlockType.FileRef:
-      return `<span data-file-ref="${sanitizeText(node.filePath)}">[\uD83D\uDCCE ${sanitizeText(node.fileName)}]</span>`;
+      return `<span data-file-ref="${sanitizeText(node.path)}">[${sanitizeText(node.name)}]</span>`;
     default:
       return children;
   }
@@ -162,7 +162,7 @@ const elementToPlainText = (node: CustomElement, children: string): string => {
     case BlockType.Command:
       return `/${node.command}`;
     case BlockType.FileRef:
-      return `[\uD83D\uDCCE ${node.fileName}]`;
+      return `[\uD83D\uDCCE ${node.name}]`;
     default:
       return children;
   }
@@ -236,8 +236,9 @@ export const getMentions = (mx: MatrixClient, roomId: string, editor: Editor): M
 };
 
 export type FileRefData = {
-  filePath: string;
-  fileName: string;
+  path: string;
+  workspaceId: string;
+  workspaceName: string;
 };
 export const getFileReferences = (editor: Editor): FileRefData[] => {
   const refs: FileRefData[] = [];
@@ -245,7 +246,7 @@ export const getFileReferences = (editor: Editor): FileRefData[] => {
   const collect = (node: Descendant): void => {
     if (Text.isText(node)) return;
     if (node.type === BlockType.FileRef) {
-      refs.push({ filePath: node.filePath, fileName: node.fileName });
+      refs.push({ path: node.path, workspaceId: node.workspaceId, workspaceName: node.workspaceName });
       return;
     }
     node.children.forEach(collect);

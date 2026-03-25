@@ -61,6 +61,7 @@ const permittedTagToAttributes = {
     'status',
     'name',
     'title',
+    'data-file-ref',
   ],
   div: ['data-mx-maths'],
   blockquote: ['data-md'],

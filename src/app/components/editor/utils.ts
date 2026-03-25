@@ -194,10 +194,17 @@ export const createCommandElement = (command: string): CommandElement => ({
   children: [{ text: '' }],
 });
 
-export const createFileRefElement = (filePath: string, fileName: string): FileRefElement => ({
+export const createFileRefElement = (
+  path: string,
+  name: string,
+  workspaceId: string,
+  workspaceName: string
+): FileRefElement => ({
   type: BlockType.FileRef,
-  filePath,
-  fileName,
+  path,
+  name,
+  workspaceId,
+  workspaceName,
   children: [{ text: '' }],
 });
 

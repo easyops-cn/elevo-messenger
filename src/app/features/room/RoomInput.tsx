@@ -122,6 +122,14 @@ import { usePowerLevelTags } from '../../hooks/usePowerLevelTags';
 import { useComposingCheck } from '../../hooks/useComposingCheck';
 import { useSdkMessageListener, SdkMessagePayload } from '../../plugins/useTauriOpener';
 
+interface WorkspaceExplorerMessage {
+  type: 'reference-file';
+  path: string;
+  name: string;
+  workspaceId: string;
+  workspaceName: string;
+}
+
 interface RoomInputProps {
   editor: Editor;
   fileDropContainerRef: RefObject<HTMLElement>;
@@ -182,23 +190,25 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const sendTypingStatus = useTypingStatusUpdater(mx, roomId);
 
     const handleWorkspaceFileRef = useCallback(
-      (payload: SdkMessagePayload) => {
+      (payload: SdkMessagePayload<WorkspaceExplorerMessage>) => {
         const { data } = payload;
-        if (
-          typeof data === 'object' &&
-          data !== null &&
-          (data as Record<string, unknown>).type === 'reference-file' &&
-          typeof (data as Record<string, unknown>).filePath === 'string'
-        ) {
-          const filePath = (data as Record<string, string>).filePath;
-          const fileName = filePath.split('/').pop() || filePath;
-          const element = createFileRefElement(filePath, fileName);
-          Transforms.insertNodes(editor, element, { at: [0, 0] });
+        if (data?.type === 'reference-file') {
+          const existing = getFileReferences(editor);
+          const isDuplicate = existing.some(
+            (fileRef) => fileRef.workspaceId === data.workspaceId && fileRef.path === data.path
+          );
+          if (isDuplicate) return;
+          const element = createFileRefElement(data.path, data.name, data.workspaceId, data.workspaceName);
+          ReactEditor.focus(editor);
+          Transforms.select(editor, Editor.end(editor, []));
+          Transforms.insertNodes(editor, element);
+          Transforms.collapse(editor, { edge: 'end' });
+          moveCursor(editor, true);
         }
       },
       [editor]
     );
-    useSdkMessageListener('workspace-explorer', handleWorkspaceFileRef);
+    useSdkMessageListener<WorkspaceExplorerMessage>('workspace-explorer', handleWorkspaceFileRef);
 
     const handleFiles = useCallback(
       async (files: File[]) => {

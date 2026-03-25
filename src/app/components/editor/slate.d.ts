@@ -48,8 +48,10 @@ export type CommandElement = {
 };
 export type FileRefElement = {
   type: BlockType.FileRef;
-  filePath: string;
-  fileName: string;
+  path: string;
+  name: string;
+  workspaceId: string;
+  workspaceName: string;
   children: Text[];
 };
 
