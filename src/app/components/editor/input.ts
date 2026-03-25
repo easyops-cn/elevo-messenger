@@ -10,7 +10,6 @@ import {
   CodeBlockElement,
   CodeLineElement,
   EmoticonElement,
-  FileRefElement,
   HeadingElement,
   HeadingLevel,
   InlineElement,
@@ -19,7 +18,7 @@ import {
   ParagraphElement,
   UnorderedListElement,
 } from './slate';
-import { createEmoticonElement, createFileRefElement, createMentionElement } from './utils';
+import { createEmoticonElement, createMentionElement } from './utils';
 import {
   parseMatrixToRoom,
   parseMatrixToRoomEvent,
@@ -95,13 +94,7 @@ const getInlineMarkElement = (
   return children;
 };
 
-const getInlineNonMarkElement = (node: Element): MentionElement | EmoticonElement | FileRefElement | undefined => {
-  if (node.name === 'span' && node.attribs['data-file-ref'] !== undefined) {
-    const path = node.attribs['data-file-ref'];
-    const rawText = getText(node);
-    const name = rawText.replace(/^\[/, '').replace(/\]$/, '');
-    return createFileRefElement(path, name || path, '', '');
-  }
+const getInlineNonMarkElement = (node: Element): MentionElement | EmoticonElement | undefined => {
   if (node.name === 'img' && node.attribs['data-mx-emoticon'] !== undefined) {
     const { src, alt } = node.attribs;
     if (!src) return undefined;

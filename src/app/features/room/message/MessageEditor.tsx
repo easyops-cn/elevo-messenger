@@ -24,7 +24,6 @@ import { ReactEditor } from 'slate-react';
 import { IContent, IMentions, MatrixEvent, RelationType, Room } from 'matrix-js-sdk';
 import { isKeyHotkey } from 'is-hotkey';
 import { useTranslation } from 'react-i18next';
-import { useSdkMessageListener, SdkMessagePayload } from '../../../plugins/useTauriOpener';
 import {
   AUTOCOMPLETE_PREFIXES,
   AutocompletePrefix,
@@ -46,8 +45,6 @@ import {
   trimCustomHtml,
   useEditor,
   getMentions,
-  getFileReferences,
-  createFileRefElement,
 } from '../../../components/editor';
 import { useSetting } from '../../../state/hooks/settings';
 import { settingsAtom } from '../../../state/settings';
@@ -58,14 +55,6 @@ import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { getEditedEvent, getMentionContent, trimReplyFromFormattedBody } from '../../../utils/room';
 import { mobileOrTablet } from '../../../utils/user-agent';
 import { useComposingCheck } from '../../../hooks/useComposingCheck';
-
-interface WorkspaceExplorerMessage {
-  type: 'reference-file';
-  path: string;
-  name: string;
-  workspaceId: string;
-  workspaceName: string;
-}
 
 type MessageEditorProps = {
   roomId: string;
@@ -218,27 +207,6 @@ export const MessageEditor = as<'div', MessageEditorProps>(
       editor.insertNode(createEmoticonElement(key, shortcode));
       moveCursor(editor);
     };
-
-    const handleWorkspaceFileRef = useCallback(
-      (payload: SdkMessagePayload<WorkspaceExplorerMessage>) => {
-        const { data } = payload;
-        if (data?.type === 'reference-file') {
-          const existing = getFileReferences(editor);
-          const isDuplicate = existing.some(
-            (fileRef) => fileRef.workspaceId === data.workspaceId && fileRef.path === data.path
-          );
-          if (isDuplicate) return;
-          const element = createFileRefElement(data.path, data.name, data.workspaceId, data.workspaceName);
-          ReactEditor.focus(editor);
-          Transforms.select(editor, Editor.end(editor, []));
-          Transforms.insertNodes(editor, element);
-          Transforms.collapse(editor, { edge: 'end' });
-          moveCursor(editor, true);
-        }
-      },
-      [editor]
-    );
-    useSdkMessageListener<WorkspaceExplorerMessage>('workspace-explorer', handleWorkspaceFileRef);
 
     useEffect(() => {
       const [body, customHtml] = getPrevBodyAndFormattedBody();
