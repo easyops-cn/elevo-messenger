@@ -266,6 +266,11 @@ export const ToolCallRunningIcon = style([
   },
 ]);
 
+export const ToolCallTitle = style({
+  opacity: 0.6,
+  fontSize: toRem(13),
+});
+
 export const ToolCall = recipe({
   base: [
     DefaultReset,

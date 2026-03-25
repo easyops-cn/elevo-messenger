@@ -59,6 +59,8 @@ const permittedTagToAttributes = {
     'data-md',
     'data-tool-call',
     'status',
+    'name',
+    'title',
   ],
   div: ['data-mx-maths'],
   blockquote: ['data-md'],
