@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import { Avatar, Box, config, Icon, IconButton, Icons, IconSrc, MenuItem, Text } from 'folds';
+import { useClientConfig } from '../../hooks/useClientConfig';
 import { JoinRule } from 'matrix-js-sdk';
 import { PageNav, PageNavContent, PageNavHeader, PageRoot } from '../../components/page';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
@@ -18,6 +19,7 @@ import { Permissions } from './permissions';
 import { RoomSettingsPage } from '../../state/roomSettings';
 import { useRoom } from '../../hooks/useRoom';
 import { DeveloperTools } from '../common-settings/developer-tools';
+import { Workspaces } from './workspaces';
 
 type RoomSettingsMenuItem = {
   page: RoomSettingsPage;
@@ -25,37 +27,49 @@ type RoomSettingsMenuItem = {
   icon: IconSrc;
 };
 
-const useRoomSettingsMenuItems = (): RoomSettingsMenuItem[] =>
-  useMemo(
-    () => [
-      {
-        page: RoomSettingsPage.GeneralPage,
-        nameKey: 'settings.general',
-        icon: Icons.Setting,
-      },
-      {
-        page: RoomSettingsPage.MembersPage,
-        nameKey: 'roomSettings.members',
-        icon: Icons.User,
-      },
-      {
-        page: RoomSettingsPage.PermissionsPage,
-        nameKey: 'roomSettings.permissions',
-        icon: Icons.Lock,
-      },
-      {
-        page: RoomSettingsPage.EmojisStickersPage,
-        nameKey: 'settings.emojisStickers',
-        icon: Icons.Smile,
-      },
-      {
+const useRoomSettingsMenuItems = (): RoomSettingsMenuItem[] => {
+  const clientConfig = useClientConfig();
+  return useMemo(
+    () => {
+      const items: RoomSettingsMenuItem[] = [
+        {
+          page: RoomSettingsPage.GeneralPage,
+          nameKey: 'settings.general',
+          icon: Icons.Setting,
+        },
+        {
+          page: RoomSettingsPage.MembersPage,
+          nameKey: 'roomSettings.members',
+          icon: Icons.User,
+        },
+        {
+          page: RoomSettingsPage.PermissionsPage,
+          nameKey: 'roomSettings.permissions',
+          icon: Icons.Lock,
+        },
+        {
+          page: RoomSettingsPage.EmojisStickersPage,
+          nameKey: 'settings.emojisStickers',
+          icon: Icons.Smile,
+        },
+      ];
+      if (clientConfig.elevoWorkspacesApiBaseUrl) {
+        items.push({
+          page: RoomSettingsPage.WorkspacesPage,
+          nameKey: 'workspaces.title',
+          icon: Icons.Category,
+        });
+      }
+      items.push({
         page: RoomSettingsPage.DeveloperToolsPage,
         nameKey: 'settings.developerTools',
         icon: Icons.Terminal,
-      },
-    ],
-    []
+      });
+      return items;
+    },
+    [clientConfig.elevoWorkspacesApiBaseUrl]
   );
+};
 
 type RoomSettingsProps = {
   initialPage?: RoomSettingsPage;
@@ -169,6 +183,9 @@ export function RoomSettings({ initialPage, requestClose }: RoomSettingsProps) {
       )}
       {activePage === RoomSettingsPage.DeveloperToolsPage && (
         <DeveloperTools requestClose={handlePageRequestClose} />
+      )}
+      {activePage === RoomSettingsPage.WorkspacesPage && (
+        <Workspaces requestClose={handlePageRequestClose} />
       )}
     </PageRoot>
   );

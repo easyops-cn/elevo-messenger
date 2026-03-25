@@ -42,6 +42,33 @@ async function openInSystemBrowser(href: string) {
   openUrl(href);
 }
 
+/**
+ * Programmatically open a URL, respecting the Tauri environment:
+ * - Tauri desktop + allowed domain → opens in an in-app WebviewWindow with ElevoMessengerSDK
+ * - Tauri desktop + other domain  → opens in the system browser
+ * - Web browser                   → falls through to window.open
+ *
+ * Use this for JS-triggered navigation that isn't driven by an <a target="_blank"> click.
+ */
+export function openExternalUrl(href: string, roomId: string): void {
+  if (isDesktopTauri) {
+    if (isDomainAllowed(href)) {
+      invoke('open_webview', { url: href, label: labelFromUrl(href, roomId), roomId }).catch((error) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to open link in webview, falling back to system browser:', error);
+        openInSystemBrowser(href);
+      });
+    } else {
+      openInSystemBrowser(href);
+    }
+  } else if (isTauri) {
+    // Mobile Tauri (future): use system browser for now.
+    openInSystemBrowser(href);
+  } else {
+    window.open(href, '_blank', 'noopener,noreferrer');
+  }
+}
+
 export function useTauriOpener(roomId: string) {
   useEffect(() => {
     if (!isTauri) return undefined;

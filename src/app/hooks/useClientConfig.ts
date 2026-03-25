@@ -19,6 +19,7 @@ export type ClientConfig = {
 
   hashRouter?: HashRouterConfig;
   elevoWorkspacesApiBaseUrl?: string;
+  elevoWorkspacesExplorerUrl?: string;
   elevoTenantNames?: Record<string, string>;
   elevoContactsRoomId?: string;
 };
