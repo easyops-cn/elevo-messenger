@@ -277,20 +277,10 @@ export const ToolCall = recipe({
       borderRadius: config.radii.R300,
       fontWeight: config.fontWeight.W500,
       verticalAlign: 'middle',
+      backgroundColor: color.SurfaceVariant.Container,
+      color: color.SurfaceVariant.OnContainer,
+      boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.SurfaceVariant.ContainerLine}`,
     },
   ],
-  variants: {
-    status: {
-      running: {
-        backgroundColor: color.Warning.Container,
-        color: color.Warning.OnContainer,
-        boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.Warning.ContainerLine}`,
-      },
-      completed: {
-        backgroundColor: color.Success.Container,
-        color: color.Success.OnContainer,
-        boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.Success.ContainerLine}`,
-      },
-    },
-  },
+  variants: {},
 });
