@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { style, keyframes } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 import { color, config, DefaultReset, toRem } from 'folds';
 import { ContainerColor } from './ContainerColor.css';
@@ -248,3 +248,49 @@ export const highlightText = style([
     color: 'black',
   },
 ]);
+
+const toolCallRunningPulse = keyframes({
+  '0%, 100%': { opacity: 1 },
+  '50%': { opacity: 0.5 },
+});
+
+export const ToolCallIcon = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+});
+
+export const ToolCallRunningIcon = style([
+  ToolCallIcon,
+  {
+    animation: `${toolCallRunningPulse} 1.5s ease-in-out infinite`,
+  },
+]);
+
+export const ToolCall = recipe({
+  base: [
+    DefaultReset,
+    {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: config.space.S100,
+      padding: `0 ${config.space.S200}`,
+      borderRadius: config.radii.R300,
+      fontWeight: config.fontWeight.W500,
+      verticalAlign: 'middle',
+    },
+  ],
+  variants: {
+    status: {
+      running: {
+        backgroundColor: color.Warning.Container,
+        color: color.Warning.OnContainer,
+        boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.Warning.ContainerLine}`,
+      },
+      completed: {
+        backgroundColor: color.Success.Container,
+        color: color.Success.OnContainer,
+        boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.Success.ContainerLine}`,
+      },
+    },
+  },
+});

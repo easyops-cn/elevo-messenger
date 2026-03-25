@@ -475,6 +475,21 @@ export const getReactCustomHtmlParser = (
           );
         }
 
+        if (name === 'span' && 'data-tool-call' in props) {
+          const status = (props.status ?? 'running') as 'running' | 'completed';
+          return (
+            <span className={css.ToolCall({ status })}>
+              <span className={status === 'running' ? css.ToolCallRunningIcon : css.ToolCallIcon}>
+                <Icon
+                  size="50"
+                  src={status === 'completed' ? Icons.Check : Icons.Terminal}
+                />
+              </span>
+              {domToReact(children, opts)}
+            </span>
+          );
+        }
+
         if (name === 'img') {
           const htmlSrc = mxcUrlToHttp(mx, props.src, params.useAuthentication);
           if (htmlSrc && props.src.startsWith('mxc://') === false) {
