@@ -162,7 +162,7 @@ const elementToPlainText = (node: CustomElement, children: string): string => {
     case BlockType.Command:
       return `/${node.command}`;
     case BlockType.FileRef:
-      return `[\uD83D\uDCCE ${node.name}]`;
+      return `[${node.name}]`;
     default:
       return children;
   }

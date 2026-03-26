@@ -110,11 +110,25 @@ export type SdkMessagePayload<T = unknown> = {
 };
 
 /**
- * Listen for messages sent by a child webview via `window.ElevoMessengerSDK.sendMessage()`.
+ * Listen for messages sent by a child webview via `elevoMessengerSDK.sendMessage()`.
  *
  * On mobile (future), this hook is a no-op – the mobile in-app browser will
  * deliver messages via a different mechanism while keeping the same API shape.
  */
+/**
+ * Sync the active theme kind to the Tauri backend so it can be injected into
+ * newly opened webviews and broadcast to already-open ones via `theme_change`.
+ */
+export function useTauriThemeSync(themeKind: string) {
+  useEffect(() => {
+    if (!isDesktopTauri) return;
+    invoke('set_theme', { themeKind }).catch((e) => {
+      // eslint-disable-next-line no-console
+      console.error('[useTauriThemeSync] set_theme failed:', e);
+    });
+  }, [themeKind]);
+}
+
 export function useSdkMessageListener<T = unknown>(
   channel: string,
   handler: (payload: SdkMessagePayload<T>) => void
