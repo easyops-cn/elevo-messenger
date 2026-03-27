@@ -911,5 +911,9 @@
     "title": "Login to {{provider}}",
     "description": "Click here to log in to your {{provider}} account to continue",
     "doneDescription": "Your {{provider}} account has been linked"
+  },
+  "toolCall": {
+    "inprogressDescription": "Running...",
+    "completedDescription": "Completed"
   }
 }

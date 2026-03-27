@@ -1,6 +1,6 @@
 import React, { CSSProperties, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Chip, Icon, Icons, Text, color, config, toRem } from 'folds';
+import { Box, Chip, Icon, Icons, Spinner, Text, color, config, toRem } from 'folds';
 import { IContent } from 'matrix-js-sdk';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { trimReplyFromBody } from '../../utils/room';
@@ -66,11 +66,41 @@ export function BrokenContent() {
   );
 }
 
+type ToolCallData = {
+  name: string;
+  title?: string;
+  input: unknown;
+  output?: unknown;
+  status: 'inprogress' | 'completed';
+};
+
 type OidcLoginData = {
   provider: string;
   url?: string;
   done?: boolean;
 };
+
+function parseToolCall(content: Record<string, unknown>): ToolCallData | undefined {
+  const toolCall = content['vip.elevo.tool_call'];
+  if (
+    toolCall &&
+    typeof toolCall === 'object' &&
+    typeof (toolCall as Record<string, unknown>).name === 'string' &&
+    ((toolCall as Record<string, unknown>).status === 'inprogress' ||
+      (toolCall as Record<string, unknown>).status === 'completed')
+  ) {
+    const data = toolCall as Record<string, unknown>;
+    return {
+      name: data.name as string,
+      title: typeof data.title === 'string' ? data.title : undefined,
+      input: data.input,
+      output: data.output,
+      status: data.status as 'inprogress' | 'completed',
+    };
+  }
+  return undefined;
+}
+
 type RenderBodyProps = {
   body: string;
   customBody?: string;
@@ -161,6 +191,34 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
             {cardContent}
           </a>
         )}
+      </Box>
+    );
+  }
+
+  const toolCall = parseToolCall(content);
+  if (toolCall) {
+    return (
+      <Box style={{ ...style }}>
+        <div style={oidcLinkStyles}>
+          <Icon src={Icons.Terminal} size="300" />
+          <Box grow="Yes" direction="Column" gap="100">
+            <Text size="T300" priority="400">
+              <b>{toolCall.title || toolCall.name}</b>
+            </Text>
+            <Text size="T200" priority="300">
+              {t(
+                toolCall.status === 'inprogress'
+                  ? 'toolCall.inprogressDescription'
+                  : 'toolCall.completedDescription',
+              )}
+            </Text>
+          </Box>
+          {toolCall.status === 'inprogress' ? (
+            <Spinner size="200" variant="Secondary" />
+          ) : (
+            <Icon src={Icons.Check} size="200" style={{ color: color.Success.Main }} />
+          )}
+        </div>
       </Box>
     );
   }
