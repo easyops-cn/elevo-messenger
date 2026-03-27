@@ -1,5 +1,6 @@
 import React, { CSSProperties, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { z } from 'zod/v4';
 import { Box, Chip, Icon, Icons, Spinner, Text, color, config, toRem } from 'folds';
 import { IContent } from 'matrix-js-sdk';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
@@ -66,39 +67,27 @@ export function BrokenContent() {
   );
 }
 
-type ToolCallData = {
-  name: string;
-  title?: string;
-  input: unknown;
-  output?: unknown;
-  status: 'inprogress' | 'completed';
-};
+const ToolCallSchema = z.object({
+  name: z.string(),
+  title: z.string().optional(),
+  input: z.unknown(),
+  output: z.unknown().optional(),
+  status: z.enum(['inprogress', 'completed']),
+});
 
-type OidcLoginData = {
-  provider: string;
-  url?: string;
-  done?: boolean;
-};
+type ToolCallData = z.infer<typeof ToolCallSchema>;
+
+const OidcLoginSchema = z.object({
+  provider: z.string(),
+  url: z.string().optional(),
+  done: z.boolean().optional(),
+});
+
+type OidcLoginData = z.infer<typeof OidcLoginSchema>;
 
 function parseToolCall(content: Record<string, unknown>): ToolCallData | undefined {
-  const toolCall = content['vip.elevo.tool_call'];
-  if (
-    toolCall &&
-    typeof toolCall === 'object' &&
-    typeof (toolCall as Record<string, unknown>).name === 'string' &&
-    ((toolCall as Record<string, unknown>).status === 'inprogress' ||
-      (toolCall as Record<string, unknown>).status === 'completed')
-  ) {
-    const data = toolCall as Record<string, unknown>;
-    return {
-      name: data.name as string,
-      title: typeof data.title === 'string' ? data.title : undefined,
-      input: data.input,
-      output: data.output,
-      status: data.status as 'inprogress' | 'completed',
-    };
-  }
-  return undefined;
+  const result = ToolCallSchema.safeParse(content['vip.elevo.tool_call']);
+  return result.success ? result.data : undefined;
 }
 
 type RenderBodyProps = {
@@ -114,22 +103,10 @@ type MTextProps = {
 };
 
 function parseOidcLogin(content: Record<string, unknown>): OidcLoginData | undefined {
-  const oidcLogin = content['vip.elevo.oidc_login'];
-  if (
-    oidcLogin &&
-    typeof oidcLogin === 'object' &&
-    typeof (oidcLogin as Record<string, unknown>).provider === 'string'
-  ) {
-    const data = oidcLogin as Record<string, unknown>;
-    const done = data.done === true;
-    const { url } = data;
-    if (done) {
-      return { provider: data.provider as string, done: true };
-    }
-    if (typeof url === 'string') {
-      return { provider: data.provider as string, url };
-    }
-  }
+  const result = OidcLoginSchema.safeParse(content['vip.elevo.oidc_login']);
+  if (!result.success) return undefined;
+  const { done, url } = result.data;
+  if (done === true || url) return result.data;
   return undefined;
 }
 
