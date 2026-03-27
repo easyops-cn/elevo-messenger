@@ -906,5 +906,9 @@
     "RoomCommon": {
       "changed_room_name": " 更改了房间名称"
     }
+  },
+  "oidcLogin": {
+    "title": "登录 {{provider}}",
+    "description": "点击此处登录您的 {{provider}} 账户以继续操作"
   }
 }

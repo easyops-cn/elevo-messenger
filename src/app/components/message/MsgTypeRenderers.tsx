@@ -1,5 +1,6 @@
 import React, { CSSProperties, ReactNode } from 'react';
-import { Box, Chip, Icon, Icons, Text, toRem } from 'folds';
+import { useTranslation } from 'react-i18next';
+import { Box, Chip, Icon, Icons, Text, color, config, toRem } from 'folds';
 import { IContent } from 'matrix-js-sdk';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { trimReplyFromBody } from '../../utils/room';
@@ -65,6 +66,10 @@ export function BrokenContent() {
   );
 }
 
+type OidcLoginData = {
+  provider: string;
+  url: string;
+};
 type RenderBodyProps = {
   body: string;
   customBody?: string;
@@ -76,10 +81,69 @@ type MTextProps = {
   renderUrlsPreview?: (urls: string[]) => ReactNode;
   style?: CSSProperties;
 };
+
+function parseOidcLogin(content: Record<string, unknown>): OidcLoginData | undefined {
+  const oidcLogin = content['vip.elevo.oidc_login'];
+  if (
+    oidcLogin &&
+    typeof oidcLogin === 'object' &&
+    typeof (oidcLogin as Record<string, unknown>).provider === 'string' &&
+    typeof (oidcLogin as Record<string, unknown>).url === 'string'
+  ) {
+    return oidcLogin as OidcLoginData;
+  }
+  return undefined;
+}
+
+const oidcLinkStyles: CSSProperties = {
+  backgroundColor: color.SurfaceVariant.Container,
+  color: color.SurfaceVariant.OnContainer,
+  border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
+  borderRadius: config.radii.R300,
+  padding: config.space.S300,
+  display: 'flex',
+  alignItems: 'center',
+  gap: config.space.S200,
+  textDecoration: 'none',
+  cursor: 'pointer',
+  transition: 'background-color 0.15s ease',
+  maxWidth: toRem(400),
+};
+
 export function MText({ edited, content, renderBody, renderUrlsPreview, style }: MTextProps) {
+  const { t } = useTranslation();
   const { body, formatted_body: customBody } = content;
 
   if (typeof body !== 'string') return <BrokenContent />;
+
+  const oidcLogin = parseOidcLogin(content);
+  if (oidcLogin) {
+    return (
+      <>
+        <Box style={{ ...style }}>
+          <a
+            href={oidcLogin.url}
+            target="_blank"
+            rel="noreferrer noopener"
+            style={oidcLinkStyles}
+          >
+            <Icon src={Icons.ShieldUser} size="300" />
+            <Box grow="Yes" direction="Column" gap="100">
+              <Text size="T300" priority="400">
+                <b>{t('oidcLogin.title', { provider: oidcLogin.provider })}</b>
+              </Text>
+              <Text size="T200" priority="300">
+                {t('oidcLogin.description', { provider: oidcLogin.provider })}
+              </Text>
+            </Box>
+            <Icon src={Icons.ArrowRight} size="200" />
+          </a>
+        </Box>
+        {edited && <MessageEditedContent />}
+      </>
+    );
+  }
+
   const trimmedBody = trimReplyFromBody(body);
   const urlsMatch = renderUrlsPreview && trimmedBody.match(URL_REG);
   const urls = urlsMatch ? [...new Set(urlsMatch)] : undefined;
