@@ -909,6 +909,7 @@
   },
   "oidcLogin": {
     "title": "登录 {{provider}}",
-    "description": "点击此处登录您的 {{provider}} 账户以继续操作"
+    "description": "点击此处登录您的 {{provider}} 账户以继续操作",
+    "doneDescription": "您的 {{provider}} 账户已关联"
   }
 }

@@ -68,7 +68,7 @@ export function BrokenContent() {
 
 type OidcLoginData = {
   provider: string;
-  url: string;
+  url?: string;
   done?: boolean;
 };
 type RenderBodyProps = {
@@ -88,10 +88,17 @@ function parseOidcLogin(content: Record<string, unknown>): OidcLoginData | undef
   if (
     oidcLogin &&
     typeof oidcLogin === 'object' &&
-    typeof (oidcLogin as Record<string, unknown>).provider === 'string' &&
-    typeof (oidcLogin as Record<string, unknown>).url === 'string'
+    typeof (oidcLogin as Record<string, unknown>).provider === 'string'
   ) {
-    return oidcLogin as OidcLoginData;
+    const data = oidcLogin as Record<string, unknown>;
+    const done = data.done === true;
+    const { url } = data;
+    if (done) {
+      return { provider: data.provider as string, done: true };
+    }
+    if (typeof url === 'string') {
+      return { provider: data.provider as string, url };
+    }
   }
   return undefined;
 }
@@ -106,7 +113,7 @@ const oidcLinkStyles: CSSProperties = {
   alignItems: 'center',
   gap: config.space.S200,
   textDecoration: 'none',
-  cursor: 'pointer',
+  cursor: 'default',
   transition: 'background-color 0.15s ease',
   maxWidth: toRem(400),
 };
@@ -119,29 +126,41 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
 
   const oidcLogin = parseOidcLogin(content);
   if (oidcLogin) {
+    const cardContent = (
+      <>
+        <Icon src={Icons.ShieldUser} size="300" />
+        <Box grow="Yes" direction="Column" gap="100">
+          <Text size="T300" priority="400">
+            <b>{t('oidcLogin.title', { provider: oidcLogin.provider })}</b>
+          </Text>
+          <Text size="T200" priority="300">
+            {t(oidcLogin.done ? 'oidcLogin.doneDescription' : 'oidcLogin.description', {
+              provider: oidcLogin.provider,
+            })}
+          </Text>
+        </Box>
+        <Icon
+          src={oidcLogin.done ? Icons.Check : Icons.ArrowRight}
+          size="200"
+          style={oidcLogin.done ? { color: color.Success.Main } : undefined}
+        />
+      </>
+    );
+
     return (
       <Box style={{ ...style }}>
-        <a
-          href={oidcLogin.url}
-          target="_blank"
-          rel="noreferrer noopener"
-          style={oidcLinkStyles}
-        >
-          <Icon src={Icons.ShieldUser} size="300" />
-          <Box grow="Yes" direction="Column" gap="100">
-            <Text size="T300" priority="400">
-              <b>{t('oidcLogin.title', { provider: oidcLogin.provider })}</b>
-            </Text>
-            <Text size="T200" priority="300">
-              {t('oidcLogin.description', { provider: oidcLogin.provider })}
-            </Text>
-          </Box>
-          <Icon
-            src={oidcLogin.done ? Icons.Check : Icons.ArrowRight}
-            size="200"
-            style={oidcLogin.done ? { color: color.Success.Main } : undefined}
-          />
-        </a>
+        {oidcLogin.done ? (
+          <div style={oidcLinkStyles}>{cardContent}</div>
+        ) : (
+          <a
+            href={oidcLogin.url}
+            target="_blank"
+            rel="noreferrer noopener"
+            style={{ ...oidcLinkStyles, cursor: 'pointer' }}
+          >
+            {cardContent}
+          </a>
+        )}
       </Box>
     );
   }
