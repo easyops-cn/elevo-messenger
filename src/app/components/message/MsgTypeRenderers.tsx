@@ -1,7 +1,7 @@
-import React, { CSSProperties, ReactNode } from 'react';
+import React, { CSSProperties, ReactNode, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod/v4';
-import { Box, Chip, Icon, Icons, Spinner, Text, color, config, toRem } from 'folds';
+import { Box, Chip, Icon, Icons, Text, color, config, toRem } from 'folds';
 import { IContent } from 'matrix-js-sdk';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { trimReplyFromBody } from '../../utils/room';
@@ -110,6 +110,88 @@ function parseOidcLogin(content: Record<string, unknown>): OidcLoginData | undef
   return undefined;
 }
 
+const toolCallHeaderStyles: CSSProperties = {
+  backgroundColor: color.SurfaceVariant.Container,
+  color: color.SurfaceVariant.OnContainer,
+  border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
+  borderRadius: config.radii.R300,
+  padding: `${config.space.S100} ${config.space.S200}`,
+  display: 'flex',
+  alignItems: 'center',
+  gap: config.space.S200,
+  cursor: 'pointer',
+  transition: 'background-color 0.15s ease',
+  width: 'fit-content',
+  marginTop: config.space.S200,
+};
+
+const toolCallBodyStyles: CSSProperties = {
+  backgroundColor: color.SurfaceVariant.Container,
+  border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
+  borderRadius: config.radii.R300,
+  padding: `${config.space.S200} ${config.space.S300}`,
+  maxWidth: toRem(600),
+};
+
+type ToolCallCardProps = { data: ToolCallData; style?: CSSProperties };
+function ToolCallCard({ data, style }: ToolCallCardProps) {
+  const [expanded, setExpanded] = useState(false);
+  const iconColor = data.status === 'completed' ? color.Success.Main : color.Secondary.Main;
+  const formatValue = (val: unknown) =>
+    typeof val === 'string' ? val : JSON.stringify(val, null, 2);
+  const preStyles: CSSProperties = {
+    fontFamily: 'monospace',
+    fontSize: toRem(12),
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+    margin: 0,
+  };
+  const dividerStyles: CSSProperties = {
+    borderTop: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
+    margin: `${config.space.S200} 0`,
+  };
+
+  return (
+    <Box style={style} direction="Column" gap="100">
+      <div
+        style={toolCallHeaderStyles}
+        onClick={() => setExpanded((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setExpanded((v) => !v);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+      >
+        <Icon src={Icons.Terminal} size="300" style={{ color: iconColor }} />
+        <Text size="T300" priority="400">
+          {data.title || data.name}
+        </Text>
+        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="200" />
+      </div>
+      {expanded && (
+        <div style={toolCallBodyStyles}>
+          <Text size="T200" priority="300" style={{ fontWeight: 500, marginBottom: config.space.S100 }}>
+            Input
+          </Text>
+          <pre style={preStyles}>{formatValue(data.input)}</pre>
+          {data.output !== undefined && (
+            <>
+              <div style={dividerStyles} />
+              <Text size="T200" priority="300" style={{ fontWeight: 500, marginBottom: config.space.S100 }}>
+                Output
+              </Text>
+              <pre style={preStyles}>{formatValue(data.output)}</pre>
+            </>
+          )}
+        </div>
+      )}
+    </Box>
+  );
+}
+
 const oidcLinkStyles: CSSProperties = {
   backgroundColor: color.SurfaceVariant.Container,
   color: color.SurfaceVariant.OnContainer,
@@ -174,30 +256,7 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
 
   const toolCall = parseToolCall(content);
   if (toolCall) {
-    return (
-      <Box style={{ ...style }}>
-        <div style={oidcLinkStyles}>
-          <Icon src={Icons.Terminal} size="300" />
-          <Box grow="Yes" direction="Column" gap="100">
-            <Text size="T300" priority="400">
-              <b>{toolCall.title || toolCall.name}</b>
-            </Text>
-            <Text size="T200" priority="300">
-              {t(
-                toolCall.status === 'inprogress'
-                  ? 'toolCall.inprogressDescription'
-                  : 'toolCall.completedDescription',
-              )}
-            </Text>
-          </Box>
-          {toolCall.status === 'inprogress' ? (
-            <Spinner size="200" variant="Secondary" />
-          ) : (
-            <Icon src={Icons.Check} size="200" style={{ color: color.Success.Main }} />
-          )}
-        </div>
-      </Box>
-    );
+    return <ToolCallCard data={toolCall} style={style} />;
   }
 
   const trimmedBody = trimReplyFromBody(body);
