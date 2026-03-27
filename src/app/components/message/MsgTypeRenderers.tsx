@@ -69,6 +69,7 @@ export function BrokenContent() {
 type OidcLoginData = {
   provider: string;
   url: string;
+  done?: boolean;
 };
 type RenderBodyProps = {
   body: string;
@@ -119,28 +120,29 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
   const oidcLogin = parseOidcLogin(content);
   if (oidcLogin) {
     return (
-      <>
-        <Box style={{ ...style }}>
-          <a
-            href={oidcLogin.url}
-            target="_blank"
-            rel="noreferrer noopener"
-            style={oidcLinkStyles}
-          >
-            <Icon src={Icons.ShieldUser} size="300" />
-            <Box grow="Yes" direction="Column" gap="100">
-              <Text size="T300" priority="400">
-                <b>{t('oidcLogin.title', { provider: oidcLogin.provider })}</b>
-              </Text>
-              <Text size="T200" priority="300">
-                {t('oidcLogin.description', { provider: oidcLogin.provider })}
-              </Text>
-            </Box>
-            <Icon src={Icons.ArrowRight} size="200" />
-          </a>
-        </Box>
-        {edited && <MessageEditedContent />}
-      </>
+      <Box style={{ ...style }}>
+        <a
+          href={oidcLogin.url}
+          target="_blank"
+          rel="noreferrer noopener"
+          style={oidcLinkStyles}
+        >
+          <Icon src={Icons.ShieldUser} size="300" />
+          <Box grow="Yes" direction="Column" gap="100">
+            <Text size="T300" priority="400">
+              <b>{t('oidcLogin.title', { provider: oidcLogin.provider })}</b>
+            </Text>
+            <Text size="T200" priority="300">
+              {t('oidcLogin.description', { provider: oidcLogin.provider })}
+            </Text>
+          </Box>
+          <Icon
+            src={oidcLogin.done ? Icons.Check : Icons.ArrowRight}
+            size="200"
+            style={oidcLogin.done ? { color: color.Success.Main } : undefined}
+          />
+        </a>
+      </Box>
     );
   }
 
