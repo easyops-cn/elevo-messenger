@@ -122,7 +122,6 @@ const toolCallHeaderStyles: CSSProperties = {
   cursor: 'pointer',
   transition: 'background-color 0.15s ease',
   width: 'fit-content',
-  marginTop: config.space.S200,
 };
 
 const toolCallBodyStyles: CSSProperties = {
@@ -237,7 +236,7 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
     );
 
     return (
-      <Box style={{ ...style }}>
+      <Box style={style}>
         {oidcLogin.done ? (
           <div style={oidcLinkStyles}>{cardContent}</div>
         ) : (

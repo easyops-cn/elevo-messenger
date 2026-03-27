@@ -2,7 +2,7 @@ import { style, globalStyle } from '@vanilla-extract/css';
 import { toRem, color, config, DefaultReset, FocusOutline } from 'folds';
 
 globalStyle('body', {
-  backgroundColor: color.Background.Container,
+  backgroundColor: color.Background.ContainerActive,
 });
 
 /**
