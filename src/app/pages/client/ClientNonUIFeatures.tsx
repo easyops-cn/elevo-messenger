@@ -5,7 +5,7 @@ import React, { ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoomEvent, RoomEventHandlerMap, type EventTimelineSetHandlerMap } from 'matrix-js-sdk';
 import { roomToUnreadAtom, unreadEqual, unreadInfoToUnread } from '../../state/room/roomToUnread';
-import LogoSVG from '../../../../public/res/svg/cinny.svg';
+import LogoSVG from '../../../../public/res/apple/apple-touch-icon-144x144.png';
 import LogoUnreadSVG from '../../../../public/res/svg/cinny-unread.svg';
 import LogoHighlightSVG from '../../../../public/res/svg/cinny-highlight.svg';
 import NotificationSound from '../../../../public/sound/notification.ogg';
@@ -54,6 +54,7 @@ function PageZoomFeature() {
   return null;
 }
 
+// TODO(steve): resume favicon update
 function FaviconUpdater() {
   const roomToUnread = useAtomValue(roomToUnreadAtom);
 
@@ -367,7 +368,7 @@ export function ClientNonUIFeatures({ children }: ClientNonUIFeaturesProps) {
     <>
       <SystemEmojiFeature />
       <PageZoomFeature />
-      <FaviconUpdater />
+      {/* <FaviconUpdater /> */}
       <InviteNotifications />
       <MessageNotifications />
       <ClientToolSdkHandler />

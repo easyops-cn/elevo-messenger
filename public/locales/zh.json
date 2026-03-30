@@ -64,8 +64,8 @@
     "registrationTokenOptional": "注册令牌（可选）",
     "termsAccept": "我接受服务器",
     "termsAndConditions": "条款和条件",
-    "cinnyLogo": "Cinny 图标",
-    "cinny": "Cinny",
+    "elevoLogo": "Elevo 图标",
+    "elevo": "Elevo",
     "homeserver": "服务器",
     "lookingForHomeserver": "正在查找服务器",
     "failedFindHomeserver": "查找服务器失败",
@@ -496,7 +496,7 @@
       "clearCacheDesc": "清除所有本地存储的数据并从服务器重新加载。",
       "clearCacheBtn": "清除缓存",
       "credits": "致谢",
-      "cinnyLogo": "Cinny 图标"
+      "elevoLogo": "Elevo 图标"
     }
   },
   "sidebar": {
@@ -605,7 +605,7 @@
     "failedLoadConfig": "加载客户端配置文件失败。"
   },
   "welcome": {
-    "title": "欢迎使用 Cinny",
+    "title": "欢迎使用 Elevo Messenger",
     "subtitle": "又一个 Matrix 客户端",
     "sourceCode": "源代码",
     "support": "支持"

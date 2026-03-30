@@ -64,8 +64,8 @@
     "registrationTokenOptional": "Registration Token (Optional)",
     "termsAccept": "I accept server",
     "termsAndConditions": "Terms and Conditions",
-    "cinnyLogo": "Cinny Logo",
-    "cinny": "Cinny",
+    "elevoLogo": "Elevo Logo",
+    "elevo": "Elevo",
     "homeserver": "Homeserver",
     "lookingForHomeserver": "Looking for homeserver",
     "failedFindHomeserver": "Failed to find homeserver",
@@ -496,7 +496,7 @@
       "clearCacheDesc": "Clear all your locally stored data and reload from server.",
       "clearCacheBtn": "Clear Cache",
       "credits": "Credits",
-      "cinnyLogo": "Cinny logo"
+      "elevoLogo": "Elevo logo"
     }
   },
   "sidebar": {
@@ -605,7 +605,7 @@
     "failedLoadConfig": "Failed to load client configuration file."
   },
   "welcome": {
-    "title": "Welcome to Cinny",
+    "title": "Welcome to Elevo Messenger",
     "subtitle": "Yet another matrix client",
     "sourceCode": "Source Code",
     "support": "Support"

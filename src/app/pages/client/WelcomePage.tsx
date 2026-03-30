@@ -2,7 +2,7 @@ import React from 'react';
 import { Box, Button, Icon, Icons, Text, config, toRem } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { Page, PageHero, PageHeroSection } from '../../components/page';
-import CinnySVG from '../../../../public/res/svg/cinny.svg';
+import ElevoLogo from '../../../../public/res/apple/apple-touch-icon-144x144.png';
 
 export function WelcomePage() {
   const { t } = useTranslation();
@@ -16,7 +16,7 @@ export function WelcomePage() {
       >
         <PageHeroSection>
           <PageHero
-            icon={<img width="70" height="70" src={CinnySVG} alt={t('auth.cinnyLogo')} />}
+            icon={<img width="70" height="70" src={ElevoLogo} alt={t('auth.elevoLogo')} />}
             title={t('welcome.title')}
             subTitle={
               <span>
