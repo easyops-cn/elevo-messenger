@@ -27,8 +27,9 @@ import * as css from './style.css';
 import { bytesToSize } from '../../../utils/common';
 import { FALLBACK_MIMETYPE } from '../../../utils/mimeTypes';
 import { stopPropagation } from '../../../utils/keyboard';
-import { decryptFile, downloadEncryptedMedia, mxcUrlToHttp } from '../../../utils/matrix';
+import { decryptFile, downloadEncryptedMedia, downloadMedia, mxcUrlToHttp } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
+import { NO_SERVICE_WORKER } from '../../../utils/noServiceWorker';
 import { ModalWide } from '../../../styles/Modal.css';
 import { validBlurHash } from '../../../utils/blurHash';
 
@@ -94,6 +95,10 @@ export const ImageContent = as<'div', ImageContentProps>(
             decryptFile(encBuf, mimeType ?? FALLBACK_MIMETYPE, encInfo)
           );
           return URL.createObjectURL(fileContent);
+        }
+        if (NO_SERVICE_WORKER) {
+          const blob = await downloadMedia(mediaUrl);
+          return URL.createObjectURL(blob);
         }
         return mediaUrl;
       }, [mx, url, useAuthentication, mimeType, encInfo])

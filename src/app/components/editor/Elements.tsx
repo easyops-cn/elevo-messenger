@@ -14,6 +14,7 @@ import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { getBeginCommand } from './utils';
 import { BlockType } from './types';
 import { mxcUrlToHttp } from '../../utils/matrix';
+import { MxcImg } from '../MxcImg';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 
 // Put this at the start and end of an inline component to work around this Chromium bug:
@@ -91,7 +92,7 @@ function RenderEmoticonElement({
         contentEditable={false}
       >
         {element.key.startsWith('mxc://') ? (
-          <img
+          <MxcImg
             className={css.EmoticonImg}
             src={mxcUrlToHttp(mx, element.key, useAuthentication) ?? element.key}
             alt={element.shortcode}

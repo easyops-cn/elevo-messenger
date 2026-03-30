@@ -4,7 +4,6 @@ import {
   Box,
   Text,
   Avatar,
-  AvatarImage,
   AvatarFallback,
   Button,
   Icon,
@@ -26,6 +25,7 @@ import { createUploadAtom, UploadSuccess } from '../../state/upload';
 import { CompactUploadCardRenderer } from '../upload-card';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { PackMetaReader } from '../../plugins/custom-emoji';
+import { MxcAvatarImage } from '../MxcAvatarImage';
 
 type ImagePackAvatarProps = {
   url?: string;
@@ -35,7 +35,7 @@ function ImagePackAvatar({ url, name }: ImagePackAvatarProps) {
   return (
     <Avatar size="500" className={ContainerColor({ variant: 'Secondary' })}>
       {url ? (
-        <AvatarImage src={url} alt={name ?? 'Unknown'} />
+        <MxcAvatarImage src={url} alt={name ?? 'Unknown'} />
       ) : (
         <AvatarFallback>
           <Text size="H2">{nameInitials(name ?? 'Unknown')}</Text>

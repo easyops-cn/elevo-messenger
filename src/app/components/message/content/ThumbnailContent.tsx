@@ -2,9 +2,10 @@ import { ReactNode, useCallback, useEffect } from 'react';
 import { IThumbnailContent } from '../../../../types/matrix/common';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
-import { decryptFile, downloadEncryptedMedia, mxcUrlToHttp } from '../../../utils/matrix';
+import { decryptFile, downloadEncryptedMedia, downloadMedia, mxcUrlToHttp } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { FALLBACK_MIMETYPE } from '../../../utils/mimeTypes';
+import { NO_SERVICE_WORKER } from '../../../utils/noServiceWorker';
 
 export type ThumbnailContentProps = {
   info: IThumbnailContent;
@@ -30,6 +31,10 @@ export function ThumbnailContent({ info, renderImage }: ThumbnailContentProps) {
           decryptFile(encBuf, thumbInfo.mimetype ?? FALLBACK_MIMETYPE, encInfo)
         );
         return URL.createObjectURL(fileContent);
+      }
+      if (NO_SERVICE_WORKER) {
+        const blob = await downloadMedia(mediaUrl);
+        return URL.createObjectURL(blob);
       }
 
       return mediaUrl;

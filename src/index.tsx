@@ -17,11 +17,12 @@ import App from './app/pages/App';
 import './app/i18n';
 import { pushSessionToSW } from './sw-session';
 import { getFallbackSession } from './app/state/sessions';
+import { NO_SERVICE_WORKER } from './app/utils/noServiceWorker';
 
 document.body.classList.add(configClass, varsClass);
 
-// Register Service Worker
-if ('serviceWorker' in navigator) {
+// Register Service Worker (skipped when VITE_NO_SERVICE_WORKER is set)
+if (!NO_SERVICE_WORKER && 'serviceWorker' in navigator) {
   const swUrl =
     import.meta.env.MODE === 'production'
       ? `${trimTrailingSlash(import.meta.env.BASE_URL)}/sw.js`

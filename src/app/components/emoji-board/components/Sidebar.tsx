@@ -14,6 +14,7 @@ import {
 } from 'folds';
 import classNames from 'classnames';
 import * as css from './styles.css';
+import { MxcImg } from '../../MxcImg';
 
 export function Sidebar({ children }: { children: ReactNode }) {
   return (
@@ -121,7 +122,7 @@ export function ImageGroupIcon<T extends string>({
   return (
     <SidebarBtn active={active} id={id} label={label} onClick={onClick}>
       {url ? (
-        <img className={css.SidebarBtnImg} src={url} alt={label} />
+        <MxcImg className={css.SidebarBtnImg} src={url} alt={label} />
       ) : (
         <Icon src={Icons.Photo} filled={active} />
       )}

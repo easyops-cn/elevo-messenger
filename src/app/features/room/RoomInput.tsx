@@ -475,16 +475,22 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       const stickerUrl = mxcUrlToHttp(mx, mxc, useAuthentication);
       if (!stickerUrl) return;
 
-      const info = await getImageInfo(
-        await loadImageElement(stickerUrl),
-        await getImageUrlBlob(stickerUrl)
-      );
+      const blob = await getImageUrlBlob(stickerUrl);
+      const blobUrl = URL.createObjectURL(blob);
+      try {
+        const info = await getImageInfo(
+          await loadImageElement(blobUrl),
+          blob
+        );
 
-      mx.sendEvent(roomId, EventType.Sticker, {
-        body: label,
-        url: mxc,
-        info,
-      });
+        mx.sendEvent(roomId, EventType.Sticker, {
+          body: label,
+          url: mxc,
+          info,
+        });
+      } finally {
+        URL.revokeObjectURL(blobUrl);
+      }
     };
 
     return (

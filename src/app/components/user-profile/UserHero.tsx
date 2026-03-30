@@ -21,6 +21,7 @@ import { UserPresence } from '../../hooks/useUserPresence';
 import { AvatarPresence, PresenceBadge } from '../presence';
 import { ImageViewer } from '../image-viewer';
 import { stopPropagation } from '../../utils/keyboard';
+import { MxcImg } from '../MxcImg';
 
 type UserHeroProps = {
   userId: string;
@@ -40,7 +41,7 @@ export function UserHero({ userId, avatarUrl, presence }: UserHeroProps) {
         }}
       >
         {avatarUrl && (
-          <img className={css.UserHeroCover} src={avatarUrl} alt={userId} draggable="false" />
+          <MxcImg className={css.UserHeroCover} src={avatarUrl} alt={userId} draggable={false} />
         )}
       </div>
       <div className={css.UserHeroAvatarContainer}>

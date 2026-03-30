@@ -33,6 +33,7 @@ import { getMemberDisplayName } from '../utils/room';
 import { EMOJI_PATTERN, sanitizeForRegex, URL_NEG_LB } from '../utils/regex';
 import { getHexcodeForEmoji, getShortcodeFor } from './emoji';
 import { findAndReplace } from '../utils/findAndReplace';
+import { MxcImg } from '../components/MxcImg';
 import {
   parseMatrixToRoom,
   parseMatrixToRoomEvent,
@@ -522,12 +523,12 @@ export const getReactCustomHtmlParser = (
             return (
               <span className={css.EmoticonBase}>
                 <span className={css.Emoticon()}>
-                  <img {...props} className={css.EmoticonImg} src={htmlSrc} />
+                  <MxcImg {...props} className={css.EmoticonImg} src={htmlSrc} />
                 </span>
               </span>
             );
           }
-          if (htmlSrc) return <img {...props} className={css.Img} src={htmlSrc} />;
+          if (htmlSrc) return <MxcImg {...props} className={css.Img} src={htmlSrc} />;
         }
       }
 

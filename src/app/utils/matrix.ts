@@ -18,6 +18,7 @@ import { IImageInfo, IThumbnailContent, IVideoInfo } from '../../types/matrix/co
 import { AccountDataEvent } from '../../types/matrix/accountData';
 import { getStateEvent } from './room';
 import { Membership, StateEvent } from '../../types/matrix/room';
+import { NO_SERVICE_WORKER } from './noServiceWorker';
 
 const DOMAIN_REGEX = /\b(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}\b/;
 
@@ -297,8 +298,14 @@ export const mxcUrlToHttp = (
   );
 
 export const downloadMedia = async (src: string): Promise<Blob> => {
-  // this request is authenticated by service worker
-  const res = await fetch(src, { method: 'GET' });
+  const headers: Record<string, string> = {};
+  if (NO_SERVICE_WORKER) {
+    const accessToken = localStorage.getItem('cinny_access_token');
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+  }
+  const res = await fetch(src, { method: 'GET', headers });
   const blob = await res.blob();
   return blob;
 };

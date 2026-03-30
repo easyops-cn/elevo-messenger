@@ -1,5 +1,6 @@
 import React from 'react';
-import { Avatar, AvatarFallback, AvatarImage, Box, Button, Icon, Icons, Text } from 'folds';
+import { Avatar, AvatarFallback, Box, Button, Icon, Icons, Text } from 'folds';
+import { MxcAvatarImage } from '../../../components/MxcAvatarImage';
 import { useUserImagePack } from '../../../hooks/useImagePacks';
 import { SequenceCard } from '../../../components/sequence-card';
 import { SequenceCardStyle } from '../styles.css';
@@ -44,7 +45,7 @@ export function UserPack({ onViewPack }: UserPackProps) {
           before={
             <Avatar size="300" radii="300">
               {avatarUrl ? (
-                <AvatarImage style={{ objectFit: 'contain' }} src={avatarUrl} />
+                <MxcAvatarImage style={{ objectFit: 'contain' }} src={avatarUrl} />
               ) : (
                 <AvatarFallback>
                   <Icon size="400" src={Icons.Sticker} filled />

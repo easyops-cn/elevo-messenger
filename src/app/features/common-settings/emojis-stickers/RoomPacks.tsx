@@ -7,7 +7,6 @@ import {
   Icon,
   Icons,
   Avatar,
-  AvatarImage,
   AvatarFallback,
   toRem,
   config,
@@ -17,6 +16,7 @@ import {
   IconButton,
   Menu,
 } from 'folds';
+import { MxcAvatarImage } from '../../../components/MxcAvatarImage';
 import { MatrixError } from 'matrix-js-sdk';
 import { SequenceCard } from '../../../components/sequence-card';
 import {
@@ -236,7 +236,7 @@ export function RoomPacks({ onViewPack }: RoomPacksProps) {
                 ))}
               <Avatar size="300" radii="300">
                 {avatarUrl ? (
-                  <AvatarImage style={{ objectFit: 'contain' }} src={avatarUrl} />
+                  <MxcAvatarImage style={{ objectFit: 'contain' }} src={avatarUrl} />
                 ) : (
                   <AvatarFallback>
                     <Icon size="400" src={Icons.Sticker} filled />

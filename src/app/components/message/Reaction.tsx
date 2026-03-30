@@ -6,6 +6,7 @@ import * as css from './Reaction.css';
 import { getHexcodeForEmoji, getShortcodeFor } from '../../plugins/emoji';
 import { getMemberDisplayName } from '../../utils/room';
 import { eventWithShortcode, getMxIdLocalPart, mxcUrlToHttp } from '../../utils/matrix';
+import { MxcImg } from '../MxcImg';
 
 export const Reaction = as<
   'button',
@@ -27,7 +28,7 @@ export const Reaction = as<
   >
     <Text className={css.ReactionText} as="span" size="T400">
       {reaction.startsWith('mxc://') ? (
-        <img
+        <MxcImg
           className={css.ReactionImg}
           src={mxcUrlToHttp(mx, reaction, useAuthentication) ?? reaction
           }

@@ -89,8 +89,17 @@ export const getDataTransferFiles = (dataTransfer: DataTransfer): File[] | undef
 export const renameFile = (file: File, name: string): File =>
   new File([file], name, { type: file.type });
 
+import { NO_SERVICE_WORKER } from './noServiceWorker';
+
 export const getImageUrlBlob = async (url: string) => {
-  const res = await fetch(url);
+  const headers: Record<string, string> = {};
+  if (NO_SERVICE_WORKER) {
+    const accessToken = localStorage.getItem('cinny_access_token');
+    if (accessToken) {
+      headers.Authorization = `Bearer ${accessToken}`;
+    }
+  }
+  const res = await fetch(url, { headers });
   const blob = await res.blob();
   return blob;
 };

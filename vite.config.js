@@ -74,6 +74,8 @@ function serverMatrixSdkCryptoWasm(wasmFilePath) {
   };
 }
 
+const noServiceWorker = process.env.VITE_NO_SERVICE_WORKER === 'true';
+
 export default defineConfig({
   appType: 'spa',
   publicDir: false,
@@ -98,20 +100,24 @@ export default defineConfig({
     vanillaExtractPlugin(),
     wasm(),
     react(),
-    VitePWA({
-      srcDir: 'src',
-      filename: 'sw.ts',
-      strategies: 'injectManifest',
-      injectRegister: false,
-      manifest: false,
-      injectManifest: {
-        injectionPoint: undefined,
-      },
-      devOptions: {
-        enabled: true,
-        type: 'module',
-      },
-    }),
+    ...(noServiceWorker
+      ? []
+      : [
+          VitePWA({
+            srcDir: 'src',
+            filename: 'sw.ts',
+            strategies: 'injectManifest',
+            injectRegister: false,
+            manifest: false,
+            injectManifest: {
+              injectionPoint: undefined,
+            },
+            devOptions: {
+              enabled: true,
+              type: 'module',
+            },
+          }),
+        ]),
   ],
   optimizeDeps: {
     esbuildOptions: {

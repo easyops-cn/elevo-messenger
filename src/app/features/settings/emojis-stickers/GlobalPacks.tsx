@@ -7,7 +7,6 @@ import {
   Icons,
   IconButton,
   Avatar,
-  AvatarImage,
   AvatarFallback,
   config,
   Spinner,
@@ -31,6 +30,7 @@ import { SettingTile } from '../../../components/setting-tile';
 import { mxcUrlToHttp } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
+import { MxcAvatarImage } from '../../../components/MxcAvatarImage';
 import {
   EmoteRoomsContent,
   ImagePack,
@@ -190,7 +190,7 @@ function GlobalPackSelector({
                             <Box alignItems="Center" gap="300">
                               <Avatar size="300" radii="300">
                                 {avatarUrl ? (
-                                  <AvatarImage style={{ objectFit: 'contain' }} src={avatarUrl} />
+                                  <MxcAvatarImage style={{ objectFit: 'contain' }} src={avatarUrl} />
                                 ) : (
                                   <AvatarFallback>
                                     <Icon size="400" src={Icons.Sticker} filled />
@@ -389,7 +389,7 @@ export function GlobalPacks({ onViewPack }: GlobalPacksProps) {
               )}
               <Avatar size="300" radii="300">
                 {avatarUrl ? (
-                  <AvatarImage style={{ objectFit: 'contain' }} src={avatarUrl} />
+                  <MxcAvatarImage style={{ objectFit: 'contain' }} src={avatarUrl} />
                 ) : (
                   <AvatarFallback>
                     <Icon size="400" src={Icons.Sticker} filled />

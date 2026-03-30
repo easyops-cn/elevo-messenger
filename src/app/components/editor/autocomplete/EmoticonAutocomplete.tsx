@@ -14,6 +14,7 @@ import { useRelevantImagePacks } from '../../../hooks/useImagePacks';
 import { IEmoji, emojis } from '../../../plugins/emoji';
 import { useKeyDown } from '../../../hooks/useKeyDown';
 import { mxcUrlToHttp } from '../../../utils/matrix';
+import { MxcImg } from '../../MxcImg';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { ImageUsage, PackImageReader } from '../../../plugins/custom-emoji';
 import { getEmoticonSearchStr } from '../../../plugins/utils';
@@ -101,12 +102,10 @@ export function EmoticonAutocomplete({
             onClick={() => handleAutocomplete(key, emoticon.shortcode)}
             before={
               isCustomEmoji && customEmojiUrl ? (
-                <Box
-                  shrink="No"
-                  as="img"
+                <MxcImg
                   src={customEmojiUrl}
                   alt={emoticon.shortcode}
-                  style={{ width: toRem(24), height: toRem(24), objectFit: 'contain' }}
+                  style={{ width: toRem(24), height: toRem(24), objectFit: 'contain', flexShrink: 0 }}
                 />
               ) : (
                 <Box
