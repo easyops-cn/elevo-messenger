@@ -42,6 +42,7 @@ import { useTimeoutToggle } from '../../hooks/useTimeoutToggle';
 import { useIgnoredUsers } from '../../hooks/useIgnoredUsers';
 import { CutoutCard } from '../cutout-card';
 import { SettingTile } from '../setting-tile';
+import { openExternalUrlInSystemBrowser } from '../../plugins/useTauriOpener';
 
 export function ServerChip({ server }: { server: string }) {
   const { t } = useTranslation();
@@ -112,7 +113,7 @@ export function ServerChip({ server }: { server: string }) {
                 size="300"
                 radii="300"
                 onClick={() => {
-                  window.open(`https://${server}`, '_blank');
+                  openExternalUrlInSystemBrowser(`https://${server}`);
                   close();
                 }}
               >

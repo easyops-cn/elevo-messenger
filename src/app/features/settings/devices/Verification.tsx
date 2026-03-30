@@ -36,6 +36,7 @@ import { stopPropagation } from '../../../utils/keyboard';
 import { useAuthMetadata } from '../../../hooks/useAuthMetadata';
 import { withSearchParam } from '../../../pages/pathUtils';
 import { useAccountManagementActions } from '../../../hooks/useAccountManagement';
+import { openExternalUrlInSystemBrowser } from '../../../plugins/useTauriOpener';
 
 type VerificationStatusBadgeProps = {
   verificationStatus: VerificationStatus;
@@ -281,11 +282,10 @@ export function DeviceVerificationOptions() {
 
     if (authMetadata) {
       const authUrl = authMetadata.account_management_uri ?? authMetadata.issuer;
-      window.open(
+      openExternalUrlInSystemBrowser(
         withSearchParam(authUrl, {
           action: accountManagementActions.crossSigningReset,
-        }),
-        '_blank'
+        })
       );
       return;
     }
