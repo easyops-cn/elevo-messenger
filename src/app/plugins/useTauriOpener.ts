@@ -43,6 +43,19 @@ async function openInSystemBrowser(href: string) {
 }
 
 /**
+ * Open a URL in the system browser from JavaScript (not driven by an <a target="_blank"> click).
+ * - Tauri (desktop or mobile) → uses the system browser via tauri-plugin-opener
+ * - Web browser               → falls through to window.open
+ */
+export function openExternalUrlInSystemBrowser(href: string): void {
+  if (isTauri) {
+    openInSystemBrowser(href);
+  } else {
+    window.open(href, '_blank', 'noopener,noreferrer');
+  }
+}
+
+/**
  * Programmatically open a URL, respecting the Tauri environment:
  * - Tauri desktop + allowed domain → opens in an in-app WebviewWindow with ElevoMessengerSDK
  * - Tauri desktop + other domain  → opens in the system browser
@@ -61,11 +74,9 @@ export function openExternalUrl(href: string, roomId: string): void {
     } else {
       openInSystemBrowser(href);
     }
-  } else if (isTauri) {
-    // Mobile Tauri (future): use system browser for now.
-    openInSystemBrowser(href);
   } else {
-    window.open(href, '_blank', 'noopener,noreferrer');
+    // Mobile Tauri (future): use system browser for now.
+    openExternalUrlInSystemBrowser(href);
   }
 }
 
