@@ -1,6 +1,6 @@
 {
-  "name": "cinny",
-  "version": "4.11.1",
+  "name": "elevo-messenger",
+  "version": "1.0.0",
   "description": "Yet another matrix client",
   "main": "index.js",
   "type": "module",
@@ -20,7 +20,7 @@
     "typecheck": "tsc --noEmit"
   },
   "keywords": [],
-  "author": "Ajay Bura",
+  "author": "Elevo Team",
   "license": "AGPL-3.0-only",
   "dependencies": {
     "@atlaskit/pragmatic-drag-and-drop": "1.1.6",
