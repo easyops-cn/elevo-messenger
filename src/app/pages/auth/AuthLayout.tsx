@@ -21,7 +21,7 @@ import {
   useClientConfig,
 } from '../../hooks/useClientConfig';
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
-import { LOGIN_PATH, REGISTER_PATH, RESET_PASSWORD_PATH } from '../paths';
+import { LOGIN_PATH, OIDC_CALLBACK_PATH, REGISTER_PATH, RESET_PASSWORD_PATH } from '../paths';
 import ElevoLogo from '../../../../public/res/apple/apple-touch-icon-144x144.png';
 import { ServerPicker } from './ServerPicker';
 import { AutoDiscoveryAction, autoDiscovery } from '../../cs-api';
@@ -125,6 +125,11 @@ export function AuthLayout() {
 
   // if server is mismatches with path server, update path
   useEffect(() => {
+    // For OIDC callback, no server param is present in the URL
+    if (matchPath(OIDC_CALLBACK_PATH, location.pathname)) {
+      return;
+    }
+
     if (!urlEncodedServer || tryDecodeURIComponent(urlEncodedServer) !== server) {
       navigate(
         generatePath(currentAuthPath(location.pathname), {

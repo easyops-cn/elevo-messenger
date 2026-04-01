@@ -4,7 +4,7 @@ import { cryptoCallbacks } from './secretStorageKeys';
 import { clearNavToActivePathStore } from '../app/state/navToActivePath';
 import { pushSessionToSW } from '../sw-session';
 import { getOidcSession } from '../app/state/sessions';
-import { EleveOidcTokenRefresher } from '../app/oidc/EleveOidcTokenRefresher';
+import { ElevoOidcTokenRefresher } from '../app/oidc/ElevoOidcTokenRefresher';
 
 type Session = {
   baseUrl: string;
@@ -24,7 +24,7 @@ export const initClient = async (session: Session): Promise<MatrixClient> => {
 
   const oidcData = getOidcSession();
   const tokenRefresher = oidcData
-    ? new EleveOidcTokenRefresher(
+    ? new ElevoOidcTokenRefresher(
         oidcData.issuer,
         oidcData.clientId,
         oidcData.redirectUri,

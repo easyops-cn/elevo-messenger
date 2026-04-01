@@ -35,22 +35,22 @@ export function setFallbackSession(
   userId: string,
   baseUrl: string
 ) {
-  localStorage.setItem('cinny_access_token', accessToken);
-  localStorage.setItem('cinny_device_id', deviceId);
-  localStorage.setItem('cinny_user_id', userId);
-  localStorage.setItem('cinny_hs_base_url', baseUrl);
+  localStorage.setItem('elevo_access_token', accessToken);
+  localStorage.setItem('elevo_device_id', deviceId);
+  localStorage.setItem('elevo_user_id', userId);
+  localStorage.setItem('elevo_hs_base_url', baseUrl);
 }
 export const removeFallbackSession = () => {
-  localStorage.removeItem('cinny_hs_base_url');
-  localStorage.removeItem('cinny_user_id');
-  localStorage.removeItem('cinny_device_id');
-  localStorage.removeItem('cinny_access_token');
+  localStorage.removeItem('elevo_hs_base_url');
+  localStorage.removeItem('elevo_user_id');
+  localStorage.removeItem('elevo_device_id');
+  localStorage.removeItem('elevo_access_token');
 };
 export const getFallbackSession = (): Session | undefined => {
-  const baseUrl = localStorage.getItem('cinny_hs_base_url');
-  const userId = localStorage.getItem('cinny_user_id');
-  const deviceId = localStorage.getItem('cinny_device_id');
-  const accessToken = localStorage.getItem('cinny_access_token');
+  const baseUrl = localStorage.getItem('elevo_hs_base_url');
+  const userId = localStorage.getItem('elevo_user_id');
+  const deviceId = localStorage.getItem('elevo_device_id');
+  const accessToken = localStorage.getItem('elevo_access_token');
 
   if (baseUrl && userId && deviceId && accessToken) {
     const session: Session = {

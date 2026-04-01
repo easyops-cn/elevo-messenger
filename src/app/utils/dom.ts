@@ -94,7 +94,7 @@ export const renameFile = (file: File, name: string): File =>
 export const getImageUrlBlob = async (url: string) => {
   const headers: Record<string, string> = {};
   if (NO_SERVICE_WORKER) {
-    const accessToken = localStorage.getItem('cinny_access_token');
+    const accessToken = localStorage.getItem('elevo_access_token');
     if (accessToken) {
       headers.Authorization = `Bearer ${accessToken}`;
     }

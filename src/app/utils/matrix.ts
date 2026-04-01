@@ -300,7 +300,7 @@ export const mxcUrlToHttp = (
 export const downloadMedia = async (src: string): Promise<Blob> => {
   const headers: Record<string, string> = {};
   if (NO_SERVICE_WORKER) {
-    const accessToken = localStorage.getItem('cinny_access_token');
+    const accessToken = localStorage.getItem('elevo_access_token');
     if (accessToken) {
       headers.Authorization = `Bearer ${accessToken}`;
     }
