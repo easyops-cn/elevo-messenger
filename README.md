@@ -1,16 +1,4 @@
-# Cinny
-<p>
-    <a href="https://github.com/ajbura/cinny/releases">
-        <img alt="GitHub release downloads" src="https://img.shields.io/github/downloads/ajbura/cinny/total?logo=github&style=social"></a>
-    <a href="https://hub.docker.com/r/ajbura/cinny">
-        <img alt="DockerHub downloads" src="https://img.shields.io/docker/pulls/ajbura/cinny?logo=docker&style=social"></a>
-    <a href="https://fosstodon.org/@cinnyapp">
-        <img alt="Follow on Mastodon" src="https://img.shields.io/mastodon/follow/106845779685925461?domain=https%3A%2F%2Ffosstodon.org&logo=mastodon&style=social"></a>
-    <a href="https://twitter.com/intent/follow?screen_name=cinnyapp">
-        <img alt="Follow on Twitter" src="https://img.shields.io/twitter/follow/cinnyapp?logo=twitter&style=social"></a>
-    <a href="https://cinny.in/#sponsor">
-        <img alt="Sponsor Cinny" src="https://img.shields.io/opencollective/all/cinny?logo=opencollective&style=social"></a>
-</p>
+# Elevo Messenger
 
 A Matrix client focusing primarily on simple, elegant and secure interface. The main goal is to have an instant messaging application that is easy on people and has a modern touch.
 - [Roadmap](https://github.com/orgs/cinnyapp/projects/1)
@@ -19,20 +7,20 @@ A Matrix client focusing primarily on simple, elegant and secure interface. The 
 <img align="center" src="https://raw.githubusercontent.com/cinnyapp/cinny-site/main/assets/preview2-light.png" height="380">
 
 ## Getting started
-The web app is available at [app.cinny.in](https://app.cinny.in/) and gets updated on each new release. The `dev` branch is continuously deployed at [dev.cinny.in](https://dev.cinny.in) but keep in mind that it could have things broken.
+The web app is available at [elevo-messenger.netlify.app](https://elevo-messenger.netlify.app/) and gets updated on each new release. The `main` branch is continuously deployed at [devserver-main--elevo-messenger.netlify.app](https://devserver-main--elevo-messenger.netlify.app) but keep in mind that it could have things broken.
 
-You can also download our desktop app from the [cinny-desktop repository](https://github.com/cinnyapp/cinny-desktop).
+You can also download our desktop app from the [Elevo Desktop repository](https://github.com/easyops-cn/elevo-desktop).
 
 ## Self-hosting
-To host Cinny on your own, simply download the tarball from [GitHub releases](https://github.com/cinnyapp/cinny/releases/latest), and serve the files from `dist/` using your preferred webserver. Alternatively, you can just pull the docker image from [DockerHub](https://hub.docker.com/r/ajbura/cinny) or [GitHub Container Registry](https://github.com/cinnyapp/cinny/pkgs/container/cinny).
+To host Elevo Messenger on your own, simply download the tarball from [GitHub releases](https://github.com/easyops-cn/elevo-messenger/releases/latest), and serve the files from `dist/` using your preferred webserver.
 
 * The default homeservers and explore pages are defined in [`config.json`](config.json).
 
-* You need to set up redirects to serve the assests. Example configurations; [netlify](netlify.toml), [nginx](contrib/nginx/cinny.domain.tld.conf), [caddy](contrib/caddy/caddyfile).
-    * If you have trouble configuring redirects you can [enable hash routing](config.json#L35) — the url in the browser will have a `/#/` between the domain and open channel (ie. `app.cinny.in/#/home/` instead of `app.cinny.in/home/`) but you won't have to configure your webserver.
+* You need to set up redirects to serve the assets. Example configurations; [netlify](netlify.toml), [nginx](contrib/nginx/cinny.domain.tld.conf), [caddy](contrib/caddy/caddyfile).
+    * If you have trouble configuring redirects you can [enable hash routing](config.json#L35) — the url in the browser will have a `/#/` between the domain and open channel (ie. `example.com/#/home/` instead of `example.com/home/`) but you won't have to configure your webserver.
 
-* To deploy on subdirectory, you need to rebuild the app youself after updating the `base` path in [`build.config.ts`](build.config.ts).
-    * For example, if you want to deploy on `https://cinny.in/app`, then set `base: '/app'`.
+* To deploy on subdirectory, you need to rebuild the app yourself after updating the `base` path in [`build.config.ts`](build.config.ts).
+    * For example, if you want to deploy on `https://example.com/app`, then set `base: '/app'`.
 
 <details><summary><b>PGP Public Key to verify tarball</b></summary>
 
@@ -100,12 +88,17 @@ npm run build # Compiles the app into the dist/ directory
 This repository includes a Dockerfile, which builds the application from source and serves it with Nginx on port 80. To
 use this locally, you can build the container like so:
 ```
-docker build -t cinny:latest .
+docker build -t elevo-messenger:latest .
 ```
 
 You can then run the container you've built with a command similar to this:
 ```
-docker run -p 8080:80 cinny:latest
+docker run -p 8080:80 elevo-messenger:latest
 ```
 
 This will forward your `localhost` port 8080 to the container's port 80. You can visit the app in your browser by navigating to `http://localhost:8080`.
+
+## License
+This project is forked from [cinnyapp/cinny](https://github.com/cinnyapp/cinny), which is licensed under AGPL-3.0.
+
+This project continues to use the same AGPL-3.0 license.
