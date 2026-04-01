@@ -1,3 +1,5 @@
+import { NO_SERVICE_WORKER } from './noServiceWorker';
+
 export const targetFromEvent = (evt: Event, selector: string): Element | undefined => {
   const targets = evt.composedPath() as Element[];
   return targets.find((target) => target.matches?.(selector));
@@ -88,8 +90,6 @@ export const getDataTransferFiles = (dataTransfer: DataTransfer): File[] | undef
 
 export const renameFile = (file: File, name: string): File =>
   new File([file], name, { type: file.type });
-
-import { NO_SERVICE_WORKER } from './noServiceWorker';
 
 export const getImageUrlBlob = async (url: string) => {
   const headers: Record<string, string> = {};
