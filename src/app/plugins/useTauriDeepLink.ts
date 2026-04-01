@@ -10,6 +10,44 @@ export const DEEP_LINK_SCHEME = 'vip.elevo.messenger';
 // Format: vip.elevo.messenger://sso-callback/login/{server}/?loginToken=xxx
 export const SSO_CALLBACK_HOST = 'sso-callback';
 
+// On macOS, custom URL schemes only work for installed .app bundles, not during
+// `tauri dev`. Detect macOS + dev mode and fall back to the web-based SSO flow.
+const isMacOS =
+  typeof navigator !== 'undefined' &&
+  (/Mac/.test(navigator.platform) || /Mac/.test(navigator.userAgent));
+
+/**
+ * True when deep-link-based SSO is supported in the current environment:
+ * - Any platform in production builds
+ * - Windows / Linux in dev mode (register_all() works at runtime)
+ * - macOS in dev mode: FALSE — schemes are not registered for non-installed apps
+ */
+export const canUseDeepLinkSSO: boolean = isDesktopTauri && !(isMacOS && import.meta.env.DEV);
+
+// ── Stale-URL deduplication ─────────────────────────────────────────────────
+//
+// `getCurrent()` from the deep-link plugin returns the URL that launched the
+// app and keeps returning it even after the page is reloaded (e.g. on logout).
+// We store each processed URL in sessionStorage so we don't re-process a
+// loginToken after logout + reload.
+const PROCESSED_DL_KEY = '__elevo_last_deep_link__';
+
+function markDeepLinkProcessed(url: string) {
+  try {
+    sessionStorage.setItem(PROCESSED_DL_KEY, url);
+  } catch {
+    // sessionStorage unavailable — ignore
+  }
+}
+
+function wasDeepLinkProcessed(url: string): boolean {
+  try {
+    return sessionStorage.getItem(PROCESSED_DL_KEY) === url;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Dispatches an incoming deep link URL to the appropriate handler.
  *
@@ -66,16 +104,25 @@ export function useTauriDeepLink() {
     if (!isDesktopTauri) return undefined;
 
     // Handle cold-start deep links (app launched via a deep link URL).
+    // `getCurrent()` returns the cached URL even after `window.location.reload()`,
+    // so we guard against re-processing the same URL across logout + reload cycles.
     import('@tauri-apps/plugin-deep-link').then(({ getCurrent }) => {
       getCurrent().then((urls: string[] | null) => {
         if (urls) {
-          urls.forEach((url) => handleDeepLink(url, navigate));
+          urls.forEach((url) => {
+            if (!wasDeepLinkProcessed(url)) {
+              markDeepLinkProcessed(url);
+              handleDeepLink(url, navigate);
+            }
+          });
         }
       });
     });
 
     // Handle deep links while the app is already running.
     const unlistenPromise = listen<string>('deep-link-received', (event) => {
+      // Mark as processed so getCurrent() doesn't replay it after the next reload.
+      markDeepLinkProcessed(event.payload);
       handleDeepLink(event.payload, navigate);
     });
 

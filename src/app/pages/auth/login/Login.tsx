@@ -14,8 +14,7 @@ import { getLoginPath, getRegisterPath, withSearchParam } from '../../pathUtils'
 import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 import { LoginPathSearchParams } from '../../paths';
 import { useClientConfig } from '../../../hooks/useClientConfig';
-import { isDesktopTauri } from '../../../plugins/useTauriOpener';
-import { DEEP_LINK_SCHEME, SSO_CALLBACK_HOST } from '../../../plugins/useTauriDeepLink';
+import { DEEP_LINK_SCHEME, SSO_CALLBACK_HOST, canUseDeepLinkSSO } from '../../../plugins/useTauriDeepLink';
 
 const getLoginTokenSearchParam = () => {
   // when using hasRouter query params in existing route
@@ -45,7 +44,7 @@ export function Login() {
   const [searchParams] = useSearchParams();
   const loginSearchParams = useLoginSearchParams(searchParams);
   const webSsoRedirectUrl = usePathWithOrigin(getLoginPath(server));
-  const ssoRedirectUrl = isDesktopTauri
+  const ssoRedirectUrl = canUseDeepLinkSSO
     ? `${DEEP_LINK_SCHEME}://${SSO_CALLBACK_HOST}${getLoginPath(server)}`
     : webSsoRedirectUrl;
   const loginTokenForHashRouter = getLoginTokenSearchParam();

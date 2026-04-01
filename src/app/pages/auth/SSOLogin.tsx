@@ -4,6 +4,7 @@ import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAutoDiscoveryInfo } from '../../hooks/useAutoDiscoveryInfo';
 import { isDesktopTauri, openExternalUrlInSystemBrowser } from '../../plugins/useTauriOpener';
+import { canUseDeepLinkSSO } from '../../plugins/useTauriDeepLink';
 
 type SSOLoginProps = {
   providers?: IIdentityProvider[];
@@ -22,9 +23,12 @@ export function SSOLogin({ providers, redirectUrl, action, saveScreenSpace }: SS
 
   const openSSOUrl = (ssoId?: string) => {
     const ssoUrl = getSSOIdUrl(ssoId);
-    if (isDesktopTauri) {
+    if (canUseDeepLinkSSO) {
+      // Desktop (production or Linux/Windows dev): open in system browser;
+      // the IdP will redirect back via the elevo:// deep link.
       openExternalUrlInSystemBrowser(ssoUrl);
     } else {
+      // Web browser or macOS dev mode: open in the current page/webview.
       window.location.href = ssoUrl;
     }
   };
