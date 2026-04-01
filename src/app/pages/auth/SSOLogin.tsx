@@ -3,6 +3,7 @@ import { IIdentityProvider, SSOAction, createClient } from 'matrix-js-sdk';
 import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAutoDiscoveryInfo } from '../../hooks/useAutoDiscoveryInfo';
+import { isDesktopTauri, openExternalUrlInSystemBrowser } from '../../plugins/useTauriOpener';
 
 type SSOLoginProps = {
   providers?: IIdentityProvider[];
@@ -19,6 +20,15 @@ export function SSOLogin({ providers, redirectUrl, action, saveScreenSpace }: SS
   const getSSOIdUrl = (ssoId?: string): string =>
     mx.getSsoLoginUrl(redirectUrl, 'sso', ssoId, action);
 
+  const openSSOUrl = (ssoId?: string) => {
+    const ssoUrl = getSSOIdUrl(ssoId);
+    if (isDesktopTauri) {
+      openExternalUrlInSystemBrowser(ssoUrl);
+    } else {
+      window.location.href = ssoUrl;
+    }
+  };
+
   const withoutIcon = providers
     ? providers.find(
         (provider) => !provider.icon || !mx.mxcUrlToHttp(provider.icon, 96, 96, 'crop', false)
@@ -27,60 +37,97 @@ export function SSOLogin({ providers, redirectUrl, action, saveScreenSpace }: SS
 
   const renderAsIcons = withoutIcon ? false : saveScreenSpace && providers && providers.length > 2;
 
-  return (
-    <Box justifyContent="Center" gap="600" wrap="Wrap">
-      {providers ? (
-        providers.map((provider) => {
-          const { id, name, icon } = provider;
-          const iconUrl = icon && mx.mxcUrlToHttp(icon, 96, 96, 'crop', false);
+  const renderProvider = (provider: IIdentityProvider) => {
+    const { id, name, icon } = provider;
+    const iconUrl = (icon && mx.mxcUrlToHttp(icon, 96, 96, 'crop', false)) || undefined;
+    const buttonTitle = t('auth.continueWith', { name });
+    const iconAvatar = iconUrl ? (
+      <AvatarImage src={iconUrl} alt={name} title={buttonTitle} />
+    ) : null;
 
-          const buttonTitle = t('auth.continueWith', { name });
+    if (renderAsIcons && iconUrl) {
+      if (isDesktopTauri) {
+        return (
+          <Avatar
+            style={{ cursor: 'pointer' }}
+            key={id}
+            as="button"
+            type="button"
+            onClick={() => openSSOUrl(id)}
+            aria-label={buttonTitle}
+            size="300"
+            radii="300"
+          >
+            {iconAvatar}
+          </Avatar>
+        );
+      }
+      return (
+        <Avatar
+          style={{ cursor: 'pointer' }}
+          key={id}
+          as="a"
+          href={getSSOIdUrl(id)}
+          aria-label={buttonTitle}
+          size="300"
+          radii="300"
+        >
+          {iconAvatar}
+        </Avatar>
+      );
+    }
 
-          if (renderAsIcons) {
-            return (
-              <Avatar
-                style={{ cursor: 'pointer' }}
-                key={id}
-                as="a"
-                href={getSSOIdUrl(id)}
-                aria-label={buttonTitle}
-                size="300"
-                radii="300"
-              >
-                <AvatarImage src={iconUrl!} alt={name} title={buttonTitle} />
-              </Avatar>
-            );
-          }
+    const beforeSlot = iconUrl && (
+      <Avatar size="200" radii="300">
+        <AvatarImage src={iconUrl} alt={name} />
+      </Avatar>
+    );
 
-          return (
-            <Button
-              style={{ width: '100%' }}
-              key={id}
-              as="a"
-              href={getSSOIdUrl(id)}
-              size="500"
-              variant="Secondary"
-              fill="Soft"
-              outlined
-              before={
-                iconUrl && (
-                  <Avatar size="200" radii="300">
-                    <AvatarImage src={iconUrl} alt={name} />
-                  </Avatar>
-                )
-              }
-            >
-              <Text align="Center" size="B500" truncate>
-                {buttonTitle}
-              </Text>
-            </Button>
-          );
-        })
-      ) : (
+    if (isDesktopTauri) {
+      return (
         <Button
           style={{ width: '100%' }}
-          as="a"
-          href={getSSOIdUrl()}
+          key={id}
+          type="button"
+          onClick={() => openSSOUrl(id)}
+          size="500"
+          variant="Secondary"
+          fill="Soft"
+          outlined
+          before={beforeSlot || undefined}
+        >
+          <Text align="Center" size="B500" truncate>
+            {buttonTitle}
+          </Text>
+        </Button>
+      );
+    }
+    return (
+      <Button
+        style={{ width: '100%' }}
+        key={id}
+        as="a"
+        href={getSSOIdUrl(id)}
+        size="500"
+        variant="Secondary"
+        fill="Soft"
+        outlined
+        before={beforeSlot || undefined}
+      >
+        <Text align="Center" size="B500" truncate>
+          {buttonTitle}
+        </Text>
+      </Button>
+    );
+  };
+
+  const renderGenericSSO = () => {
+    if (isDesktopTauri) {
+      return (
+        <Button
+          style={{ width: '100%' }}
+          type="button"
+          onClick={() => openSSOUrl()}
           size="500"
           variant="Secondary"
           fill="Soft"
@@ -90,7 +137,28 @@ export function SSOLogin({ providers, redirectUrl, action, saveScreenSpace }: SS
             {t('auth.continueWithSSO')}
           </Text>
         </Button>
-      )}
+      );
+    }
+    return (
+      <Button
+        style={{ width: '100%' }}
+        as="a"
+        href={getSSOIdUrl()}
+        size="500"
+        variant="Secondary"
+        fill="Soft"
+        outlined
+      >
+        <Text align="Center" size="B500" truncate>
+          {t('auth.continueWithSSO')}
+        </Text>
+      </Button>
+    );
+  };
+
+  return (
+    <Box justifyContent="Center" gap="600" wrap="Wrap">
+      {providers ? providers.map(renderProvider) : renderGenericSSO()}
     </Box>
   );
 }

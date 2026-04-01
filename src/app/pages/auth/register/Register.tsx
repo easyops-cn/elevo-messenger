@@ -13,6 +13,8 @@ import { SupportedUIAFlowsLoader } from '../../../components/SupportedUIAFlowsLo
 import { getLoginPath } from '../../pathUtils';
 import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 import { RegisterPathSearchParams } from '../../paths';
+import { isDesktopTauri } from '../../../plugins/useTauriOpener';
+import { DEEP_LINK_SCHEME, SSO_CALLBACK_HOST } from '../../../plugins/useTauriDeepLink';
 
 const useRegisterSearchParams = (searchParams: URLSearchParams): RegisterPathSearchParams =>
   useMemo(
@@ -33,7 +35,10 @@ export function Register() {
   const { sso } = useParsedLoginFlows(loginFlows.flows);
 
   // redirect to /login because only that path handle m.login.token
-  const ssoRedirectUrl = usePathWithOrigin(getLoginPath(server));
+  const webSsoRedirectUrl = usePathWithOrigin(getLoginPath(server));
+  const ssoRedirectUrl = isDesktopTauri
+    ? `${DEEP_LINK_SCHEME}://${SSO_CALLBACK_HOST}${getLoginPath(server)}`
+    : webSsoRedirectUrl;
 
   return (
     <Box direction="Column" gap="500">

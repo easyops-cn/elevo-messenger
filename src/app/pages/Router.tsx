@@ -7,6 +7,7 @@ import {
   createRoutesFromElements,
   redirect,
 } from 'react-router-dom';
+import { useTauriDeepLink } from '../plugins/useTauriDeepLink';
 
 import { ClientConfig } from '../hooks/useClientConfig';
 import { AuthLayout, Login, Register, ResetPassword } from './auth';
@@ -78,10 +79,15 @@ import { CallEmbedProvider } from '../components/CallEmbedProvider';
 
 export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize) => {
   const { hashRouter } = clientConfig;
+
+  function TauriDeepLinkHandler() {
+    useTauriDeepLink();
+    return <Outlet />;
+  }
   const mobile = screenSize === ScreenSize.Mobile;
 
   const routes = createRoutesFromElements(
-    <Route>
+    <Route element={<TauriDeepLinkHandler />}>
       <Route
         index
         loader={() => {
