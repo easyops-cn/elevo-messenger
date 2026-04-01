@@ -1,5 +1,5 @@
-import { ReactNode, useCallback, useEffect, useState } from 'react';
-import { AsyncStatus, useAsyncCallback } from '../hooks/useAsyncCallback';
+import { ReactNode, useCallback, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { SpecVersions, specVersions } from '../cs-api';
 
 type SpecVersionsLoaderProps = {
@@ -14,30 +14,24 @@ export function SpecVersionsLoader({
   error,
   children,
 }: SpecVersionsLoaderProps) {
-  const [state, load] = useAsyncCallback(
-    useCallback(() => specVersions(fetch, baseUrl), [baseUrl])
-  );
+  const { data, status, error: queryError, refetch } = useQuery({
+    queryKey: ['specVersions', baseUrl],
+    queryFn: () => specVersions(fetch, baseUrl),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    retry: 2,
+  });
   const [ignoreError, setIgnoreError] = useState(false);
 
   const ignoreCallback = useCallback(() => setIgnoreError(true), []);
 
-  useEffect(() => {
-    load();
-  }, [load]);
-
-  if (state.status === AsyncStatus.Idle || state.status === AsyncStatus.Loading) {
+  if (status === 'pending') {
     return fallback?.();
   }
 
-  if (!ignoreError && state.status === AsyncStatus.Error) {
-    return error?.(state.error, load, ignoreCallback);
+  if (!ignoreError && status === 'error') {
+    return error?.(queryError, () => { refetch(); }, ignoreCallback);
   }
 
-  return children(
-    state.status === AsyncStatus.Success
-      ? state.data
-      : {
-          versions: [],
-        }
-  );
+  return children(data ?? { versions: [] });
 }

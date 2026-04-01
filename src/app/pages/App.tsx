@@ -2,7 +2,8 @@ import React from 'react';
 import { Provider as JotaiProvider } from 'jotai';
 import { OverlayContainerProvider, PopOutContainerProvider, TooltipContainerProvider } from 'folds';
 import { RouterProvider } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
+import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 import { ClientConfigLoader } from '../components/ClientConfigLoader';
@@ -12,8 +13,27 @@ import { FeatureCheck } from './FeatureCheck';
 import { createRouter } from './Router';
 import { ScreenSizeProvider, useScreenSize } from '../hooks/useScreenSize';
 import { useCompositionEndTracking } from '../hooks/useComposingCheck';
+import { createIDBPersister } from '../queryPersister';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 24 * 60 * 60 * 1000, // 24 hours (persist for offline)
+      networkMode: 'offlineFirst',
+      retry: (failureCount, error) => {
+        // Don't retry when offline
+        if (!navigator.onLine) return false;
+        return failureCount < 3;
+      },
+    },
+    mutations: {
+      networkMode: 'offlineFirst',
+    },
+  },
+});
+
+const persister = createIDBPersister();
 
 function App() {
   const screenSize = useScreenSize();
@@ -39,12 +59,15 @@ function App() {
               >
                 {(clientConfig) => (
                   <ClientConfigProvider value={clientConfig}>
-                    <QueryClientProvider client={queryClient}>
+                    <PersistQueryClientProvider
+                      client={queryClient}
+                      persistOptions={{ persister, maxAge: 24 * 60 * 60 * 1000 }}
+                    >
                       <JotaiProvider>
                         <RouterProvider router={createRouter(clientConfig, screenSize)} />
                       </JotaiProvider>
                       <ReactQueryDevtools initialIsOpen={false} />
-                    </QueryClientProvider>
+                    </PersistQueryClientProvider>
                   </ClientConfigProvider>
                 )}
               </ClientConfigLoader>

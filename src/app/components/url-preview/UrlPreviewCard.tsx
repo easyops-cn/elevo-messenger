@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { IPreviewUrlResponse } from 'matrix-js-sdk';
 import { Box, Icon, IconButton, Icons, Scroll, Spinner, Text, as, color, config } from 'folds';
+import { useQuery } from '@tanstack/react-query';
 import { ImageOverlay } from '../ImageOverlay';
-import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { UrlPreview, UrlPreviewContent, UrlPreviewDescription, UrlPreviewImg } from './UrlPreview';
 import {
@@ -23,15 +23,14 @@ export const UrlPreviewCard = as<'div', { url: string; ts: number }>(
     const mx = useMatrixClient();
     const useAuthentication = useMediaAuthentication();
     const [viewer, setViewer] = useState(false);
-    const [previewStatus, loadPreview] = useAsyncCallback(
-      useCallback(() => mx.getUrlPreview(url, ts), [url, ts, mx])
-    );
+    const { data: previewData, status: previewStatus } = useQuery({
+      queryKey: ['urlPreview', url],
+      queryFn: () => mx.getUrlPreview(url, ts),
+      staleTime: Infinity,
+      gcTime: 30 * 60 * 1000, // 30 minutes
+    });
 
-    useEffect(() => {
-      loadPreview();
-    }, [loadPreview]);
-
-    if (previewStatus.status === AsyncStatus.Error) return null;
+    if (previewStatus === 'error') return null;
 
     const renderContent = (prev: IPreviewUrlResponse) => {
       const thumbUrl = mxcUrlToHttp(
@@ -96,8 +95,8 @@ export const UrlPreviewCard = as<'div', { url: string; ts: number }>(
 
     return (
       <UrlPreview {...props} ref={ref}>
-        {previewStatus.status === AsyncStatus.Success ? (
-          renderContent(previewStatus.data)
+        {previewData ? (
+          renderContent(previewData)
         ) : (
           <Box grow="Yes" alignItems="Center" justifyContent="Center">
             <Spinner variant="Secondary" size="400" />

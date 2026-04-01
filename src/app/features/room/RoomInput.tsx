@@ -121,6 +121,7 @@ import { useRoomCreatorsTag } from '../../hooks/useRoomCreatorsTag';
 import { usePowerLevelTags } from '../../hooks/usePowerLevelTags';
 import { useComposingCheck } from '../../hooks/useComposingCheck';
 import { useSdkMessageListener, SdkMessagePayload } from '../../plugins/useTauriOpener';
+import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 
 interface WorkspaceExplorerMessage {
   type: 'reference-file';
@@ -140,6 +141,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
   ({ editor, fileDropContainerRef, roomId, room }, ref) => {
     const { t } = useTranslation();
     const mx = useMatrixClient();
+    const isOnline = useNetworkStatus();
     const useAuthentication = useMediaAuthentication();
     const [enterForNewline] = useSetting(settingsAtom, 'enterForNewline');
     const [isMarkdown] = useSetting(settingsAtom, 'isMarkdown');
@@ -716,7 +718,14 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                   </PopOut>
                 )}
               </UseStateProvider>
-              <IconButton onClick={submit} variant="SurfaceVariant" size="300" radii="300">
+              <IconButton
+                onClick={submit}
+                variant="SurfaceVariant"
+                size="300"
+                radii="300"
+                disabled={!isOnline}
+                aria-label={isOnline ? undefined : 'Send unavailable while offline'}
+              >
                 <Icon src={Icons.Send} />
               </IconButton>
             </>

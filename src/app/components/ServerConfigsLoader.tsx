@@ -1,6 +1,6 @@
-import { ReactNode, useCallback, useMemo } from 'react';
+import { ReactNode } from 'react';
 import { Capabilities, validateAuthMetadata, ValidatedAuthMetadata } from 'matrix-js-sdk';
-import { AsyncStatus, useAsyncCallbackValue } from '../hooks/useAsyncCallback';
+import { useQuery } from '@tanstack/react-query';
 import { useMatrixClient } from '../hooks/useMatrixClient';
 import { MediaConfig } from '../hooks/useMediaConfig';
 import { promiseFulfilledResult } from '../utils/common';
@@ -11,15 +11,17 @@ export type ServerConfigs = {
   authMetadata?: ValidatedAuthMetadata;
 };
 
+const EMPTY_CONFIGS: ServerConfigs = {};
+
 type ServerConfigsLoaderProps = {
   children: (configs: ServerConfigs) => ReactNode;
 };
 export function ServerConfigsLoader({ children }: ServerConfigsLoaderProps) {
   const mx = useMatrixClient();
-  const fallbackConfigs = useMemo(() => ({}), []);
 
-  const [configsState] = useAsyncCallbackValue<ServerConfigs, unknown>(
-    useCallback(async () => {
+  const { data: configs = EMPTY_CONFIGS } = useQuery({
+    queryKey: ['serverConfigs', mx.getHomeserverUrl()],
+    queryFn: async (): Promise<ServerConfigs> => {
       const result = await Promise.allSettled([
         mx.getCapabilities(),
         mx.getMediaConfig(),
@@ -42,11 +44,10 @@ export function ServerConfigsLoader({ children }: ServerConfigsLoaderProps) {
         mediaConfig,
         authMetadata: validatedAuthMetadata,
       };
-    }, [mx])
-  );
-
-  const configs: ServerConfigs =
-    configsState.status === AsyncStatus.Success ? configsState.data : fallbackConfigs;
+    },
+    staleTime: 24 * 60 * 60 * 1000, // 24 hours
+    gcTime: Infinity,
+  });
 
   return children(configs);
 }

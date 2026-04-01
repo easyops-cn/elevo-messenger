@@ -45,6 +45,11 @@ if (!NO_SERVICE_WORKER && 'serviceWorker' in navigator) {
   });
 }
 
+// Request persistent storage to prevent browser from evicting IndexedDB data
+if (navigator.storage?.persist) {
+  navigator.storage.persist();
+}
+
 const mountApp = () => {
   const rootContainer = document.getElementById('root');
 

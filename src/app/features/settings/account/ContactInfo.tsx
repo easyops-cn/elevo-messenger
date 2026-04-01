@@ -1,26 +1,24 @@
-import React, { useCallback, useEffect } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Text, Chip } from 'folds';
+import { useQuery } from '@tanstack/react-query';
 import { SequenceCard } from '../../../components/sequence-card';
 import { SequenceCardStyle } from '../styles.css';
 import { SettingTile } from '../../../components/setting-tile';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
-import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 
 export function ContactInformation() {
   const { t } = useTranslation();
   const mx = useMatrixClient();
-  const [threePIdsState, loadThreePIds] = useAsyncCallback(
-    useCallback(() => mx.getThreePids(), [mx])
-  );
-  const threePIds =
-    threePIdsState.status === AsyncStatus.Success ? threePIdsState.data.threepids : undefined;
+  const { data } = useQuery({
+    queryKey: ['threePIds'],
+    queryFn: () => mx.getThreePids(),
+    staleTime: Infinity,
+    gcTime: Infinity,
+  });
+  const threePIds = data?.threepids;
 
   const emailIds = threePIds?.filter((id) => id.medium === 'email');
-
-  useEffect(() => {
-    loadThreePIds();
-  }, [loadThreePIds]);
 
   return (
     <Box direction="Column" gap="100">

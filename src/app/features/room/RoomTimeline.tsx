@@ -338,7 +338,9 @@ const useTimelinePagination = (
         })
       );
       if (err) {
-        // TODO: handle pagination error.
+        fetching = false;
+        // When offline or network error, stop silently — cached messages remain visible.
+        // The sync status bar already informs the user about connection state.
         return;
       }
       const fetchedTimeline =

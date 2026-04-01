@@ -2,6 +2,7 @@ import { MatrixClient, SyncState } from 'matrix-js-sdk';
 import React, { useCallback, useState } from 'react';
 import { Box, config, Line, Text } from 'folds';
 import { useSyncState } from '../../hooks/useSyncState';
+import { useNetworkStatus } from '../../hooks/useNetworkStatus';
 import { ContainerColor } from '../../styles/ContainerColor.css';
 
 type StateData = {
@@ -13,6 +14,7 @@ type SyncStatusProps = {
   mx: MatrixClient;
 };
 export function SyncStatus({ mx }: SyncStatusProps) {
+  const isOnline = useNetworkStatus();
   const [stateData, setStateData] = useState<StateData>({
     current: null,
     previous: undefined,
@@ -29,6 +31,22 @@ export function SyncStatus({ mx }: SyncStatusProps) {
       });
     }, [])
   );
+
+  if (!isOnline) {
+    return (
+      <Box direction="Column" shrink="No">
+        <Box
+          className={ContainerColor({ variant: 'Warning' })}
+          style={{ padding: `${config.space.S100} 0` }}
+          alignItems="Center"
+          justifyContent="Center"
+        >
+          <Text size="L400">Offline — Viewing cached data</Text>
+        </Box>
+        <Line variant="Warning" size="300" />
+      </Box>
+    );
+  }
 
   if (
     (stateData.current === SyncState.Prepared ||
