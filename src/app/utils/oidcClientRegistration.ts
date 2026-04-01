@@ -1,4 +1,5 @@
 import { OidcClientConfig, registerOidcClient } from 'matrix-js-sdk/lib/oidc';
+import { DEEP_LINK_SCHEME } from '../plugins/useTauriDeepLink';
 
 const OIDC_CLIENT_ID_KEY_PREFIX = 'elevo_oidc_client_';
 
@@ -23,7 +24,7 @@ export const getOrRegisterOidcClientId = async (
   const cached = localStorage.getItem(storageKey);
   if (cached) return cached;
 
-  const isNative = redirectUri.startsWith('vip.elevo.messenger://');
+  const isNative = redirectUri.startsWith(`${DEEP_LINK_SCHEME}:`);
 
   const clientId = await registerOidcClient(oidcConfig, {
     clientName: 'Elevo Messenger',

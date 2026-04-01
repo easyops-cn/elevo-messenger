@@ -20,7 +20,7 @@ import { getHomePath, getLoginPath, getOidcCallbackPath } from '../../pathUtils'
 import {
   canUseDeepLinkSSO,
   DEEP_LINK_SCHEME,
-  OIDC_CALLBACK_HOST,
+  OIDC_CALLBACK_PATH,
 } from '../../../plugins/useTauriDeepLink';
 import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 
@@ -55,7 +55,7 @@ export function OidcCallback() {
   const [searchParams] = useSearchParams();
   const webCallbackUri = usePathWithOrigin(getOidcCallbackPath());
   const redirectUri = canUseDeepLinkSSO
-    ? `${DEEP_LINK_SCHEME}://${OIDC_CALLBACK_HOST}`
+    ? `${DEEP_LINK_SCHEME}:${OIDC_CALLBACK_PATH}`
     : webCallbackUri;
 
   const code = searchParams.get('code');
