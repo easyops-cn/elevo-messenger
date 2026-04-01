@@ -3,6 +3,8 @@ import { createClient, MatrixClient, IndexedDBStore, IndexedDBCryptoStore } from
 import { cryptoCallbacks } from './secretStorageKeys';
 import { clearNavToActivePathStore } from '../app/state/navToActivePath';
 import { pushSessionToSW } from '../sw-session';
+import { getOidcSession } from '../app/state/sessions';
+import { EleveOidcTokenRefresher } from '../app/oidc/EleveOidcTokenRefresher';
 
 type Session = {
   baseUrl: string;
@@ -20,6 +22,17 @@ export const initClient = async (session: Session): Promise<MatrixClient> => {
 
   const legacyCryptoStore = new IndexedDBCryptoStore(global.indexedDB, 'crypto-store');
 
+  const oidcData = getOidcSession();
+  const tokenRefresher = oidcData
+    ? new EleveOidcTokenRefresher(
+        oidcData.issuer,
+        oidcData.clientId,
+        oidcData.redirectUri,
+        oidcData.deviceId,
+        oidcData.idTokenClaims as any,
+      )
+    : undefined;
+
   const mx = createClient({
     baseUrl: session.baseUrl,
     accessToken: session.accessToken,
@@ -30,6 +43,10 @@ export const initClient = async (session: Session): Promise<MatrixClient> => {
     timelineSupport: true,
     cryptoCallbacks: cryptoCallbacks as any,
     verificationMethods: ['m.sas.v1'],
+    refreshToken: oidcData?.refreshToken,
+    tokenRefreshFunction: tokenRefresher
+      ? tokenRefresher.doRefreshAccessToken.bind(tokenRefresher)
+      : undefined,
   });
 
   await indexedDBStore.startup();

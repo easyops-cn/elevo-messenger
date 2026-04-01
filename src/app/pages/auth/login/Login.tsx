@@ -15,6 +15,8 @@ import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 import { LoginPathSearchParams } from '../../paths';
 import { useClientConfig } from '../../../hooks/useClientConfig';
 import { DEEP_LINK_SCHEME, SSO_CALLBACK_HOST, canUseDeepLinkSSO } from '../../../plugins/useTauriDeepLink';
+import { useOidcIssuer } from '../../../hooks/useOidcIssuer';
+import { OidcLogin } from '../oidc/OidcLogin';
 
 const getLoginTokenSearchParam = () => {
   // when using hasRouter query params in existing route
@@ -49,6 +51,7 @@ export function Login() {
     : webSsoRedirectUrl;
   const loginTokenForHashRouter = getLoginTokenSearchParam();
   const absoluteLoginPath = usePathWithOrigin(getLoginPath(server));
+  const oidcIssuer = useOidcIssuer();
 
   if (hashRouter?.enabled && loginTokenForHashRouter) {
     window.location.replace(
@@ -59,6 +62,24 @@ export function Login() {
   }
 
   const parsedFlows = useParsedLoginFlows(loginFlows.flows);
+
+  // OIDC-first: when the homeserver delegates auth to an OIDC provider,
+  // skip legacy SSO / password flows entirely.
+  if (oidcIssuer) {
+    return (
+      <Box direction="Column" gap="500">
+        <Text size="H2" priority="400">
+          {t('auth.login')}
+        </Text>
+        <OidcLogin issuer={oidcIssuer} />
+        <span data-spacing-node />
+        <Text align="Center">
+          {t('auth.noAccount')}{' '}
+          <Link to={getRegisterPath(server)}>{t('auth.register')}</Link>
+        </Text>
+      </Box>
+    );
+  }
 
   return (
     <Box direction="Column" gap="500">

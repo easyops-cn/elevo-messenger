@@ -10,6 +10,10 @@ export const DEEP_LINK_SCHEME = 'vip.elevo.messenger';
 // Format: vip.elevo.messenger://sso-callback/login/{server}/?loginToken=xxx
 export const SSO_CALLBACK_HOST = 'sso-callback';
 
+// Path prefix used for OIDC authorization code callback deep links.
+// Format: vip.elevo.messenger://oidc-callback?code=xxx&state=xxx
+export const OIDC_CALLBACK_HOST = 'oidc-callback';
+
 // On macOS, custom URL schemes only work for installed .app bundles, not during
 // `tauri dev`. Detect macOS + dev mode and fall back to the web-based SSO flow.
 const isMacOS =
@@ -77,6 +81,22 @@ function handleDeepLink(rawUrl: string, navigate: ReturnType<typeof useNavigate>
     }
     const routePath = `${parsed.pathname}?loginToken=${encodeURIComponent(loginToken)}`;
     navigate(routePath, { replace: true });
+    return;
+  }
+
+  if (parsed.hostname === OIDC_CALLBACK_HOST) {
+    // vip.elevo.messenger://oidc-callback?code=xxx&state=xxx
+    const code = parsed.searchParams.get('code');
+    const state = parsed.searchParams.get('state');
+    if (!code || !state) {
+      // eslint-disable-next-line no-console
+      console.warn('[useTauriDeepLink] OIDC callback URL missing code or state:', rawUrl);
+      return;
+    }
+    navigate(
+      `/oidc-callback/?code=${encodeURIComponent(code)}&state=${encodeURIComponent(state)}`,
+      { replace: true }
+    );
     return;
   }
 

@@ -11,6 +11,7 @@ import { useTauriDeepLink } from '../plugins/useTauriDeepLink';
 
 import { ClientConfig } from '../hooks/useClientConfig';
 import { AuthLayout, Login, Register, ResetPassword } from './auth';
+import { OidcCallback } from './auth/oidc/OidcCallback';
 import {
   DIRECT_PATH,
   EXPLORE_PATH,
@@ -20,6 +21,7 @@ import {
   REGISTER_PATH,
   RESET_PASSWORD_PATH,
   SPACE_PATH,
+  OIDC_CALLBACK_PATH,
   _CREATE_PATH,
   _FEATURED_PATH,
   _INVITES_PATH,
@@ -115,6 +117,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
         <Route path={LOGIN_PATH} element={<Login />} />
         <Route path={REGISTER_PATH} element={<Register />} />
         <Route path={RESET_PASSWORD_PATH} element={<ResetPassword />} />
+        <Route path={OIDC_CALLBACK_PATH} element={<OidcCallback />} />
       </Route>
 
       <Route

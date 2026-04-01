@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Header, Scroll, Spinner, Text, color } from 'folds';
 import {
@@ -10,6 +10,7 @@ import {
   useParams,
 } from 'react-router-dom';
 import classNames from 'classnames';
+import { createClient } from 'matrix-js-sdk';
 
 import { AuthFooter } from './AuthFooter';
 import * as css from './styles.css';
@@ -31,6 +32,7 @@ import { AuthFlowsLoader } from '../../components/AuthFlowsLoader';
 import { AuthFlowsProvider } from '../../hooks/useAuthFlows';
 import { AuthServerProvider } from '../../hooks/useAuthServer';
 import { tryDecodeURIComponent } from '../../utils/dom';
+import { OidcIssuerProvider } from '../../hooks/useOidcIssuer';
 
 const currentAuthPath = (pathname: string): string => {
   if (matchPath(LOGIN_PATH, pathname)) {
@@ -64,6 +66,32 @@ function AuthLayoutError({ message }: { message: string }) {
       </Text>
     </Box>
   );
+}
+
+/**
+ * Fetches OIDC metadata from the homeserver via MatrixClient#getAuthMetadata()
+ * (supports both /auth_metadata and the legacy /auth_issuer + well-known fallback)
+ * and provides the issuer URL via OidcIssuerProvider.
+ * Resolves to undefined when the server does not support delegated OIDC auth.
+ */
+function OidcMetadataLoader({ baseUrl, children }: { baseUrl: string; children: ReactNode }) {
+  const [issuer, setIssuer] = useState<string | undefined>(undefined);
+
+  useEffect(() => {
+    if (window.location.protocol === 'http:') {
+      // OIDC does not work on non-secure origins.
+      setIssuer(undefined);
+      return;
+    }
+
+    const client = createClient({ baseUrl });
+    client
+      .getAuthMetadata()
+      .then((config) => setIssuer(config.issuer))
+      .catch(() => setIssuer(undefined));
+  }, [baseUrl]);
+
+  return <OidcIssuerProvider value={issuer}>{children}</OidcIssuerProvider>;
 }
 
 export function AuthLayout() {
@@ -192,7 +220,11 @@ export function AuthLayout() {
                         >
                           {(authFlows) => (
                             <AuthFlowsProvider value={authFlows}>
-                              <Outlet />
+                              <OidcMetadataLoader
+                                baseUrl={autoDiscoveryInfo['m.homeserver'].base_url}
+                              >
+                                <Outlet />
+                              </OidcMetadataLoader>
                             </AuthFlowsProvider>
                           )}
                         </AuthFlowsLoader>

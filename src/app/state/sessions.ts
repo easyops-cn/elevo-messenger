@@ -70,6 +70,44 @@ export const getFallbackSession = (): Session | undefined => {
  * End of migration code for old session
  */
 
+// ── OIDC session data ────────────────────────────────────────────────────────
+
+const OIDC_SESSION_KEY = 'elevo_oidc_session';
+
+export type OidcSessionData = {
+  issuer: string;
+  clientId: string;
+  redirectUri: string;
+  deviceId: string;
+  refreshToken: string;
+  idTokenClaims: Record<string, unknown>;
+};
+
+export const setOidcSession = (
+  accessToken: string,
+  deviceId: string,
+  userId: string,
+  baseUrl: string,
+  oidcData: OidcSessionData
+): void => {
+  setFallbackSession(accessToken, deviceId, userId, baseUrl);
+  localStorage.setItem(OIDC_SESSION_KEY, JSON.stringify(oidcData));
+};
+
+export const getOidcSession = (): OidcSessionData | null => {
+  const raw = localStorage.getItem(OIDC_SESSION_KEY);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw) as OidcSessionData;
+  } catch {
+    return null;
+  }
+};
+
+export const clearOidcSession = (): void => {
+  localStorage.removeItem(OIDC_SESSION_KEY);
+};
+
 // export const getSessionStoreName = (session: Session): SessionStoreName => {
 //   if (session.fallbackSdkStores) {
 //     return FALLBACK_STORE_NAME;

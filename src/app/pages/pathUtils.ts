@@ -26,6 +26,7 @@ import {
   CONTACTS_PATH,
   CONTACTS_CONTACTS_PATH,
   CONTACTS_ROLE_PATH,
+  OIDC_CALLBACK_PATH,
 } from './paths';
 import { trimLeadingSlash, trimTrailingSlash } from '../utils/common';
 import { HashRouterConfig } from '../hooks/useClientConfig';
@@ -166,3 +167,5 @@ export const getContactsPath = (): string => CONTACTS_PATH;
 export const getContactsContactsPath = (): string => CONTACTS_CONTACTS_PATH;
 export const getContactsRolePath = (roleName: string): string =>
   CONTACTS_ROLE_PATH.replace(':roleName', encodeURIComponent(roleName));
+
+export const getOidcCallbackPath = (): string => OIDC_CALLBACK_PATH;

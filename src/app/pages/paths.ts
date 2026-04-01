@@ -1,5 +1,7 @@
 export const ROOT_PATH = '/';
 
+export const OIDC_CALLBACK_PATH = '/oidc-callback/';
+
 export type LoginPathSearchParams = {
   username?: string;
   email?: string;
