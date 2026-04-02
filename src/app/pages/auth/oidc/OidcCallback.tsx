@@ -17,11 +17,6 @@ import { createClient } from 'matrix-js-sdk';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import { setOidcSession, OidcSessionData } from '../../../state/sessions';
 import { getHomePath, getLoginPath, getOidcCallbackPath } from '../../pathUtils';
-import {
-  canUseDeepLinkSSO,
-  DEEP_LINK_SCHEME,
-  OIDC_CALLBACK_PATH,
-} from '../../../plugins/useTauriDeepLink';
 import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 
 function OidcCallbackError({ message }: { message: string }) {
@@ -54,9 +49,7 @@ export function OidcCallback() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const webCallbackUri = usePathWithOrigin(getOidcCallbackPath());
-  const redirectUri = canUseDeepLinkSSO
-    ? `${DEEP_LINK_SCHEME}:${OIDC_CALLBACK_PATH}`
-    : webCallbackUri;
+  const redirectUri = webCallbackUri;
 
   const code = searchParams.get('code');
   const state = searchParams.get('state');

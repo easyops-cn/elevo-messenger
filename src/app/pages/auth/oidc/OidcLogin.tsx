@@ -8,12 +8,6 @@ import { useAutoDiscoveryInfo } from '../../../hooks/useAutoDiscoveryInfo';
 import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 import { getOidcCallbackPath } from '../../pathUtils';
 import { getOrRegisterOidcClientId } from '../../../utils/oidcClientRegistration';
-import {
-  canUseDeepLinkSSO,
-  DEEP_LINK_SCHEME,
-  OIDC_CALLBACK_PATH,
-} from '../../../plugins/useTauriDeepLink';
-import { openExternalUrlInSystemBrowser } from '../../../plugins/useTauriOpener';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 
 type OidcLoginProps = {
@@ -25,10 +19,7 @@ export function OidcLogin({ issuer }: OidcLoginProps) {
   const discovery = useAutoDiscoveryInfo();
   const baseUrl = discovery['m.homeserver'].base_url;
 
-  const webCallbackPath = usePathWithOrigin(getOidcCallbackPath());
-  const desktopCallbackUri = `${DEEP_LINK_SCHEME}:${OIDC_CALLBACK_PATH}`;
-
-  const redirectUri = canUseDeepLinkSSO ? desktopCallbackUri : webCallbackPath;
+  const redirectUri = usePathWithOrigin(getOidcCallbackPath());
 
   const [loginState, startOidcLogin] = useAsyncCallback(
     useCallback(async () => {
@@ -44,11 +35,7 @@ export function OidcLogin({ issuer }: OidcLoginProps) {
         nonce,
       });
 
-      if (canUseDeepLinkSSO) {
-        openExternalUrlInSystemBrowser(authUrl);
-      } else {
-        window.location.href = authUrl;
-      }
+      window.location.href = authUrl;
     }, [issuer, redirectUri, baseUrl])
   );
 

@@ -14,7 +14,6 @@ import { getLoginPath, getRegisterPath, withSearchParam } from '../../pathUtils'
 import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 import { LoginPathSearchParams } from '../../paths';
 import { useClientConfig } from '../../../hooks/useClientConfig';
-import { DEEP_LINK_SCHEME, SSO_CALLBACK_PATH, canUseDeepLinkSSO } from '../../../plugins/useTauriDeepLink';
 import { useOidcIssuer } from '../../../hooks/useOidcIssuer';
 import { OidcLogin } from '../oidc/OidcLogin';
 
@@ -46,9 +45,7 @@ export function Login() {
   const [searchParams] = useSearchParams();
   const loginSearchParams = useLoginSearchParams(searchParams);
   const webSsoRedirectUrl = usePathWithOrigin(getLoginPath(server));
-  const ssoRedirectUrl = canUseDeepLinkSSO
-    ? `${DEEP_LINK_SCHEME}:${SSO_CALLBACK_PATH}${getLoginPath(server)}`
-    : webSsoRedirectUrl;
+  const ssoRedirectUrl = webSsoRedirectUrl;
   const loginTokenForHashRouter = getLoginTokenSearchParam();
   const absoluteLoginPath = usePathWithOrigin(getLoginPath(server));
   const oidcIssuer = useOidcIssuer();

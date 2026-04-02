@@ -78,11 +78,11 @@ function OidcMetadataLoader({ baseUrl, children }: { baseUrl: string; children: 
   const [issuer, setIssuer] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (window.location.protocol === 'http:') {
-      // OIDC does not work on non-secure origins.
-      setIssuer(undefined);
-      return;
-    }
+    // if (window.location.protocol === 'http:') {
+    //   // OIDC does not work on non-secure origins.
+    //   setIssuer(undefined);
+    //   return;
+    // }
 
     const client = createClient({ baseUrl });
     client
