@@ -79,6 +79,7 @@
     "poweredByMatrix": "由 Matrix 提供支持",
     "continueWith": "使用 {{name}} 继续",
     "continueWithSSO": "使用 SSO 继续",
+    "connectingToProvider": "正在连接认证服务",
     "or": "或",
     "resetPassword": "重置密码",
     "rememberPassword": "记得密码？",
@@ -491,7 +492,6 @@
     "aboutPage": {
       "tagline": "又一个 Matrix 客户端。",
       "sourceCode": "源代码",
-      "support": "支持",
       "clearCache": "清除缓存并重新加载",
       "clearCacheDesc": "清除所有本地存储的数据并从服务器重新加载。",
       "clearCacheBtn": "清除缓存",
@@ -607,8 +607,7 @@
   "welcome": {
     "title": "欢迎使用 Elevo Messenger",
     "subtitle": "又一个 Matrix 客户端",
-    "sourceCode": "源代码",
-    "support": "支持"
+    "sourceCode": "源代码"
   },
   "explore": {
     "title": "探索社区",

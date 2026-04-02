@@ -48,7 +48,7 @@ export function About({ requestClose }: AboutProps) {
                   <Box direction="Column" gap="100">
                     <Box gap="100" alignItems="End">
                       <Text size="H3">Elevo Messenger</Text>
-                      <Text size="T200">v4.11.1</Text>
+                      <Text size="T200">v1.0.0</Text>
                     </Box>
                     <Text>{t('settings.aboutPage.tagline')}</Text>
                   </Box>
@@ -56,7 +56,7 @@ export function About({ requestClose }: AboutProps) {
                   <Box gap="200" wrap="Wrap">
                     <Button
                       as="a"
-                      href="https://github.com/cinnyapp/cinny"
+                      href="https://github.com/easyops-cn/elevo-desktop"
                       rel="noreferrer noopener"
                       target="_blank"
                       variant="Secondary"
@@ -66,19 +66,6 @@ export function About({ requestClose }: AboutProps) {
                       before={<Icon src={Icons.Code} size="100" filled />}
                     >
                       <Text size="B300">{t('settings.aboutPage.sourceCode')}</Text>
-                    </Button>
-                    <Button
-                      as="a"
-                      href="https://cinny.in/#sponsor"
-                      rel="noreferrer noopener"
-                      target="_blank"
-                      variant="Critical"
-                      fill="Soft"
-                      size="300"
-                      radii="300"
-                      before={<Icon src={Icons.Heart} size="100" filled />}
-                    >
-                      <Text size="B300">{t('settings.aboutPage.support')}</Text>
                     </Button>
                   </Box>
                 </Box>
@@ -126,6 +113,27 @@ export function About({ requestClose }: AboutProps) {
                       paddingLeft: config.space.S400,
                     }}
                   >
+                    <li>
+                      <Text size="T300">
+                        This project is forked from{' '}
+                        <a
+                          href="https://github.com/cinnyapp/cinny"
+                          rel="noreferrer noopener"
+                          target="_blank"
+                        >
+                          cinnyapp/cinny
+                        </a>{' '}
+                        which is licensed under{' '}
+                        <a
+                          href="https://github.com/cinnyapp/cinny/blob/dev/LICENSE"
+                          rel="noreferrer noopener"
+                          target="_blank"
+                        >
+                          AGPL-3.0
+                        </a>
+                        .
+                      </Text>
+                    </li>
                     <li>
                       <Text size="T300">
                         The{' '}

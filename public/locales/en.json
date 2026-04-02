@@ -79,6 +79,7 @@
     "poweredByMatrix": "Powered by Matrix",
     "continueWith": "Continue with {{name}}",
     "continueWithSSO": "Continue with SSO",
+    "connectingToProvider": "Connecting to provider",
     "or": "Or",
     "resetPassword": "Reset Password",
     "rememberPassword": "Remember your password?",
@@ -491,7 +492,6 @@
     "aboutPage": {
       "tagline": "Yet another matrix client.",
       "sourceCode": "Source Code",
-      "support": "Support",
       "clearCache": "Clear Cache & Reload",
       "clearCacheDesc": "Clear all your locally stored data and reload from server.",
       "clearCacheBtn": "Clear Cache",
@@ -607,8 +607,7 @@
   "welcome": {
     "title": "Welcome to Elevo Messenger",
     "subtitle": "Yet another matrix client",
-    "sourceCode": "Source Code",
-    "support": "Support"
+    "sourceCode": "Source Code"
   },
   "explore": {
     "title": "Explore Community",

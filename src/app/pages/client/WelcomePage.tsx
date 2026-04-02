@@ -22,11 +22,11 @@ export function WelcomePage() {
               <span>
                 {t('welcome.subtitle')}{' '}
                 <a
-                  href="https://github.com/cinnyapp/cinny/releases"
+                  href="https://github.com/easyops-cn/elevo-desktop/releases"
                   target="_blank"
                   rel="noreferrer noopener"
                 >
-                  v4.11.1
+                  v1.0.0
                 </a>
               </span>
             }
@@ -35,25 +35,13 @@ export function WelcomePage() {
               <Box grow="Yes" style={{ maxWidth: toRem(300) }} direction="Column" gap="300">
                 <Button
                   as="a"
-                  href="https://github.com/cinnyapp/cinny"
+                  href="https://github.com/easyops-cn/elevo-desktop"
                   target="_blank"
                   rel="noreferrer noopener"
                   before={<Icon size="200" src={Icons.Code} />}
                 >
                   <Text as="span" size="B400" truncate>
                     {t('welcome.sourceCode')}
-                  </Text>
-                </Button>
-                <Button
-                  as="a"
-                  href="https://cinny.in/#sponsor"
-                  target="_blank"
-                  rel="noreferrer noopener"
-                  fill="Soft"
-                  before={<Icon size="200" src={Icons.Heart} />}
-                >
-                  <Text as="span" size="B400" truncate>
-                    {t('welcome.support')}
                   </Text>
                 </Button>
               </Box>

@@ -1,10 +1,10 @@
 # Elevo Messenger
 
 A Matrix client focusing primarily on simple, elegant and secure interface. The main goal is to have an instant messaging application that is easy on people and has a modern touch.
-- [Roadmap](https://github.com/orgs/cinnyapp/projects/1)
+
 - [Contributing](./CONTRIBUTING.md)
 
-<img align="center" src="https://raw.githubusercontent.com/cinnyapp/cinny-site/main/assets/preview2-light.png" height="380">
+<!-- <img align="center" height="380"> -->
 
 ## Getting started
 The web app is available at [elevo-messenger.netlify.app](https://elevo-messenger.netlify.app/) and gets updated on each new release. The `main` branch is continuously deployed at [devserver-main--elevo-messenger.netlify.app](https://devserver-main--elevo-messenger.netlify.app) but keep in mind that it could have things broken.
