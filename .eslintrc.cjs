@@ -21,7 +21,8 @@ module.exports = {
     sourceType: 'module',
   },
   "globals": {
-    JSX: "readonly"
+    JSX: "readonly",
+    __APP_VERSION__: "readonly"
   },
   plugins: [
     'react',

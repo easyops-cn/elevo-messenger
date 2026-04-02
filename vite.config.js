@@ -11,6 +11,8 @@ import fs from 'fs';
 import path from 'path';
 import buildConfig from './build.config';
 
+const pkg = JSON.parse(fs.readFileSync(path.resolve('package.json'), 'utf-8'));
+
 const copyFiles = {
   targets: [
     {
@@ -80,6 +82,9 @@ export default defineConfig({
   appType: 'spa',
   publicDir: false,
   base: buildConfig.base,
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   server: {
     port: 8080,
     host: true,
