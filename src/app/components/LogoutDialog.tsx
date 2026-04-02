@@ -5,6 +5,7 @@ import { AsyncStatus, useAsyncCallback } from '../hooks/useAsyncCallback';
 import { logoutClient } from '../../client/initMatrix';
 import { useMatrixClient } from '../hooks/useMatrixClient';
 import { useCrossSigningActive } from '../hooks/useCrossSigning';
+import { useAuthMetadata } from '../hooks/useAuthMetadata';
 import { InfoCard } from './info-card';
 import {
   useDeviceVerificationStatus,
@@ -18,6 +19,7 @@ export const LogoutDialog = forwardRef<HTMLDivElement, LogoutDialogProps>(
   ({ handleClose }, ref) => {
     const { t } = useTranslation();
     const mx = useMatrixClient();
+    const authMetadata = useAuthMetadata();
     const hasEncryptedRoom = !!mx.getRooms().find((room) => room.hasEncryptionStateEvent());
     const crossSigningActive = useCrossSigningActive();
     const verificationStatus = useDeviceVerificationStatus(
@@ -28,8 +30,8 @@ export const LogoutDialog = forwardRef<HTMLDivElement, LogoutDialogProps>(
 
     const [logoutState, logout] = useAsyncCallback<void, Error, []>(
       useCallback(async () => {
-        await logoutClient(mx);
-      }, [mx])
+        await logoutClient(mx, authMetadata?.revocation_endpoint);
+      }, [mx, authMetadata?.revocation_endpoint])
     );
 
     const ongoingLogout = logoutState.status === AsyncStatus.Loading;

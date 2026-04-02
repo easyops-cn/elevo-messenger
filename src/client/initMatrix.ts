@@ -3,7 +3,7 @@ import { createClient, MatrixClient, IndexedDBStore, IndexedDBCryptoStore } from
 import { cryptoCallbacks } from './secretStorageKeys';
 import { clearNavToActivePathStore } from '../app/state/navToActivePath';
 import { pushSessionToSW } from '../sw-session';
-import { getOidcSession } from '../app/state/sessions';
+import { getOidcSession, clearOidcSession, OidcSessionData } from '../app/state/sessions';
 import { ElevoOidcTokenRefresher } from '../app/oidc/ElevoOidcTokenRefresher';
 
 type Session = {
@@ -70,15 +70,51 @@ export const clearCacheAndReload = async (mx: MatrixClient) => {
   window.location.reload();
 };
 
-export const logoutClient = async (mx: MatrixClient) => {
+/**
+ * Revoke the OIDC refresh token at the issuer's revocation endpoint.
+ * This tells the MAS/OIDC provider to destroy the server-side session.
+ */
+const revokeOidcRefreshToken = async (
+  oidcData: OidcSessionData,
+  revocationEndpoint: string
+): Promise<void> => {
+  try {
+    const params = new URLSearchParams();
+    params.set('token', oidcData.refreshToken);
+    params.set('token_type_hint', 'refresh_token');
+    params.set('client_id', oidcData.clientId);
+
+    await fetch(revocationEndpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString(),
+    });
+  } catch {
+    // Best-effort: do not block logout if revocation fails
+  }
+};
+
+export const logoutClient = async (
+  mx: MatrixClient,
+  revocationEndpoint?: string
+) => {
   pushSessionToSW();
   mx.stopClient();
+
+  // Revoke OIDC refresh token before calling Matrix logout,
+  // so the access token is still valid for the revocation request.
+  const oidcData = getOidcSession();
+  if (oidcData?.refreshToken && revocationEndpoint) {
+    await revokeOidcRefreshToken(oidcData, revocationEndpoint);
+  }
+
   try {
     await mx.logout();
   } catch {
     // ignore if failed to logout
   }
   await mx.clearStores();
+  clearOidcSession();
   window.localStorage.clear();
   window.location.reload();
 };
