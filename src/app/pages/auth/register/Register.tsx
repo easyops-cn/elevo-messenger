@@ -13,6 +13,9 @@ import { SupportedUIAFlowsLoader } from '../../../components/SupportedUIAFlowsLo
 import { getLoginPath } from '../../pathUtils';
 import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 import { RegisterPathSearchParams } from '../../paths';
+import { useClientConfig, getOidcStaticClientId } from '../../../hooks/useClientConfig';
+import { useOidcIssuer } from '../../../hooks/useOidcIssuer';
+import { OidcLogin } from '../oidc/OidcLogin';
 
 const useRegisterSearchParams = (searchParams: URLSearchParams): RegisterPathSearchParams =>
   useMemo(
@@ -31,27 +34,45 @@ export function Register() {
   const [searchParams] = useSearchParams();
   const registerSearchParams = useRegisterSearchParams(searchParams);
   const { sso } = useParsedLoginFlows(loginFlows.flows);
+  const clientConfig = useClientConfig();
+  const oidcIssuer = useOidcIssuer();
+  const oidcClientId = oidcIssuer ? getOidcStaticClientId(clientConfig, server) : undefined;
+  const hasSsoOrOidc = !!sso || !!oidcClientId;
 
   // redirect to /login because only that path handle m.login.token
   const webSsoRedirectUrl = usePathWithOrigin(getLoginPath(server));
   const ssoRedirectUrl = webSsoRedirectUrl;
+
+  let ssoLoginElement: React.ReactNode = null;
+  if (oidcClientId) {
+    ssoLoginElement = <OidcLogin clientId={oidcClientId} />;
+  } else if (sso) {
+    ssoLoginElement = (
+      <SSOLogin
+        providers={sso.identity_providers}
+        redirectUrl={ssoRedirectUrl}
+        action={SSOAction.REGISTER}
+        saveScreenSpace={registerFlows.status === RegisterFlowStatus.FlowRequired}
+      />
+    );
+  }
 
   return (
     <Box direction="Column" gap="500">
       <Text size="H2" priority="400">
         {t('auth.register')}
       </Text>
-      {registerFlows.status === RegisterFlowStatus.RegistrationDisabled && !sso && (
+      {registerFlows.status === RegisterFlowStatus.RegistrationDisabled && !hasSsoOrOidc && (
         <Text style={{ color: color.Critical.Main }} size="T300">
           {t('auth.errors.registrationDisabled')}
         </Text>
       )}
-      {registerFlows.status === RegisterFlowStatus.RateLimited && !sso && (
+      {registerFlows.status === RegisterFlowStatus.RateLimited && !hasSsoOrOidc && (
         <Text style={{ color: color.Critical.Main }} size="T300">
           {t('auth.errors.registrationRateLimited')}
         </Text>
       )}
-      {registerFlows.status === RegisterFlowStatus.InvalidRequest && !sso && (
+      {registerFlows.status === RegisterFlowStatus.InvalidRequest && !hasSsoOrOidc && (
         <Text style={{ color: color.Critical.Main }} size="T300">
           {t('auth.errors.registrationInvalidRequest')}
         </Text>
@@ -79,17 +100,12 @@ export function Register() {
             }
           </SupportedUIAFlowsLoader>
           <span data-spacing-node />
-          {sso && <OrDivider />}
+          {hasSsoOrOidc && <OrDivider />}
         </>
       )}
-      {sso && (
+      {ssoLoginElement && (
         <>
-          <SSOLogin
-            providers={sso.identity_providers}
-            redirectUrl={ssoRedirectUrl}
-            action={SSOAction.REGISTER}
-            saveScreenSpace={registerFlows.status === RegisterFlowStatus.FlowRequired}
-          />
+          {ssoLoginElement}
           <span data-spacing-node />
         </>
       )}

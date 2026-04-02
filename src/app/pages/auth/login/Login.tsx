@@ -60,26 +60,21 @@ export function Login() {
 
   const parsedFlows = useParsedLoginFlows(loginFlows.flows);
 
-  // OIDC-first: when the homeserver delegates auth to an OIDC provider
-  // and a static client_id is configured in config.json,
-  // skip legacy SSO / password flows entirely.
-  if (oidcIssuer) {
-    const clientId = getOidcStaticClientId(clientConfig, server);
-    if (clientId) {
-      return (
-        <Box direction="Column" gap="500">
-          <Text size="H2" priority="400">
-            {t('auth.login')}
-          </Text>
-          <OidcLogin clientId={clientId} />
-          <span data-spacing-node />
-          <Text align="Center">
-            {t('auth.noAccount')}{' '}
-            <Link to={getRegisterPath(server)}>{t('auth.register')}</Link>
-          </Text>
-        </Box>
-      );
-    }
+  const oidcClientId = oidcIssuer ? getOidcStaticClientId(clientConfig, server) : undefined;
+
+  const hasSsoOrOidc = !!parsedFlows.sso || !!oidcClientId;
+  let ssoLoginElement: React.ReactNode = null;
+  if (oidcClientId) {
+    ssoLoginElement = <OidcLogin clientId={oidcClientId} />;
+  } else if (parsedFlows.sso) {
+    ssoLoginElement = (
+      <SSOLogin
+        providers={parsedFlows.sso.identity_providers}
+        redirectUrl={ssoRedirectUrl}
+        action={SSOAction.LOGIN}
+        saveScreenSpace={parsedFlows.password !== undefined}
+      />
+    );
   }
 
   return (
@@ -90,28 +85,18 @@ export function Login() {
       {parsedFlows.token && loginSearchParams.loginToken && (
         <TokenLogin token={loginSearchParams.loginToken} />
       )}
-      {!parsedFlows.sso && parsedFlows.password && (
+      {!hasSsoOrOidc && parsedFlows.password && (
         <>
           <PasswordLoginForm
             defaultUsername={loginSearchParams.username}
             defaultEmail={loginSearchParams.email}
           />
           <span data-spacing-node />
-          {parsedFlows.sso && <OrDivider />}
         </>
       )}
-      {parsedFlows.sso && (
-        <>
-          <SSOLogin
-            providers={parsedFlows.sso.identity_providers}
-            redirectUrl={ssoRedirectUrl}
-            action={SSOAction.LOGIN}
-            saveScreenSpace={parsedFlows.password !== undefined}
-          />
-          <span data-spacing-node />
-        </>
-      )}
-      {!parsedFlows.password && !parsedFlows.sso && (
+      {ssoLoginElement}
+      {hasSsoOrOidc && <span data-spacing-node />}
+      {!parsedFlows.password && !hasSsoOrOidc && (
         <>
           <Text style={{ color: color.Critical.Main }}>
             {t('auth.errors.loginNotSupported', { server })}
