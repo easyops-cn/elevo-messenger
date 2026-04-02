@@ -185,7 +185,7 @@ export function AuthLayout() {
               <Text size="H3">{t('auth.elevo')}</Text>
             </Box>
           </Header>
-          <Box className={css.AuthCardContent} direction="Column">
+          <Box className={css.AuthCardContent} direction="Column" justifyContent="Start">
             <Box direction="Column" gap="100">
               <Text as="label" size="L400" priority="300">
                 {t('auth.homeserver')}
