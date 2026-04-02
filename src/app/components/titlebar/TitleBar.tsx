@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import * as css from './TitleBar.css';
-
-const isMacOS = /Mac|darwin/i.test(navigator.platform);
+import { isMacOS } from '../../utils/user-agent';
 
 function MinimizeIcon() {
   return (
@@ -111,7 +110,7 @@ function WindowControls() {
 
 export function TitleBar() {
   const handleDoubleClick = useCallback(() => {
-    if (!isMacOS) {
+    if (!isMacOS()) {
       getAppWindow().then((w) => w.toggleMaximize());
     }
   }, []);
@@ -124,9 +123,9 @@ export function TitleBar() {
       data-tauri-drag-region
       onDoubleClick={handleDoubleClick}
     >
-      {isMacOS && <div className={css.TrafficLightSpacer} />}
+      {isMacOS() && <div className={css.TrafficLightSpacer} />}
       <span className={css.TitleText}>Elevo Messenger</span>
-      {!isMacOS && <WindowControls />}
+      {!isMacOS() && <WindowControls />}
     </div>
   );
 }
