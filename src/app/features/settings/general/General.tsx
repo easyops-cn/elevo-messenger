@@ -288,20 +288,22 @@ function PageZoomInput() {
   };
 
   return (
-    <Input
-      style={{ width: toRem(100) }}
-      variant={pageZoom === parseInt(currentZoom, 10) ? 'Secondary' : 'Success'}
-      size="300"
-      radii="300"
-      type="number"
-      min="75"
-      max="150"
-      value={currentZoom}
-      onChange={handleZoomChange}
-      onKeyDown={handleZoomEnter}
-      after={<Text size="T300">%</Text>}
-      outlined
-    />
+    <Box gap="100" alignItems="Center">
+      <Input
+        style={{ width: toRem(100) }}
+        variant={pageZoom === parseInt(currentZoom, 10) ? 'Secondary' : 'Success'}
+        size="300"
+        radii="300"
+        type="number"
+        min="75"
+        max="150"
+        value={currentZoom}
+        onChange={handleZoomChange}
+        onKeyDown={handleZoomEnter}
+        outlined
+      />
+      <Text size="T300">%</Text>
+    </Box>
   );
 }
 
