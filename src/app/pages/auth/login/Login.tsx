@@ -13,7 +13,7 @@ import { OrDivider } from '../OrDivider';
 import { getLoginPath, getRegisterPath, withSearchParam } from '../../pathUtils';
 import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 import { LoginPathSearchParams } from '../../paths';
-import { useClientConfig } from '../../../hooks/useClientConfig';
+import { useClientConfig, getOidcStaticClientId } from '../../../hooks/useClientConfig';
 import { useOidcIssuer } from '../../../hooks/useOidcIssuer';
 import { OidcLogin } from '../oidc/OidcLogin';
 
@@ -40,7 +40,7 @@ const useLoginSearchParams = (searchParams: URLSearchParams): LoginPathSearchPar
 export function Login() {
   const { t } = useTranslation();
   const server = useAuthServer();
-  const { hashRouter } = useClientConfig();
+  const { hashRouter, ...clientConfig } = useClientConfig();
   const { loginFlows } = useAuthFlows();
   const [searchParams] = useSearchParams();
   const loginSearchParams = useLoginSearchParams(searchParams);
@@ -60,22 +60,26 @@ export function Login() {
 
   const parsedFlows = useParsedLoginFlows(loginFlows.flows);
 
-  // OIDC-first: when the homeserver delegates auth to an OIDC provider,
+  // OIDC-first: when the homeserver delegates auth to an OIDC provider
+  // and a static client_id is configured in config.json,
   // skip legacy SSO / password flows entirely.
   if (oidcIssuer) {
-    return (
-      <Box direction="Column" gap="500">
-        <Text size="H2" priority="400">
-          {t('auth.login')}
-        </Text>
-        <OidcLogin issuer={oidcIssuer} />
-        <span data-spacing-node />
-        <Text align="Center">
-          {t('auth.noAccount')}{' '}
-          <Link to={getRegisterPath(server)}>{t('auth.register')}</Link>
-        </Text>
-      </Box>
-    );
+    const clientId = getOidcStaticClientId(clientConfig, server);
+    if (clientId) {
+      return (
+        <Box direction="Column" gap="500">
+          <Text size="H2" priority="400">
+            {t('auth.login')}
+          </Text>
+          <OidcLogin clientId={clientId} />
+          <span data-spacing-node />
+          <Text align="Center">
+            {t('auth.noAccount')}{' '}
+            <Link to={getRegisterPath(server)}>{t('auth.register')}</Link>
+          </Text>
+        </Box>
+      );
+    }
   }
 
   return (
@@ -86,7 +90,7 @@ export function Login() {
       {parsedFlows.token && loginSearchParams.loginToken && (
         <TokenLogin token={loginSearchParams.loginToken} />
       )}
-      {parsedFlows.password && (
+      {!parsedFlows.sso && parsedFlows.password && (
         <>
           <PasswordLoginForm
             defaultUsername={loginSearchParams.username}

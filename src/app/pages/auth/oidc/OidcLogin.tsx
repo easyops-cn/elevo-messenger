@@ -7,14 +7,13 @@ import { createClient } from 'matrix-js-sdk';
 import { useAutoDiscoveryInfo } from '../../../hooks/useAutoDiscoveryInfo';
 import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 import { getOidcCallbackPath } from '../../pathUtils';
-import { getOrRegisterOidcClientId } from '../../../utils/oidcClientRegistration';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 
 type OidcLoginProps = {
-  issuer: string;
+  clientId: string;
 };
 
-export function OidcLogin({ issuer }: OidcLoginProps) {
+export function OidcLogin({ clientId }: OidcLoginProps) {
   const { t } = useTranslation();
   const discovery = useAutoDiscoveryInfo();
   const baseUrl = discovery['m.homeserver'].base_url;
@@ -25,7 +24,6 @@ export function OidcLogin({ issuer }: OidcLoginProps) {
     useCallback(async () => {
       const tempClient = createClient({ baseUrl });
       const oidcConfig = await tempClient.getAuthMetadata();
-      const clientId = await getOrRegisterOidcClientId(issuer, oidcConfig, redirectUri);
       const nonce = secureRandomString(8);
       const authUrl = await generateOidcAuthorizationUrl({
         metadata: oidcConfig,
@@ -36,7 +34,7 @@ export function OidcLogin({ issuer }: OidcLoginProps) {
       });
 
       window.location.href = authUrl;
-    }, [issuer, redirectUri, baseUrl])
+    }, [clientId, redirectUri, baseUrl])
   );
 
   const isLoading = loginState.status === AsyncStatus.Loading;

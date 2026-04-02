@@ -18,6 +18,7 @@ import * as PatternsCss from '../../styles/Patterns.css';
 import {
   clientAllowedServer,
   clientDefaultServer,
+  getOidcStaticClientId,
   useClientConfig,
 } from '../../hooks/useClientConfig';
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
@@ -74,22 +75,33 @@ function AuthLayoutError({ message }: { message: string }) {
  * and provides the issuer URL via OidcIssuerProvider.
  * Resolves to undefined when the server does not support delegated OIDC auth.
  */
-function OidcMetadataLoader({ baseUrl, children }: { baseUrl: string; children: ReactNode }) {
+function OidcMetadataLoader({
+  baseUrl,
+  server,
+  children,
+}: {
+  baseUrl: string;
+  server: string;
+  children: ReactNode;
+}) {
+  const clientConfig = useClientConfig();
   const [issuer, setIssuer] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    // if (window.location.protocol === 'http:') {
-    //   // OIDC does not work on non-secure origins.
-    //   setIssuer(undefined);
-    //   return;
-    // }
+    // OIDC login is only enabled when a static client_id is configured
+    // for the current homeserver in config.json.
+    const staticClientId = getOidcStaticClientId(clientConfig, server);
+    if (!staticClientId) {
+      setIssuer(undefined);
+      return;
+    }
 
     const client = createClient({ baseUrl });
     client
       .getAuthMetadata()
       .then((config) => setIssuer(config.issuer))
       .catch(() => setIssuer(undefined));
-  }, [baseUrl]);
+  }, [baseUrl, clientConfig, server]);
 
   return <OidcIssuerProvider value={issuer}>{children}</OidcIssuerProvider>;
 }
@@ -227,6 +239,7 @@ export function AuthLayout() {
                             <AuthFlowsProvider value={authFlows}>
                               <OidcMetadataLoader
                                 baseUrl={autoDiscoveryInfo['m.homeserver'].base_url}
+                                server={server}
                               >
                                 <Outlet />
                               </OidcMetadataLoader>
