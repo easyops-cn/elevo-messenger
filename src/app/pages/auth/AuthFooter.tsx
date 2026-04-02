@@ -17,7 +17,7 @@ export function AuthFooter() {
         target="_blank"
         rel="noreferrer"
       >
-        v1.0.2
+        v1.0.3
       </Text>
       <Text as="a" size="T300" href="https://matrix.org" target="_blank" rel="noreferrer">
         {t('auth.poweredByMatrix')}
