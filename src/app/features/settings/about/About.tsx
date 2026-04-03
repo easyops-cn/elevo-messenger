@@ -8,13 +8,28 @@ import { SettingTile } from '../../../components/setting-tile';
 import ElevoLogo from '../../../../../public/res/apple/apple-touch-icon-144x144.png';
 import { clearCacheAndReload } from '../../../../client/initMatrix';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
+import { useUpdateChecker } from '../../../state/update/UpdateCheckerContext';
+import { isDesktopTauri } from '../../../plugins/useTauriOpener';
 
 type AboutProps = {
   requestClose: () => void;
 };
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+}
+
 export function About({ requestClose }: AboutProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
+  const {
+    checking, downloading, updateAvailable, updateDownloaded,
+    version, progress, error, checkAndDownload, installAndRelaunch,
+  } = useUpdateChecker();
 
   return (
     <Page>
@@ -95,6 +110,67 @@ export function About({ requestClose }: AboutProps) {
                     }
                   />
                 </SequenceCard>
+                {isDesktopTauri && (
+                  <SequenceCard
+                    className={SequenceCardStyle}
+                    variant="SurfaceVariant"
+                    direction="Column"
+                    gap="400"
+                  >
+                    <SettingTile
+                      title={t('settings.aboutPage.checkForUpdates')}
+                      description={
+                        updateDownloaded
+                          ? t('settings.aboutPage.updateReady', { version })
+                          : downloading
+                            ? t('settings.aboutPage.downloadingUpdate', {
+                                downloaded: formatBytes(progress?.downloaded ?? 0),
+                                total: formatBytes(progress?.total ?? 0),
+                              })
+                            : checking
+                              ? t('settings.aboutPage.checkingForUpdates')
+                              : error
+                                ? error
+                                : updateAvailable
+                                  ? t('settings.aboutPage.updateAvailable', { version })
+                                  : t('settings.aboutPage.checkForUpdatesDesc')
+                      }
+                      after={
+                        updateDownloaded ? (
+                          <Button
+                            onClick={installAndRelaunch}
+                            variant="Primary"
+                            fill="Soft"
+                            size="300"
+                            radii="300"
+                          >
+                            <Text size="B300">{t('settings.aboutPage.restartToUpdate')}</Text>
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={checkAndDownload}
+                            variant="Secondary"
+                            fill="Soft"
+                            size="300"
+                            radii="300"
+                            outlined
+                            disabled={checking || downloading}
+                          >
+                            <Text size="B300">
+                              {downloading
+                                ? t('settings.aboutPage.downloading')
+                                : checking
+                                  ? t('settings.aboutPage.checking')
+                                  : error
+                                    ? t('settings.aboutPage.retry')
+                                    : t('settings.aboutPage.check')}
+                            </Text>
+                          </Button>
+                        )
+                      }
+                    />
+                  </SequenceCard>
+                )}
               </Box>
               <Box direction="Column" gap="100">
                 <Text size="L400">{t('settings.aboutPage.credits')}</Text>

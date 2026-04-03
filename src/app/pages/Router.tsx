@@ -78,6 +78,7 @@ import { SearchModalRenderer } from '../features/search';
 import { getFallbackSession } from '../state/sessions';
 import { CallStatusRenderer } from './CallStatusRenderer';
 import { CallEmbedProvider } from '../components/CallEmbedProvider';
+import { UpdateCheckerProvider } from '../state/update/UpdateCheckerContext';
 
 export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize) => {
   const { hashRouter } = clientConfig;
@@ -140,6 +141,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
                 <ClientRoomsNotificationPreferences>
                   <ClientBindAtoms>
                     <ClientNonUIFeatures>
+                      <UpdateCheckerProvider>
                       <CallEmbedProvider>
                         <ClientLayout
                           nav={
@@ -160,6 +162,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
                       <SpaceSettingsRenderer />
                       <ReceiveSelfDeviceVerification />
                       <AutoRestoreBackupOnVerification />
+                      </UpdateCheckerProvider>
                     </ClientNonUIFeatures>
                   </ClientBindAtoms>
                 </ClientRoomsNotificationPreferences>

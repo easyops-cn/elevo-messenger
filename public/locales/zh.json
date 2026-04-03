@@ -496,7 +496,18 @@
       "clearCacheDesc": "清除所有本地存储的数据并从服务器重新加载。",
       "clearCacheBtn": "清除缓存",
       "credits": "致谢",
-      "elevoLogo": "Elevo 图标"
+      "elevoLogo": "Elevo 图标",
+      "checkForUpdates": "检查更新",
+      "checkForUpdatesDesc": "检查是否有新版本可用。",
+      "checkingForUpdates": "正在检查更新...",
+      "updateAvailable": "版本 {{version}} 可用。",
+      "downloadingUpdate": "正在下载更新: {{downloaded}} / {{total}}",
+      "downloading": "下载中...",
+      "updateReady": "版本 {{version}} 已就绪，可以安装。",
+      "restartToUpdate": "重启以更新",
+      "check": "检查",
+      "checking": "检查中...",
+      "retry": "重试"
     }
   },
   "sidebar": {

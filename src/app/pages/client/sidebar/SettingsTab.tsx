@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Text } from 'folds';
-import { SidebarItem, SidebarItemTooltip, SidebarAvatar } from '../../../components/sidebar';
+import { Badge, Text } from 'folds';
+import { SidebarItem, SidebarItemTooltip, SidebarAvatar, SidebarItemBadge } from '../../../components/sidebar';
+import { useUpdateChecker } from '../../../state/update/UpdateCheckerContext';
 import { UserAvatar } from '../../../components/user-avatar';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { getMxIdLocalPart, mxcUrlToHttp } from '../../../utils/matrix';
@@ -15,6 +16,7 @@ export function SettingsTab() {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
+  const { updateAvailable } = useUpdateChecker();
   const userId = mx.getUserId()!;
   const profile = useUserProfile(userId);
 
@@ -41,6 +43,11 @@ export function SettingsTab() {
           </SidebarAvatar>
         )}
       </SidebarItemTooltip>
+      {updateAvailable && (
+        <SidebarItemBadge>
+          <Badge variant="Critical" size="200" fill="Solid" radii="Pill" />
+        </SidebarItemBadge>
+      )}
       {settings && (
         <Modal500 requestClose={closeSettings}>
           <Settings requestClose={closeSettings} />

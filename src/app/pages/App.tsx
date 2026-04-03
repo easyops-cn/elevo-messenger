@@ -20,10 +20,6 @@ function App() {
   const screenSize = useScreenSize();
   useCompositionEndTracking();
 
-  // useSdkMessageListener('test-channel', (payload) => {
-  //   console.log('Received SDK message:', payload.channel, payload.data);
-  // });
-
   const portalContainer = document.getElementById('portalContainer') ?? undefined;
 
   return (

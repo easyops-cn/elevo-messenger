@@ -496,7 +496,18 @@
       "clearCacheDesc": "Clear all your locally stored data and reload from server.",
       "clearCacheBtn": "Clear Cache",
       "credits": "Credits",
-      "elevoLogo": "Elevo logo"
+      "elevoLogo": "Elevo logo",
+      "checkForUpdates": "Check for Updates",
+      "checkForUpdatesDesc": "Check if a newer version is available.",
+      "checkingForUpdates": "Checking for updates...",
+      "updateAvailable": "Version {{version}} is available.",
+      "downloadingUpdate": "Downloading update: {{downloaded}} / {{total}}",
+      "downloading": "Downloading...",
+      "updateReady": "Version {{version}} is ready to install.",
+      "restartToUpdate": "Restart to Update",
+      "check": "Check",
+      "checking": "Checking...",
+      "retry": "Retry"
     }
   },
   "sidebar": {

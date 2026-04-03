@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import {
   Avatar,
+  Badge,
   Box,
   Button,
   config,
@@ -35,6 +36,7 @@ import { About } from './about';
 import { UseStateProvider } from '../../components/UseStateProvider';
 import { stopPropagation } from '../../utils/keyboard';
 import { LogoutDialog } from '../../components/LogoutDialog';
+import { useUpdateChecker } from '../../state/update/UpdateCheckerContext';
 
 export enum SettingsPages {
   GeneralPage,
@@ -116,6 +118,7 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
     : undefined;
 
   const screenSize = useScreenSizeContext();
+  const { updateAvailable } = useUpdateChecker();
   const [activePage, setActivePage] = useState<SettingsPages | undefined>(() => {
     if (initialPage) return initialPage;
     return screenSize === ScreenSize.Mobile ? undefined : SettingsPages.GeneralPage;
@@ -177,6 +180,9 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
                       >
                         {t(item.nameKey)}
                       </Text>
+                      {item.page === SettingsPages.AboutPage && updateAvailable && (
+                        <Badge variant="Critical" size="200" fill="Solid" radii="Pill" style={{ marginLeft: 'auto' }} />
+                      )}
                     </MenuItem>
                   ))}
                 </div>
