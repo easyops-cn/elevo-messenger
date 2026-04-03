@@ -50,8 +50,10 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
     (stateEvent?.getContent() as { workspaces?: WorkspaceItem[] } | undefined)
       ?.workspaces ?? [];
 
-  const [token, setToken] = useState(() => localStorage.getItem(ELEVO_TOKEN_STORAGE_KEY) ?? '');
-  const [tokenInput, setTokenInput] = useState(token);
+  const defaultApiKey = workspacesConfig.apiKey ?? '';
+  const [userToken, setUserToken] = useState(() => localStorage.getItem(ELEVO_TOKEN_STORAGE_KEY) ?? '');
+  const token = userToken || defaultApiKey;
+  const [tokenInput, setTokenInput] = useState(userToken || defaultApiKey);
   const [tokenSaved, setTokenSaved] = useState(false);
 
   const [showAddModal, setShowAddModal] = useState(false);
@@ -61,7 +63,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
 
   const handleSaveToken = () => {
     localStorage.setItem(ELEVO_TOKEN_STORAGE_KEY, tokenInput);
-    setToken(tokenInput);
+    setUserToken(tokenInput);
     setTokenSaved(true);
     setTimeout(() => setTokenSaved(false), 2000);
   };

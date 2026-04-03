@@ -16,6 +16,7 @@ const fetchWorkspacesConfig = async (mx: MatrixClient): Promise<WorkspacesConfig
     return {
       apiBaseUrl: data.api?.base_url,
       explorerUrl: data.explorer?.base_url,
+      apiKey: data.api?.api_key,
     };
   } catch {
     return {};

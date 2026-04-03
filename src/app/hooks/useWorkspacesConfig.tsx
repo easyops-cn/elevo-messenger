@@ -3,6 +3,7 @@ import { createContext, useContext } from 'react';
 export type WorkspacesConfig = {
   apiBaseUrl?: string;
   explorerUrl?: string;
+  apiKey?: string;
 };
 
 const WorkspacesConfigContext = createContext<WorkspacesConfig | null>(null);
