@@ -12,7 +12,6 @@ import './index.css';
 
 import { trimTrailingSlash } from './app/utils/common';
 import App from './app/pages/App';
-import { TitleBar } from './app/components/titlebar/TitleBar';
 
 // import i18n (needs to be bundled ;))
 import './app/i18n';
@@ -55,12 +54,7 @@ const mountApp = () => {
   }
 
   const root = createRoot(rootContainer);
-  root.render(
-    <>
-      <TitleBar />
-      <App />
-    </>
-  );
+  root.render(<App />);
 };
 
 mountApp();

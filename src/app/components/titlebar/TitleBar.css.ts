@@ -30,6 +30,43 @@ export const TitleText = style([
   },
 ]);
 
+export const SearchBox = style([
+  DefaultReset,
+  {
+    display: 'flex',
+    alignItems: 'center',
+    gap: toRem(6),
+    height: toRem(26),
+    padding: `0 ${toRem(10)}`,
+    borderRadius: toRem(6),
+    backgroundColor: color.SurfaceVariant.ContainerHover,
+    color: color.SurfaceVariant.OnContainer,
+    fontSize: toRem(12),
+    cursor: 'pointer',
+    // @ts-expect-error non-standard CSS property
+    appRegion: 'no-drag',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
+    minWidth: toRem(400),
+  },
+]);
+
+export const SearchBoxIcon = style({
+  flexShrink: 0,
+  opacity: 0.6,
+});
+
+export const SearchBoxText = style({
+  flex: 1,
+  opacity: 0.5,
+});
+
+export const SearchBoxShortcut = style({
+  opacity: 0.4,
+  fontSize: toRem(11),
+  flexShrink: 0,
+});
+
 export const TrafficLightSpacer = style({
   width: toRem(70),
   flexShrink: 0,
