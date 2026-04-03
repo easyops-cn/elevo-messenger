@@ -507,7 +507,8 @@
       "restartToUpdate": "重启以更新",
       "check": "检查",
       "checking": "检查中...",
-      "retry": "重试"
+      "retry": "重试",
+      "noUpdatesAvailable": "当前已是最新版本。"
     }
   },
   "sidebar": {

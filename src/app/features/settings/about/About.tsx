@@ -27,7 +27,7 @@ export function About({ requestClose }: AboutProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const {
-    checking, downloading, updateAvailable, updateDownloaded,
+    checking, downloading, updateAvailable, updateDownloaded, checked,
     version, progress, error, checkAndDownload, installAndRelaunch,
   } = useUpdateChecker();
 
@@ -133,7 +133,9 @@ export function About({ requestClose }: AboutProps) {
                                 ? error
                                 : updateAvailable
                                   ? t('settings.aboutPage.updateAvailable', { version })
-                                  : t('settings.aboutPage.checkForUpdatesDesc')
+                                  : checked
+                                    ? t('settings.aboutPage.noUpdatesAvailable')
+                                    : t('settings.aboutPage.checkForUpdatesDesc')
                       }
                       after={
                         updateDownloaded ? (

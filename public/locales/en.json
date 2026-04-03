@@ -507,7 +507,8 @@
       "restartToUpdate": "Restart to Update",
       "check": "Check",
       "checking": "Checking...",
-      "retry": "Retry"
+      "retry": "Retry",
+      "noUpdatesAvailable": "You're already on the latest version."
     }
   },
   "sidebar": {

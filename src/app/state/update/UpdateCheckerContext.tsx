@@ -12,6 +12,7 @@ type UpdateState = {
   updateDownloaded: boolean;
   downloading: boolean;
   checking: boolean;
+  checked: boolean;
   version: string | null;
   body: string | null;
   progress: UpdateProgress | null;
@@ -28,6 +29,7 @@ const initial: UpdateState = {
   updateDownloaded: false,
   downloading: false,
   checking: false,
+  checked: false,
   version: null,
   body: null,
   progress: null,
@@ -55,11 +57,11 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
     try {
       const { check } = await import('@tauri-apps/plugin-updater');
 
-      setState((s) => ({ ...s, checking: true, error: null }));
+      setState((s) => ({ ...s, checking: true, checked: false, error: null }));
       const update = await check();
 
       if (!update) {
-        setState(initial);
+        setState((s) => ({ ...s, checking: false, checked: true, updateAvailable: false, updateDownloaded: false, downloading: false, error: null }));
         checkingRef.current = false;
         return;
       }
