@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import { Avatar, Box, config, Icon, IconButton, Icons, IconSrc, MenuItem, Text } from 'folds';
-import { useClientConfig } from '../../hooks/useClientConfig';
+import { useWorkspacesConfig } from '../../hooks/useWorkspacesConfig';
 import { JoinRule } from 'matrix-js-sdk';
 import { PageNav, PageNavContent, PageNavHeader, PageRoot } from '../../components/page';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
@@ -28,7 +28,7 @@ type RoomSettingsMenuItem = {
 };
 
 const useRoomSettingsMenuItems = (): RoomSettingsMenuItem[] => {
-  const clientConfig = useClientConfig();
+  const workspacesConfig = useWorkspacesConfig();
   return useMemo(
     () => {
       const items: RoomSettingsMenuItem[] = [
@@ -53,7 +53,7 @@ const useRoomSettingsMenuItems = (): RoomSettingsMenuItem[] => {
           icon: Icons.Smile,
         },
       ];
-      if (clientConfig.elevoWorkspacesApiBaseUrl) {
+      if (workspacesConfig.apiBaseUrl) {
         items.push({
           page: RoomSettingsPage.WorkspacesPage,
           nameKey: 'workspaces.title',
@@ -67,7 +67,7 @@ const useRoomSettingsMenuItems = (): RoomSettingsMenuItem[] => {
       });
       return items;
     },
-    [clientConfig.elevoWorkspacesApiBaseUrl]
+    [workspacesConfig.apiBaseUrl]
   );
 };
 

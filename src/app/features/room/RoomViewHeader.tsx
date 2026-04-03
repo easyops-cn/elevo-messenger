@@ -68,7 +68,7 @@ import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { InviteUserPrompt } from '../../components/invite-user-prompt';
 import { ContainerColor } from '../../styles/ContainerColor.css';
 import { RoomSettingsPage } from '../../state/roomSettings';
-import { useClientConfig } from '../../hooks/useClientConfig';
+import { useWorkspacesConfig } from '../../hooks/useWorkspacesConfig';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
 import { openExternalUrl } from '../../plugins/useTauriOpener';
 
@@ -265,7 +265,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const space = useSpaceOptionally();
   const [menuAnchor, setMenuAnchor] = useState<RectCords>();
   const [pinMenuAnchor, setPinMenuAnchor] = useState<RectCords>();
-  const clientConfig = useClientConfig();
+  const workspacesConfig = useWorkspacesConfig();
   const direct = useIsDirectRoom();
 
   const workspacesStateEvent = useStateEvent(room, ELEVO_WORKSPACES_STATE_KEY as any);
@@ -274,8 +274,8 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
       ?.workspaces ?? []
   ).map((w) => w.id);
   const workspaceExplorerUrl =
-    clientConfig.elevoWorkspacesExplorerUrl && linkedWorkspaceIds.length > 0
-      ? `${clientConfig.elevoWorkspacesExplorerUrl}?ids=${linkedWorkspaceIds.join(',')}`
+    workspacesConfig.explorerUrl && linkedWorkspaceIds.length > 0
+      ? `${workspacesConfig.explorerUrl}?ids=${linkedWorkspaceIds.join(',')}`
       : null;
 
   const pinnedEvents = useRoomPinnedEvents(room);

@@ -13,6 +13,8 @@ export const isDesktopTauri = isTauri && !mobileOrTablet();
 // Replace placeholders with real domains before shipping.
 const ALLOWED_DOMAINS: string[] = [
   'localhost',
+  'easyops.local',
+  'elevo.vip',
 ];
 
 function isDomainAllowed(href: string): boolean {

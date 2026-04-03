@@ -20,6 +20,7 @@ import { useRoom } from '../../../hooks/useRoom';
 import { useStateEvent } from '../../../hooks/useStateEvent';
 import { usePowerLevels, readPowerLevel } from '../../../hooks/usePowerLevels';
 import { useClientConfig } from '../../../hooks/useClientConfig';
+import { useWorkspacesConfig } from '../../../hooks/useWorkspacesConfig';
 import {
   AddWorkspaceModal,
   WorkspaceItem,
@@ -37,7 +38,8 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
   const room = useRoom();
   const powerLevels = usePowerLevels(room);
   const clientConfig = useClientConfig();
-  const baseUrl = clientConfig.elevoWorkspacesApiBaseUrl ?? '';
+  const workspacesConfig = useWorkspacesConfig();
+  const baseUrl = workspacesConfig.apiBaseUrl ?? '';
 
   const userId = mx.getSafeUserId();
   const userPower = readPowerLevel.user(powerLevels, userId);
