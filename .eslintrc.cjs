@@ -32,6 +32,9 @@ module.exports = {
     'linebreak-style': 0,
     'no-underscore-dangle': 0,
     "no-shadow": "off",
+    "no-nested-ternary": "off",
+    "default-case": "off",
+    "consistent-return": "off",
 
     "import/prefer-default-export": "off",
     "import/extensions": "off",

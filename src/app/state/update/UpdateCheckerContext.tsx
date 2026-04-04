@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
 
@@ -81,7 +81,7 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
         return;
       }
 
-      const version = update.version;
+      const {version} = update;
       const body = update.body ?? null;
 
       setState((s) => ({
@@ -99,7 +99,7 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
       await update.downloadAndInstall((event) => {
         switch (event.event) {
           case 'Started':
-            total = event.data.contentLength;
+            total = event.data.contentLength ?? 0;
             break;
           case 'Progress':
             downloaded += event.data.chunkLength;
@@ -161,11 +161,11 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
     };
   }, [checkAndDownload]);
 
-  const value: UpdateCheckerContextValue = {
+  const value = useMemo<UpdateCheckerContextValue>(() => ({
     ...state,
     checkAndDownload,
     installAndRelaunch,
-  };
+  }), [checkAndDownload, installAndRelaunch, state])
 
   return (
     <UpdateCheckerContext.Provider value={value}>

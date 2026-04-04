@@ -20,7 +20,7 @@ function formatBytes(bytes: number): string {
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+  return `${(bytes / k**i).toFixed(1)} ${sizes[i]}`;
 }
 
 export function About({ requestClose }: AboutProps) {
@@ -129,13 +129,11 @@ export function About({ requestClose }: AboutProps) {
                               })
                             : checking
                               ? t('settings.aboutPage.checkingForUpdates')
-                              : error
-                                ? error
-                                : updateAvailable
+                              : error || (updateAvailable
                                   ? t('settings.aboutPage.updateAvailable', { version })
                                   : checked
                                     ? t('settings.aboutPage.noUpdatesAvailable')
-                                    : t('settings.aboutPage.checkForUpdatesDesc')
+                                    : t('settings.aboutPage.checkForUpdatesDesc'))
                       }
                       after={
                         updateDownloaded ? (
