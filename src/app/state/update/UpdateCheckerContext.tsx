@@ -20,8 +20,8 @@ type UpdateState = {
 };
 
 type UpdateCheckerContextValue = UpdateState & {
-  checkAndDownload: () => Promise<void>;
-  installAndRelaunch: () => Promise<void>;
+  checkAndPrepare: () => Promise<void>;
+  applyUpdate: () => Promise<void>;
 };
 
 const initial: UpdateState = {
@@ -39,9 +39,9 @@ const initial: UpdateState = {
 const UpdateCheckerContext = React.createContext<UpdateCheckerContextValue>({
   ...initial,
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  checkAndDownload: async () => {},
+  checkAndPrepare: async () => {},
   // eslint-disable-next-line @typescript-eslint/no-empty-function
-  installAndRelaunch: async () => {},
+  applyUpdate: async () => {},
 });
 
 export function useUpdateChecker() {
@@ -68,7 +68,7 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
   const checkingRef = useRef(false);
   const pendingUpdateRef = useRef<Awaited<ReturnType<typeof import('@tauri-apps/plugin-updater').check>> | null>(null);
 
-  const checkAndDownload = useCallback(async () => {
+  const checkAndPrepare = useCallback(async () => {
     if (!isDesktopTauri || checkingRef.current) return;
     checkingRef.current = true;
 
@@ -88,6 +88,20 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
       const body = update.body ?? null;
 
       const isWindows = navigator.userAgent.includes('Windows');
+
+      if (isWindows) {
+        // On Windows, do NOT auto-download. Just notify the user that an update is available.
+        // The user will confirm, then download + install + restart all at once.
+        pendingUpdateRef.current = update;
+        setState((s) => ({
+          ...s,
+          checking: false,
+          updateAvailable: true,
+          version,
+          body,
+        }));
+        return;
+      }
 
       setState((s) => ({
         ...s,
@@ -118,14 +132,7 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
         }
       };
 
-      if (isWindows) {
-        // On Windows, install triggers an immediate app restart,
-        // so we only download here and defer install to user confirmation.
-        await update.download(onEvent);
-        pendingUpdateRef.current = update;
-      } else {
-        await update.downloadAndInstall(onEvent);
-      }
+      await update.downloadAndInstall(onEvent);
 
       setState((s) => ({
         ...s,
@@ -145,13 +152,40 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
     }
   }, []);
 
-  const installAndRelaunch = useCallback(async () => {
+  const applyUpdate = useCallback(async () => {
     if (!isDesktopTauri) return;
     const pendingUpdate = pendingUpdateRef.current;
     if (pendingUpdate) {
-      // Windows: install the previously downloaded update, which triggers restart.
-      await pendingUpdate.install();
+      // Windows: download + install + restart all at once after user confirmation.
+      setState((s) => ({ ...s, downloading: true }));
+
+      let downloaded = 0;
+      let total = 0;
+
+      await pendingUpdate.downloadAndInstall((event) => {
+        switch (event.event) {
+          case 'Started':
+            total = event.data.contentLength ?? 0;
+            break;
+          case 'Progress':
+            downloaded += event.data.chunkLength;
+            setState((s) => ({
+              ...s,
+              progress: { downloaded, total },
+            }));
+            break;
+          default:
+            break;
+        }
+      });
+
       pendingUpdateRef.current = null;
+      setState((s) => ({
+        ...s,
+        downloading: false,
+        updateDownloaded: true,
+        progress: { downloaded, total },
+      }));
     }
     const { relaunch } = await import('@tauri-apps/plugin-process');
     await relaunch();
@@ -169,7 +203,7 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
         if (event.payload.openSettings) {
           emitOpenAbout();
         }
-        checkAndDownload();
+        checkAndPrepare();
       }
     );
 
@@ -179,13 +213,13 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
         if (cancelled) unlisten();
       });
     };
-  }, [checkAndDownload]);
+  }, [checkAndPrepare]);
 
   const value = useMemo<UpdateCheckerContextValue>(() => ({
     ...state,
-    checkAndDownload,
-    installAndRelaunch,
-  }), [checkAndDownload, installAndRelaunch, state])
+    checkAndPrepare,
+    applyUpdate,
+  }), [checkAndPrepare, applyUpdate, state])
 
   return (
     <UpdateCheckerContext.Provider value={value}>

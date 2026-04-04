@@ -28,7 +28,7 @@ export function About({ requestClose }: AboutProps) {
   const mx = useMatrixClient();
   const {
     checking, downloading, updateAvailable, updateDownloaded, checked,
-    version, progress, error, checkAndDownload, installAndRelaunch,
+    version, progress, error, checkAndPrepare, applyUpdate,
   } = useUpdateChecker();
 
   return (
@@ -139,7 +139,7 @@ export function About({ requestClose }: AboutProps) {
                                       : t('settings.aboutPage.checkForUpdatesDesc'))}
                           {(updateAvailable || updateDownloaded) && (
                             <>
-                              {' '}
+                              <br />
                               <a
                                 href={`https://github.com/easyops-cn/elevo-desktop/releases/tag/elevo-messenger-v${version}`}
                                 rel="noreferrer noopener"
@@ -154,7 +154,7 @@ export function About({ requestClose }: AboutProps) {
                       after={
                         updateDownloaded ? (
                           <Button
-                            onClick={installAndRelaunch}
+                            onClick={applyUpdate}
                             variant="Primary"
                             fill="Solid"
                             size="300"
@@ -162,9 +162,19 @@ export function About({ requestClose }: AboutProps) {
                           >
                             <Text size="B300">{t('settings.aboutPage.restartToUpdate')}</Text>
                           </Button>
+                        ) : updateAvailable && !downloading ? (
+                          <Button
+                            onClick={applyUpdate}
+                            variant="Primary"
+                            fill="Solid"
+                            size="300"
+                            radii="300"
+                          >
+                            <Text size="B300">{t('settings.aboutPage.updateAndRestart', { defaultValue: 'Update & Restart' })}</Text>
+                          </Button>
                         ) : (
                           <Button
-                            onClick={checkAndDownload}
+                            onClick={checkAndPrepare}
                             variant="Secondary"
                             fill="Soft"
                             size="300"
