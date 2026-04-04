@@ -191,7 +191,18 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
     await relaunch();
   }, []);
 
-  // Listen for "check-for-updates" event from Rust (menu click or silent startup check).
+  // Auto-check for updates after a short delay on startup.
+  useEffect(() => {
+    if (!isDesktopTauri) return;
+
+    const timer = setTimeout(() => {
+      checkAndPrepare();
+    }, 5000);
+
+    return () => clearTimeout(timer);
+  }, [checkAndPrepare]);
+
+  // Listen for "check-for-updates" event from Rust (menu click).
   useEffect(() => {
     if (!isDesktopTauri) return;
 
