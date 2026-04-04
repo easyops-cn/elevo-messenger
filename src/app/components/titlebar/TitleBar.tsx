@@ -166,9 +166,20 @@ export function TitleBar() {
       data-tauri-drag-region
       onDoubleClick={handleDoubleClick}
     >
-      {isMacOS() && <div className={css.TrafficLightSpacer} />}
+      {isMacOS() ? (
+        <div className={css.TrafficLightSpacer} />
+      ) : (
+        <div className={css.LeftSection}>
+          <span className={css.AppTitle}>Elevo Messenger</span>
+        </div>
+      )}
       <TitleBarSearchBox />
-      {!isMacOS() && <WindowControls />}
+      {!isMacOS() && (
+        <>
+          <div className={css.WindowControlsSpacer} />
+          <WindowControls />
+        </>
+      )}
     </div>
   );
 }

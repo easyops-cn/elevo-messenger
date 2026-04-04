@@ -47,7 +47,9 @@ export const SearchBox = style([
     appRegion: 'no-drag',
     userSelect: 'none',
     WebkitUserSelect: 'none',
-    minWidth: toRem(400),
+    minWidth: 0,
+    maxWidth: toRem(400),
+    flex: 1,
   },
 ]);
 
@@ -70,6 +72,24 @@ export const SearchBoxShortcut = style({
 export const TrafficLightSpacer = style({
   width: toRem(70),
   flexShrink: 0,
+});
+
+export const LeftSection = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: toRem(8),
+  paddingLeft: toRem(12),
+  flexShrink: 0,
+  // @ts-expect-error non-standard CSS property
+  appRegion: 'no-drag',
+  pointerEvents: 'none',
+});
+
+export const AppTitle = style({
+  fontSize: toRem(12),
+  fontWeight: 600,
+  opacity: 0.7,
+  whiteSpace: 'nowrap',
 });
 
 export const WindowControls = style([
@@ -116,6 +136,11 @@ export const CloseButton = style({
       color: '#ffffff',
     },
   },
+});
+
+export const WindowControlsSpacer = style({
+  width: toRem(138),
+  flexShrink: 0,
 });
 
 // Ensure drag region CSS for Windows touch/pen support
