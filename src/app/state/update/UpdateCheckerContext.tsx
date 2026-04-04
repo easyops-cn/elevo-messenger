@@ -38,7 +38,9 @@ const initial: UpdateState = {
 
 const UpdateCheckerContext = React.createContext<UpdateCheckerContextValue>({
   ...initial,
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   checkAndDownload: async () => {},
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   installAndRelaunch: async () => {},
 });
 
@@ -64,6 +66,7 @@ function emitOpenAbout() {
 export function UpdateCheckerProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<UpdateState>(initial);
   const checkingRef = useRef(false);
+  const pendingUpdateRef = useRef<Awaited<ReturnType<typeof import('@tauri-apps/plugin-updater').check>> | null>(null);
 
   const checkAndDownload = useCallback(async () => {
     if (!isDesktopTauri || checkingRef.current) return;
@@ -84,6 +87,8 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
       const {version} = update;
       const body = update.body ?? null;
 
+      const isWindows = navigator.userAgent.includes('Windows');
+
       setState((s) => ({
         ...s,
         checking: false,
@@ -96,7 +101,7 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
       let downloaded = 0;
       let total = 0;
 
-      await update.downloadAndInstall((event) => {
+      const onEvent = (event: { event: 'Started'; data: { contentLength?: number } } | { event: 'Progress'; data: { chunkLength: number } } | { event: 'Finished' }) => {
         switch (event.event) {
           case 'Started':
             total = event.data.contentLength ?? 0;
@@ -108,10 +113,19 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
               progress: { downloaded, total },
             }));
             break;
-          case 'Finished':
+          default:
             break;
         }
-      });
+      };
+
+      if (isWindows) {
+        // On Windows, install triggers an immediate app restart,
+        // so we only download here and defer install to user confirmation.
+        await update.download(onEvent);
+        pendingUpdateRef.current = update;
+      } else {
+        await update.downloadAndInstall(onEvent);
+      }
 
       setState((s) => ({
         ...s,
@@ -133,6 +147,12 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
 
   const installAndRelaunch = useCallback(async () => {
     if (!isDesktopTauri) return;
+    const pendingUpdate = pendingUpdateRef.current;
+    if (pendingUpdate) {
+      // Windows: install the previously downloaded update, which triggers restart.
+      await pendingUpdate.install();
+      pendingUpdateRef.current = null;
+    }
     const { relaunch } = await import('@tauri-apps/plugin-process');
     await relaunch();
   }, []);
