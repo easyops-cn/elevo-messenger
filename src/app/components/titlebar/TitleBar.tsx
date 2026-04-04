@@ -24,8 +24,8 @@ function MaximizeIcon() {
 function RestoreIcon() {
   return (
     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1">
-      <rect x="2.5" y="0.5" width="7" height="7" />
       <rect x="0.5" y="2.5" width="7" height="7" />
+      <polyline points="2.5,2.5 2.5,0.5 9.5,0.5 9.5,7.5 7.5,7.5" />
     </svg>
   );
 }

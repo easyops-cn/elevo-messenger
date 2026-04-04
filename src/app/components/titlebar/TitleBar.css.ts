@@ -10,7 +10,7 @@ export const TitleBarContainer = style([
     minHeight: toRem(TITLEBAR_HEIGHT),
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     gap: toRem(8),
     position: 'relative',
     backgroundColor: color.Background.Container,
