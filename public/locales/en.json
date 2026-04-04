@@ -508,7 +508,8 @@
       "check": "Check",
       "checking": "Checking...",
       "retry": "Retry",
-      "noUpdatesAvailable": "You're already on the latest version."
+      "noUpdatesAvailable": "You're already on the latest version.",
+      "viewReleaseNotes": "View Release Notes"
     }
   },
   "sidebar": {

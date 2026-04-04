@@ -120,27 +120,43 @@ export function About({ requestClose }: AboutProps) {
                     <SettingTile
                       title={t('settings.aboutPage.checkForUpdates')}
                       description={
-                        updateDownloaded
-                          ? t('settings.aboutPage.updateReady', { version })
-                          : downloading
-                            ? t('settings.aboutPage.downloadingUpdate', {
-                                downloaded: formatBytes(progress?.downloaded ?? 0),
-                                total: formatBytes(progress?.total ?? 0),
-                              })
-                            : checking
-                              ? t('settings.aboutPage.checkingForUpdates')
-                              : error || (updateAvailable
-                                  ? t('settings.aboutPage.updateAvailable', { version })
-                                  : checked
-                                    ? t('settings.aboutPage.noUpdatesAvailable')
-                                    : t('settings.aboutPage.checkForUpdatesDesc'))
+                        <>
+                          {updateDownloaded
+                            ? t('settings.aboutPage.updateReady', { version })
+                            : downloading
+                              ? (progress?.total
+                                  ? t('settings.aboutPage.downloadingUpdate', {
+                                      downloaded: formatBytes(progress.downloaded),
+                                      total: formatBytes(progress.total),
+                                    })
+                                  : t('settings.aboutPage.downloading'))
+                              : checking
+                                ? t('settings.aboutPage.checkingForUpdates')
+                                : error || (updateAvailable
+                                    ? t('settings.aboutPage.updateAvailable', { version })
+                                    : checked
+                                      ? t('settings.aboutPage.noUpdatesAvailable')
+                                      : t('settings.aboutPage.checkForUpdatesDesc'))}
+                          {(updateAvailable || updateDownloaded) && (
+                            <>
+                              {' '}
+                              <a
+                                href={`https://github.com/easyops-cn/elevo-desktop/releases/tag/elevo-messenger-v${version}`}
+                                rel="noreferrer noopener"
+                                target="_blank"
+                              >
+                                {t('settings.aboutPage.viewReleaseNotes', { defaultValue: 'View Release Notes' })}
+                              </a>
+                            </>
+                          )}
+                        </>
                       }
                       after={
                         updateDownloaded ? (
                           <Button
                             onClick={installAndRelaunch}
                             variant="Primary"
-                            fill="Soft"
+                            fill="Solid"
                             size="300"
                             radii="300"
                           >

@@ -508,7 +508,8 @@
       "check": "检查",
       "checking": "检查中...",
       "retry": "重试",
-      "noUpdatesAvailable": "当前已是最新版本。"
+      "noUpdatesAvailable": "当前已是最新版本。",
+      "viewReleaseNotes": "查看更新说明"
     }
   },
   "sidebar": {
