@@ -80,13 +80,14 @@ import { CallStatusRenderer } from './CallStatusRenderer';
 import { CallEmbedProvider } from '../components/CallEmbedProvider';
 import { UpdateCheckerProvider } from '../state/update/UpdateCheckerContext';
 
+function TauriDeepLinkHandler() {
+  useTauriDeepLink();
+  return <Outlet />;
+}
+
 export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize) => {
   const { hashRouter } = clientConfig;
 
-  function TauriDeepLinkHandler() {
-    useTauriDeepLink();
-    return <Outlet />;
-  }
   const mobile = screenSize === ScreenSize.Mobile;
 
   const routes = createRoutesFromElements(
