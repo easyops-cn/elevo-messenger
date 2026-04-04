@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Badge, Text } from 'folds';
 import { SidebarItem, SidebarItemTooltip, SidebarAvatar, SidebarItemBadge } from '../../../components/sidebar';
 import { useUpdateChecker } from '../../../state/update/UpdateCheckerContext';
+import { onOpenAbout } from '../../../state/update/UpdateCheckerContext';
 import { UserAvatar } from '../../../components/user-avatar';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { getMxIdLocalPart, mxcUrlToHttp } from '../../../utils/matrix';
 import { nameInitials } from '../../../utils/common';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
-import { Settings } from '../../../features/settings';
+import { Settings, SettingsPages } from '../../../features/settings';
 import { useUserProfile } from '../../../hooks/useUserProfile';
 import { Modal500 } from '../../../components/Modal500';
 
@@ -21,14 +22,24 @@ export function SettingsTab() {
   const profile = useUserProfile(userId);
 
   const [settings, setSettings] = useState(false);
+  const [initialPage, setInitialPage] = useState<SettingsPages | undefined>(undefined);
 
   const displayName = profile.displayName ?? getMxIdLocalPart(userId) ?? userId;
   const avatarUrl = profile.avatarUrl
     ? mxcUrlToHttp(mx, profile.avatarUrl, useAuthentication, 96, 96, 'crop') ?? undefined
     : undefined;
 
-  const openSettings = () => setSettings(true);
+  const openSettings = () => {
+    setInitialPage(undefined);
+    setSettings(true);
+  };
   const closeSettings = () => setSettings(false);
+
+  // Listen for "open about" requests from the native menu update check.
+  useEffect(() => onOpenAbout(() => {
+    setInitialPage(SettingsPages.AboutPage);
+    setSettings(true);
+  }), []);
 
   return (
     <SidebarItem active={settings}>
@@ -50,7 +61,7 @@ export function SettingsTab() {
       )}
       {settings && (
         <Modal500 requestClose={closeSettings}>
-          <Settings requestClose={closeSettings} />
+          <Settings initialPage={initialPage} requestClose={closeSettings} />
         </Modal500>
       )}
     </SidebarItem>

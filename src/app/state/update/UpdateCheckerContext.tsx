@@ -46,6 +46,21 @@ export function useUpdateChecker() {
   return useContext(UpdateCheckerContext);
 }
 
+// Simple event emitter so the SettingsTab can listen for "open about" requests.
+type OpenAboutListener = () => void;
+const openAboutListeners = new Set<OpenAboutListener>();
+
+export function onOpenAbout(listener: OpenAboutListener): () => void {
+  openAboutListeners.add(listener);
+  return () => {
+    openAboutListeners.delete(listener);
+  };
+}
+
+function emitOpenAbout() {
+  openAboutListeners.forEach((fn) => fn());
+}
+
 export function UpdateCheckerProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<UpdateState>(initial);
   const checkingRef = useRef(false);
@@ -122,27 +137,21 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
     await relaunch();
   }, []);
 
-  // Listen for silent update events from Rust startup check.
+  // Listen for "check-for-updates" event from Rust (menu click or silent startup check).
   useEffect(() => {
     if (!isDesktopTauri) return;
 
     let cancelled = false;
-    const unlistenPromise = listen<{
-      version: string;
-      body: string;
-      date?: string;
-      currentVersion: string;
-    }>('update-available', (event) => {
-      if (cancelled) return;
-      setState((s) => ({
-        ...s,
-        updateAvailable: true,
-        version: event.payload.version,
-        body: event.payload.body,
-      }));
-      // Auto-download after receiving the event.
-      checkAndDownload();
-    });
+    const unlistenPromise = listen<{ openSettings: boolean }>(
+      'check-for-updates',
+      (event) => {
+        if (cancelled) return;
+        if (event.payload.openSettings) {
+          emitOpenAbout();
+        }
+        checkAndDownload();
+      }
+    );
 
     return () => {
       cancelled = true;
