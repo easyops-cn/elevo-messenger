@@ -509,7 +509,8 @@
       "checking": "Checking...",
       "retry": "Retry",
       "noUpdatesAvailable": "You're already on the latest version.",
-      "viewReleaseNotes": "View Release Notes"
+      "viewReleaseNotes": "View Release Notes",
+      "updateAndRestart": "Update and Restart"
     }
   },
   "sidebar": {

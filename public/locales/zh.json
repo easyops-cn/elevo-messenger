@@ -509,7 +509,8 @@
       "checking": "检查中...",
       "retry": "重试",
       "noUpdatesAvailable": "当前已是最新版本。",
-      "viewReleaseNotes": "查看更新说明"
+      "viewReleaseNotes": "查看更新说明",
+      "updateAndRestart": "更新并重启"
     }
   },
   "sidebar": {

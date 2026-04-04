@@ -170,7 +170,7 @@ export function About({ requestClose }: AboutProps) {
                             size="300"
                             radii="300"
                           >
-                            <Text size="B300">{t('settings.aboutPage.updateAndRestart', { defaultValue: 'Update & Restart' })}</Text>
+                            <Text size="B300">{t('settings.aboutPage.updateAndRestart', { defaultValue: 'Update and Restart' })}</Text>
                           </Button>
                         ) : (
                           <Button
