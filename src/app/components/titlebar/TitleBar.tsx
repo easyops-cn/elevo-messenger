@@ -174,11 +174,10 @@ export function TitleBar() {
         </div>
       )}
       <TitleBarSearchBox />
-      {!isMacOS() && (
-        <>
-          <div className={css.WindowControlsSpacer} />
-          <WindowControls />
-        </>
+      {isMacOS() ? (
+        <div className={css.TrafficLightSpacer} />
+      ) : (
+        <WindowControls />
       )}
     </div>
   );
