@@ -162,7 +162,7 @@ export function About({ requestClose }: AboutProps) {
                           >
                             <Text size="B300">{t('settings.aboutPage.restartToUpdate')}</Text>
                           </Button>
-                        ) : updateAvailable && !downloading ? (
+                        ) : updateAvailable && !downloading && !error ? (
                           <Button
                             onClick={applyUpdate}
                             variant="Primary"
