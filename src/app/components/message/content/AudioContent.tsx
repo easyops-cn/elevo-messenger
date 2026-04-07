@@ -14,7 +14,6 @@ import {
   useMediaSeek,
   useMediaVolume,
 } from '../../../hooks/media';
-import { useThrottle } from '../../../hooks/useThrottle';
 import { secondsToMinutesAndSeconds } from '../../../utils/common';
 import {
   decryptFile,
@@ -24,10 +23,6 @@ import {
 } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 
-const PLAY_TIME_THROTTLE_OPS = {
-  wait: 500,
-  immediate: true,
-};
 
 type RenderMediaControlProps = {
   after: ReactNode;
@@ -79,10 +74,7 @@ export function AudioContent({
     setDuration(d);
     setCurrentTime(ct);
   }, []);
-  useMediaPlayTimeCallback(
-    getAudioRef,
-    useThrottle(handlePlayTimeCallback, PLAY_TIME_THROTTLE_OPS)
-  );
+  useMediaPlayTimeCallback(getAudioRef, handlePlayTimeCallback);
 
   const handlePlay = () => {
     if (srcState.status === AsyncStatus.Success) {

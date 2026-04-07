@@ -19,7 +19,7 @@ export const WaveformContainer = style({
 export const WaveformBar = style({
   width: toRem(2),
   borderRadius: toRem(1),
-  transition: 'background-color 0.1s',
+  transition: 'background-color 0.3s ease',
 });
 
 export const TimeText = style({

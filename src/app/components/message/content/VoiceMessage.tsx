@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { MouseEvent, useCallback, useRef, useState } from 'react';
+import React, { MouseEvent, useCallback, useMemo, useRef, useState } from 'react';
 import { Box, Icon, IconButton, Icons, Spinner, Text, color, toRem } from 'folds';
 import { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
@@ -12,7 +12,6 @@ import {
   useMediaPlayTimeCallback,
   useMediaSeek,
 } from '../../../hooks/media';
-import { useThrottle } from '../../../hooks/useThrottle';
 import { secondsToMinutesAndSeconds } from '../../../utils/common';
 import {
   decryptFile,
@@ -23,10 +22,6 @@ import {
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import * as css from './VoiceMessage.css';
 
-const PLAY_TIME_THROTTLE_OPS = {
-  wait: 500,
-  immediate: true,
-};
 
 function sampleWaveform(waveform: number[], maxBars: number): number[] {
   if (waveform.length <= maxBars) return waveform;
@@ -91,10 +86,7 @@ export function VoiceMessage({
     setDuration(d);
     setCurrentTime(ct);
   }, []);
-  useMediaPlayTimeCallback(
-    getAudioRef,
-    useThrottle(handlePlayTimeCallback, PLAY_TIME_THROTTLE_OPS)
-  );
+  useMediaPlayTimeCallback(getAudioRef, handlePlayTimeCallback);
 
   const handlePlay = () => {
     if (srcState.status === AsyncStatus.Success) {
@@ -104,7 +96,7 @@ export function VoiceMessage({
     }
   };
 
-  const bars = sampleWaveform(waveform, MAX_BARS);
+  const bars = useMemo(() => sampleWaveform(waveform, MAX_BARS), [waveform]);
   const progress = duration > 0 ? currentTime / duration : 0;
 
   const handleWaveformClick = (evt: MouseEvent<HTMLDivElement>) => {
