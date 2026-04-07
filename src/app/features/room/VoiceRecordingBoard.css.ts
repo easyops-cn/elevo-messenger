@@ -61,8 +61,8 @@ export const WaveformBar = style({
 });
 
 export const RecordingDot = style({
-  width: toRem(24),
-  height: toRem(24),
+  width: toRem(32),
+  height: toRem(32),
   borderRadius: '50%',
   flexShrink: 0,
   display: 'flex',
@@ -82,8 +82,8 @@ export const RecordingDotInner = style({
 });
 
 export const IdleDot = style({
-  width: toRem(24),
-  height: toRem(24),
+  width: toRem(32),
+  height: toRem(32),
   borderRadius: '50%',
   flexShrink: 0,
   display: 'flex',

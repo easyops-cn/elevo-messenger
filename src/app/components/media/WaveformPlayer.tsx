@@ -1,5 +1,7 @@
 import React, { MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Box, Icon, IconButton, Icons, Spinner, Text, color, toRem } from 'folds';
+import { Box, Icon, IconButton, Spinner, Text, color, toRem } from 'folds';
+import { PlayIcon } from '../../icons/PlayIcon';
+import { PauseIcon } from '../../icons/PauseIcon';
 import {
   PlayTimeCallback,
   useMediaLoading,
@@ -150,9 +152,8 @@ export function WaveformPlayer({
     <Box className={css.WaveformPlayerContainer} alignItems="Center">
       <IconButton
         variant="Secondary"
-        size="300"
+        size="400"
         radii="Pill"
-        fill="None"
         onClick={handlePlay}
         disabled={isLoadingFinal}
         aria-label={playing ? 'Pause' : 'Play'}
@@ -160,7 +161,7 @@ export function WaveformPlayer({
         {isLoadingFinal ? (
           <Spinner variant="Secondary" size="50" />
         ) : (
-          <Icon src={playing ? Icons.Pause : Icons.Play} size="50" filled={playing} />
+          <Icon src={playing ? PauseIcon : PlayIcon} size="50" filled />
         )}
       </IconButton>
 
@@ -186,13 +187,13 @@ export function WaveformPlayer({
           const played = barProgress <= progress;
 
           return (
-            // eslint-disable-next-line react/no-array-index-key
             <div
+            // eslint-disable-next-line react/no-array-index-key
               key={index}
               className={css.WaveformBar}
               style={{
                 height: toRem(height),
-                backgroundColor: played ? color.Secondary.Main : color.Secondary.Container,
+                backgroundColor: played ? color.Secondary.Main : color.Secondary.ContainerLine,
               }}
             />
           );
