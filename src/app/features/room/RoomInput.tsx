@@ -104,7 +104,7 @@ import {
 } from './msgContent';
 import { getMemberDisplayName, getMentionContent, trimReplyFromBody } from '../../utils/room';
 import { CommandAutocomplete } from './CommandAutocomplete';
-import { VoiceRecordingBoard } from './VoiceRecordingBoard';
+import { VoiceRecordingBoard, VoiceRecordingBoardHandlers } from './VoiceRecordingBoard';
 import { Command, SHRUG, TABLEFLIP, UNFLIP, useCommands } from '../../hooks/useCommands';
 import { mobileOrTablet } from '../../utils/user-agent';
 import { useElementSizeObserver } from '../../hooks/useElementSizeObserver';
@@ -182,6 +182,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       selectedFiles.map((f) => f.file)
     );
     const uploadBoardHandlers = useRef<UploadBoardImperativeHandlers>();
+    const voiceRecordingRef = useRef<VoiceRecordingBoardHandlers>(null);
 
     const imagePackRooms: Room[] = useImagePackRooms(roomId, roomToParents);
 
@@ -499,6 +500,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       <div ref={ref}>
         {voiceRecordingOpen && (
           <VoiceRecordingBoard
+            ref={voiceRecordingRef}
             roomId={roomId}
             room={room}
             onClose={() => setVoiceRecordingOpen(false)}
@@ -656,7 +658,16 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                 radii="300"
                 aria-pressed={voiceRecordingOpen}
                 aria-label="Record voice message"
-                onClick={() => setVoiceRecordingOpen((v) => !v)}
+                onClick={() => {
+                  if (voiceRecordingOpen) {
+                    const stopped = voiceRecordingRef.current?.stopRecording();
+                    if (!stopped) {
+                      setVoiceRecordingOpen(false);
+                    }
+                  } else {
+                    setVoiceRecordingOpen(true);
+                  }
+                }}
               >
                 <Icon src={Icons.Mic} filled={voiceRecordingOpen} />
               </IconButton>

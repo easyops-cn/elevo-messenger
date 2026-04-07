@@ -12,6 +12,7 @@ export const WaveformContainer = style({
   alignItems: 'center',
   gap: toRem(2),
   height: toRem(32),
+  width: toRem(158), // 40 * (2 + 2) - 2 = 158
   cursor: 'pointer',
   userSelect: 'none',
 });

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useImperativeHandle, useRef, useState, forwardRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Chip, Icon, Icons, Spinner, Text, color, toRem } from 'folds';
 import { Room } from 'matrix-js-sdk';
@@ -53,16 +53,30 @@ function LiveWaveform({ bars }: LiveWaveformProps) {
 
 // ─── Main VoiceRecordingBoard ──────────────────────────────────────────────────
 
+export type VoiceRecordingBoardHandlers = {
+  /** Returns true if it stopped an active recording, false if already stopped/idle */
+  stopRecording: () => boolean;
+};
+
 type VoiceRecordingBoardProps = {
   roomId: string;
   room: Room;
   onClose: () => void;
 };
 
-export function VoiceRecordingBoard({ roomId, room, onClose }: VoiceRecordingBoardProps) {
+export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, VoiceRecordingBoardProps>(({ roomId, room, onClose }, ref) => {
   const mx = useMatrixClient();
   const { t } = useTranslation();
   const recorder = useVoiceRecorder();
+  useImperativeHandle(ref, () => ({
+    stopRecording: () => {
+      if (recorder.state === 'recording') {
+        recorder.stop();
+        return true;
+      }
+      return false;
+    },
+  }), [recorder]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
@@ -224,4 +238,4 @@ export function VoiceRecordingBoard({ roomId, room, onClose }: VoiceRecordingBoa
       </div>
     </div>
   );
-}
+});
