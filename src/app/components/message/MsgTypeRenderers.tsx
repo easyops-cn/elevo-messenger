@@ -491,13 +491,27 @@ export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: 
   const waveform = msc1767Audio?.waveform;
   if (Array.isArray(waveform) && waveform.length > 0) {
     return (
-      <VoiceMessage
-        mimeType={safeMimeType}
-        url={mxcUrl}
-        info={audioInfo}
-        encInfo={content.file}
-        waveform={waveform}
-      />
+      <Box
+        style={{
+          padding: config.space.S300,
+          backgroundColor: color.SurfaceVariant.Container,
+          color: color.SurfaceVariant.OnContainer,
+          borderRadius: config.radii.R400,
+          ...(outlined
+            ? {
+                boxShadow: `inset 0 0 0 ${config.borderWidth.B300} ${color.SurfaceVariant.ContainerLine}`,
+              }
+            : {}),
+        }}
+      >
+        <VoiceMessage
+          mimeType={safeMimeType}
+          url={mxcUrl}
+          info={audioInfo}
+          encInfo={content.file}
+          waveform={waveform}
+        />
+      </Box>
     );
   }
 

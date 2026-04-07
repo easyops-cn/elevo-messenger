@@ -154,7 +154,7 @@ export function VoiceMessage({
       >
         {bars.map((value, index) => {
           const normalized = Math.min(value, MAX_WAVEFORM_VALUE) / MAX_WAVEFORM_VALUE;
-          const height = Math.max(MIN_BAR_HEIGHT, normalized * MAX_BAR_HEIGHT);
+          const height = Math.max(MIN_BAR_HEIGHT, Math.sqrt(normalized) * MAX_BAR_HEIGHT);
           const barProgress = (index + 0.5) / bars.length;
           const played = barProgress <= progress;
 
