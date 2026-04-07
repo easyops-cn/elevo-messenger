@@ -1,17 +1,12 @@
-import React, { MouseEvent, useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Chip, Icon, IconButton, Icons, Spinner, Text, color, toRem } from 'folds';
+import React, { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Box, Chip, Icon, Icons, Spinner, Text, color, toRem } from 'folds';
 import { Room } from 'matrix-js-sdk';
 import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useVoiceRecorder } from '../../hooks/useVoiceRecorder';
-import {
-  PlayTimeCallback,
-  useMediaLoading,
-  useMediaPlay,
-  useMediaPlayTimeCallback,
-  useMediaSeek,
-} from '../../hooks/media';
+import { WaveformPlayer } from '../../components/media/WaveformPlayer';
 import { encryptFile } from '../../utils/matrix';
 import { getVoiceMsgContent } from './msgContent';
 import { secondsToMinutesAndSeconds } from '../../utils/common';
@@ -19,7 +14,7 @@ import * as css from './VoiceRecordingBoard.css';
 
 const MIN_BAR_HEIGHT = 2;
 const MAX_BAR_HEIGHT = 32;
-const MAX_WAVEFORM_VALUE = 1024;
+const MAX_LIVE_WAVEFORM_VALUE = 255;
 
 // ─── Live waveform (recording phase) ──────────────────────────────────────────
 
@@ -31,7 +26,7 @@ function LiveWaveform({ bars }: LiveWaveformProps) {
   return (
     <div className={css.WaveformContainer}>
       {bars.map((value, index) => {
-        const normalized = Math.min(value, MAX_WAVEFORM_VALUE) / MAX_WAVEFORM_VALUE;
+        const normalized = Math.min(value, MAX_LIVE_WAVEFORM_VALUE) / MAX_LIVE_WAVEFORM_VALUE;
         const height = Math.max(MIN_BAR_HEIGHT, Math.sqrt(normalized) * MAX_BAR_HEIGHT);
         return (
           <div
@@ -49,103 +44,6 @@ function LiveWaveform({ bars }: LiveWaveformProps) {
   );
 }
 
-// ─── Preview player (stopped phase) ───────────────────────────────────────────
-
-type PreviewPlayerProps = {
-  blobUrl: string;
-  mimeType: string;
-  durationMs: number;
-  waveform: number[];
-};
-
-function PreviewPlayer({ blobUrl, mimeType, durationMs, waveform }: PreviewPlayerProps) {
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(durationMs / 1000);
-
-  const getAudioRef = useCallback(() => audioRef.current, []);
-  const { loading } = useMediaLoading(getAudioRef);
-  const { playing, setPlaying } = useMediaPlay(getAudioRef);
-  const { seek } = useMediaSeek(getAudioRef);
-
-  const handlePlayTimeCallback: PlayTimeCallback = useCallback((d, ct) => {
-    setDuration(d);
-    setCurrentTime(ct);
-  }, []);
-  useMediaPlayTimeCallback(getAudioRef, handlePlayTimeCallback);
-
-  const progress = duration > 0 ? currentTime / duration : 0;
-
-  const handleWaveformClick = (evt: MouseEvent<HTMLDivElement>) => {
-    const rect = evt.currentTarget.getBoundingClientRect();
-    const ratio = Math.max(0, Math.min(1, (evt.clientX - rect.left) / rect.width));
-    seek(ratio * duration);
-  };
-
-  const displayTime = playing || currentTime > 0 ? currentTime : duration;
-
-  return (
-    <Box alignItems="Center" gap="200">
-      <IconButton
-        variant="Secondary"
-        size="300"
-        radii="Pill"
-        onClick={() => setPlaying(!playing)}
-        disabled={loading}
-        aria-label={playing ? 'Pause' : 'Play'}
-      >
-        {loading ? (
-          <Spinner variant="Secondary" size="50" />
-        ) : (
-          <Icon src={playing ? Icons.Pause : Icons.Play} size="50" filled={playing} />
-        )}
-      </IconButton>
-
-      <div
-        className={css.WaveformContainer}
-        onClick={handleWaveformClick}
-        onKeyDown={(e) => {
-          if (e.key === 'ArrowRight') seek(Math.min(currentTime + 5, duration));
-          if (e.key === 'ArrowLeft') seek(Math.max(currentTime - 5, 0));
-        }}
-        role="slider"
-        aria-valuemin={0}
-        aria-valuemax={duration || 1}
-        aria-valuenow={currentTime}
-        tabIndex={0}
-        style={{ cursor: 'pointer', userSelect: 'none' }}
-      >
-        {waveform.map((value, index) => {
-          const normalized = Math.min(value, MAX_WAVEFORM_VALUE) / MAX_WAVEFORM_VALUE;
-          const height = Math.max(MIN_BAR_HEIGHT, Math.sqrt(normalized) * MAX_BAR_HEIGHT);
-          const barProgress = (index + 0.5) / waveform.length;
-          const played = barProgress <= progress;
-          return (
-            <div
-              // eslint-disable-next-line react/no-array-index-key
-              key={index}
-              className={css.WaveformBar}
-              style={{
-                height: toRem(height),
-                backgroundColor: played ? color.Secondary.Main : color.Secondary.Container,
-              }}
-            />
-          );
-        })}
-      </div>
-
-      <Text size="T200" style={{ minWidth: toRem(48), textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-        {secondsToMinutesAndSeconds(displayTime)}
-      </Text>
-
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
-      <audio controls={false} autoPlay={false} ref={audioRef}>
-        <source src={blobUrl} type={mimeType} />
-      </audio>
-    </Box>
-  );
-}
-
 // ─── Main VoiceRecordingBoard ──────────────────────────────────────────────────
 
 type VoiceRecordingBoardProps = {
@@ -156,10 +54,11 @@ type VoiceRecordingBoardProps = {
 
 export function VoiceRecordingBoard({ roomId, room, onClose }: VoiceRecordingBoardProps) {
   const mx = useMatrixClient();
+  const { t } = useTranslation();
   const recorder = useVoiceRecorder();
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const blobUrlRef = useRef<string | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const startedRef = useRef(false);
 
   // Auto-start recording when board opens
@@ -176,10 +75,10 @@ export function VoiceRecordingBoard({ roomId, room, onClose }: VoiceRecordingBoa
   useEffect(() => {
     if (recorder.state === 'stopped' && recorder.audioBlob) {
       const url = URL.createObjectURL(recorder.audioBlob);
-      blobUrlRef.current = url;
+      setBlobUrl(url);
       return () => {
         URL.revokeObjectURL(url);
-        blobUrlRef.current = null;
+        setBlobUrl(null);
       };
     }
     return undefined;
@@ -266,12 +165,12 @@ export function VoiceRecordingBoard({ roomId, room, onClose }: VoiceRecordingBoa
           )}
 
           {/* Preview phase */}
-          {isStopped && blobUrlRef.current && (
-            <PreviewPlayer
-              blobUrl={blobUrlRef.current}
-              mimeType={recorder.mimeType}
-              durationMs={recorder.durationMs}
+          {isStopped && blobUrl && (
+            <WaveformPlayer
+              audioSrc={blobUrl}
               waveform={recorder.finalWaveform}
+              durationSec={recorder.durationMs / 1000}
+              mimeType={recorder.mimeType}
             />
           )}
 
@@ -285,30 +184,32 @@ export function VoiceRecordingBoard({ roomId, room, onClose }: VoiceRecordingBoa
                 radii="Pill"
                 after={<Icon src={Icons.MicMute} size="50" />}
               >
-                <Text size="B300">Stop</Text>
+                <Text size="B300">{t('voiceRecording.stop')}</Text>
               </Chip>
             )}
-            <Chip
-              as="button"
-              onClick={handleCancel}
-              variant="SurfaceVariant"
-              radii="Pill"
-              after={<Icon src={Icons.Cross} size="50" />}
-            >
-              <Text size="B300">Cancel</Text>
-            </Chip>
             {isStopped && (
-              <Chip
-                as="button"
-                onClick={handleSend}
-                variant="Primary"
-                radii="Pill"
-                outlined
-                disabled={sending}
-                after={sending ? <Spinner size="50" variant="Primary" /> : <Icon src={Icons.Send} size="50" filled />}
-              >
-                <Text size="B300">Send</Text>
-              </Chip>
+              <>
+                <Chip
+                  as="button"
+                  onClick={handleCancel}
+                  variant="SurfaceVariant"
+                  radii="Pill"
+                  after={<Icon src={Icons.Cross} size="50" />}
+                >
+                  <Text size="B300">{t('voiceRecording.cancel')}</Text>
+                </Chip>
+                <Chip
+                  as="button"
+                  onClick={handleSend}
+                  variant="Primary"
+                  radii="Pill"
+                  outlined
+                  disabled={sending}
+                  after={sending ? <Spinner size="50" variant="Primary" /> : <Icon src={Icons.Send} size="50" filled />}
+                >
+                  <Text size="B300">{t('voiceRecording.send')}</Text>
+                </Chip>
+              </>
             )}
           </Box>
         </div>

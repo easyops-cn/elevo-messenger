@@ -57,7 +57,7 @@ export const WaveformBar = style({
   flexShrink: 0,
   width: toRem(3),
   borderRadius: toRem(2),
-  transition: 'height 0.1s ease',
+  // transition: 'height 0.1s ease',
 });
 
 export const RecordingDot = style({

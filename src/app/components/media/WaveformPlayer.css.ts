@@ -1,7 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { config, toRem } from 'folds';
 
-export const VoiceMessageContainer = style({
+export const WaveformPlayerContainer = style({
   display: 'flex',
   alignItems: 'center',
   gap: config.space.S200,

@@ -801,6 +801,11 @@
     "searchOrTextReaction": "Search or Text Reaction",
     "react": "React"
   },
+  "voiceRecording": {
+    "stop": "Stop",
+    "cancel": "Cancel",
+    "send": "Send"
+  },
   "upload": {
     "retry": "Retry Upload",
     "cancel": "Cancel Upload",

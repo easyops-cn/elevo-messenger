@@ -801,6 +801,11 @@
     "searchOrTextReaction": "搜索或文字表情",
     "react": "表情回复"
   },
+  "voiceRecording": {
+    "stop": "停止",
+    "cancel": "取消",
+    "send": "发送"
+  },
   "upload": {
     "retry": "重新上传",
     "cancel": "取消上传",

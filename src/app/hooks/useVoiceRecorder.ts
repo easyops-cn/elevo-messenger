@@ -157,20 +157,24 @@ export function useVoiceRecorder(): VoiceRecorderControls {
       }
     }, 1000);
 
-    // Waveform animation loop
+    // Waveform sampling at ~50ms intervals
     const dataArray = new Uint8Array(analyser.fftSize);
-    const tick = () => {
-      analyser.getByteTimeDomainData(dataArray);
-      let peak = 0;
-      for (let i = 0; i < dataArray.length; i += 1) {
-        const amplitude = Math.abs(dataArray[i] - 128) * 2;
-        if (amplitude > peak) peak = amplitude;
+    let lastSampleTime = 0;
+    const tick = (now: number) => {
+      if (now - lastSampleTime >= 50) {
+        lastSampleTime = now;
+        analyser.getByteTimeDomainData(dataArray);
+        let peak = 0;
+        for (let i = 0; i < dataArray.length; i += 1) {
+          const amplitude = Math.abs(dataArray[i] - 128) * 2;
+          if (amplitude > peak) peak = amplitude;
+        }
+        allPeaksRef.current.push(peak);
+        setLiveWaveform((prev) => {
+          const next = [...prev, peak];
+          return next.length > MAX_LIVE_BARS ? next.slice(next.length - MAX_LIVE_BARS) : next;
+        });
       }
-      allPeaksRef.current.push(peak);
-      setLiveWaveform((prev) => {
-        const next = [...prev, peak];
-        return next.length > MAX_LIVE_BARS ? next.slice(next.length - MAX_LIVE_BARS) : next;
-      });
       rafRef.current = requestAnimationFrame(tick);
     };
     rafRef.current = requestAnimationFrame(tick);
