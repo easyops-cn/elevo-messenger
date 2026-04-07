@@ -31,6 +31,7 @@ import { FALLBACK_MIMETYPE, getBlobSafeMimeType } from '../../utils/mimeTypes';
 import { parseGeoUri, scaleYDimension } from '../../utils/common';
 import { Attachment, AttachmentBox, AttachmentContent, AttachmentHeader } from './attachment';
 import { FileHeader, FileDownloadButton } from './FileHeader';
+import { VoiceMessage } from './content/VoiceMessage';
 
 export function MBadEncrypted() {
   return (
@@ -484,6 +485,20 @@ export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: 
       return renderAsFile();
     }
     return <BrokenContent />;
+  }
+
+  const msc1767Audio = content['org.matrix.msc1767.audio'];
+  const waveform = msc1767Audio?.waveform;
+  if (Array.isArray(waveform) && waveform.length > 0) {
+    return (
+      <VoiceMessage
+        mimeType={safeMimeType}
+        url={mxcUrl}
+        info={audioInfo}
+        encInfo={content.file}
+        waveform={waveform}
+      />
+    );
   }
 
   const filename = content.filename ?? content.body ?? 'Audio';
