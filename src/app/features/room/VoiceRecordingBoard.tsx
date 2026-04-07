@@ -73,7 +73,7 @@ export function VoiceRecordingBoard({ roomId, room, onClose }: VoiceRecordingBoa
     if (startedRef.current) return;
     startedRef.current = true;
     recorder.start().catch((err: Error) => {
-      setError(err.message || 'Failed to access microphone');
+      setError(t(err.message) || t('voiceRecording.error.unknown'));
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

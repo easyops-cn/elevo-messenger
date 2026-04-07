@@ -100,7 +100,28 @@ export function useVoiceRecorder(): VoiceRecorderControls {
   stopRef.current = stop;
 
   const start = useCallback(async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('voiceRecording.error.unsupported');
+    }
+
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const hasAudioInput = devices.some((d) => d.kind === 'audioinput');
+    if (!hasAudioInput) {
+      throw new Error('voiceRecording.error.noDevice');
+    }
+
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'NotAllowedError') {
+        throw new Error('voiceRecording.error.permissionDenied');
+      }
+      if (err instanceof DOMException && err.name === 'NotFoundError') {
+        throw new Error('voiceRecording.error.notFound');
+      }
+      throw new Error('voiceRecording.error.unknown');
+    }
     streamRef.current = stream;
 
     const ctx = new AudioContext();
