@@ -30,7 +30,7 @@ export const VoiceRecordingBoardContainer = style([
 
 export const VoiceRecordingBoard = style({
   maxWidth: toRem(400),
-  width: '100%',
+  width: 'fit-content',
   backgroundColor: color.Surface.Container,
   color: color.Surface.OnContainer,
   borderRadius: config.radii.R400,
@@ -48,28 +48,55 @@ export const WaveformContainer = style({
   display: 'flex',
   alignItems: 'center',
   gap: toRem(2),
-  height: toRem(36),
-  flex: 1,
+  height: toRem(32),
+  width: toRem(158),
   overflow: 'hidden',
 });
 
 export const WaveformBar = style({
   flexShrink: 0,
-  width: toRem(3),
-  borderRadius: toRem(2),
+  width: toRem(2),
+  borderRadius: toRem(1),
   // transition: 'height 0.1s ease',
 });
 
 export const RecordingDot = style({
-  width: toRem(8),
-  height: toRem(8),
+  width: toRem(24),
+  height: toRem(24),
   borderRadius: '50%',
-  backgroundColor: color.Critical.Main,
   flexShrink: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
   animationName: blinkAnimation,
   animationDuration: '1.2s',
   animationTimingFunction: 'ease-in-out',
   animationIterationCount: 'infinite',
+});
+
+export const RecordingDotInner = style({
+  width: toRem(8),
+  height: toRem(8),
+  borderRadius: '50%',
+  backgroundColor: color.Critical.Main,
+});
+
+export const IdleDot = style({
+  width: toRem(24),
+  height: toRem(24),
+  borderRadius: '50%',
+  flexShrink: 0,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
+export const IdleDotInner = style({
+  width: toRem(8),
+  height: toRem(8),
+  borderRadius: '50%',
+  backgroundColor: color.Surface.OnContainer,
+  opacity: 0.3,
 });
 
 export const ErrorText = style({

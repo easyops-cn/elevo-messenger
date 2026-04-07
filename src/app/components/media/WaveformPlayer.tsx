@@ -51,8 +51,10 @@ export function WaveformPlayer({
   autoPlay = false,
 }: WaveformPlayerProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const waveformRef = useRef<HTMLDivElement | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(durationSec);
+  const [isDragging, setIsDragging] = useState(false);
 
   const prevSrcRef = useRef<string | null>(audioSrc);
   const pendingSeekRef = useRef<number | null>(null);
@@ -95,17 +97,51 @@ export function WaveformPlayer({
     }
   };
 
+  const seekToPosition = useCallback(
+    (clientX: number) => {
+      const el = waveformRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+      const targetTime = ratio * duration;
+      if (audioSrc) {
+        seek(targetTime);
+        setCurrentTime(targetTime);
+      } else if (!isLoading) {
+        pendingSeekRef.current = targetTime;
+        setCurrentTime(targetTime);
+      }
+    },
+    [audioSrc, duration, isLoading, seek],
+  );
+
   const handleWaveformClick = (evt: MouseEvent<HTMLDivElement>) => {
-    const rect = evt.currentTarget.getBoundingClientRect();
-    const ratio = Math.max(0, Math.min(1, (evt.clientX - rect.left) / rect.width));
-    const targetTime = ratio * duration;
-    if (audioSrc) {
-      seek(targetTime);
-    } else if (!isLoading) {
-      pendingSeekRef.current = targetTime;
-      setCurrentTime(targetTime);
-    }
+    seekToPosition(evt.clientX);
   };
+
+  const handleWaveformMouseDown = (evt: MouseEvent<HTMLDivElement>) => {
+    evt.preventDefault();
+    setIsDragging(true);
+    seekToPosition(evt.clientX);
+  };
+
+  useEffect(() => {
+    if (!isDragging) return;
+
+    const handleMouseMove = (evt: globalThis.MouseEvent) => {
+      seekToPosition(evt.clientX);
+    };
+    const handleMouseUp = () => {
+      setIsDragging(false);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isDragging, seekToPosition]);
 
   const isLoadingFinal = isLoading || loading;
   const displayTime = playing || currentTime > 0 ? currentTime : duration;
@@ -116,6 +152,7 @@ export function WaveformPlayer({
         variant="Secondary"
         size="300"
         radii="Pill"
+        fill="None"
         onClick={handlePlay}
         disabled={isLoadingFinal}
         aria-label={playing ? 'Pause' : 'Play'}
@@ -128,8 +165,10 @@ export function WaveformPlayer({
       </IconButton>
 
       <div
+        ref={waveformRef}
         className={css.WaveformContainer}
         onClick={handleWaveformClick}
+        onMouseDown={handleWaveformMouseDown}
         onKeyDown={(e) => {
           if (e.key === 'ArrowRight') seek(Math.min(currentTime + 5, duration));
           if (e.key === 'ArrowLeft') seek(Math.max(currentTime - 5, 0));

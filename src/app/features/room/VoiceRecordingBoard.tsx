@@ -15,6 +15,7 @@ import * as css from './VoiceRecordingBoard.css';
 const MIN_BAR_HEIGHT = 2;
 const MAX_BAR_HEIGHT = 32;
 const MAX_LIVE_WAVEFORM_VALUE = 255;
+const MAX_LIVE_BARS = 40;
 
 // ─── Live waveform (recording phase) ──────────────────────────────────────────
 
@@ -23,11 +24,16 @@ type LiveWaveformProps = {
 };
 
 function LiveWaveform({ bars }: LiveWaveformProps) {
+  const padding = Math.max(0, MAX_LIVE_BARS - bars.length);
+  const displayBars = bars.length > 0
+    ? Array(padding).fill(-1).concat(bars)
+    : [];
   return (
     <div className={css.WaveformContainer}>
-      {bars.map((value, index) => {
-        const normalized = Math.min(value, MAX_LIVE_WAVEFORM_VALUE) / MAX_LIVE_WAVEFORM_VALUE;
-        const height = Math.max(MIN_BAR_HEIGHT, Math.sqrt(normalized) * MAX_BAR_HEIGHT);
+      {displayBars.map((value, index) => {
+        const normalized = Math.max(value, 0);
+        const h = normalized / MAX_LIVE_WAVEFORM_VALUE;
+        const height = Math.max(MIN_BAR_HEIGHT, Math.sqrt(h) * MAX_BAR_HEIGHT);
         return (
           <div
             // eslint-disable-next-line react/no-array-index-key
@@ -36,6 +42,7 @@ function LiveWaveform({ bars }: LiveWaveformProps) {
             style={{
               height: toRem(height),
               backgroundColor: color.Critical.Main,
+              opacity: value < 0 ? 0.15 : 1,
             }}
           />
         );
@@ -153,8 +160,8 @@ export function VoiceRecordingBoard({ roomId, room, onClose }: VoiceRecordingBoa
           {/* Recording phase */}
           {(recorder.state === 'idle' || isRecording) && (
             <Box alignItems="Center" gap="200">
-              {isRecording && <div className={css.RecordingDot} />}
-              {!isRecording && !error && <Spinner variant="Secondary" size="200" />}
+              {isRecording && <div className={css.RecordingDot}><div className={css.RecordingDotInner} /></div>}
+              {!isRecording && !error && <div className={css.IdleDot}><div className={css.IdleDotInner} /></div>}
 
               <LiveWaveform bars={recorder.liveWaveform} />
 
@@ -176,13 +183,14 @@ export function VoiceRecordingBoard({ roomId, room, onClose }: VoiceRecordingBoa
 
           {/* Action buttons */}
           <Box justifyContent="End" gap="200">
-            {isRecording && (
+            {(recorder.state === 'idle' || isRecording) && (
               <Chip
                 as="button"
                 onClick={() => recorder.stop()}
                 variant="SurfaceVariant"
                 radii="Pill"
                 after={<Icon src={Icons.MicMute} size="50" />}
+                disabled={!isRecording}
               >
                 <Text size="B300">{t('voiceRecording.stop')}</Text>
               </Chip>
