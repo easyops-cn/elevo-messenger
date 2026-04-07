@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { MouseEvent, useCallback, useMemo, useRef, useState } from 'react';
+import React, { MouseEvent, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Icon, IconButton, Icons, Spinner, Text, color, toRem } from 'folds';
 import { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
@@ -99,6 +99,8 @@ export function VoiceMessage({
   const bars = useMemo(() => sampleWaveform(waveform, MAX_BARS), [waveform]);
   const progress = duration > 0 ? currentTime / duration : 0;
 
+  const pendingSeekRef = useRef<number | null>(null);
+
   const handleWaveformClick = (evt: MouseEvent<HTMLDivElement>) => {
     const rect = evt.currentTarget.getBoundingClientRect();
     const x = evt.clientX - rect.left;
@@ -107,9 +109,24 @@ export function VoiceMessage({
     if (srcState.status === AsyncStatus.Success) {
       seek(targetTime);
     } else if (srcState.status !== AsyncStatus.Loading) {
-      loadSrc();
+      pendingSeekRef.current = targetTime;
+      setCurrentTime(targetTime);
     }
   };
+
+  useEffect(() => {
+    if (srcState.status === AsyncStatus.Success && pendingSeekRef.current !== null) {
+      const audioEl = audioRef.current;
+      if (!audioEl) return;
+      const targetTime = pendingSeekRef.current;
+      pendingSeekRef.current = null;
+      const onLoaded = () => {
+        audioEl.currentTime = targetTime;
+        audioEl.removeEventListener('loadedmetadata', onLoaded);
+      };
+      audioEl.addEventListener('loadedmetadata', onLoaded);
+    }
+  }, [srcState.status]);
 
   const isLoading = srcState.status === AsyncStatus.Loading || loading;
   const displayTime = playing || currentTime > 0 ? currentTime : duration;
