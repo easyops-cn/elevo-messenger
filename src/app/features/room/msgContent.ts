@@ -1,5 +1,6 @@
 import { IContent, MatrixClient, MsgType } from 'matrix-js-sdk';
 import to from 'await-to-js';
+import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 import {
   IThumbnailContent,
   MATRIX_BLUR_HASH_PROPERTY_NAME,
@@ -145,6 +146,57 @@ export const getAudioMsgContent = (item: TUploadItem, mxc: string): IContent => 
   } else {
     content.url = mxc;
   }
+  return content;
+};
+
+export interface VoiceUploadInfo {
+  file: File;
+  encInfo?: EncryptedAttachmentInfo;
+}
+
+export const getVoiceMsgContent = (
+  item: VoiceUploadInfo,
+  mxc: string,
+  durationMs: number,
+  waveform: number[]
+): IContent => {
+  const { file, encInfo } = item;
+  const mimetype = file.type;
+  const { size } = file;
+
+  const fileField = encInfo ? { ...encInfo, url: mxc } : undefined;
+  const urlField = encInfo ? undefined : mxc;
+
+  const content: IContent = {
+    msgtype: MsgType.Audio,
+    body: 'Voice message',
+    info: {
+      duration: durationMs,
+      mimetype,
+      size,
+    },
+    'org.matrix.msc1767.text': 'Voice message',
+    'org.matrix.msc1767.file': {
+      url: mxc,
+      ...(encInfo ? { file: fileField } : {}),
+      name: 'Voice message.ogg',
+      mimetype,
+      size,
+    },
+    'org.matrix.msc1767.audio': {
+      duration: durationMs,
+      waveform,
+    },
+    'org.matrix.msc3245.voice': {},
+  };
+
+  if (urlField) {
+    content.url = urlField;
+  }
+  if (fileField) {
+    content.file = fileField;
+  }
+
   return content;
 };
 

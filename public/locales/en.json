@@ -801,6 +801,16 @@
     "searchOrTextReaction": "Search or Text Reaction",
     "react": "React"
   },
+  "voiceRecording": {
+    "stop": "Stop",
+    "cancel": "Cancel",
+    "send": "Send",
+    "error.unsupported": "Your browser does not support voice recording",
+    "error.noDevice": "No microphone detected. Please connect a microphone and try again",
+    "error.permissionDenied": "Microphone access denied. Please allow microphone access in system settings",
+    "error.notFound": "No available recording device found",
+    "error.unknown": "Unable to access recording device"
+  },
   "upload": {
     "retry": "Retry Upload",
     "cancel": "Cancel Upload",

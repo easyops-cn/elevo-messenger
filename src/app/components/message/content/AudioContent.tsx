@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/media-has-caption */
-import React, { ReactNode, useCallback, useRef, useState } from 'react';
+import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Badge, Chip, Icon, IconButton, Icons, ProgressBar, Spinner, Text, toRem } from 'folds';
 import { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 import { Range } from 'react-range';
@@ -14,7 +14,6 @@ import {
   useMediaSeek,
   useMediaVolume,
 } from '../../../hooks/media';
-import { useThrottle } from '../../../hooks/useThrottle';
 import { secondsToMinutesAndSeconds } from '../../../utils/common';
 import {
   decryptFile,
@@ -24,10 +23,6 @@ import {
 } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 
-const PLAY_TIME_THROTTLE_OPS = {
-  wait: 500,
-  immediate: true,
-};
 
 type RenderMediaControlProps = {
   after: ReactNode;
@@ -79,16 +74,38 @@ export function AudioContent({
     setDuration(d);
     setCurrentTime(ct);
   }, []);
-  useMediaPlayTimeCallback(
-    getAudioRef,
-    useThrottle(handlePlayTimeCallback, PLAY_TIME_THROTTLE_OPS)
-  );
+  useMediaPlayTimeCallback(getAudioRef, handlePlayTimeCallback);
+
+  const pendingSeekRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (srcState.status === AsyncStatus.Success && pendingSeekRef.current !== null) {
+      const audioEl = audioRef.current;
+      if (!audioEl) return;
+      const targetTime = pendingSeekRef.current;
+      pendingSeekRef.current = null;
+      const onLoaded = () => {
+        audioEl.currentTime = targetTime;
+        audioEl.removeEventListener('loadedmetadata', onLoaded);
+      };
+      audioEl.addEventListener('loadedmetadata', onLoaded);
+    }
+  }, [srcState.status]);
 
   const handlePlay = () => {
     if (srcState.status === AsyncStatus.Success) {
       setPlaying(!playing);
     } else if (srcState.status !== AsyncStatus.Loading) {
       loadSrc();
+    }
+  };
+
+  const handleProgressSeek = (time: number) => {
+    if (srcState.status === AsyncStatus.Success) {
+      seek(time);
+    } else {
+      pendingSeekRef.current = time;
+      setCurrentTime(time);
     }
   };
 
@@ -99,7 +116,7 @@ export function AudioContent({
         min={0}
         max={duration || 1}
         values={[currentTime]}
-        onChange={(values) => seek(values[0])}
+        onChange={(values) => handleProgressSeek(values[0])}
         renderTrack={(params) => (
           <div {...params.props}>
             {params.children}

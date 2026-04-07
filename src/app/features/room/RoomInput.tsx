@@ -104,6 +104,7 @@ import {
 } from './msgContent';
 import { getMemberDisplayName, getMentionContent, trimReplyFromBody } from '../../utils/room';
 import { CommandAutocomplete } from './CommandAutocomplete';
+import { VoiceRecordingBoard, VoiceRecordingBoardHandlers } from './VoiceRecordingBoard';
 import { Command, SHRUG, TABLEFLIP, UNFLIP, useCommands } from '../../hooks/useCommands';
 import { mobileOrTablet } from '../../utils/user-agent';
 import { useElementSizeObserver } from '../../hooks/useElementSizeObserver';
@@ -174,12 +175,14 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       legacyUsernameColor || direct ? colorMXID(replyUserID ?? '') : replyPowerColor;
 
     const [uploadBoard, setUploadBoard] = useState(true);
+    const [voiceRecordingOpen, setVoiceRecordingOpen] = useState(false);
     const [selectedFiles, setSelectedFiles] = useAtom(roomIdToUploadItemsAtomFamily(roomId));
     const uploadFamilyObserverAtom = createUploadFamilyObserverAtom(
       roomUploadAtomFamily,
       selectedFiles.map((f) => f.file)
     );
     const uploadBoardHandlers = useRef<UploadBoardImperativeHandlers>();
+    const voiceRecordingRef = useRef<VoiceRecordingBoardHandlers>(null);
 
     const imagePackRooms: Room[] = useImagePackRooms(roomId, roomToParents);
 
@@ -495,6 +498,14 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
 
     return (
       <div ref={ref}>
+        {voiceRecordingOpen && (
+          <VoiceRecordingBoard
+            ref={voiceRecordingRef}
+            roomId={roomId}
+            room={room}
+            onClose={() => setVoiceRecordingOpen(false)}
+          />
+        )}
         {selectedFiles.length > 0 && (
           <UploadBoard
             header={
@@ -641,6 +652,25 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           }
           after={
             <>
+              <IconButton
+                variant="SurfaceVariant"
+                size="300"
+                radii="300"
+                aria-pressed={voiceRecordingOpen}
+                aria-label="Record voice message"
+                onClick={() => {
+                  if (voiceRecordingOpen) {
+                    const stopped = voiceRecordingRef.current?.stopRecording();
+                    if (!stopped) {
+                      setVoiceRecordingOpen(false);
+                    }
+                  } else {
+                    setVoiceRecordingOpen(true);
+                  }
+                }}
+              >
+                <Icon src={Icons.Mic} filled={voiceRecordingOpen} />
+              </IconButton>
               <IconButton
                 variant="SurfaceVariant"
                 size="300"
