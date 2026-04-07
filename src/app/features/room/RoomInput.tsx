@@ -104,6 +104,7 @@ import {
 } from './msgContent';
 import { getMemberDisplayName, getMentionContent, trimReplyFromBody } from '../../utils/room';
 import { CommandAutocomplete } from './CommandAutocomplete';
+import { VoiceRecordingBoard } from './VoiceRecordingBoard';
 import { Command, SHRUG, TABLEFLIP, UNFLIP, useCommands } from '../../hooks/useCommands';
 import { mobileOrTablet } from '../../utils/user-agent';
 import { useElementSizeObserver } from '../../hooks/useElementSizeObserver';
@@ -174,6 +175,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       legacyUsernameColor || direct ? colorMXID(replyUserID ?? '') : replyPowerColor;
 
     const [uploadBoard, setUploadBoard] = useState(true);
+    const [voiceRecordingOpen, setVoiceRecordingOpen] = useState(false);
     const [selectedFiles, setSelectedFiles] = useAtom(roomIdToUploadItemsAtomFamily(roomId));
     const uploadFamilyObserverAtom = createUploadFamilyObserverAtom(
       roomUploadAtomFamily,
@@ -495,6 +497,13 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
 
     return (
       <div ref={ref}>
+        {voiceRecordingOpen && (
+          <VoiceRecordingBoard
+            roomId={roomId}
+            room={room}
+            onClose={() => setVoiceRecordingOpen(false)}
+          />
+        )}
         {selectedFiles.length > 0 && (
           <UploadBoard
             header={
@@ -641,6 +650,16 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           }
           after={
             <>
+              <IconButton
+                variant="SurfaceVariant"
+                size="300"
+                radii="300"
+                aria-pressed={voiceRecordingOpen}
+                aria-label="Record voice message"
+                onClick={() => setVoiceRecordingOpen((v) => !v)}
+              >
+                <Icon src={Icons.Mic} filled={voiceRecordingOpen} />
+              </IconButton>
               <IconButton
                 variant="SurfaceVariant"
                 size="300"
