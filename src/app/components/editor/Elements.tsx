@@ -9,13 +9,14 @@ import {
 } from 'slate-react';
 
 import * as css from '../../styles/CustomHtml.css';
-import { CommandElement, EmoticonElement, FileRefElement, LinkElement, MentionElement } from './slate';
+import { CommandElement, EmoticonElement, FileRefElement, LinkElement, MentionElement, TaskRefElement } from './slate';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { getBeginCommand } from './utils';
 import { BlockType } from './types';
 import { mxcUrlToHttp } from '../../utils/matrix';
 import { MxcImg } from '../MxcImg';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
+import { TasksIcon } from '../../icons/TasksIcon';
 
 // Put this at the start and end of an inline component to work around this Chromium bug:
 // https://bugs.chromium.org/p/chromium/issues/detail?id=1249405
@@ -143,6 +144,30 @@ function RenderFileRefElement({
   );
 }
 
+function RenderTaskRefElement({
+  attributes,
+  element,
+  children,
+}: { element: TaskRefElement } & RenderElementProps) {
+  const selected = useSelected();
+  const focused = useFocused();
+
+  return (
+    <span
+      {...attributes}
+      className={css.TaskRef({
+        focus: selected && focused,
+      })}
+      contentEditable={false}
+      title={element.title}
+    >
+      <Icon src={<TasksIcon />} style={{ width: toRem(12), height: toRem(12) }} />
+      {` ${element.title}`}
+      {children}
+    </span>
+  );
+}
+
 export function RenderElement({ attributes, element, children }: RenderElementProps) {
   switch (element.type) {
     case BlockType.Paragraph:
@@ -246,6 +271,12 @@ export function RenderElement({ attributes, element, children }: RenderElementPr
         <RenderFileRefElement attributes={attributes} element={element}>
           {children}
         </RenderFileRefElement>
+      );
+    case BlockType.TaskRef:
+      return (
+        <RenderTaskRefElement attributes={attributes} element={element}>
+          {children}
+        </RenderTaskRefElement>
       );
     default:
       return (

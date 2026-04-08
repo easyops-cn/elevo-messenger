@@ -22,6 +22,7 @@ import Linkify from 'linkify-react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ChildNode } from 'domhandler';
 import { useTranslation } from 'react-i18next';
+import { TasksIcon } from '../icons/TasksIcon';
 import * as css from '../styles/CustomHtml.css';
 import {
   getMxIdLocalPart,
@@ -484,6 +485,18 @@ export const getReactCustomHtmlParser = (
             <span className={css.FileRef()} title={filePath}>
               <Icon src={Icons.File} style={{ width: toRem(14), height: toRem(14) }} />
               {` ${fileName}`}
+            </span>
+          );
+        }
+
+        if (name === 'span' && 'data-task-ref' in attribs) {
+          const taskId = attribs['data-task-ref'];
+          const rawText = extractTextFromChildren(children);
+          const taskTitle = rawText.replace(/^\[/, '').replace(/\]$/, '');
+          return (
+            <span className={css.TaskRef()} title={taskTitle || taskId}>
+              <Icon src={<TasksIcon />} style={{ width: toRem(14), height: toRem(14) }} />
+              {` ${taskTitle || taskId}`}
             </span>
           );
         }

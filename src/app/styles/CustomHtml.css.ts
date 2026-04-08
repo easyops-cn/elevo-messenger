@@ -223,6 +223,33 @@ export const FileRef = recipe({
   },
 });
 
+export const TaskRef = recipe({
+  base: [
+    DefaultReset,
+    {
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: toRem(4),
+      verticalAlign: 'middle',
+      lineHeight: toRem(18),
+      backgroundColor: color.SurfaceVariant.Container,
+      color: color.SurfaceVariant.OnContainer,
+      boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.SurfaceVariant.ContainerLine}`,
+      padding: `${toRem(1)} ${toRem(6)}`,
+      borderRadius: config.radii.R300,
+      fontWeight: config.fontWeight.W500,
+      fontSize: config.fontSize.T200,
+    },
+  ],
+  variants: {
+    focus: {
+      true: {
+        boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.SurfaceVariant.OnContainer}`,
+      },
+    },
+  },
+});
+
 export const EmoticonBase = style([
   DefaultReset,
   {

@@ -54,8 +54,15 @@ export type FileRefElement = {
   workspaceName: string;
   children: Text[];
 };
+export type TaskRefElement = {
+  type: BlockType.TaskRef;
+  id: string;
+  workspaceId: string;
+  title: string;
+  children: Text[];
+};
 
-export type InlineElement = Text | LinkElement | MentionElement | EmoticonElement | CommandElement | FileRefElement;
+export type InlineElement = Text | LinkElement | MentionElement | EmoticonElement | CommandElement | FileRefElement | TaskRefElement;
 
 export type ParagraphElement = {
   type: BlockType.Paragraph;
@@ -101,6 +108,7 @@ export type CustomElement =
   | EmoticonElement
   | CommandElement
   | FileRefElement
+  | TaskRefElement
   | ParagraphElement
   | HeadingElement
   | CodeLineElement

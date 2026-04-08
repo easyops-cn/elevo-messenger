@@ -83,6 +83,8 @@ const elementToCustomHtml = (node: CustomElement, children: string): string => {
       return `/${sanitizeText(node.command)}`;
     case BlockType.FileRef:
       return `<span data-file-ref="${sanitizeText(node.path)}">[${sanitizeText(node.name)}]</span>`;
+    case BlockType.TaskRef:
+      return `<span data-task-ref="${sanitizeText(node.id)}">[${sanitizeText(node.title)}]</span>`;
     default:
       return children;
   }
@@ -163,6 +165,8 @@ const elementToPlainText = (node: CustomElement, children: string): string => {
       return `/${node.command}`;
     case BlockType.FileRef:
       return `[${node.name}]`;
+    case BlockType.TaskRef:
+      return `[${node.title}]`;
     default:
       return children;
   }
@@ -254,4 +258,28 @@ export const getFileReferences = (editor: Editor): FileRefData[] => {
 
   editor.children.forEach(collect);
   return refs;
+};
+
+export type TaskRefData = {
+  id: string;
+  workspaceId: string;
+};
+export const getTaskReference = (editor: Editor): TaskRefData | null => {
+  const collect = (node: Descendant): TaskRefData | null => {
+    if (Text.isText(node)) return null;
+    if (node.type === BlockType.TaskRef) {
+      return { id: node.id, workspaceId: node.workspaceId };
+    }
+    for (const child of node.children) {
+      const found = collect(child);
+      if (found) return found;
+    }
+    return null;
+  };
+
+  for (const child of editor.children) {
+    const found = collect(child);
+    if (found) return found;
+  }
+  return null;
 };

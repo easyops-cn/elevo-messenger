@@ -8,6 +8,7 @@ import {
   HeadingLevel,
   LinkElement,
   MentionElement,
+  TaskRefElement,
 } from './slate';
 
 const ALL_MARK_TYPE: MarkType[] = [
@@ -205,6 +206,18 @@ export const createFileRefElement = (
   name,
   workspaceId,
   workspaceName,
+  children: [{ text: '' }],
+});
+
+export const createTaskRefElement = (
+  id: string,
+  workspaceId: string,
+  title: string
+): TaskRefElement => ({
+  type: BlockType.TaskRef,
+  id,
+  workspaceId,
+  title,
   children: [{ text: '' }],
 });
 

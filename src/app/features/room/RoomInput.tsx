@@ -11,7 +11,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import { isKeyHotkey } from 'is-hotkey';
 import { EventType, IContent, MsgType, RelationType, Room } from 'matrix-js-sdk';
 import { ReactEditor } from 'slate-react';
-import { Transforms, Editor } from 'slate';
+import { Transforms, Editor, Element as SlateElement } from 'slate';
 import {
   Box,
   Dialog,
@@ -56,6 +56,8 @@ import {
   getMentions,
   getFileReferences,
   createFileRefElement,
+  getTaskReference,
+  createTaskRefElement,
 } from '../../components/editor';
 import { EmojiBoard, EmojiBoardTab } from '../../components/emoji-board';
 import { UseStateProvider } from '../../components/UseStateProvider';
@@ -129,6 +131,11 @@ interface WorkspaceExplorerMessage {
   name: string;
   workspaceId: string;
   workspaceName: string;
+}
+
+interface TaskManagementMessage {
+  type: 'select-task';
+  task: null | { id: string; workspace_id: string; title: string };
 }
 
 interface RoomInputProps {
@@ -212,6 +219,35 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       [editor]
     );
     useSdkMessageListener<WorkspaceExplorerMessage>('workspace-explorer', handleWorkspaceFileRef);
+
+    const removeExistingTaskRef = useCallback(() => {
+      const taskRef = getTaskReference(editor);
+      if (taskRef) {
+        Transforms.removeNodes(editor, {
+          at: [],
+          match: (n) => SlateElement.isElement(n) && n.type === 'task-ref',
+        });
+      }
+    }, [editor]);
+
+    const handleTaskSelect = useCallback(
+      (payload: SdkMessagePayload<TaskManagementMessage>) => {
+        const { data } = payload;
+        if (data?.type === 'select-task') {
+          removeExistingTaskRef();
+          if (data.task) {
+            const element = createTaskRefElement(data.task.id, data.task.workspace_id, data.task.title);
+            ReactEditor.focus(editor);
+            Transforms.select(editor, Editor.end(editor, []));
+            Transforms.insertNodes(editor, element);
+            Transforms.collapse(editor, { edge: 'end' });
+            moveCursor(editor, true);
+          }
+        }
+      },
+      [editor, removeExistingTaskRef]
+    );
+    useSdkMessageListener<TaskManagementMessage>('task-management', handleTaskSelect);
 
     const handleFiles = useCallback(
       async (files: File[]) => {
@@ -389,6 +425,11 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
 
       if (fileRefs.length > 0) {
         content['vip.elevo.file_references'] = fileRefs;
+      }
+
+      const taskRef = getTaskReference(editor);
+      if (taskRef) {
+        content['vip.elevo.task_reference'] = taskRef;
       }
 
       if (replyDraft && replyDraft.userId !== mx.getUserId()) {
