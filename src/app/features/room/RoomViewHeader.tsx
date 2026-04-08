@@ -70,7 +70,7 @@ import { ContainerColor } from '../../styles/ContainerColor.css';
 import { RoomSettingsPage } from '../../state/roomSettings';
 import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
-import { openExternalUrl } from '../../plugins/useTauriOpener';
+import { openSidePanel } from '../../plugins/useTauriOpener';
 import { TasksIcon } from '../../icons/TasksIcon';
 
 type RoomMenuProps = {
@@ -514,7 +514,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                 <IconButton
                   fill="None"
                   ref={triggerRef}
-                  onClick={() => openExternalUrl(tasksUrl, room.roomId)}
+                  onClick={() => openSidePanel(tasksUrl, room.roomId)}
                 >
                   <Icon size="400" src={TasksIcon} />
                 </IconButton>
@@ -536,7 +536,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                   fill="None"
                   ref={triggerRef}
                   onClick={() =>
-                    openExternalUrl(workspaceExplorerUrl, room.roomId)
+                    openSidePanel(workspaceExplorerUrl, room.roomId)
                   }
                 >
                   <Icon size="400" src={Icons.Category} />
