@@ -6,6 +6,7 @@ import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useVoiceRecorder, getExtFromMimeType } from '../../hooks/useVoiceRecorder';
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { WaveformPlayer } from '../../components/media/WaveformPlayer';
 import { encryptFile } from '../../utils/matrix';
 import { getVoiceMsgContent } from './msgContent';
@@ -68,6 +69,9 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
   const mx = useMatrixClient();
   const { t } = useTranslation();
   const recorder = useVoiceRecorder();
+  const speech = useSpeechRecognition();
+  const [recognizedText, setRecognizedText] = useState('');
+  const [sendingText, setSendingText] = useState(false);
   useImperativeHandle(ref, () => ({
     stopRecording: () => {
       if (recorder.state === 'recording') {
@@ -86,11 +90,28 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
-    recorder.start().catch((err: Error) => {
+    recorder.start().then(() => {
+      if (speech.supported) speech.start();
+    }).catch((err: Error) => {
       setError(t(err.message) || t('voiceRecording.error.unknown'));
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Stop speech recognition when recording stops, lock in final text
+  useEffect(() => {
+    if (recorder.state === 'stopped' && speech.state !== 'idle') {
+      speech.stop();
+      setRecognizedText(speech.finalTranscript);
+    }
+  }, [recorder.state, speech]);
+
+  // Keep textarea in sync with live recognition during recording
+  useEffect(() => {
+    if (recorder.state === 'recording') {
+      setRecognizedText(speech.transcript);
+    }
+  }, [recorder.state, speech.transcript]);
 
   // Create / revoke blob URL when recording stops
   useEffect(() => {
@@ -109,10 +130,28 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
   useEffect(
     () => () => {
       recorder.cancel();
+      speech.reset();
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+
+  const handleSendText = async () => {
+    const text = recognizedText.trim();
+    if (!text || sendingText) return;
+    setSendingText(true);
+    try {
+      mx.sendMessage(roomId, {
+        msgtype: 'm.text',
+        body: text,
+      } as any);
+      setRecognizedText('');
+    } catch (err) {
+      setError('Failed to send text message.');
+    } finally {
+      setSendingText(false);
+    }
+  };
 
   const handleSend = async () => {
     if (!recorder.audioBlob || sending) return;
@@ -196,8 +235,36 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
             />
           )}
 
+          {/* Speech recognition textarea */}
+          {(isRecording || isStopped) && speech.supported && (
+            <textarea
+              className={css.SpeechTextArea}
+              readOnly={isRecording}
+              value={isRecording ? speech.transcript : recognizedText}
+              onChange={(e) => setRecognizedText(e.target.value)}
+              placeholder={t('voiceRecording.speechPlaceholder')}
+              rows={2}
+            />
+          )}
+
           {/* Action buttons */}
-          <Box justifyContent="End" gap="200">
+          <div className={css.ActionBar}>
+            {/* Left: Send Text */}
+            {isStopped && speech.supported && recognizedText.trim() && (
+              <Chip
+                as="button"
+                onClick={handleSendText}
+                variant="SurfaceVariant"
+                radii="Pill"
+                disabled={sendingText}
+                after={sendingText ? <Spinner size="50" /> : <Icon src={Icons.Send} size="50" />}
+              >
+                <Text size="B300">{t('voiceRecording.sendText')}</Text>
+              </Chip>
+            )}
+            {!isStopped && <div />}
+
+            {/* Right: voice controls */}
             {(recorder.state === 'idle' || isRecording) && (
               <Chip
                 as="button"
@@ -234,7 +301,7 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
                 </Chip>
               </>
             )}
-          </Box>
+          </div>
         </div>
       </div>
     </div>

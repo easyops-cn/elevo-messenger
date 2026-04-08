@@ -102,3 +102,35 @@ export const IdleDotInner = style({
 export const ErrorText = style({
   color: color.Critical.Main,
 });
+
+export const SpeechTextArea = style({
+  width: '100%',
+  minHeight: toRem(48),
+  maxHeight: toRem(120),
+  resize: 'none',
+  backgroundColor: color.Surface.Container,
+  color: color.Surface.OnContainer,
+  border: `${config.borderWidth.B300} solid ${color.Surface.ContainerLine}`,
+  borderRadius: config.radii.R300,
+  padding: `${config.space.S200} ${config.space.S300}`,
+  fontFamily: 'inherit',
+  fontSize: toRem(14),
+  lineHeight: '1.4',
+  outline: 'none',
+  selectors: {
+    '&:read-only': {
+      opacity: 0.7,
+      cursor: 'default',
+    },
+    '&:focus:not(:read-only)': {
+      borderColor: color.Primary.Main,
+    },
+  },
+});
+
+export const ActionBar = style({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: config.space.S200,
+});

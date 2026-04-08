@@ -805,6 +805,8 @@
     "stop": "Stop",
     "cancel": "Cancel",
     "send": "Send",
+    "sendText": "Send Text",
+    "speechPlaceholder": "Recognized speech will appear here...",
     "error.unsupported": "Your browser does not support voice recording",
     "error.noDevice": "No microphone detected. Please connect a microphone and try again",
     "error.permissionDenied": "Microphone access denied. Please allow microphone access in system settings",
