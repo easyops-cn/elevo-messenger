@@ -13,7 +13,7 @@ import { SupportedUIAFlowsLoader } from '../../../components/SupportedUIAFlowsLo
 import { getLoginPath } from '../../pathUtils';
 import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 import { RegisterPathSearchParams } from '../../paths';
-import { useClientConfig, getOidcStaticClientId } from '../../../hooks/useClientConfig';
+import { useElevoConfig, getOidcStaticClientId } from '../../../hooks/useElevoConfig';
 import { useOidcIssuer } from '../../../hooks/useOidcIssuer';
 import { OidcLogin } from '../oidc/OidcLogin';
 
@@ -34,9 +34,9 @@ export function Register() {
   const [searchParams] = useSearchParams();
   const registerSearchParams = useRegisterSearchParams(searchParams);
   const { sso } = useParsedLoginFlows(loginFlows.flows);
-  const clientConfig = useClientConfig();
+  const elevoConfig = useElevoConfig();
   const oidcIssuer = useOidcIssuer();
-  const oidcClientId = oidcIssuer ? getOidcStaticClientId(clientConfig, server) : undefined;
+  const oidcClientId = oidcIssuer ? getOidcStaticClientId(elevoConfig, server) : undefined;
   const hasSsoOrOidc = !!sso || !!oidcClientId;
 
   // redirect to /login because only that path handle m.login.token

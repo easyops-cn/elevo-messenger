@@ -68,7 +68,7 @@ import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { InviteUserPrompt } from '../../components/invite-user-prompt';
 import { ContainerColor } from '../../styles/ContainerColor.css';
 import { RoomSettingsPage } from '../../state/roomSettings';
-import { useWorkspacesConfig } from '../../hooks/useWorkspacesConfig';
+import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
 import { openExternalUrl } from '../../plugins/useTauriOpener';
 import { TasksIcon } from '../../icons/TasksIcon';
@@ -266,22 +266,26 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const space = useSpaceOptionally();
   const [menuAnchor, setMenuAnchor] = useState<RectCords>();
   const [pinMenuAnchor, setPinMenuAnchor] = useState<RectCords>();
-  const workspacesConfig = useWorkspacesConfig();
+  const elevoConfig = useElevoConfig();
   const direct = useIsDirectRoom();
 
   const workspacesStateEvent = useStateEvent(room, ELEVO_WORKSPACES_STATE_KEY as any);
-  const linkedWorkspaceIds: string[] = (
+  const linkedWorkspaces: WorkspaceItem[] =
     (workspacesStateEvent?.getContent() as { workspaces?: WorkspaceItem[] } | undefined)
-      ?.workspaces ?? []
-  ).map((w) => w.id);
+      ?.workspaces ?? [];
+  const linkedWorkspaceIds: string[] = linkedWorkspaces.map((w) => w.id);
   const workspaceExplorerUrl =
-    workspacesConfig.explorerUrl && linkedWorkspaceIds.length > 0
-      ? `${workspacesConfig.explorerUrl}?ids=${linkedWorkspaceIds.join(',')}`
+    elevoConfig.workspaces?.explorerUrl && linkedWorkspaceIds.length > 0
+      ? `${elevoConfig.workspaces.explorerUrl}?ids=${linkedWorkspaceIds.join(',')}`
       : null;
 
+  const firstWorkspace = linkedWorkspaces[0];
+  const firstTenant = (elevoConfig.workspaces?.tenants ?? []).find(
+    (t) => t.id === firstWorkspace?.owner_tenant_id
+  );
   const tasksUrl =
-    workspacesConfig.tasksTemplateUrl && linkedWorkspaceIds.length > 0
-      ? workspacesConfig.tasksTemplateUrl.replace('{{workspace_id}}', linkedWorkspaceIds[0])
+    firstTenant?.tasks_template_url && firstWorkspace
+      ? firstTenant.tasks_template_url.replace('{{source_path}}', firstWorkspace.source_path)
       : null;
 
   const pinnedEvents = useRoomPinnedEvents(room);

@@ -1,7 +1,7 @@
 import React, { createContext, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import { EventTimeline, Room, RoomStateEvent } from 'matrix-js-sdk';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
-import { useClientConfig } from '../../../hooks/useClientConfig';
+import { useElevoConfig } from '../../../hooks/useElevoConfig';
 
 type ContactsContextValue = {
   contactsRoomId: string;
@@ -19,7 +19,7 @@ const ContactsContext = createContext<ContactsContextValue>({
 
 export function ContactsProvider({ children }: { children: ReactNode }) {
   const mx = useMatrixClient();
-  const { elevoContactsRoomId = '' } = useClientConfig();
+  const { elevoContactsRoomId = '' } = useElevoConfig();
   const room = mx.getRoom(elevoContactsRoomId);
   const [stateVersion, setStateVersion] = useState(0);
 

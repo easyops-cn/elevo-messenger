@@ -18,9 +18,10 @@ import * as PatternsCss from '../../styles/Patterns.css';
 import {
   clientAllowedServer,
   clientDefaultServer,
-  getOidcStaticClientId,
   useClientConfig,
 } from '../../hooks/useClientConfig';
+import { useElevoConfig, getOidcStaticClientId } from '../../hooks/useElevoConfig';
+import { AuthElevoConfigLoader } from '../../components/AuthElevoConfigLoader';
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { LOGIN_PATH, OIDC_CALLBACK_PATH, REGISTER_PATH, RESET_PASSWORD_PATH } from '../paths';
 import ElevoLogo from '../../../../public/res/apple/apple-touch-icon-144x144.png';
@@ -84,13 +85,11 @@ function OidcMetadataLoader({
   server: string;
   children: ReactNode;
 }) {
-  const clientConfig = useClientConfig();
+  const elevoConfig = useElevoConfig();
   const [issuer, setIssuer] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    // OIDC login is only enabled when a static client_id is configured
-    // for the current homeserver in config.json.
-    const staticClientId = getOidcStaticClientId(clientConfig, server);
+    const staticClientId = getOidcStaticClientId(elevoConfig, server);
     if (!staticClientId) {
       setIssuer(undefined);
       return;
@@ -101,7 +100,7 @@ function OidcMetadataLoader({
       .getAuthMetadata()
       .then((config) => setIssuer(config.issuer))
       .catch(() => setIssuer(undefined));
-  }, [baseUrl, clientConfig, server]);
+  }, [baseUrl, elevoConfig, server]);
 
   return <OidcIssuerProvider value={issuer}>{children}</OidcIssuerProvider>;
 }
@@ -214,6 +213,7 @@ export function AuthLayout() {
             {discoveryState.status === AsyncStatus.Success && autoDiscoveryInfo && (
               <AuthServerProvider value={discoveryState.data.serverName}>
                 <AutoDiscoveryInfoProvider value={autoDiscoveryInfo}>
+                  <AuthElevoConfigLoader baseUrl={autoDiscoveryInfo['m.homeserver'].base_url}>
                   <SpecVersionsLoader
                     baseUrl={autoDiscoveryInfo['m.homeserver'].base_url}
                     fallback={() => (
@@ -249,6 +249,7 @@ export function AuthLayout() {
                       </SpecVersionsProvider>
                     )}
                   </SpecVersionsLoader>
+                  </AuthElevoConfigLoader>
                 </AutoDiscoveryInfoProvider>
               </AuthServerProvider>
             )}

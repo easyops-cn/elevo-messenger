@@ -12,7 +12,8 @@ import { TokenLogin } from './TokenLogin';
 import { getLoginPath, getRegisterPath, withSearchParam } from '../../pathUtils';
 import { usePathWithOrigin } from '../../../hooks/usePathWithOrigin';
 import { LoginPathSearchParams } from '../../paths';
-import { useClientConfig, getOidcStaticClientId } from '../../../hooks/useClientConfig';
+import { useClientConfig } from '../../../hooks/useClientConfig';
+import { useElevoConfig, getOidcStaticClientId } from '../../../hooks/useElevoConfig';
 import { useOidcIssuer } from '../../../hooks/useOidcIssuer';
 import { OidcLogin } from '../oidc/OidcLogin';
 
@@ -39,7 +40,8 @@ const useLoginSearchParams = (searchParams: URLSearchParams): LoginPathSearchPar
 export function Login() {
   const { t } = useTranslation();
   const server = useAuthServer();
-  const { hashRouter, ...clientConfig } = useClientConfig();
+  const { hashRouter } = useClientConfig();
+  const elevoConfig = useElevoConfig();
   const { loginFlows } = useAuthFlows();
   const [searchParams] = useSearchParams();
   const loginSearchParams = useLoginSearchParams(searchParams);
@@ -59,7 +61,7 @@ export function Login() {
 
   const parsedFlows = useParsedLoginFlows(loginFlows.flows);
 
-  const oidcClientId = oidcIssuer ? getOidcStaticClientId(clientConfig, server) : undefined;
+  const oidcClientId = oidcIssuer ? getOidcStaticClientId(elevoConfig, server) : undefined;
 
   const hasSsoOrOidc = !!parsedFlows.sso || !!oidcClientId;
   let ssoLoginElement: React.ReactNode = null;

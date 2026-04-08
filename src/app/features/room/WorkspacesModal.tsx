@@ -39,7 +39,7 @@ type AddWorkspaceModalProps = {
   linkedIds: Set<string>;
   baseUrl: string;
   token: string;
-  tenantNames: Record<string, string>;
+  tenantNames: Map<string, string>;
   onAdd: (ws: WorkspaceItem) => Promise<void>;
   requestClose: () => void;
 };
@@ -170,9 +170,9 @@ export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAd
                                 : <span style={{ display: 'inline-block', width: toRem(20) }} />
                             }
                             after={
-                              tenantNames[ws.owner_tenant_id] ? (
+                              tenantNames.has(ws.owner_tenant_id) ? (
                                 <Text size="T200" priority="300" truncate>
-                                  <b>{tenantNames[ws.owner_tenant_id]}</b>
+                                  <b>{tenantNames.get(ws.owner_tenant_id)}</b>
                                 </Text>
                               ) : undefined
                             }

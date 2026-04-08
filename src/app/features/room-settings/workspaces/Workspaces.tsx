@@ -19,8 +19,7 @@ import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useRoom } from '../../../hooks/useRoom';
 import { useStateEvent } from '../../../hooks/useStateEvent';
 import { usePowerLevels, readPowerLevel } from '../../../hooks/usePowerLevels';
-import { useClientConfig } from '../../../hooks/useClientConfig';
-import { useWorkspacesConfig } from '../../../hooks/useWorkspacesConfig';
+import { useElevoConfig } from '../../../hooks/useElevoConfig';
 import {
   AddWorkspaceModal,
   WorkspaceItem,
@@ -37,9 +36,11 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
   const mx = useMatrixClient();
   const room = useRoom();
   const powerLevels = usePowerLevels(room);
-  const clientConfig = useClientConfig();
-  const workspacesConfig = useWorkspacesConfig();
-  const baseUrl = workspacesConfig.apiBaseUrl ?? '';
+  const elevoConfig = useElevoConfig();
+  const baseUrl = elevoConfig.workspaces?.apiBaseUrl ?? '';
+  const tenantsById = new Map(
+    (elevoConfig.workspaces?.tenants ?? []).map((tenant) => [tenant.id, tenant.name])
+  );
 
   const userId = mx.getSafeUserId();
   const userPower = readPowerLevel.user(powerLevels, userId);
@@ -50,7 +51,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
     (stateEvent?.getContent() as { workspaces?: WorkspaceItem[] } | undefined)
       ?.workspaces ?? [];
 
-  const defaultApiKey = workspacesConfig.apiKey ?? '';
+  const defaultApiKey = elevoConfig.workspaces?.apiKey ?? '';
   const [userToken, setUserToken] = useState(() => localStorage.getItem(ELEVO_TOKEN_STORAGE_KEY) ?? '');
   const token = userToken || defaultApiKey;
   const [tokenInput, setTokenInput] = useState(userToken || defaultApiKey);
@@ -239,9 +240,9 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                             ) : undefined
                           }
                         >
-                          {clientConfig.elevoTenantNames?.[ws.owner_tenant_id] && (
+                          {tenantsById.has(ws.owner_tenant_id) && (
                             <Text size="T200" priority="300">
-                              {clientConfig.elevoTenantNames[ws.owner_tenant_id]}
+                              {tenantsById.get(ws.owner_tenant_id)}
                             </Text>
                           )}
                         </SettingTile>
@@ -296,7 +297,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
           linkedIds={linkedIds}
           baseUrl={baseUrl}
           token={token}
-          tenantNames={clientConfig.elevoTenantNames ?? {}}
+          tenantNames={tenantsById}
           onAdd={handleAdd}
           requestClose={() => setShowAddModal(false)}
         />
