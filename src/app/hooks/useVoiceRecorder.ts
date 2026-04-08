@@ -3,6 +3,15 @@ import { useCallback, useRef, useState } from 'react';
 export type RecorderState = 'idle' | 'recording' | 'stopped';
 
 const MIME_TYPES = ['audio/ogg;codecs=opus', 'audio/webm;codecs=opus', 'audio/webm'];
+
+export function getExtFromMimeType(mimeType: string): string {
+  const base = mimeType.split(';')[0].trim();
+  switch (base) {
+    case 'audio/ogg': return 'ogg';
+    case 'audio/webm': return 'webm';
+    default: return base.split('/')[1] || 'ogg';
+  }
+}
 const MAX_LIVE_BARS = 40;
 const MAX_FINAL_BARS = 100;
 const MAX_DURATION_SECONDS = 300;

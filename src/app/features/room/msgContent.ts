@@ -170,6 +170,8 @@ export const getVoiceMsgContent = (
   const content: IContent = {
     msgtype: MsgType.Audio,
     body: 'Voice message',
+    url: urlField,
+    file: fileField,
     info: {
       duration: durationMs,
       mimetype,
@@ -177,9 +179,9 @@ export const getVoiceMsgContent = (
     },
     'org.matrix.msc1767.text': 'Voice message',
     'org.matrix.msc1767.file': {
-      url: mxc,
-      ...(encInfo ? { file: fileField } : {}),
-      name: 'Voice message.ogg',
+      url: urlField,
+      file: fileField,
+      name: file.name,
       mimetype,
       size,
     },
@@ -189,13 +191,6 @@ export const getVoiceMsgContent = (
     },
     'org.matrix.msc3245.voice': {},
   };
-
-  if (urlField) {
-    content.url = urlField;
-  }
-  if (fileField) {
-    content.file = fileField;
-  }
 
   return content;
 };

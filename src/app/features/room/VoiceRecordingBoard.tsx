@@ -5,7 +5,7 @@ import { Room } from 'matrix-js-sdk';
 import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { useVoiceRecorder } from '../../hooks/useVoiceRecorder';
+import { useVoiceRecorder, getExtFromMimeType } from '../../hooks/useVoiceRecorder';
 import { WaveformPlayer } from '../../components/media/WaveformPlayer';
 import { encryptFile } from '../../utils/matrix';
 import { getVoiceMsgContent } from './msgContent';
@@ -120,7 +120,8 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
     setError(null);
     try {
       const isEncrypted = room.hasEncryptionStateEvent();
-      const file = new File([recorder.audioBlob], 'Voice message.ogg', {
+      const ext = getExtFromMimeType(recorder.mimeType);
+      const file = new File([recorder.audioBlob], `Voice message.${ext}`, {
         type: recorder.mimeType,
       });
 
