@@ -21,7 +21,6 @@ export function useSpeechRecognition(): SpeechRecognitionControls {
 
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const listeningRef = useRef(false);
-  const interimRef = useRef('');
 
   const supported = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 
@@ -59,7 +58,6 @@ export function useSpeechRecognition(): SpeechRecognitionControls {
       if (final) {
         setFinalTranscript((prev) => prev + final);
       }
-      interimRef.current = interim;
       setInterimTranscript(interim);
     };
 
@@ -102,11 +100,6 @@ export function useSpeechRecognition(): SpeechRecognitionControls {
       }
       recognitionRef.current = null;
     }
-    // Merge remaining interim text into final so nothing is lost
-    if (interimRef.current) {
-      setFinalTranscript((prev) => prev + interimRef.current);
-      interimRef.current = '';
-    }
     setState('stopped');
     setInterimTranscript('');
   }, []);
@@ -123,7 +116,6 @@ export function useSpeechRecognition(): SpeechRecognitionControls {
     }
     setState('idle');
     setFinalTranscript('');
-    interimRef.current = '';
     setInterimTranscript('');
   }, []);
 

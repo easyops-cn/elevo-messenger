@@ -804,7 +804,7 @@
   "voiceRecording": {
     "stop": "Stop",
     "cancel": "Cancel",
-    "send": "Send",
+    "send": "Send Voice",
     "sendText": "Send Text",
     "speechPlaceholder": "Recognized speech will appear here...",
     "error.unsupported": "Your browser does not support voice recording",

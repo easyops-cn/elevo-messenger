@@ -134,3 +134,9 @@ export const ActionBar = style({
   justifyContent: 'space-between',
   gap: config.space.S200,
 });
+
+export const ActionBarRight = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: config.space.S200,
+});
