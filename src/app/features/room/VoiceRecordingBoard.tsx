@@ -247,7 +247,7 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
 
               <LiveWaveform bars={liveWaveform} />
 
-              <Text size="T200" style={{ minWidth: toRem(48), textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+              <Text size="T200" style={{ minWidth: toRem(48), marginLeft: 'auto', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
                 {secondsToMinutesAndSeconds(elapsedSeconds)}
               </Text>
             </Box>
@@ -311,7 +311,6 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
                   onClick={handleCancel}
                   variant="SurfaceVariant"
                   radii="Pill"
-                  after={<Icon src={Icons.Cross} size="50" />}
                 >
                   <Text size="B300">{t('voiceRecording.cancel')}</Text>
                 </Chip>

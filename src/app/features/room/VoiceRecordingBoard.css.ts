@@ -30,7 +30,7 @@ export const VoiceRecordingBoardContainer = style([
 
 export const VoiceRecordingBoard = style({
   maxWidth: toRem(400),
-  width: 'fit-content',
+  width: '100%',
   backgroundColor: color.Surface.Container,
   color: color.Surface.OnContainer,
   borderRadius: config.radii.R400,
