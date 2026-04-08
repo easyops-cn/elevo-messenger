@@ -5,7 +5,7 @@ export function UsersIcon(filled?: boolean) {
   return (
     <g
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth="1.5"
       strokeLinecap="round"
       strokeLinejoin="round"
       fill="none"

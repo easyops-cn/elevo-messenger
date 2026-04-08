@@ -4,6 +4,7 @@ export type WorkspacesConfig = {
   apiBaseUrl?: string;
   explorerUrl?: string;
   apiKey?: string;
+  tasksTemplateUrl?: string;
 };
 
 const WorkspacesConfigContext = createContext<WorkspacesConfig | null>(null);

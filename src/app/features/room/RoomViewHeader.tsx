@@ -71,6 +71,7 @@ import { RoomSettingsPage } from '../../state/roomSettings';
 import { useWorkspacesConfig } from '../../hooks/useWorkspacesConfig';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
 import { openExternalUrl } from '../../plugins/useTauriOpener';
+import { TasksIcon } from '../../icons/TasksIcon';
 
 type RoomMenuProps = {
   room: Room;
@@ -276,6 +277,11 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const workspaceExplorerUrl =
     workspacesConfig.explorerUrl && linkedWorkspaceIds.length > 0
       ? `${workspacesConfig.explorerUrl}?ids=${linkedWorkspaceIds.join(',')}`
+      : null;
+
+  const tasksUrl =
+    workspacesConfig.tasksTemplateUrl && linkedWorkspaceIds.length > 0
+      ? workspacesConfig.tasksTemplateUrl.replace('{{workspace_id}}', linkedWorkspaceIds[0])
       : null;
 
   const pinnedEvents = useRoomPinnedEvents(room);
@@ -490,6 +496,27 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
             </TooltipProvider>
           )}
 
+          {tasksUrl && (
+            <TooltipProvider
+              position="Bottom"
+              offset={4}
+              tooltip={
+                <Tooltip>
+                  <Text>Tasks</Text>
+                </Tooltip>
+              }
+            >
+              {(triggerRef) => (
+                <IconButton
+                  fill="None"
+                  ref={triggerRef}
+                  onClick={() => openExternalUrl(tasksUrl, room.roomId)}
+                >
+                  <Icon size="400" src={TasksIcon} />
+                </IconButton>
+              )}
+            </TooltipProvider>
+          )}
           {workspaceExplorerUrl && (
             <TooltipProvider
               position="Bottom"
