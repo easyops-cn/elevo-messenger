@@ -244,20 +244,26 @@ export type FileRefData = {
   workspaceId: string;
   workspaceName: string;
 };
-export const getFileReferences = (editor: Editor): FileRefData[] => {
-  const refs: FileRefData[] = [];
-
-  const collect = (node: Descendant): void => {
-    if (Text.isText(node)) return;
+export const getFileReference = (editor: Editor): FileRefData | null => {
+  const collect = (node: Descendant): FileRefData | null => {
+    if (Text.isText(node)) return null;
     if (node.type === BlockType.FileRef) {
-      refs.push({ path: node.path, workspaceId: node.workspaceId, workspaceName: node.workspaceName });
-      return;
+      return { path: node.path, workspaceId: node.workspaceId, workspaceName: node.workspaceName };
     }
-    node.children.forEach(collect);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const child of node.children) {
+      const found = collect(child);
+      if (found) return found;
+    }
+    return null;
   };
 
-  editor.children.forEach(collect);
-  return refs;
+  // eslint-disable-next-line no-restricted-syntax
+  for (const child of editor.children) {
+    const found = collect(child);
+    if (found) return found;
+  }
+  return null;
 };
 
 export type TaskRefData = {
