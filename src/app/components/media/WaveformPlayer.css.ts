@@ -25,6 +25,7 @@ export const WaveformBar = style({
 
 export const TimeText = style({
   minWidth: toRem(48),
+  marginLeft: 'auto',
   textAlign: 'right',
   fontVariantNumeric: 'tabular-nums',
 });

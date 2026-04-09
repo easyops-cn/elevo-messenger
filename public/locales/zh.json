@@ -804,7 +804,9 @@
   "voiceRecording": {
     "stop": "停止",
     "cancel": "取消",
-    "send": "发送",
+    "send": "发送语音",
+    "sendText": "发送文字",
+    "speechPlaceholder": "语音识别内容将显示在此处...",
     "error.unsupported": "浏览器不支持录音功能",
     "error.noDevice": "未检测到录音设备，请连接麦克风后重试",
     "error.permissionDenied": "录音权限被拒绝，请在系统设置中允许麦克风访问",

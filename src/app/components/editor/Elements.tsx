@@ -1,4 +1,4 @@
-import { Icon, Icons, Scroll, Text, toRem } from 'folds';
+import { color, Icon, Icons, Scroll, Text, toRem } from 'folds';
 import React from 'react';
 import {
   RenderElementProps,
@@ -9,7 +9,7 @@ import {
 } from 'slate-react';
 
 import * as css from '../../styles/CustomHtml.css';
-import { CommandElement, EmoticonElement, FileRefElement, LinkElement, MentionElement } from './slate';
+import { CommandElement, EmoticonElement, FileRefElement, LinkElement, MentionElement, TaskRefElement, type TaskRefStatus } from './slate';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { getBeginCommand } from './utils';
 import { BlockType } from './types';
@@ -143,6 +143,46 @@ function RenderFileRefElement({
   );
 }
 
+const TASK_STATUS_COLOR: Record<TaskRefStatus, string> = {
+  in_progress: color.Primary.Main,
+  done: color.Success.Main,
+  todo: color.SurfaceVariant.ContainerLine,
+  cancelled: color.SurfaceVariant.ContainerLine,
+};
+
+function RenderTaskRefElement({
+  attributes,
+  element,
+  children,
+}: { element: TaskRefElement } & RenderElementProps) {
+  const selected = useSelected();
+  const focused = useFocused();
+
+  return (
+    <span
+      {...attributes}
+      className={css.TaskRef({
+        focus: selected && focused,
+      })}
+      contentEditable={false}
+      title={element.title}
+    >
+      <span
+        style={{
+          display: 'inline-block',
+          width: toRem(8),
+          height: toRem(8),
+          borderRadius: '50%',
+          backgroundColor: TASK_STATUS_COLOR[element.status],
+          marginRight: toRem(4),
+        }}
+      />
+      {element.title}
+      {children}
+    </span>
+  );
+}
+
 export function RenderElement({ attributes, element, children }: RenderElementProps) {
   switch (element.type) {
     case BlockType.Paragraph:
@@ -246,6 +286,12 @@ export function RenderElement({ attributes, element, children }: RenderElementPr
         <RenderFileRefElement attributes={attributes} element={element}>
           {children}
         </RenderFileRefElement>
+      );
+    case BlockType.TaskRef:
+      return (
+        <RenderTaskRefElement attributes={attributes} element={element}>
+          {children}
+        </RenderTaskRefElement>
       );
     default:
       return (

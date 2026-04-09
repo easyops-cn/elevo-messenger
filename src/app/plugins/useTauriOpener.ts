@@ -82,6 +82,30 @@ export function openExternalUrl(href: string, roomId: string): void {
   }
 }
 
+/**
+ * Open a URL in a side panel docked to the right of the main window.
+ * The Rust backend handles the layout: exits fullscreen, resizes/repositions
+ * the main window, and places the panel at 1/3 screen width on the right.
+ * Falls back to system browser on non-desktop or non-allowlisted domains.
+ */
+export function openSidePanel(href: string, roomId: string): void {
+  if (isDesktopTauri) {
+    if (isDomainAllowed(href)) {
+      invoke('open_side_panel', { url: href, label: labelFromUrl(href, roomId), roomId }).catch(
+        (error) => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to open side panel, falling back to system browser:', error);
+          openInSystemBrowser(href);
+        }
+      );
+    } else {
+      openInSystemBrowser(href);
+    }
+  } else {
+    openExternalUrlInSystemBrowser(href);
+  }
+}
+
 export function useTauriOpener(roomId: string) {
   useEffect(() => {
     if (!isTauri) return undefined;

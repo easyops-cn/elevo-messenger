@@ -17,9 +17,11 @@ import {
   MentionElement,
   OrderedListElement,
   ParagraphElement,
+  TaskRefElement,
+  type TaskRefStatus,
   UnorderedListElement,
 } from './slate';
-import { createEmoticonElement, createFileRefElement, createMentionElement } from './utils';
+import { createEmoticonElement, createFileRefElement, createMentionElement, createTaskRefElement } from './utils';
 import {
   parseMatrixToRoom,
   parseMatrixToRoomEvent,
@@ -95,12 +97,19 @@ const getInlineMarkElement = (
   return children;
 };
 
-const getInlineNonMarkElement = (node: Element): MentionElement | EmoticonElement | FileRefElement | undefined => {
+const getInlineNonMarkElement = (node: Element): MentionElement | EmoticonElement | FileRefElement | TaskRefElement | undefined => {
   if (node.name === 'span' && node.attribs['data-file-ref'] !== undefined) {
     const path = node.attribs['data-file-ref'];
     const rawText = getText(node);
     const name = rawText.replace(/^\[/, '').replace(/\]$/, '');
     return createFileRefElement(path, name || path, '', '');
+  }
+  if (node.name === 'span' && node.attribs['data-task-ref'] !== undefined) {
+    const id = node.attribs['data-task-ref'];
+    const status = node.attribs['data-task-status'] as TaskRefStatus | undefined;
+    const rawText = getText(node);
+    const title = rawText.replace(/^\[/, '').replace(/\]$/, '');
+    return createTaskRefElement(id, '', title || id, status);
   }
   if (node.name === 'img' && node.attribs['data-mx-emoticon'] !== undefined) {
     const { src, alt } = node.attribs;

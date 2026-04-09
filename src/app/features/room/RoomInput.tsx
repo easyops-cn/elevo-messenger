@@ -11,7 +11,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import { isKeyHotkey } from 'is-hotkey';
 import { EventType, IContent, MsgType, RelationType, Room } from 'matrix-js-sdk';
 import { ReactEditor } from 'slate-react';
-import { Transforms, Editor } from 'slate';
+import { Transforms, Editor, Element as SlateElement, Path, Node, Text as SlateText } from 'slate';
 import {
   Box,
   Dialog,
@@ -54,8 +54,10 @@ import {
   getBeginCommand,
   trimCommand,
   getMentions,
-  getFileReferences,
+  getFileReference,
   createFileRefElement,
+  getTaskReference,
+  createTaskRefElement,
 } from '../../components/editor';
 import { EmojiBoard, EmojiBoardTab } from '../../components/emoji-board';
 import { UseStateProvider } from '../../components/UseStateProvider';
@@ -124,11 +126,23 @@ import { useComposingCheck } from '../../hooks/useComposingCheck';
 import { useSdkMessageListener, SdkMessagePayload } from '../../plugins/useTauriOpener';
 
 interface WorkspaceExplorerMessage {
-  type: 'reference-file';
-  path: string;
-  name: string;
-  workspaceId: string;
-  workspaceName: string;
+  type: 'select-file';
+  file: null | {
+    path: string;
+    name: string;
+    workspaceId: string;
+    workspaceName: string;
+  };
+}
+
+interface TaskManagementMessage {
+  type: 'select-task';
+  task: null | {
+    id: string;
+    workspace_id: string;
+    title: string;
+    status?: { category: 'todo' | 'in_progress' | 'done' | 'cancelled' };
+  };
 }
 
 interface RoomInputProps {
@@ -192,26 +206,85 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
 
     const sendTypingStatus = useTypingStatusUpdater(mx, roomId);
 
-    const handleWorkspaceFileRef = useCallback(
+    const removeExistingFileRef = useCallback(() => {
+      const [fileRefEntry] = Editor.nodes(editor, {
+        at: [],
+        match: (n) => SlateElement.isElement(n) && n.type === 'file-ref',
+      });
+
+      if (fileRefEntry) {
+        const [, fileRefPath] = fileRefEntry;
+        const nextPath = Path.next(fileRefPath);
+
+        if (Node.has(editor, nextPath)) {
+          const nextNode = Node.get(editor, nextPath);
+          if (SlateText.isText(nextNode) && /^\s$/.test(nextNode.text)) {
+            Transforms.removeNodes(editor, { at: nextPath });
+          }
+        }
+
+        Transforms.removeNodes(editor, { at: fileRefPath });
+      }
+    }, [editor]);
+
+    const handleWorkspaceFileSelect = useCallback(
       (payload: SdkMessagePayload<WorkspaceExplorerMessage>) => {
         const { data } = payload;
-        if (data?.type === 'reference-file') {
-          const existing = getFileReferences(editor);
-          const isDuplicate = existing.some(
-            (fileRef) => fileRef.workspaceId === data.workspaceId && fileRef.path === data.path
-          );
-          if (isDuplicate) return;
-          const element = createFileRefElement(data.path, data.name, data.workspaceId, data.workspaceName);
-          ReactEditor.focus(editor);
-          Transforms.select(editor, Editor.end(editor, []));
-          Transforms.insertNodes(editor, element);
-          Transforms.collapse(editor, { edge: 'end' });
-          moveCursor(editor, true);
+        if (data?.type === 'select-file') {
+          removeExistingFileRef();
+          if (data.file) {
+            const element = createFileRefElement(data.file.path, data.file.name, data.file.workspaceId, data.file.workspaceName);
+            ReactEditor.focus(editor);
+            Transforms.select(editor, Editor.end(editor, []));
+            Transforms.insertNodes(editor, element);
+            Transforms.collapse(editor, { edge: 'end' });
+            moveCursor(editor, true);
+          }
         }
       },
-      [editor]
+      [editor, removeExistingFileRef]
     );
-    useSdkMessageListener<WorkspaceExplorerMessage>('workspace-explorer', handleWorkspaceFileRef);
+    useSdkMessageListener<WorkspaceExplorerMessage>('workspace-explorer', handleWorkspaceFileSelect);
+
+    const removeExistingTaskRef = useCallback(() => {
+      const [taskRefEntry] = Editor.nodes(editor, {
+        at: [],
+        match: (n) => SlateElement.isElement(n) && n.type === 'task-ref',
+      });
+
+      if (taskRefEntry) {
+        const [, taskRefPath] = taskRefEntry;
+        const nextPath = Path.next(taskRefPath);
+
+        if (Node.has(editor, nextPath)) {
+          const nextNode = Node.get(editor, nextPath);
+          if (SlateText.isText(nextNode) && /^\s$/.test(nextNode.text)) {
+            Transforms.removeNodes(editor, { at: nextPath });
+          }
+        }
+
+        Transforms.removeNodes(editor, { at: taskRefPath });
+      }
+    }, [editor]);
+
+    const handleTaskSelect = useCallback(
+      (payload: SdkMessagePayload<TaskManagementMessage>) => {
+        const { data } = payload;
+        if (data?.type === 'select-task') {
+          removeExistingTaskRef();
+          if (data.task) {
+            const element = createTaskRefElement(data.task.id, data.task.workspace_id, data.task.title, data.task.status?.category);
+            ReactEditor.focus(editor);
+            Transforms.select(editor, Editor.end(editor, []));
+            Transforms.insertNodes(editor, element);
+            Transforms.collapse(editor, { edge: 'end' });
+            moveCursor(editor, true);
+          }
+        }
+      },
+      [editor, removeExistingTaskRef]
+    );
+    useSdkMessageListener<TaskManagementMessage>('tasks-management', handleTaskSelect);
 
     const handleFiles = useCallback(
       async (files: File[]) => {
@@ -380,15 +453,20 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       const body = plainText;
       const formattedBody = customHtml;
       const mentionData = getMentions(mx, roomId, editor);
-      const fileRefs = getFileReferences(editor);
+      const fileRef = getFileReference(editor);
 
       const content: IContent = {
         msgtype: msgType,
         body,
       };
 
-      if (fileRefs.length > 0) {
-        content['vip.elevo.file_references'] = fileRefs;
+      if (fileRef) {
+        content['vip.elevo.file_reference'] = fileRef;
+      }
+
+      const taskRef = getTaskReference(editor);
+      if (taskRef) {
+        content['vip.elevo.task_reference'] = taskRef;
       }
 
       if (replyDraft && replyDraft.userId !== mx.getUserId()) {

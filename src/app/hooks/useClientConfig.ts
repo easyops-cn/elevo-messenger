@@ -18,9 +18,6 @@ export type ClientConfig = {
   };
 
   hashRouter?: HashRouterConfig;
-  oidcStaticClients?: Record<string, { client_id: string }>;
-  elevoTenantNames?: Record<string, string>;
-  elevoContactsRoomId?: string;
 };
 
 const ClientConfigContext = createContext<ClientConfig | null>(null);
@@ -43,8 +40,3 @@ export const clientAllowedServer = (clientConfig: ClientConfig, server: string):
 
   return homeserverList?.includes(server) === true;
 };
-
-export const getOidcStaticClientId = (
-  clientConfig: ClientConfig,
-  server: string
-): string | undefined => clientConfig.oidcStaticClients?.[server]?.client_id;

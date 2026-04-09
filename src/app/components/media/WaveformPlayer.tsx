@@ -67,7 +67,7 @@ export function WaveformPlayer({
   const { seek } = useMediaSeek(getAudioRef);
 
   const handlePlayTimeCallback: PlayTimeCallback = useCallback((d, ct) => {
-    setDuration(d);
+    if (Number.isFinite(d)) setDuration(d);
     setCurrentTime(ct);
   }, []);
   useMediaPlayTimeCallback(getAudioRef, handlePlayTimeCallback);

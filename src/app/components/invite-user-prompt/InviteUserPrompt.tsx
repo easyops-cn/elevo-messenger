@@ -43,7 +43,7 @@ import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { BreakWord } from '../../styles/Text.css';
 import { useAlive } from '../../hooks/useAlive';
-import { useClientConfig } from '../../hooks/useClientConfig';
+import { useElevoConfig } from '../../hooks/useElevoConfig';
 
 const SEARCH_OPTIONS: UseAsyncSearchOptions = {
   limit: 1000,
@@ -60,7 +60,7 @@ export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const alive = useAlive();
-  const { elevoContactsRoomId } = useClientConfig();
+  const { elevoContactsRoomId } = useElevoConfig();
 
   const inputRef = useRef<HTMLInputElement>(null);
   const directUsers = useDirectUsers();

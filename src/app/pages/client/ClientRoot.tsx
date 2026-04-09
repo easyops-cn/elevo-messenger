@@ -36,7 +36,7 @@ import { SyncStatus } from './SyncStatus';
 import { AuthMetadataProvider } from '../../hooks/useAuthMetadata';
 import { getFallbackSession } from '../../state/sessions';
 import { AutoDiscovery } from './AutoDiscovery';
-import { WorkspacesConfigLoader } from '../../components/WorkspacesConfigLoader';
+import { ElevoConfigLoader } from '../../components/ElevoConfigLoader';
 
 function ClientRootLoading() {
   return (
@@ -220,7 +220,7 @@ export function ClientRoot({ children }: ClientRootProps) {
           <ClientRootLoading />
         ) : (
           <MatrixClientProvider value={mx}>
-            <WorkspacesConfigLoader mx={mx}>
+            <ElevoConfigLoader mx={mx}>
               <ServerConfigsLoader>
                 {(serverConfigs) => (
                   <CapabilitiesProvider value={serverConfigs.capabilities ?? {}}>
@@ -232,7 +232,7 @@ export function ClientRoot({ children }: ClientRootProps) {
                   </CapabilitiesProvider>
                 )}
               </ServerConfigsLoader>
-            </WorkspacesConfigLoader>
+            </ElevoConfigLoader>
           </MatrixClientProvider>
         )}
       </SpecVersions>

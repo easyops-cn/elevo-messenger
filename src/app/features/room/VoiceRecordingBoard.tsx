@@ -6,6 +6,7 @@ import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useVoiceRecorder, getExtFromMimeType } from '../../hooks/useVoiceRecorder';
+import { useSpeechRecognition } from '../../hooks/useSpeechRecognition';
 import { WaveformPlayer } from '../../components/media/WaveformPlayer';
 import { encryptFile } from '../../utils/matrix';
 import { getVoiceMsgContent } from './msgContent';
@@ -67,35 +68,83 @@ type VoiceRecordingBoardProps = {
 export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, VoiceRecordingBoardProps>(({ roomId, room, onClose }, ref) => {
   const mx = useMatrixClient();
   const { t } = useTranslation();
-  const recorder = useVoiceRecorder();
-  useImperativeHandle(ref, () => ({
-    stopRecording: () => {
-      if (recorder.state === 'recording') {
-        recorder.stop();
-        return true;
-      }
-      return false;
-    },
-  }), [recorder]);
+
+  const {
+    state: recorderState,
+    liveWaveform,
+    elapsedSeconds,
+    audioBlob,
+    finalWaveform,
+    durationMs,
+    mimeType,
+    start: recorderStart,
+    stop: recorderStop,
+    cancel: recorderCancel,
+  } = useVoiceRecorder();
+
+  const {
+    supported: speechSupported,
+    state: speechState,
+    transcript: speechTranscript,
+    finalTranscript: speechFinalTranscript,
+    start: speechStart,
+    stop: speechStop,
+    reset: speechReset,
+  } = useSpeechRecognition();
+
+  const [recognizedText, setRecognizedText] = useState('');
+  const [sendingText, setSendingText] = useState(false);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const startedRef = useRef(false);
 
+  useImperativeHandle(ref, () => ({
+    stopRecording: () => {
+      if (recorderState === 'recording') {
+        recorderStop();
+        return true;
+      }
+      return false;
+    },
+  }), [recorderState, recorderStop]);
+
   // Auto-start recording when board opens
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
-    recorder.start().catch((err: Error) => {
+    recorderStart().then(() => {
+      if (speechSupported) speechStart();
+    }).catch((err: Error) => {
       setError(t(err.message) || t('voiceRecording.error.unknown'));
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [recorderStart, speechSupported, speechStart, t]);
+
+  // Stop speech recognition when recording stops
+  useEffect(() => {
+    if (recorderState === 'stopped' && speechState === 'listening') {
+      speechStop();
+    }
+  }, [recorderState, speechState, speechStop]);
+
+  // Lock in final text when speech recognition stops
+  useEffect(() => {
+    if (recorderState === 'stopped' && speechState === 'stopped' && speechFinalTranscript) {
+      setRecognizedText(speechFinalTranscript);
+    }
+  }, [recorderState, speechState, speechFinalTranscript]);
+
+  // Keep textarea in sync with live recognition during recording
+  useEffect(() => {
+    if (recorderState === 'recording') {
+      setRecognizedText(speechTranscript);
+    }
+  }, [recorderState, speechTranscript]);
 
   // Create / revoke blob URL when recording stops
   useEffect(() => {
-    if (recorder.state === 'stopped' && recorder.audioBlob) {
-      const url = URL.createObjectURL(recorder.audioBlob);
+    if (recorderState === 'stopped' && audioBlob) {
+      const url = URL.createObjectURL(audioBlob);
       setBlobUrl(url);
       return () => {
         URL.revokeObjectURL(url);
@@ -103,26 +152,44 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
       };
     }
     return undefined;
-  }, [recorder.state, recorder.audioBlob]);
+  }, [recorderState, audioBlob]);
 
   // Cleanup on unmount
   useEffect(
     () => () => {
-      recorder.cancel();
+      recorderCancel();
+      speechReset();
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [recorderCancel, speechReset]
   );
 
+  const handleSendText = async () => {
+    const text = recognizedText.trim();
+    if (!text || sendingText) return;
+    setSendingText(true);
+    try {
+      mx.sendMessage(roomId, {
+        msgtype: 'm.text',
+        body: text,
+      } as any);
+      setRecognizedText('');
+      onClose();
+    } catch (err) {
+      setError('Failed to send text message.');
+    } finally {
+      setSendingText(false);
+    }
+  };
+
   const handleSend = async () => {
-    if (!recorder.audioBlob || sending) return;
+    if (!audioBlob || sending) return;
     setSending(true);
     setError(null);
     try {
       const isEncrypted = room.hasEncryptionStateEvent();
-      const ext = getExtFromMimeType(recorder.mimeType);
-      const file = new File([recorder.audioBlob], `Voice message.${ext}`, {
-        type: recorder.mimeType,
+      const ext = getExtFromMimeType(mimeType);
+      const file = new File([audioBlob], `Voice message.${ext}`, {
+        type: mimeType,
       });
 
       let mxc: string;
@@ -143,8 +210,8 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
       const content = getVoiceMsgContent(
         { file, encInfo },
         mxc,
-        recorder.durationMs,
-        recorder.finalWaveform
+        durationMs,
+        finalWaveform
       );
       mx.sendMessage(roomId, content as any);
       onClose();
@@ -155,12 +222,12 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
   };
 
   const handleCancel = () => {
-    recorder.cancel();
+    recorderCancel();
     onClose();
   };
 
-  const isRecording = recorder.state === 'recording';
-  const isStopped = recorder.state === 'stopped';
+  const isRecording = recorderState === 'recording';
+  const isStopped = recorderState === 'stopped';
 
   return (
     <div className={css.VoiceRecordingBoardBase}>
@@ -173,15 +240,15 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
           )}
 
           {/* Recording phase */}
-          {(recorder.state === 'idle' || isRecording) && (
+          {(recorderState === 'idle' || isRecording) && (
             <Box alignItems="Center" gap="200">
               {isRecording && <div className={css.RecordingDot}><div className={css.RecordingDotInner} /></div>}
               {!isRecording && !error && <div className={css.IdleDot}><div className={css.IdleDotInner} /></div>}
 
-              <LiveWaveform bars={recorder.liveWaveform} />
+              <LiveWaveform bars={liveWaveform} />
 
-              <Text size="T200" style={{ minWidth: toRem(48), textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
-                {secondsToMinutesAndSeconds(recorder.elapsedSeconds)}
+              <Text size="T200" style={{ minWidth: toRem(48), marginLeft: 'auto', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+                {secondsToMinutesAndSeconds(elapsedSeconds)}
               </Text>
             </Box>
           )}
@@ -190,18 +257,45 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
           {isStopped && blobUrl && (
             <WaveformPlayer
               audioSrc={blobUrl}
-              waveform={recorder.finalWaveform}
-              durationSec={recorder.durationMs / 1000}
-              mimeType={recorder.mimeType}
+              waveform={finalWaveform}
+              durationSec={durationMs / 1000}
+              mimeType={mimeType}
+            />
+          )}
+
+          {/* Speech recognition textarea */}
+          {(isRecording || isStopped) && speechSupported && (
+            <textarea
+              className={css.SpeechTextArea}
+              readOnly={isRecording}
+              value={isRecording ? speechTranscript : recognizedText}
+              onChange={(e) => setRecognizedText(e.target.value)}
+              placeholder={t('voiceRecording.speechPlaceholder')}
+              rows={3}
             />
           )}
 
           {/* Action buttons */}
-          <Box justifyContent="End" gap="200">
-            {(recorder.state === 'idle' || isRecording) && (
+          <div className={css.ActionBar}>
+            {/* Left: Send Text */}
+            {isStopped && speechSupported && recognizedText.trim() ? (
               <Chip
                 as="button"
-                onClick={() => recorder.stop()}
+                onClick={handleSendText}
+                variant="SurfaceVariant"
+                radii="Pill"
+                disabled={sendingText}
+                after={sendingText ? <Spinner size="50" /> : <Icon src={Icons.Send} size="50" />}
+              >
+                <Text size="B300">{t('voiceRecording.sendText')}</Text>
+              </Chip>
+            ) : <div />}
+
+            {/* Right: voice controls */}
+            {(recorderState === 'idle' || isRecording) && (
+              <Chip
+                as="button"
+                onClick={() => recorderStop()}
                 variant="SurfaceVariant"
                 radii="Pill"
                 after={<Icon src={Icons.MicMute} size="50" />}
@@ -211,13 +305,12 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
               </Chip>
             )}
             {isStopped && (
-              <>
+              <div className={css.ActionBarRight}>
                 <Chip
                   as="button"
                   onClick={handleCancel}
                   variant="SurfaceVariant"
                   radii="Pill"
-                  after={<Icon src={Icons.Cross} size="50" />}
                 >
                   <Text size="B300">{t('voiceRecording.cancel')}</Text>
                 </Chip>
@@ -232,9 +325,9 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
                 >
                   <Text size="B300">{t('voiceRecording.send')}</Text>
                 </Chip>
-              </>
+              </div>
             )}
-          </Box>
+          </div>
         </div>
       </div>
     </div>
