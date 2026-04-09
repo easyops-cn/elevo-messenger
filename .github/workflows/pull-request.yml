@@ -33,6 +33,7 @@ jobs:
           publish-dir: ./dist
           github-token: ${{ secrets.GITHUB_TOKEN }}
           deploy-message: "${{ github.event.pull_request.title }}"
+          alias: pr-${{ github.event.number }}
           netlify-config-path: ./netlify.toml
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
