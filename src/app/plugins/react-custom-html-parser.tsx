@@ -16,13 +16,13 @@ import {
 } from 'html-react-parser';
 import { MatrixClient } from 'matrix-js-sdk';
 import classNames from 'classnames';
-import { Box, Chip, config, Header, Icon, IconButton, Icons, Scroll, Text, toRem } from 'folds';
+import { Box, Chip, color, config, Header, Icon, IconButton, Icons, Scroll, Text, toRem } from 'folds';
 import { IntermediateRepresentation, Opts as LinkifyOpts, OptFn } from 'linkifyjs';
 import Linkify from 'linkify-react';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ChildNode } from 'domhandler';
 import { useTranslation } from 'react-i18next';
-import { TasksIcon } from '../icons/TasksIcon';
+import { TaskRefStatus } from '../components/editor/slate';
 import * as css from '../styles/CustomHtml.css';
 import {
   getMxIdLocalPart,
@@ -491,12 +491,27 @@ export const getReactCustomHtmlParser = (
 
         if (name === 'span' && 'data-task-ref' in attribs) {
           const taskId = attribs['data-task-ref'];
+          const taskStatus = attribs['data-task-status'] as TaskRefStatus | undefined;
           const rawText = extractTextFromChildren(children);
           const taskTitle = rawText.replace(/^\[/, '').replace(/\]$/, '');
+          const statusColor = taskStatus === 'in_progress'
+            ? color.Primary.Main
+            : taskStatus === 'done'
+              ? color.Success.Main
+              : color.SurfaceVariant.ContainerLine;
           return (
             <span className={css.TaskRef()} title={taskTitle || taskId}>
-              <Icon src={<TasksIcon />} style={{ width: toRem(14), height: toRem(14) }} />
-              {` ${taskTitle || taskId}`}
+              <span
+                style={{
+                  display: 'inline-block',
+                  width: toRem(8),
+                  height: toRem(8),
+                  borderRadius: '50%',
+                  backgroundColor: statusColor,
+                  marginRight: toRem(4),
+                }}
+              />
+              {taskTitle || taskId}
             </span>
           );
         }

@@ -59,6 +59,7 @@ const permittedTagToAttributes = {
     'data-md',
     'data-tool-call',
     'data-task-ref',
+    'data-task-status',
     'status',
     'name',
     'title',

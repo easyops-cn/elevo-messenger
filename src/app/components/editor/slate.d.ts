@@ -54,11 +54,14 @@ export type FileRefElement = {
   workspaceName: string;
   children: Text[];
 };
+export type TaskRefStatus = 'todo' | 'in_progress' | 'done' | 'cancelled';
+
 export type TaskRefElement = {
   type: BlockType.TaskRef;
   id: string;
   workspaceId: string;
   title: string;
+  status: TaskRefStatus;
   children: Text[];
 };
 

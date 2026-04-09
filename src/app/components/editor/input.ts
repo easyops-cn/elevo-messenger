@@ -18,6 +18,7 @@ import {
   OrderedListElement,
   ParagraphElement,
   TaskRefElement,
+  type TaskRefStatus,
   UnorderedListElement,
 } from './slate';
 import { createEmoticonElement, createFileRefElement, createMentionElement, createTaskRefElement } from './utils';
@@ -105,9 +106,10 @@ const getInlineNonMarkElement = (node: Element): MentionElement | EmoticonElemen
   }
   if (node.name === 'span' && node.attribs['data-task-ref'] !== undefined) {
     const id = node.attribs['data-task-ref'];
+    const status = node.attribs['data-task-status'] as TaskRefStatus | undefined;
     const rawText = getText(node);
     const title = rawText.replace(/^\[/, '').replace(/\]$/, '');
-    return createTaskRefElement(id, '', title || id);
+    return createTaskRefElement(id, '', title || id, status);
   }
   if (node.name === 'img' && node.attribs['data-mx-emoticon'] !== undefined) {
     const { src, alt } = node.attribs;

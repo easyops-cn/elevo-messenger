@@ -1,4 +1,4 @@
-import { Icon, Icons, Scroll, Text, toRem } from 'folds';
+import { color, Icon, Icons, Scroll, Text, toRem } from 'folds';
 import React from 'react';
 import {
   RenderElementProps,
@@ -9,14 +9,13 @@ import {
 } from 'slate-react';
 
 import * as css from '../../styles/CustomHtml.css';
-import { CommandElement, EmoticonElement, FileRefElement, LinkElement, MentionElement, TaskRefElement } from './slate';
+import { CommandElement, EmoticonElement, FileRefElement, LinkElement, MentionElement, TaskRefElement, type TaskRefStatus } from './slate';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { getBeginCommand } from './utils';
 import { BlockType } from './types';
 import { mxcUrlToHttp } from '../../utils/matrix';
 import { MxcImg } from '../MxcImg';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
-import { TasksIcon } from '../../icons/TasksIcon';
 
 // Put this at the start and end of an inline component to work around this Chromium bug:
 // https://bugs.chromium.org/p/chromium/issues/detail?id=1249405
@@ -144,6 +143,13 @@ function RenderFileRefElement({
   );
 }
 
+const TASK_STATUS_COLOR: Record<TaskRefStatus, string> = {
+  in_progress: color.Primary.Main,
+  done: color.Success.Main,
+  todo: color.SurfaceVariant.ContainerLine,
+  cancelled: color.SurfaceVariant.ContainerLine,
+};
+
 function RenderTaskRefElement({
   attributes,
   element,
@@ -161,8 +167,17 @@ function RenderTaskRefElement({
       contentEditable={false}
       title={element.title}
     >
-      <Icon src={<TasksIcon />} style={{ width: toRem(12), height: toRem(12) }} />
-      {` ${element.title}`}
+      <span
+        style={{
+          display: 'inline-block',
+          width: toRem(8),
+          height: toRem(8),
+          borderRadius: '50%',
+          backgroundColor: TASK_STATUS_COLOR[element.status],
+          marginRight: toRem(4),
+        }}
+      />
+      {element.title}
       {children}
     </span>
   );

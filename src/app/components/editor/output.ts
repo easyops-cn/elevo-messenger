@@ -84,7 +84,7 @@ const elementToCustomHtml = (node: CustomElement, children: string): string => {
     case BlockType.FileRef:
       return `<span data-file-ref="${sanitizeText(node.path)}">[${sanitizeText(node.name)}]</span>`;
     case BlockType.TaskRef:
-      return `<span data-task-ref="${sanitizeText(node.id)}">[${sanitizeText(node.title)}]</span>`;
+      return `<span data-task-ref="${sanitizeText(node.id)}" data-task-status="${sanitizeText(node.status)}">[${sanitizeText(node.title)}]</span>`;
     default:
       return children;
   }
@@ -164,9 +164,9 @@ const elementToPlainText = (node: CustomElement, children: string): string => {
     case BlockType.Command:
       return `/${node.command}`;
     case BlockType.FileRef:
-      return `[${node.name}]`;
+      return `[File: ${node.name}]`;
     case BlockType.TaskRef:
-      return `[${node.title}]`;
+      return `[Task: ${node.title}]`;
     default:
       return children;
   }
@@ -262,14 +262,16 @@ export const getFileReferences = (editor: Editor): FileRefData[] => {
 
 export type TaskRefData = {
   id: string;
+  title: string;
   workspaceId: string;
 };
 export const getTaskReference = (editor: Editor): TaskRefData | null => {
   const collect = (node: Descendant): TaskRefData | null => {
     if (Text.isText(node)) return null;
     if (node.type === BlockType.TaskRef) {
-      return { id: node.id, workspaceId: node.workspaceId };
+      return { id: node.id, title: node.title, workspaceId: node.workspaceId };
     }
+    // eslint-disable-next-line no-restricted-syntax
     for (const child of node.children) {
       const found = collect(child);
       if (found) return found;
@@ -277,6 +279,7 @@ export const getTaskReference = (editor: Editor): TaskRefData | null => {
     return null;
   };
 
+  // eslint-disable-next-line no-restricted-syntax
   for (const child of editor.children) {
     const found = collect(child);
     if (found) return found;

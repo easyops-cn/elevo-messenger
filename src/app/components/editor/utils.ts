@@ -9,6 +9,7 @@ import {
   LinkElement,
   MentionElement,
   TaskRefElement,
+  type TaskRefStatus,
 } from './slate';
 
 const ALL_MARK_TYPE: MarkType[] = [
@@ -212,12 +213,14 @@ export const createFileRefElement = (
 export const createTaskRefElement = (
   id: string,
   workspaceId: string,
-  title: string
+  title: string,
+  status?: TaskRefStatus
 ): TaskRefElement => ({
   type: BlockType.TaskRef,
   id,
   workspaceId,
   title,
+  status: status ?? 'todo',
   children: [{ text: '' }],
 });
 

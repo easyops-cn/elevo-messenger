@@ -11,7 +11,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import { isKeyHotkey } from 'is-hotkey';
 import { EventType, IContent, MsgType, RelationType, Room } from 'matrix-js-sdk';
 import { ReactEditor } from 'slate-react';
-import { Transforms, Editor, Element as SlateElement } from 'slate';
+import { Transforms, Editor, Element as SlateElement, Path, Node, Text as SlateText } from 'slate';
 import {
   Box,
   Dialog,
@@ -135,7 +135,12 @@ interface WorkspaceExplorerMessage {
 
 interface TaskManagementMessage {
   type: 'select-task';
-  task: null | { id: string; workspace_id: string; title: string };
+  task: null | {
+    id: string;
+    workspace_id: string;
+    title: string;
+    status?: { category: 'todo' | 'in_progress' | 'done' | 'cancelled' };
+  };
 }
 
 interface RoomInputProps {
@@ -221,12 +226,23 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     useSdkMessageListener<WorkspaceExplorerMessage>('workspace-explorer', handleWorkspaceFileRef);
 
     const removeExistingTaskRef = useCallback(() => {
-      const taskRef = getTaskReference(editor);
-      if (taskRef) {
-        Transforms.removeNodes(editor, {
-          at: [],
-          match: (n) => SlateElement.isElement(n) && n.type === 'task-ref',
-        });
+      const [taskRefEntry] = Editor.nodes(editor, {
+        at: [],
+        match: (n) => SlateElement.isElement(n) && n.type === 'task-ref',
+      });
+
+      if (taskRefEntry) {
+        const [, taskRefPath] = taskRefEntry;
+        const nextPath = Path.next(taskRefPath);
+
+        if (Node.has(editor, nextPath)) {
+          const nextNode = Node.get(editor, nextPath);
+          if (SlateText.isText(nextNode) && /^\s$/.test(nextNode.text)) {
+            Transforms.removeNodes(editor, { at: nextPath });
+          }
+        }
+
+        Transforms.removeNodes(editor, { at: taskRefPath });
       }
     }, [editor]);
 
@@ -236,7 +252,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         if (data?.type === 'select-task') {
           removeExistingTaskRef();
           if (data.task) {
-            const element = createTaskRefElement(data.task.id, data.task.workspace_id, data.task.title);
+            const element = createTaskRefElement(data.task.id, data.task.workspace_id, data.task.title, data.task.status?.category);
             ReactEditor.focus(editor);
             Transforms.select(editor, Editor.end(editor, []));
             Transforms.insertNodes(editor, element);
@@ -247,7 +263,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       },
       [editor, removeExistingTaskRef]
     );
-    useSdkMessageListener<TaskManagementMessage>('task-management', handleTaskSelect);
+    useSdkMessageListener<TaskManagementMessage>('tasks-management', handleTaskSelect);
 
     const handleFiles = useCallback(
       async (files: File[]) => {
