@@ -39,49 +39,6 @@ function labelFromUrl(href: string, roomId: string): string {
   }
 }
 
-async function openInSystemBrowser(href: string) {
-  const { openUrl } = await import('@tauri-apps/plugin-opener');
-  openUrl(href);
-}
-
-/**
- * Open a URL in the system browser from JavaScript (not driven by an <a target="_blank"> click).
- * - Tauri (desktop or mobile) → uses the system browser via tauri-plugin-opener
- * - Web browser               → falls through to window.open
- */
-export function openExternalUrlInSystemBrowser(href: string): void {
-  if (isTauri) {
-    openInSystemBrowser(href);
-  } else {
-    window.open(href, '_blank', 'noopener,noreferrer');
-  }
-}
-
-/**
- * Programmatically open a URL, respecting the Tauri environment:
- * - Tauri desktop + allowed domain → opens in an in-app WebviewWindow with ElevoMessengerSDK
- * - Tauri desktop + other domain  → opens in the system browser
- * - Web browser                   → falls through to window.open
- *
- * Use this for JS-triggered navigation that isn't driven by an <a target="_blank"> click.
- */
-export function openExternalUrl(href: string, roomId: string): void {
-  if (isDesktopTauri) {
-    if (isDomainAllowed(href)) {
-      invoke('open_webview', { url: href, label: labelFromUrl(href, roomId), roomId }).catch((error) => {
-        // eslint-disable-next-line no-console
-        console.error('Failed to open link in webview, falling back to system browser:', error);
-        openInSystemBrowser(href);
-      });
-    } else {
-      openInSystemBrowser(href);
-    }
-  } else {
-    // Mobile Tauri (future): use system browser for now.
-    openExternalUrlInSystemBrowser(href);
-  }
-}
-
 /**
  * Open a URL in a side panel docked to the right of the main window.
  * The Rust backend handles the layout: exits fullscreen, resizes/repositions
@@ -89,54 +46,17 @@ export function openExternalUrl(href: string, roomId: string): void {
  * Falls back to system browser on non-desktop or non-allowlisted domains.
  */
 export function openSidePanel(href: string, roomId: string): void {
-  if (isDesktopTauri) {
-    if (isDomainAllowed(href)) {
-      invoke('open_side_panel', { url: href, label: labelFromUrl(href, roomId), roomId }).catch(
-        (error) => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to open side panel, falling back to system browser:', error);
-          openInSystemBrowser(href);
-        }
-      );
-    } else {
-      openInSystemBrowser(href);
-    }
-  } else {
-    openExternalUrlInSystemBrowser(href);
-  }
-}
-
-export function useTauriOpener(roomId: string) {
-  useEffect(() => {
-    if (!isTauri) return undefined;
-
-    const handleClick = (e: MouseEvent) => {
-      const anchor = (e.target as HTMLElement).closest('a');
-      if (!anchor) return;
-      const href = anchor.getAttribute('href');
-      const target = anchor.getAttribute('target');
-      if (!(href && /^https?:\/\//.test(href) && (target === '_blank' || href.startsWith("http://localhost:5173/")))) return;
-
-      e.preventDefault();
-
-      if (isDesktopTauri && isDomainAllowed(href)) {
-        // Open in an in-app WebviewWindow with ElevoMessengerSDK injected.
-        invoke('open_webview', { url: href, label: labelFromUrl(href, roomId), roomId }).catch((error) => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to open link in webview, falling back to system browser:', error);
-          // Fallback to system browser if the command fails.
-          openInSystemBrowser(href);
-        });
-      } else {
-        // Non-allowlisted domains, or mobile (future): use system browser.
-        // TODO(mobile): replace with tauri-plugin-inappbrowser when available.
-        openInSystemBrowser(href);
+  if (isDesktopTauri && isDomainAllowed(href)) {
+    invoke('open_side_panel', { url: href, label: labelFromUrl(href, roomId), roomId }).catch(
+      (error) => {
+        // eslint-disable-next-line no-console
+        console.error('Failed to open side panel, falling back to system browser:', error);
+        window.open(href, '_blank', 'noopener,noreferrer');
       }
-    };
-
-    document.addEventListener('click', handleClick);
-    return () => document.removeEventListener('click', handleClick);
-  }, [roomId]);
+    );
+  } else {
+    window.open(href, '_blank', 'noopener,noreferrer');
+  }
 }
 
 export type SdkMessagePayload<T = unknown> = {
