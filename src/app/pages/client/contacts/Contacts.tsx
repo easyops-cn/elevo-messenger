@@ -60,7 +60,7 @@ export function Contacts() {
                     <NavItemContent>
                       <Box as="span" grow="Yes" alignItems="Center" gap="200">
                         <Avatar size="200" radii="400">
-                          <Icon src={UsersIcon} size="100" filled={isSelected} />
+                          <Icon src={ContactIcon} size="100" filled={isSelected} />
                         </Avatar>
                         <Box as="span" grow="Yes">
                           <Text as="span" size="Inherit" truncate>
@@ -78,7 +78,7 @@ export function Contacts() {
                 <NavItemContent>
                   <Box as="span" grow="Yes" alignItems="Center" gap="200">
                     <Avatar size="200" radii="400">
-                      <Icon src={UsersIcon} size="100" filled={othersSelected} />
+                      <Icon src={ContactIcon} size="100" filled={othersSelected} />
                     </Avatar>
                     <Box as="span" grow="Yes">
                       <Text as="span" size="Inherit" truncate>
