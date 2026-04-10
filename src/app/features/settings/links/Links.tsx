@@ -188,7 +188,7 @@ export function Links({ requestClose }: LinksProps) {
                         title={t('links.workspaceNotConnected')}
                         description={t('links.workspaceNotConnectedDesc')}
                         after={
-                          <Badge variant="Secondary" size="200" fill="Soft" radii="Pill">
+                          <Badge variant="Secondary" size="500" fill="Soft" radii="Pill">
                             {t('links.disconnected')}
                           </Badge>
                         }

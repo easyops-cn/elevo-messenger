@@ -93,7 +93,7 @@ export async function performWorkspaceOAuth(
   const { codeVerifier, codeChallenge } = await generatePKCE();
   const authUrl = buildAuthorizationUrl(config, state, codeChallenge);
 
-  await invoke('open_oauth_window', { authUrl });
+  await invoke('open_oauth_window', { authUrl, title: 'Link with Elevo Workspace' });
 
   return new Promise<WorkspaceOAuthResult>((resolve, reject) => {
     const unlistenPromises: Promise<() => void>[] = [];

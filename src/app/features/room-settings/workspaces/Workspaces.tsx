@@ -204,7 +204,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                           title={t('workspaces.oauthNotConnected')}
                           description={t('workspaces.oauthNotConnectedDesc')}
                           after={
-                            <Badge variant="Secondary" size="200" fill="Soft" radii="Pill">
+                            <Badge variant="Secondary" size="500" fill="Soft" radii="Pill">
                               {t('links.disconnected')}
                             </Badge>
                           }
