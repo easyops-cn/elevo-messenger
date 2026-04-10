@@ -1,7 +1,7 @@
 import React from 'react';
 import { Avatar, Box, Icon, Text } from 'folds';
 import { useTranslation } from 'react-i18next';
-import { UsersIcon } from '../../../icons/UsersIcon';
+import { ContactIcon } from '../../../icons/ContactIcon';
 import { NavCategory, NavItem, NavItemContent, NavLink } from '../../../components/nav';
 import { getContactsContactsPath, getContactsRolePath } from '../../pathUtils';
 import {
@@ -40,7 +40,7 @@ export function Contacts() {
                 <NavItemContent>
                   <Box as="span" grow="Yes" alignItems="Center" gap="200">
                     <Avatar size="200" radii="400">
-                      <Icon src={UsersIcon} size="100" filled={contactsSelected} />
+                      <Icon src={ContactIcon} size="100" filled={contactsSelected} />
                     </Avatar>
                     <Box as="span" grow="Yes">
                       <Text as="span" size="Inherit" truncate>

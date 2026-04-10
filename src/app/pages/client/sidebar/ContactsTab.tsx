@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Icon } from 'folds';
 import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
-import { UsersIcon } from '../../../icons/UsersIcon';
+import { ContactIcon } from '../../../icons/ContactIcon';
 import { SidebarAvatar, SidebarItem, SidebarItemTooltip } from '../../../components/sidebar';
 import { getContactsContactsPath, getContactsPath, joinPathComponent } from '../../pathUtils';
 import { useContactsSelected } from '../../../hooks/router/useContacts';
@@ -36,7 +36,7 @@ export function ContactsTab() {
       <SidebarItemTooltip tooltip={t('contacts.title')}>
         {(triggerRef) => (
           <SidebarAvatar as="button" ref={triggerRef} outlined onClick={handleContactsClick}>
-            <Icon src={UsersIcon} filled={contactsSelected} />
+            <Icon src={ContactIcon} filled={contactsSelected} />
           </SidebarAvatar>
         )}
       </SidebarItemTooltip>

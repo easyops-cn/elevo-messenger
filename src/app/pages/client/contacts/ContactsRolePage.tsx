@@ -12,7 +12,7 @@ import { ContainerColor } from '../../../styles/ContainerColor.css';
 import { useContactsRoleSelected } from '../../../hooks/router/useContacts';
 import { useContactsContext } from './ContactsContext';
 import { ContactsMemberList } from './ContactsPage';
-import { UsersIcon } from '../../../icons/UsersIcon';
+import { ContactIcon } from '../../../icons/ContactIcon';
 
 function ContactsRoleRoomMembers({ room, filterRole }: { room: Room; filterRole: string }) {
   const mx = useMatrixClient();
@@ -49,7 +49,7 @@ export function ContactsRolePage() {
             )}
           </Box>
           <Box alignItems="Center" gap="200">
-            <Icon size="400" src={UsersIcon} />
+            <Icon size="400" src={ContactIcon} />
             <Text size="H3" truncate>
               {roleName}
             </Text>

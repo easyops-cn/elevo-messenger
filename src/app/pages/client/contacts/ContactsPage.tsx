@@ -60,7 +60,7 @@ import {
 } from '../../../state/hooks/userRoomProfile';
 import { useSpaceOptionally } from '../../../hooks/useSpace';
 import * as css from '../../../features/room/MembersDrawer.css';
-import { UsersIcon } from '../../../icons/UsersIcon';
+import { ContactIcon } from '../../../icons/ContactIcon';
 import { useContactsContext } from './ContactsContext';
 
 type MemberItemProps = {
@@ -480,7 +480,7 @@ export function ContactsPage() {
             )}
           </Box>
           <Box alignItems="Center" gap="200">
-            {screenSize !== ScreenSize.Mobile && <Icon size="400" src={UsersIcon} />}
+            {screenSize !== ScreenSize.Mobile && <Icon size="400" src={ContactIcon} />}
             <Text size="H3" truncate>
               {t('contacts.title')}
             </Text>

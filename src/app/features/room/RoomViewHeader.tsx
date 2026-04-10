@@ -72,6 +72,7 @@ import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
 import { openSidePanel } from '../../plugins/useTauriOpener';
 import { TasksIcon } from '../../icons/TasksIcon';
+import { UsersIcon } from '../../icons/UsersIcon';
 
 type RoomMenuProps = {
   room: Room;
@@ -478,28 +479,6 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
             }
           />
 
-          {screenSize === ScreenSize.Desktop && (
-            <TooltipProvider
-              position="Bottom"
-              offset={4}
-              tooltip={
-                <Tooltip>
-                  {callView ? (
-                    <Text>Members</Text>
-                  ) : (
-                    <Text>{peopleDrawer ? 'Hide Members' : 'Show Members'}</Text>
-                  )}
-                </Tooltip>
-              }
-            >
-              {(triggerRef) => (
-                <IconButton fill="None" ref={triggerRef} onClick={handleMemberToggle}>
-                  <Icon size="400" src={Icons.User} />
-                </IconButton>
-              )}
-            </TooltipProvider>
-          )}
-
           {tasksUrl && (
             <TooltipProvider
               position="Bottom"
@@ -521,6 +500,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
               )}
             </TooltipProvider>
           )}
+
           {workspaceExplorerUrl && (
             <TooltipProvider
               position="Bottom"
@@ -544,6 +524,29 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
               )}
             </TooltipProvider>
           )}
+
+          {screenSize === ScreenSize.Desktop && (
+            <TooltipProvider
+              position="Bottom"
+              offset={4}
+              tooltip={
+                <Tooltip>
+                  {callView ? (
+                    <Text>Members</Text>
+                  ) : (
+                    <Text>{peopleDrawer ? 'Hide Members' : 'Show Members'}</Text>
+                  )}
+                </Tooltip>
+              }
+            >
+              {(triggerRef) => (
+                <IconButton fill="None" ref={triggerRef} onClick={handleMemberToggle}>
+                  <Icon size="400" src={UsersIcon} />
+                </IconButton>
+              )}
+            </TooltipProvider>
+          )}
+
           <TooltipProvider
             position="Bottom"
             align="End"
