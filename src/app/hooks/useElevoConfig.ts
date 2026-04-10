@@ -4,6 +4,7 @@ export type TenantConfig = {
   id: string;
   name: string;
   tasks_template_url?: string;
+  tasks_web_template_url?: string;
 };
 
 export type WorkspacesConfig = {

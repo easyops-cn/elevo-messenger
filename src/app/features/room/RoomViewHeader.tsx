@@ -70,7 +70,7 @@ import { ContainerColor } from '../../styles/ContainerColor.css';
 import { RoomSettingsPage } from '../../state/roomSettings';
 import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
-import { openSidePanel } from '../../plugins/useTauriOpener';
+import { openSidePanel, isDesktopTauri } from '../../plugins/useTauriOpener';
 import { TasksIcon } from '../../icons/TasksIcon';
 import { UsersIcon } from '../../icons/UsersIcon';
 
@@ -284,9 +284,14 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const firstTenant = (elevoConfig.workspaces?.tenants ?? []).find(
     (t) => t.id === firstWorkspace?.owner_tenant_id
   );
+  const tasksUrlTemplate = firstTenant
+    ? isDesktopTauri
+      ? firstTenant.tasks_template_url
+      : firstTenant.tasks_web_template_url
+    : null;
   const tasksUrl =
-    firstTenant?.tasks_template_url && firstWorkspace
-      ? firstTenant.tasks_template_url.replace('{{source_path}}', firstWorkspace.source_path)
+    tasksUrlTemplate && firstWorkspace
+      ? tasksUrlTemplate.replace('{{source_path}}', firstWorkspace.source_path)
       : null;
 
   const pinnedEvents = useRoomPinnedEvents(room);

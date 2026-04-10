@@ -10,10 +10,11 @@ export const fetchElevoConfig = async (baseUrl: string): Promise<ElevoConfig> =>
     if (!res.ok) return {};
     const data = await res.json();
     const tenants: TenantConfig[] | undefined = data.workspaces?.tenants?.map(
-      (t: { id: string; name: string; tasks_template_url?: string }) => ({
+      (t: { id: string; name: string; tasks_template_url?: string; tasks_web_template_url?: string }) => ({
         id: t.id,
         name: t.name,
         tasks_template_url: t.tasks_template_url,
+        tasks_web_template_url: t.tasks_web_template_url,
       })
     );
     return {
