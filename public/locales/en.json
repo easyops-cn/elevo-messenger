@@ -497,6 +497,8 @@
       "clearCacheBtn": "Clear Cache",
       "credits": "Credits",
       "elevoLogo": "Elevo logo",
+      "autoUpdateCheck": "Automatic Updates",
+      "autoUpdateCheckDesc": "Automatically check for updates when the app starts.",
       "checkForUpdates": "Check for Updates",
       "checkForUpdatesDesc": "Check if a newer version is available.",
       "checkingForUpdates": "Checking for updates...",

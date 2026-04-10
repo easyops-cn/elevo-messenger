@@ -41,6 +41,7 @@ export interface Settings {
   dateFormatString: string;
 
   developerTools: boolean;
+  autoUpdateCheck: boolean;
 }
 
 const defaultSettings: Settings = {
@@ -75,6 +76,7 @@ const defaultSettings: Settings = {
   dateFormatString: 'D MMM YYYY',
 
   developerTools: false,
+  autoUpdateCheck: true,
 };
 
 export const getSettings = () => {

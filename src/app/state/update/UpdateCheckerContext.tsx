@@ -1,6 +1,8 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
+import { useSetting } from '../hooks/settings';
+import { settingsAtom } from '../settings';
 
 type UpdateProgress = {
   downloaded: number;
@@ -65,6 +67,7 @@ function emitOpenAbout() {
 
 export function UpdateCheckerProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<UpdateState>(initial);
+  const [autoUpdateCheck] = useSetting(settingsAtom, 'autoUpdateCheck');
   const checkingRef = useRef(false);
   const pendingUpdateRef = useRef<Awaited<ReturnType<typeof import('@tauri-apps/plugin-updater').check>> | null>(null);
 
@@ -193,14 +196,14 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
 
   // Auto-check for updates after a short delay on startup.
   useEffect(() => {
-    if (!isDesktopTauri) return;
+    if (!isDesktopTauri || !autoUpdateCheck) return;
 
     const timer = setTimeout(() => {
       checkAndPrepare();
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [checkAndPrepare]);
+  }, [checkAndPrepare, autoUpdateCheck]);
 
   // Listen for "check-for-updates" event from Rust (menu click).
   useEffect(() => {

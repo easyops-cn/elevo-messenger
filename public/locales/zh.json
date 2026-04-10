@@ -497,6 +497,8 @@
       "clearCacheBtn": "清除缓存",
       "credits": "致谢",
       "elevoLogo": "Elevo 图标",
+      "autoUpdateCheck": "自动更新",
+      "autoUpdateCheckDesc": "应用启动时自动检查更新。",
       "checkForUpdates": "检查更新",
       "checkForUpdatesDesc": "检查是否有新版本可用。",
       "checkingForUpdates": "正在检查更新...",

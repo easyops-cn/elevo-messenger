@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Text, IconButton, Icon, Icons, Scroll, Button, config, toRem } from 'folds';
+import { Box, Text, IconButton, Icon, Icons, Scroll, Button, Switch, config, toRem } from 'folds';
 import { Page, PageContent, PageHeader } from '../../../components/page';
 import { SequenceCard } from '../../../components/sequence-card';
 import { SequenceCardStyle } from '../styles.css';
@@ -10,6 +10,8 @@ import { clearCacheAndReload } from '../../../../client/initMatrix';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useUpdateChecker } from '../../../state/update/UpdateCheckerContext';
 import { isDesktopTauri } from '../../../plugins/useTauriOpener';
+import { useSetting } from '../../../state/hooks/settings';
+import { settingsAtom } from '../../../state/settings';
 
 type AboutProps = {
   requestClose: () => void;
@@ -30,6 +32,7 @@ export function About({ requestClose }: AboutProps) {
     checking, downloading, updateAvailable, updateDownloaded, checked,
     version, progress, error, checkAndPrepare, applyUpdate,
   } = useUpdateChecker();
+  const [autoUpdateCheck, setAutoUpdateCheck] = useSetting(settingsAtom, 'autoUpdateCheck');
 
   return (
     <Page>
@@ -111,91 +114,105 @@ export function About({ requestClose }: AboutProps) {
                   />
                 </SequenceCard>
                 {isDesktopTauri && (
-                  <SequenceCard
-                    className={SequenceCardStyle}
-                    variant="SurfaceVariant"
-                    direction="Column"
-                    gap="400"
-                  >
-                    <SettingTile
-                      title={t('settings.aboutPage.checkForUpdates')}
-                      description={
-                        <>
-                          {updateDownloaded
-                            ? t('settings.aboutPage.updateReady', { version })
-                            : downloading
-                              ? (progress?.total
-                                  ? t('settings.aboutPage.downloadingUpdate', {
-                                      downloaded: formatBytes(progress.downloaded),
-                                      total: formatBytes(progress.total),
-                                    })
-                                  : t('settings.aboutPage.downloading'))
-                              : checking
-                                ? t('settings.aboutPage.checkingForUpdates')
-                                : error || (updateAvailable
-                                    ? t('settings.aboutPage.updateAvailable', { version })
-                                    : checked
-                                      ? t('settings.aboutPage.noUpdatesAvailable')
-                                      : t('settings.aboutPage.checkForUpdatesDesc'))}
-                          {(updateAvailable || updateDownloaded) && (
-                            <>
-                              <br />
-                              <a
-                                href={`https://github.com/easyops-cn/elevo-desktop/releases/tag/elevo-messenger-v${version}`}
-                                rel="noreferrer noopener"
-                                target="_blank"
-                              >
-                                {t('settings.aboutPage.viewReleaseNotes', { defaultValue: 'View Release Notes' })}
-                              </a>
-                            </>
-                          )}
-                        </>
-                      }
-                      after={
-                        updateDownloaded ? (
-                          <Button
-                            onClick={applyUpdate}
-                            variant="Primary"
-                            fill="Solid"
-                            size="300"
-                            radii="300"
-                          >
-                            <Text size="B300">{t('settings.aboutPage.restartToUpdate')}</Text>
-                          </Button>
-                        ) : updateAvailable && !downloading && !error ? (
-                          <Button
-                            onClick={applyUpdate}
-                            variant="Primary"
-                            fill="Solid"
-                            size="300"
-                            radii="300"
-                          >
-                            <Text size="B300">{t('settings.aboutPage.updateAndRestart', { defaultValue: 'Update and Restart' })}</Text>
-                          </Button>
-                        ) : (
-                          <Button
-                            onClick={checkAndPrepare}
-                            variant="Secondary"
-                            fill="Soft"
-                            size="300"
-                            radii="300"
-                            outlined
-                            disabled={checking || downloading}
-                          >
-                            <Text size="B300">
-                              {downloading
-                                ? t('settings.aboutPage.downloading')
+                  <>
+                    <SequenceCard
+                      className={SequenceCardStyle}
+                      variant="SurfaceVariant"
+                      direction="Column"
+                      gap="400"
+                    >
+                      <SettingTile
+                        title={t('settings.aboutPage.autoUpdateCheck')}
+                        description={t('settings.aboutPage.autoUpdateCheckDesc')}
+                        after={<Switch value={autoUpdateCheck} onChange={setAutoUpdateCheck} />}
+                      />
+                    </SequenceCard>
+                    <SequenceCard
+                      className={SequenceCardStyle}
+                      variant="SurfaceVariant"
+                      direction="Column"
+                      gap="400"
+                    >
+                      <SettingTile
+                        title={t('settings.aboutPage.checkForUpdates')}
+                        description={
+                          <>
+                            {updateDownloaded
+                              ? t('settings.aboutPage.updateReady', { version })
+                              : downloading
+                                ? (progress?.total
+                                    ? t('settings.aboutPage.downloadingUpdate', {
+                                        downloaded: formatBytes(progress.downloaded),
+                                        total: formatBytes(progress.total),
+                                      })
+                                    : t('settings.aboutPage.downloading'))
                                 : checking
-                                  ? t('settings.aboutPage.checking')
-                                  : error
-                                    ? t('settings.aboutPage.retry')
-                                    : t('settings.aboutPage.check')}
-                            </Text>
-                          </Button>
-                        )
-                      }
-                    />
-                  </SequenceCard>
+                                  ? t('settings.aboutPage.checkingForUpdates')
+                                  : error || (updateAvailable
+                                      ? t('settings.aboutPage.updateAvailable', { version })
+                                      : checked
+                                        ? t('settings.aboutPage.noUpdatesAvailable')
+                                        : t('settings.aboutPage.checkForUpdatesDesc'))}
+                            {(updateAvailable || updateDownloaded) && (
+                              <>
+                                <br />
+                                <a
+                                  href={`https://github.com/easyops-cn/elevo-desktop/releases/tag/elevo-messenger-v${version}`}
+                                  rel="noreferrer noopener"
+                                  target="_blank"
+                                >
+                                  {t('settings.aboutPage.viewReleaseNotes', { defaultValue: 'View Release Notes' })}
+                                </a>
+                              </>
+                            )}
+                          </>
+                        }
+                        after={
+                          updateDownloaded ? (
+                            <Button
+                              onClick={applyUpdate}
+                              variant="Primary"
+                              fill="Solid"
+                              size="300"
+                              radii="300"
+                            >
+                              <Text size="B300">{t('settings.aboutPage.restartToUpdate')}</Text>
+                            </Button>
+                          ) : updateAvailable && !downloading && !error ? (
+                            <Button
+                              onClick={applyUpdate}
+                              variant="Primary"
+                              fill="Solid"
+                              size="300"
+                              radii="300"
+                            >
+                              <Text size="B300">{t('settings.aboutPage.updateAndRestart', { defaultValue: 'Update and Restart' })}</Text>
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={checkAndPrepare}
+                              variant="Secondary"
+                              fill="Soft"
+                              size="300"
+                              radii="300"
+                              outlined
+                              disabled={checking || downloading}
+                            >
+                              <Text size="B300">
+                                {downloading
+                                  ? t('settings.aboutPage.downloading')
+                                  : checking
+                                    ? t('settings.aboutPage.checking')
+                                    : error
+                                      ? t('settings.aboutPage.retry')
+                                      : t('settings.aboutPage.check')}
+                              </Text>
+                            </Button>
+                          )
+                        }
+                      />
+                    </SequenceCard>
+                  </>
                 )}
               </Box>
               <Box direction="Column" gap="100">
