@@ -12,11 +12,13 @@ type OAuthTokenResponse = {
   access_token: string;
   token_type: string;
   expires_in: number;
+  refresh_token?: string;
   scope: string;
 };
 
 export type WorkspaceOAuthResult = {
   accessToken: string;
+  refreshToken?: string;
   expiresIn: number;
   scope: string;
 };
@@ -132,6 +134,7 @@ export async function performWorkspaceOAuth(
             await cleanup();
             resolve({
               accessToken: tokenResponse.access_token,
+              refreshToken: tokenResponse.refresh_token,
               expiresIn: tokenResponse.expires_in,
               scope: tokenResponse.scope,
             });
@@ -150,4 +153,29 @@ export async function performWorkspaceOAuth(
       })
     );
   });
+}
+
+export async function refreshWorkspaceOAuthToken(
+  serverUrl: string,
+  clientId: string,
+  refreshToken: string
+): Promise<WorkspaceOAuthResult> {
+  const params = new URLSearchParams({
+    grant_type: 'refresh_token',
+    refresh_token: refreshToken,
+    client_id: clientId,
+  });
+  const res = await fetch(`${serverUrl}/oauth/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: params.toString(),
+  });
+  if (!res.ok) throw new Error(`Token refresh failed: HTTP ${res.status}`);
+  const tokenResponse: OAuthTokenResponse = await res.json();
+  return {
+    accessToken: tokenResponse.access_token,
+    refreshToken: tokenResponse.refresh_token,
+    expiresIn: tokenResponse.expires_in,
+    scope: tokenResponse.scope,
+  };
 }

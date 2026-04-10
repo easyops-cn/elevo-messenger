@@ -1,9 +1,9 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useMatrixClient } from './useMatrixClient';
 import { useAccountData } from './useAccountData';
 import { AccountDataEvent, LinksContent } from '../../types/matrix/accountData';
 import { useElevoConfig } from './useElevoConfig';
-import { performWorkspaceOAuth } from '../utils/workspaceOAuth';
+import { performWorkspaceOAuth, refreshWorkspaceOAuthToken } from '../utils/workspaceOAuth';
 
 export type WorkspaceTokenState = {
   token: string | null;
@@ -44,6 +44,7 @@ export function useWorkspaceToken(): UseWorkspaceTokenReturn {
     await mx.setAccountData(AccountDataEvent.ElevoLinks, {
       workspaces: {
         accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
         expiresIn: result.expiresIn,
         scope: result.scope,
         connectedAt: new Date().toISOString(),
@@ -51,6 +52,41 @@ export function useWorkspaceToken(): UseWorkspaceTokenReturn {
       },
     });
   }, [mx, elevoConfig]);
+
+  // Auto-refresh when access token is expired but refresh token is available
+  const refreshingRef = useRef(false);
+  useEffect(() => {
+    const refreshToken = connection?.refreshToken;
+    if (!expired || !refreshToken || refreshingRef.current) return;
+
+    const oauth = elevoConfig.workspaces?.oauth;
+    if (!oauth) return;
+
+    refreshingRef.current = true;
+    const doRefresh = async () => {
+      try {
+        const result = await refreshWorkspaceOAuthToken(
+          connection.serverUrl,
+          oauth.clientId,
+          refreshToken
+        );
+        await mx.setAccountData(AccountDataEvent.ElevoLinks, {
+          workspaces: {
+            accessToken: result.accessToken,
+            refreshToken: result.refreshToken,
+            expiresIn: result.expiresIn,
+            scope: result.scope,
+            connectedAt: new Date().toISOString(),
+            serverUrl: connection.serverUrl,
+          },
+        });
+      } catch {
+        // Refresh failed (e.g. refresh token expired), keep expired state
+      }
+      refreshingRef.current = false;
+    };
+    doRefresh();
+  }, [mx, expired, connection, elevoConfig]);
 
   const disconnect = useCallback(async () => {
     await mx.setAccountData(AccountDataEvent.ElevoLinks, {});

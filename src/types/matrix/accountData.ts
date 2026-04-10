@@ -59,6 +59,7 @@ export type ConnectorsContent = {
 
 export type WorkspaceOAuthConnection = {
   accessToken: string;
+  refreshToken?: string;
   expiresIn: number;
   scope: string;
   connectedAt: string;
