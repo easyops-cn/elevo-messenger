@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import * as css from './TitleBar.css';
 import { isMacOS } from '../../utils/user-agent';
 import { searchModalAtom } from '../../state/searchModal';
+import { matrixReadyAtom } from '../../state/matrixReady';
 
 function MinimizeIcon() {
   return (
@@ -152,6 +153,7 @@ function TitleBarSearchBox() {
 }
 
 export function TitleBar() {
+  const matrixReady = useAtomValue(matrixReadyAtom);
   const handleDoubleClick = useCallback(() => {
     if (!isMacOS()) {
       getAppWindow().then((w) => w.toggleMaximize());
@@ -173,7 +175,7 @@ export function TitleBar() {
           <span className={css.AppTitle}>Elevo Messenger</span>
         </div>
       )}
-      <TitleBarSearchBox />
+      {matrixReady && <TitleBarSearchBox />}
       {isMacOS() ? (
         <div className={css.TrafficLightSpacer} />
       ) : (

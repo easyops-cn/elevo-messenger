@@ -16,6 +16,7 @@ import {
 import { HttpApiEvent, HttpApiEventHandlerMap, MatrixClient } from 'matrix-js-sdk';
 import FocusTrap from 'focus-trap-react';
 import React, { MouseEventHandler, ReactNode, useCallback, useEffect, useState } from 'react';
+import { useSetAtom } from 'jotai';
 import {
   clearCacheAndReload,
   clearLoginData,
@@ -35,6 +36,7 @@ import { stopPropagation } from '../../utils/keyboard';
 import { SyncStatus } from './SyncStatus';
 import { AuthMetadataProvider } from '../../hooks/useAuthMetadata';
 import { getFallbackSession } from '../../state/sessions';
+import { matrixReadyAtom } from '../../state/matrixReady';
 import { AutoDiscovery } from './AutoDiscovery';
 import { ElevoConfigLoader } from '../../components/ElevoConfigLoader';
 
@@ -145,6 +147,7 @@ type ClientRootProps = {
 };
 export function ClientRoot({ children }: ClientRootProps) {
   const [loading, setLoading] = useState(true);
+  const setMatrixReady = useSetAtom(matrixReadyAtom);
   const { baseUrl, userId } = getFallbackSession() ?? {};
 
   const [loadState, loadMatrix] = useAsyncCallback<MatrixClient, Error, []>(
@@ -180,8 +183,9 @@ export function ClientRoot({ children }: ClientRootProps) {
     useCallback((state) => {
       if (state === 'PREPARED') {
         setLoading(false);
+        setMatrixReady(true);
       }
-    }, [])
+    }, [setMatrixReady])
   );
 
   return (
