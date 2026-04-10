@@ -332,7 +332,7 @@
     "devices": "Devices",
     "emojisStickers": "Emojis & Stickers",
     "developerTools": "Developer Tools",
-    "connectors": "Connectors",
+    "links": "Links",
     "about": "About",
     "appearance": {
       "title": "Appearance",
@@ -927,11 +927,38 @@
     "syncFailed": "Sync failed",
     "failedToFetch": "Failed to fetch workspaces",
     "notConfigured": "Token Not Set",
-    "notConfiguredDesc": "Please enter your API token in the Settings section first."
+    "notConfiguredDesc": "Please enter your API token in the Settings section first.",
+    "oauthConnected": "Workspace Connected",
+    "oauthConnectedDesc": "Connected via OAuth to Elevo Workspace.",
+    "oauthExpired": "Connection Expired",
+    "oauthExpiredDesc": "Your workspace token has expired. Please reconnect in Settings > Links.",
+    "oauthNotConnected": "Workspace Not Connected",
+    "oauthNotConnectedDesc": "Connect your Elevo Workspace account to browse and add workspaces."
+  },
+  "links": {
+    "workspaceTitle": "Elevo Workspace",
+    "workspaceConnected": "Workspace Connected",
+    "workspaceConnectedDesc": "Connected on {{date}} with scope: {{scope}}",
+    "workspaceNotConnected": "Workspace Not Connected",
+    "workspaceNotConnectedDesc": "Connect your Elevo Workspace account to access workspaces.",
+    "workspaceExpired": "Workspace Connection Expired",
+    "workspaceExpiredDesc": "Your workspace token has expired. Please reconnect.",
+    "connected": "Connected",
+    "disconnected": "Disconnected",
+    "expired": "Expired",
+    "connectWorkspace": "Connect Workspace",
+    "reconnect": "Reconnect",
+    "disconnect": "Disconnect",
+    "connectionFailed": "Connection Failed",
+    "serverUrl": "Server URL",
+    "desktopOnly": "Desktop Only",
+    "desktopOnlyDesc": "OAuth connection is only supported on the desktop app."
   },
   "Organisms": {
-    "RoomCommon": {
-      "changed_room_name": " changed room name"
+    "workspaces": {
+      "RoomCommon": {
+        "changed_room_name": " changed room name"
+      }
     }
   },
   "oidcLogin": {

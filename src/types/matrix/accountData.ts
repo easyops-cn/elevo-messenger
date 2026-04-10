@@ -12,7 +12,7 @@ export enum AccountDataEvent {
 
   SecretStorageDefaultKey = 'm.secret_storage.default_key',
 
-  ElevoConnectors = 'vip.elevo.connectors',
+  ElevoLinks = 'vip.elevo.links',
 
   CrossSigningMaster = 'm.cross_signing.master',
   CrossSigningSelf = 'm.cross_signing.self',
@@ -55,4 +55,16 @@ export type ConnectorsContent = {
   javis?: {
     accessToken?: string;
   };
+};
+
+export type WorkspaceOAuthConnection = {
+  accessToken: string;
+  expiresIn: number;
+  scope: string;
+  connectedAt: string;
+  serverUrl: string;
+};
+
+export type LinksContent = {
+  workspaces?: WorkspaceOAuthConnection;
 };

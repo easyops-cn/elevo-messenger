@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { MatrixClient } from 'matrix-js-sdk';
-import { ElevoConfig, ElevoConfigProvider, TenantConfig } from '../hooks/useElevoConfig';
+import { ElevoConfig, ElevoConfigProvider, TenantConfig, OAuthConfig } from '../hooks/useElevoConfig';
 import { trimTrailingSlash } from '../utils/common';
 
 export const fetchElevoConfig = async (baseUrl: string): Promise<ElevoConfig> => {
@@ -17,12 +17,16 @@ export const fetchElevoConfig = async (baseUrl: string): Promise<ElevoConfig> =>
         tasks_web_template_url: t.tasks_web_template_url,
       })
     );
+    const oauth: OAuthConfig | undefined = data.workspaces?.oauth?.client_id
+      ? { clientId: data.workspaces.oauth.client_id }
+      : undefined;
     return {
       workspaces: {
         apiBaseUrl: data.workspaces?.api?.base_url,
         explorerUrl: data.workspaces?.explorer?.base_url,
         apiKey: data.workspaces?.api?.api_key,
         tenants,
+        oauth,
       },
       oidcStaticClients: data.oidc_static_clients,
       elevoContactsRoomId: data.elevo_contacts_room_id,

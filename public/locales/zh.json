@@ -332,7 +332,7 @@
     "devices": "设备",
     "emojisStickers": "表情和贴纸",
     "developerTools": "开发者工具",
-    "connectors": "连接器",
+    "links": "连接",
     "about": "关于",
     "appearance": {
       "title": "外观",
@@ -927,7 +927,32 @@
     "syncFailed": "同步失败",
     "failedToFetch": "获取工作空间失败",
     "notConfigured": "未设置令牌",
-    "notConfiguredDesc": "请先在设置区域中输入您的 API 令牌。"
+    "notConfiguredDesc": "请先在设置区域中输入您的 API 令牌。",
+    "oauthConnected": "工作空间已连接",
+    "oauthConnectedDesc": "已通过 OAuth 连接到 Elevo 工作空间。",
+    "oauthExpired": "连接已过期",
+    "oauthExpiredDesc": "您的工作空间令牌已过期，请在设置 > 链接中重新连接。",
+    "oauthNotConnected": "工作空间未连接",
+    "oauthNotConnectedDesc": "连接您的 Elevo 工作空间账户以浏览和添加工作空间。"
+  },
+  "links": {
+    "workspaceTitle": "Elevo 工作空间",
+    "workspaceConnected": "工作空间已连接",
+    "workspaceConnectedDesc": "连接时间：{{date}}，权限范围：{{scope}}",
+    "workspaceNotConnected": "工作空间未连接",
+    "workspaceNotConnectedDesc": "连接您的 Elevo 工作空间账户以访问工作空间。",
+    "workspaceExpired": "工作空间连接已过期",
+    "workspaceExpiredDesc": "您的工作空间令牌已过期，请重新连接。",
+    "connected": "已连接",
+    "disconnected": "未连接",
+    "expired": "已过期",
+    "connectWorkspace": "连接工作空间",
+    "reconnect": "重新连接",
+    "disconnect": "断开连接",
+    "connectionFailed": "连接失败",
+    "serverUrl": "服务器地址",
+    "desktopOnly": "仅支持桌面端",
+    "desktopOnlyDesc": "OAuth 连接仅支持桌面端应用。"
   },
   "Organisms": {
     "RoomCommon": {

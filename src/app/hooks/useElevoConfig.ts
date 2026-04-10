@@ -7,11 +7,16 @@ export type TenantConfig = {
   tasks_web_template_url?: string;
 };
 
+export type OAuthConfig = {
+  clientId: string;
+};
+
 export type WorkspacesConfig = {
   apiBaseUrl?: string;
   explorerUrl?: string;
   apiKey?: string;
   tenants?: TenantConfig[];
+  oauth?: OAuthConfig;
 };
 
 export type ElevoConfig = {
