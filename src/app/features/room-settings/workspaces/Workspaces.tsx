@@ -153,7 +153,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                           date: new Date().toLocaleString(),
                         })}
                         after={
-                          <Badge variant="Success" size="200" fill="Soft" radii="Pill">
+                          <Badge variant="Success" size="500" fill="Soft" radii="Pill">
                             {t('links.connected')}
                           </Badge>
                         }

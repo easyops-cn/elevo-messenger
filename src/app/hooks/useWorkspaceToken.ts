@@ -3,10 +3,7 @@ import { useMatrixClient } from './useMatrixClient';
 import { useAccountData } from './useAccountData';
 import { AccountDataEvent, LinksContent } from '../../types/matrix/accountData';
 import { useElevoConfig } from './useElevoConfig';
-import { isDesktopTauri } from '../plugins/useTauriOpener';
 import { performWorkspaceOAuth } from '../utils/workspaceOAuth';
-
-const ELEVO_TOKEN_STORAGE_KEY = 'elevo_workspaces_api_token';
 
 export type WorkspaceTokenState = {
   token: string | null;
@@ -31,11 +28,7 @@ export function useWorkspaceToken(): UseWorkspaceTokenReturn {
     ? Date.now() > new Date(connection.connectedAt).getTime() + connection.expiresIn * 1000
     : false;
 
-  // Token resolution priority: account data > localStorage > config apiKey
-  const legacyToken = localStorage.getItem(ELEVO_TOKEN_STORAGE_KEY) ?? '';
-  const defaultApiKey = elevoConfig.workspaces?.apiKey ?? '';
-  const token =
-    connection && !expired ? connection.accessToken : legacyToken || defaultApiKey || null;
+  const token = connection && !expired ? connection.accessToken : null;
   const connected = !!connection && !expired;
 
   const connect = useCallback(async () => {

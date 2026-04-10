@@ -14,7 +14,6 @@ export type OAuthConfig = {
 export type WorkspacesConfig = {
   apiBaseUrl?: string;
   explorerUrl?: string;
-  apiKey?: string;
   tenants?: TenantConfig[];
   oauth?: OAuthConfig;
 };

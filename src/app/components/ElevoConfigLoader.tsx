@@ -24,7 +24,6 @@ export const fetchElevoConfig = async (baseUrl: string): Promise<ElevoConfig> =>
       workspaces: {
         apiBaseUrl: data.workspaces?.api?.base_url,
         explorerUrl: data.workspaces?.explorer?.base_url,
-        apiKey: data.workspaces?.api?.api_key,
         tenants,
         oauth,
       },
