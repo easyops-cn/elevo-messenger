@@ -28,8 +28,12 @@ function isDomainAllowed(href: string): boolean {
   }
 }
 
+function sanitizeRoomId(roomId: string): string {
+  return roomId.replace(/[^a-zA-Z0-9_/:-]/g, '_');
+}
+
 function labelFromUrl(href: string, roomId: string): string {
-  const roomIdSafe = roomId.replace(/[^a-zA-Z0-9_/:-]/g, '_');
+  const roomIdSafe = sanitizeRoomId(roomId);
   try {
     const { hostname, port } = new URL(href);
     // Use a stable label per room + hostname + port so repeated clicks reuse the same window.
@@ -44,10 +48,15 @@ function labelFromUrl(href: string, roomId: string): string {
  * The Rust backend handles the layout: exits fullscreen, resizes/repositions
  * the main window, and places the panel at 1/3 screen width on the right.
  * Falls back to system browser on non-desktop or non-allowlisted domains.
+ *
+ * @param href - The URL to open in the side panel.
+ * @param roomId - The room ID associated with this side panel.
+ * @param label - Optional custom webview label. If omitted, a label is
+ *   derived from the URL and roomId.
  */
-export function openSidePanel(href: string, roomId: string): void {
+function openSidePanel(href: string, roomId: string, label?: string): void {
   if (isDesktopTauri && isDomainAllowed(href)) {
-    invoke('open_side_panel', { url: href, label: labelFromUrl(href, roomId), roomId }).catch(
+    invoke('open_side_panel', { url: href, label: label ?? labelFromUrl(href, roomId), roomId }).catch(
       (error) => {
         // eslint-disable-next-line no-console
         console.error('Failed to open side panel, falling back to system browser:', error);
@@ -57,6 +66,16 @@ export function openSidePanel(href: string, roomId: string): void {
   } else {
     window.open(href, '_blank', 'noopener,noreferrer');
   }
+}
+
+/** Open a workspace explorer side panel with label `workspaces-{ROOM_ID}`. */
+export function openWorkspacePanel(href: string, roomId: string): void {
+  openSidePanel(href, roomId, `workspaces-${sanitizeRoomId(roomId)}`);
+}
+
+/** Open a task management side panel with label `tasks-{ROOM_ID}`. */
+export function openTasksPanel(href: string, roomId: string): void {
+  openSidePanel(href, roomId, `tasks-${sanitizeRoomId(roomId)}`);
 }
 
 export type SdkMessagePayload<T = unknown> = {
