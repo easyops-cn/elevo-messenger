@@ -1111,10 +1111,10 @@ export function General({ requestClose }: GeneralProps) {
           <PageContent>
             <Box direction="Column" gap="700">
               <Appearance />
+              <Language />
               <DateAndTime />
               <Editor />
               <Messages />
-              <Language />
             </Box>
           </PageContent>
         </Scroll>

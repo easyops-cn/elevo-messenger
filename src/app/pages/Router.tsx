@@ -143,26 +143,26 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
                   <ClientBindAtoms>
                     <ClientNonUIFeatures>
                       <UpdateCheckerProvider>
-                      <CallEmbedProvider>
-                        <ClientLayout
-                          nav={
-                            <MobileFriendlyClientNav>
-                              <SidebarNav />
-                            </MobileFriendlyClientNav>
-                          }
-                        >
-                          <Outlet />
-                        </ClientLayout>
-                        <CallStatusRenderer />
-                      </CallEmbedProvider>
-                      <SearchModalRenderer />
-                      <UserRoomProfileRenderer />
-                      <CreateRoomModalRenderer />
-                      <CreateSpaceModalRenderer />
-                      <RoomSettingsRenderer />
-                      <SpaceSettingsRenderer />
-                      <ReceiveSelfDeviceVerification />
-                      <AutoRestoreBackupOnVerification />
+                        <CallEmbedProvider>
+                          <ClientLayout
+                            nav={
+                              <MobileFriendlyClientNav>
+                                <SidebarNav />
+                              </MobileFriendlyClientNav>
+                            }
+                          >
+                            <Outlet />
+                          </ClientLayout>
+                          <CallStatusRenderer />
+                        </CallEmbedProvider>
+                        <SearchModalRenderer />
+                        <UserRoomProfileRenderer />
+                        <CreateRoomModalRenderer />
+                        <CreateSpaceModalRenderer />
+                        <RoomSettingsRenderer />
+                        <SpaceSettingsRenderer />
+                        <ReceiveSelfDeviceVerification />
+                        <AutoRestoreBackupOnVerification />
                       </UpdateCheckerProvider>
                     </ClientNonUIFeatures>
                   </ClientBindAtoms>

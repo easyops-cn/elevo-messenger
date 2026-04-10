@@ -181,7 +181,7 @@ export function AuthLayout() {
           <Header className={css.AuthHeader} size="600" variant="Surface">
             <Box grow="Yes" direction="Row" gap="300" alignItems="Center">
               <img className={css.AuthLogo} src={ElevoLogo} alt={t('auth.elevoLogo')} />
-              <Text size="H3">{t('auth.elevo')}</Text>
+              <Text size="H3">{t('auth.elevoMessenger')}</Text>
             </Box>
           </Header>
           <Box className={css.AuthCardContent} direction="Column" justifyContent="Start">
