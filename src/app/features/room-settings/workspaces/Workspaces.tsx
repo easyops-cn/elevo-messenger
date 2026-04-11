@@ -1,15 +1,16 @@
 import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
 import {
+  Badge,
   Box,
   Text,
   Icon,
   Icons,
   IconButton,
   Button,
-  Input,
   Spinner,
   Scroll,
+  color,
 } from 'folds';
 import { Page, PageContent, PageHeader } from '../../../components/page';
 import { SequenceCard } from '../../../components/sequence-card';
@@ -20,11 +21,13 @@ import { useRoom } from '../../../hooks/useRoom';
 import { useStateEvent } from '../../../hooks/useStateEvent';
 import { usePowerLevels, readPowerLevel } from '../../../hooks/usePowerLevels';
 import { useElevoConfig } from '../../../hooks/useElevoConfig';
+import { useWorkspaceToken } from '../../../hooks/useWorkspaceToken';
+import { isDesktopTauri } from '../../../plugins/useTauriOpener';
+import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import {
   AddWorkspaceModal,
   WorkspaceItem,
   ELEVO_WORKSPACES_STATE_KEY,
-  ELEVO_TOKEN_STORAGE_KEY,
 } from '../../room/WorkspacesModal';
 
 type WorkspacesProps = {
@@ -48,26 +51,24 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
 
   const stateEvent = useStateEvent(room, ELEVO_WORKSPACES_STATE_KEY as any);
   const linkedWorkspaces: WorkspaceItem[] =
-    (stateEvent?.getContent() as { workspaces?: WorkspaceItem[] } | undefined)
-      ?.workspaces ?? [];
+    (stateEvent?.getContent() as { workspaces?: WorkspaceItem[] } | undefined)?.workspaces ?? [];
 
-  const defaultApiKey = elevoConfig.workspaces?.apiKey ?? '';
-  const [userToken, setUserToken] = useState(() => localStorage.getItem(ELEVO_TOKEN_STORAGE_KEY) ?? '');
-  const token = userToken || defaultApiKey;
-  const [tokenInput, setTokenInput] = useState(userToken || defaultApiKey);
-  const [tokenSaved, setTokenSaved] = useState(false);
+  const { token, connected, expired, refreshing, connect } = useWorkspaceToken();
+  const [connectError, setConnectError] = useState<string | null>(null);
 
-  const [showAddModal, setShowAddModal] = useState(false);
+  const [connectState, startConnect] = useAsyncCallback(
+    React.useCallback(async () => {
+      setConnectError(null);
+      await connect();
+    }, [connect])
+  );
+
+  const showAddModalState = useState(false);
+  const showAddModal = showAddModalState[0];
+  const setShowAddModal = showAddModalState[1];
 
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
-
-  const handleSaveToken = () => {
-    localStorage.setItem(ELEVO_TOKEN_STORAGE_KEY, tokenInput);
-    setUserToken(tokenInput);
-    setTokenSaved(true);
-    setTimeout(() => setTokenSaved(false), 2000);
-  };
 
   const handleAdd = async (ws: WorkspaceItem) => {
     if (linkedWorkspaces.some((w) => w.id === ws.id)) return;
@@ -113,6 +114,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
   };
 
   const linkedIds = new Set(linkedWorkspaces.map((w) => w.id));
+  const isConnecting = connectState.status === AsyncStatus.Loading;
 
   return (
     <>
@@ -136,7 +138,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
             <PageContent>
               <Box direction="Column" gap="700">
 
-                {/* Workspaces API Token */}
+                {/* Workspace Connection */}
                 <Box direction="Column" gap="100">
                   <Text size="L400">{t('workspaces.settings')}</Text>
                   <SequenceCard
@@ -146,38 +148,96 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                     gap="400"
                   >
                     <SettingTile
-                      title={t('workspaces.apiToken')}
-                      description={
-                        !baseUrl
-                          ? t('workspaces.apiTokenNotConfigured')
-                          : t('workspaces.apiTokenStoredLocally')
-                      }
+                      title={t('links.workspaceTitle')}
                       after={
-                        <Box gap="200" alignItems="Center">
-                          <Input
-                            type="password"
-                            value={tokenInput}
-                            variant="Secondary"
-                            radii="300"
-                            onChange={(e) => setTokenInput((e.target as HTMLInputElement).value)}
-                            placeholder={t('workspaces.enterToken')}
-                            style={{ width: 200 }}
-                          />
+                        connected ? (
+                          <Box as="span" gap="100" alignItems="Center">
+                            <Badge variant="Success" fill="Solid" size="200" radii="Pill" />
+                            <Text
+                              as="span"
+                              size="L400"
+                              style={{ color: color.Success.Main }}
+                            >
+                              {t('links.connected')}
+                            </Text>
+                          </Box>
+                        ) : refreshing ? (
+                          <Box as="span" gap="100" alignItems="Center">
+                            <Spinner size="200" variant="Secondary" />
+                            <Text
+                              as="span"
+                              size="L400"
+                              style={{ color: color.Warning.Main }}
+                            >
+                              {t('links.refreshing')}
+                            </Text>
+                          </Box>
+                        ) : expired ? (
+                          <Box alignItems="Center" gap="200">
+                            <Box as="span" gap="100" alignItems="Center">
+                              <Badge variant="Critical" fill="Solid" size="200" radii="Pill" />
+                              <Text
+                                as="span"
+                                size="L400"
+                                style={{ color: color.Critical.Main }}
+                              >
+                                {t('links.expired')}
+                              </Text>
+                            </Box>
+                            {isDesktopTauri && (
+                              <Button
+                                size="300"
+                                variant="Primary"
+                                fill="Solid"
+                                radii="300"
+                                onClick={() =>
+                                  startConnect().catch((e) =>
+                                    setConnectError(e.message ?? String(e))
+                                  )
+                                }
+                                disabled={isConnecting}
+                                before={
+                                  isConnecting ? (
+                                    <Spinner size="100" variant="Secondary" />
+                                  ) : (
+                                    <Icon src={Icons.Link} size="100" />
+                                  )
+                                }
+                              >
+                                <Text size="B300">{t('links.reconnect')}</Text>
+                              </Button>
+                            )}
+                          </Box>
+                        ) : isDesktopTauri ? (
                           <Button
                             size="300"
-                            variant="Secondary"
-                            fill="Soft"
+                            variant="Primary"
+                            fill="Solid"
                             radii="300"
-                            outlined
-                            onClick={handleSaveToken}
+                            onClick={() =>
+                              startConnect().catch((e) =>
+                                setConnectError(e.message ?? String(e))
+                              )
+                            }
+                            disabled={isConnecting}
+                            before={
+                              isConnecting ? (
+                                <Spinner size="100" variant="Secondary" />
+                              ) : (
+                                <Icon src={Icons.Link} size="100" />
+                              )
+                            }
                           >
-                            <Text size="B300">
-                              {tokenSaved ? t('workspaces.saved') : t('common.save')}
-                            </Text>
+                            <Text size="B300">{t('links.connectWorkspace')}</Text>
                           </Button>
-                        </Box>
+                        ) : undefined
                       }
                     />
+                    {connectError && (
+                      <Text size="T200" style={{ color: 'var(--mx-danger)' }}>
+                        {connectError}
+                      </Text>
+                    )}
                   </SequenceCard>
                 </Box>
 
@@ -296,7 +356,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
         <AddWorkspaceModal
           linkedIds={linkedIds}
           baseUrl={baseUrl}
-          token={token}
+          token={token ?? ''}
           tenantNames={tenantsById}
           onAdd={handleAdd}
           requestClose={() => setShowAddModal(false)}

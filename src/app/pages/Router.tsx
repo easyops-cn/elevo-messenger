@@ -63,7 +63,7 @@ import { ScreenSize } from '../hooks/useScreenSize';
 import { MobileFriendlyPageNav, MobileFriendlyClientNav } from './MobileFriendly';
 import { ClientInitStorageAtom } from './client/ClientInitStorageAtom';
 import { ClientNonUIFeatures } from './client/ClientNonUIFeatures';
-import { AuthRouteThemeManager, UnAuthRouteThemeManager } from './ThemeManager';
+import { AuthRouteThemeManager } from './ThemeManager';
 import { ReceiveSelfDeviceVerification } from '../components/DeviceVerification';
 import { AutoRestoreBackupOnVerification } from '../components/BackupRestore';
 import { RoomSettingsRenderer } from '../features/room-settings';
@@ -110,10 +110,9 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           return null;
         }}
         element={
-          <>
+          <AuthRouteThemeManager>
             <AuthLayout />
-            <UnAuthRouteThemeManager />
-          </>
+          </AuthRouteThemeManager>
         }
       >
         <Route path={LOGIN_PATH} element={<Login />} />

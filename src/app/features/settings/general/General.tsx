@@ -30,6 +30,7 @@ import {
 import { isKeyHotkey } from 'is-hotkey';
 import FocusTrap from 'focus-trap-react';
 import { useTranslation } from 'react-i18next';
+import { SUPPORTED_LANGUAGES } from '../../../i18n';
 import { Page, PageContent, PageHeader } from '../../../components/page';
 import { SequenceCard } from '../../../components/sequence-card';
 import { useSetting } from '../../../state/hooks/settings';
@@ -51,6 +52,7 @@ import { useMessageLayoutItems } from '../../../hooks/useMessageLayout';
 import { useMessageSpacingItems } from '../../../hooks/useMessageSpacing';
 import { useDateFormatItems } from '../../../hooks/useDateFormat';
 import { SequenceCardStyle } from '../styles.css';
+import { isDesktopTauri } from '../../../plugins/useTauriOpener';
 
 type ThemeSelectorProps = {
   themeNames: Record<string, string>;
@@ -1003,13 +1005,9 @@ function Messages() {
     </Box>
   );
 }
-const SUPPORTED_LANGUAGES = [
-  { code: 'en', name: 'English' },
-  { code: 'zh', name: '简体中文' },
-];
-
 function Language() {
   const { t, i18n } = useTranslation();
+  const [, setLanguage] = useSetting(settingsAtom, 'language');
   const [menuCords, setMenuCords] = useState<RectCords>();
 
   const handleMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
@@ -1018,6 +1016,9 @@ function Language() {
 
   const handleSelect = (langCode: string) => {
     i18n.changeLanguage(langCode);
+    if (isDesktopTauri) {
+      setLanguage(langCode);
+    }
     setMenuCords(undefined);
   };
 

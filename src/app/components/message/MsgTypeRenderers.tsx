@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod/v4';
 import { Box, Chip, Icon, Icons, Text, color, config, toRem } from 'folds';
 import { IContent } from 'matrix-js-sdk';
+import { invoke } from '@tauri-apps/api/core';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
+import { useMatrixClient } from '../../hooks/useMatrixClient';
+import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import { trimReplyFromBody } from '../../utils/room';
 import { MessageTextBody } from './layout';
 import {
@@ -82,6 +85,7 @@ const OidcLoginSchema = z.object({
   provider: z.string(),
   url: z.string().optional(),
   done: z.boolean().optional(),
+  userId: z.string().optional(),
 });
 
 type OidcLoginData = z.infer<typeof OidcLoginSchema>;
@@ -209,12 +213,13 @@ const oidcLinkStyles: CSSProperties = {
 
 export function MText({ edited, content, renderBody, renderUrlsPreview, style }: MTextProps) {
   const { t } = useTranslation();
+  const mx = useMatrixClient();
   const { body, formatted_body: customBody } = content;
 
   if (typeof body !== 'string') return <BrokenContent />;
 
   const oidcLogin = parseOidcLogin(content);
-  if (oidcLogin) {
+  if (oidcLogin && (!oidcLogin.userId || oidcLogin.userId === mx.getUserId())) {
     const cardContent = (
       <>
         <Icon src={Icons.ShieldUser} size="300" />
@@ -236,22 +241,51 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
       </>
     );
 
-    return (
-      <Box style={style}>
-        {oidcLogin.done ? (
-          <div style={oidcLinkStyles}>{cardContent}</div>
-        ) : (
-          <a
-            href={oidcLogin.url}
-            target="_blank"
-            rel="noreferrer noopener"
+    const handleOidcClick = () => {
+      if (isDesktopTauri && oidcLogin.url) {
+        invoke('open_oauth_window', { authUrl: oidcLogin.url, label: 'oauth-elevo-bridge' }).catch((err) => {
+          // eslint-disable-next-line no-console
+          console.error('Failed to open OAuth window, falling back to browser:', err);
+          window.open(oidcLogin.url, '_blank', 'noopener,noreferrer');
+        });
+      }
+    };
+
+    const renderOidcCard = () => {
+      if (oidcLogin.done) {
+        return <div style={oidcLinkStyles}>{cardContent}</div>;
+      }
+      if (isDesktopTauri) {
+        return (
+          <div
+            role="button"
+            tabIndex={0}
             style={{ ...oidcLinkStyles, cursor: 'pointer' }}
+            onClick={handleOidcClick}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                handleOidcClick();
+              }
+            }}
           >
             {cardContent}
-          </a>
-        )}
-      </Box>
-    );
+          </div>
+        );
+      }
+      return (
+        <a
+          href={oidcLogin.url}
+          target="_blank"
+          rel="noreferrer noopener"
+          style={{ ...oidcLinkStyles, cursor: 'pointer' }}
+        >
+          {cardContent}
+        </a>
+      );
+    };
+
+    return <Box style={style}>{renderOidcCard()}</Box>;
   }
 
   const toolCall = parseToolCall(content);

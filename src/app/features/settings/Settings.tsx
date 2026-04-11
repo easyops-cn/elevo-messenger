@@ -31,8 +31,8 @@ import { Notifications } from './notifications';
 import { Devices } from './devices';
 import { EmojisStickers } from './emojis-stickers';
 import { DeveloperTools } from './developer-tools';
-// import { Connectors } from './connectors';
 import { About } from './about';
+import { Links } from './links';
 import { UseStateProvider } from '../../components/UseStateProvider';
 import { stopPropagation } from '../../utils/keyboard';
 import { LogoutDialog } from '../../components/LogoutDialog';
@@ -45,7 +45,7 @@ export enum SettingsPages {
   DevicesPage,
   EmojisStickersPage,
   DeveloperToolsPage,
-  // ConnectorsPage,
+  LinksPage,
   AboutPage,
 }
 
@@ -88,11 +88,11 @@ const useSettingsMenuItems = (): SettingsMenuItem[] =>
         nameKey: 'settings.developerTools',
         icon: Icons.Terminal,
       },
-      // {
-      //   page: SettingsPages.ConnectorsPage,
-      //   nameKey: 'settings.connectors',
-      //   icon: Icons.Link,
-      // },
+      {
+        page: SettingsPages.LinksPage,
+        nameKey: 'settings.links',
+        icon: Icons.Link,
+      },
       {
         page: SettingsPages.AboutPage,
         nameKey: 'settings.about',
@@ -243,9 +243,9 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
       {activePage === SettingsPages.DeveloperToolsPage && (
         <DeveloperTools requestClose={handlePageRequestClose} />
       )}
-      {/* {activePage === SettingsPages.ConnectorsPage && (
-        <Connectors requestClose={handlePageRequestClose} />
-      )} */}
+      {activePage === SettingsPages.LinksPage && (
+        <Links requestClose={handlePageRequestClose} />
+      )}
       {activePage === SettingsPages.AboutPage && <About requestClose={handlePageRequestClose} />}
     </PageRoot>
   );

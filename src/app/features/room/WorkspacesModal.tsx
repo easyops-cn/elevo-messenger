@@ -20,7 +20,6 @@ import {
 } from 'folds';
 
 export const ELEVO_WORKSPACES_STATE_KEY = 'vip.elevo.workspaces';
-export const ELEVO_TOKEN_STORAGE_KEY = 'elevo_workspaces_api_token';
 const PAGE_SIZE = 100;
 
 export type WorkspaceItem = {
