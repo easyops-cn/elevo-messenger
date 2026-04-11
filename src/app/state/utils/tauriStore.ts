@@ -2,6 +2,7 @@ import { isDesktopTauri } from '../../plugins/useTauriOpener';
 
 const STORE_FILE = 'settings.json';
 const STORE_KEY = 'settings';
+const LANGUAGE_KEY = 'language';
 
 type LazyStoreInstance = {
   get: <T>(key: string) => Promise<T | undefined>;
@@ -32,4 +33,17 @@ export async function setTauriSettings<T>(value: T): Promise<void> {
   const store = await getStore();
   if (!store) return;
   await store.set(STORE_KEY, value);
+}
+
+export async function getTauriLanguage(): Promise<string | null> {
+  const store = await getStore();
+  if (!store) return null;
+  const value = await store.get<string>(LANGUAGE_KEY);
+  return value ?? null;
+}
+
+export async function setTauriLanguage(lang: string): Promise<void> {
+  const store = await getStore();
+  if (!store) return;
+  await store.set(LANGUAGE_KEY, lang);
 }

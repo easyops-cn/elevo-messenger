@@ -51,6 +51,8 @@ import { useMessageLayoutItems } from '../../../hooks/useMessageLayout';
 import { useMessageSpacingItems } from '../../../hooks/useMessageSpacing';
 import { useDateFormatItems } from '../../../hooks/useDateFormat';
 import { SequenceCardStyle } from '../styles.css';
+import { isDesktopTauri } from '../../../plugins/useTauriOpener';
+import { setTauriLanguage } from '../../../state/utils/tauriStore';
 
 type ThemeSelectorProps = {
   themeNames: Record<string, string>;
@@ -1018,6 +1020,9 @@ function Language() {
 
   const handleSelect = (langCode: string) => {
     i18n.changeLanguage(langCode);
+    if (isDesktopTauri) {
+      setTauriLanguage(langCode);
+    }
     setMenuCords(undefined);
   };
 
