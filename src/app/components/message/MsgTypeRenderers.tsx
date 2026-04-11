@@ -5,6 +5,7 @@ import { Box, Chip, Icon, Icons, Text, color, config, toRem } from 'folds';
 import { IContent } from 'matrix-js-sdk';
 import { invoke } from '@tauri-apps/api/core';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
+import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import { trimReplyFromBody } from '../../utils/room';
 import { MessageTextBody } from './layout';
@@ -84,6 +85,7 @@ const OidcLoginSchema = z.object({
   provider: z.string(),
   url: z.string().optional(),
   done: z.boolean().optional(),
+  userId: z.string().optional(),
 });
 
 type OidcLoginData = z.infer<typeof OidcLoginSchema>;
@@ -211,12 +213,13 @@ const oidcLinkStyles: CSSProperties = {
 
 export function MText({ edited, content, renderBody, renderUrlsPreview, style }: MTextProps) {
   const { t } = useTranslation();
+  const mx = useMatrixClient();
   const { body, formatted_body: customBody } = content;
 
   if (typeof body !== 'string') return <BrokenContent />;
 
   const oidcLogin = parseOidcLogin(content);
-  if (oidcLogin) {
+  if (oidcLogin && (!oidcLogin.userId || oidcLogin.userId === mx.getUserId())) {
     const cardContent = (
       <>
         <Icon src={Icons.ShieldUser} size="300" />
