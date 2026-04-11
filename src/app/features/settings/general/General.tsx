@@ -30,6 +30,7 @@ import {
 import { isKeyHotkey } from 'is-hotkey';
 import FocusTrap from 'focus-trap-react';
 import { useTranslation } from 'react-i18next';
+import { SUPPORTED_LANGUAGES } from '../../../i18n';
 import { Page, PageContent, PageHeader } from '../../../components/page';
 import { SequenceCard } from '../../../components/sequence-card';
 import { useSetting } from '../../../state/hooks/settings';
@@ -1005,11 +1006,6 @@ function Messages() {
     </Box>
   );
 }
-const SUPPORTED_LANGUAGES = [
-  { code: 'en', name: 'English' },
-  { code: 'zh', name: '简体中文' },
-];
-
 function Language() {
   const { t, i18n } = useTranslation();
   const [menuCords, setMenuCords] = useState<RectCords>();

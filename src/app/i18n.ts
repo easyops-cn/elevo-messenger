@@ -46,4 +46,9 @@ chain
     }
   });
 
+export const SUPPORTED_LANGUAGES = [
+  { code: 'en', name: 'English' },
+  { code: 'zh', name: '简体中文' },
+];
+
 export default i18n;
