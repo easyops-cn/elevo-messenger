@@ -4,12 +4,14 @@ import FocusTrap from 'focus-trap-react';
 import { useTranslation } from 'react-i18next';
 import { SUPPORTED_LANGUAGES } from '../../i18n';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
-import { setTauriLanguage } from '../../state/utils/tauriStore';
+import { settingsAtom } from '../../state/settings';
+import { useSetting } from '../../state/hooks/settings';
 import { stopPropagation } from '../../utils/keyboard';
 import * as css from './styles.css';
 
 export function AuthFooter() {
   const { t, i18n } = useTranslation();
+  const [, setLanguage] = useSetting(settingsAtom, 'language');
   const [menuCords, setMenuCords] = useState<RectCords>();
 
   const handleMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
@@ -19,7 +21,7 @@ export function AuthFooter() {
   const handleSelect = (langCode: string) => {
     i18n.changeLanguage(langCode);
     if (isDesktopTauri) {
-      setTauriLanguage(langCode);
+      setLanguage(langCode);
     }
     setMenuCords(undefined);
   };

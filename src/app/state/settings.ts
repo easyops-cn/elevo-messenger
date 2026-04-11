@@ -43,6 +43,8 @@ export interface Settings {
 
   developerTools: boolean;
   autoUpdateCheck: boolean;
+
+  language?: string;
 }
 
 const defaultSettings: Settings = {
@@ -89,7 +91,7 @@ export const getSettings = () => {
   };
 };
 
-export const setSettings = (settings: Settings) => {
+const setSettings = (settings: Settings) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
   setTauriSettings(settings);
 };

@@ -53,7 +53,6 @@ import { useMessageSpacingItems } from '../../../hooks/useMessageSpacing';
 import { useDateFormatItems } from '../../../hooks/useDateFormat';
 import { SequenceCardStyle } from '../styles.css';
 import { isDesktopTauri } from '../../../plugins/useTauriOpener';
-import { setTauriLanguage } from '../../../state/utils/tauriStore';
 
 type ThemeSelectorProps = {
   themeNames: Record<string, string>;
@@ -1008,6 +1007,7 @@ function Messages() {
 }
 function Language() {
   const { t, i18n } = useTranslation();
+  const [, setLanguage] = useSetting(settingsAtom, 'language');
   const [menuCords, setMenuCords] = useState<RectCords>();
 
   const handleMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
@@ -1017,7 +1017,7 @@ function Language() {
   const handleSelect = (langCode: string) => {
     i18n.changeLanguage(langCode);
     if (isDesktopTauri) {
-      setTauriLanguage(langCode);
+      setLanguage(langCode);
     }
     setMenuCords(undefined);
   };

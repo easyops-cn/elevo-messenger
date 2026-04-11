@@ -28,8 +28,9 @@ chain
   .then(async () => {
     if (!isDesktopTauri) return;
     try {
-      const { getTauriLanguage } = await import('./state/utils/tauriStore');
-      const persisted = await getTauriLanguage();
+      const { getTauriSettings } = await import('./state/utils/tauriStore');
+      const settings = await getTauriSettings<{ language?: string }>();
+      const persisted = settings?.language ?? null;
       if (persisted) {
         await i18n.changeLanguage(persisted);
         return;
