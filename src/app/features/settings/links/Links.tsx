@@ -121,7 +121,7 @@ export function Links({ requestClose }: LinksProps) {
                           <Button
                             size="300"
                             variant="Critical"
-                            fill="None"
+                            fill="Soft"
                             radii="300"
                             onClick={() =>
                               startDisconnect().catch((e) => setError(e.message ?? String(e)))

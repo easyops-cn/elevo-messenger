@@ -948,7 +948,7 @@
     "expired": "已过期",
     "connectWorkspace": "连接工作空间",
     "reconnect": "重新连接",
-    "disconnect": "断开连接",
+    "disconnect": "取消连接",
     "connectionFailed": "连接失败",
     "serverUrl": "服务器地址",
     "desktopOnly": "仅支持桌面端",
