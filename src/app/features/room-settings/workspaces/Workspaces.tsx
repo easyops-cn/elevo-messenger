@@ -53,7 +53,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
   const linkedWorkspaces: WorkspaceItem[] =
     (stateEvent?.getContent() as { workspaces?: WorkspaceItem[] } | undefined)?.workspaces ?? [];
 
-  const { token, connected, expired, connect } = useWorkspaceToken();
+  const { token, connected, expired, refreshing, connect } = useWorkspaceToken();
   const [connectError, setConnectError] = useState<string | null>(null);
 
   const [connectState, startConnect] = useAsyncCallback(
@@ -159,6 +159,17 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                               style={{ color: color.Success.Main }}
                             >
                               {t('links.connected')}
+                            </Text>
+                          </Box>
+                        ) : refreshing ? (
+                          <Box as="span" gap="100" alignItems="Center">
+                            <Spinner size="200" variant="Secondary" />
+                            <Text
+                              as="span"
+                              size="L400"
+                              style={{ color: color.Warning.Main }}
+                            >
+                              {t('links.refreshing')}
                             </Text>
                           </Box>
                         ) : expired ? (

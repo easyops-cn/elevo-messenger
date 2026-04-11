@@ -32,7 +32,7 @@ type LinksProps = {
 
 export function Links({ requestClose }: LinksProps) {
   const { t } = useTranslation();
-  const { connected, expired, connection, connect, disconnect } = useWorkspaceToken();
+  const { connected, expired, refreshing, connection, connect, disconnect } = useWorkspaceToken();
   const [error, setError] = useState<string | null>(null);
   const [menuCords, setMenuCords] = useState<RectCords>();
 
@@ -179,6 +179,17 @@ export function Links({ requestClose }: LinksProps) {
                               </FocusTrap>
                             }
                           />
+                        </Box>
+                      ) : refreshing ? (
+                        <Box as="span" gap="100" alignItems="Center">
+                          <Spinner size="200" variant="Secondary" />
+                          <Text
+                            as="span"
+                            size="L400"
+                            style={{ color: color.Warning.Main }}
+                          >
+                            {t('links.refreshing')}
+                          </Text>
                         </Box>
                       ) : expired ? (
                         <Box alignItems="Center" gap="200">

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMatrixClient } from './useMatrixClient';
 import { useAccountData } from './useAccountData';
 import { AccountDataEvent, LinksContent } from '../../types/matrix/accountData';
@@ -13,6 +13,7 @@ export type WorkspaceTokenState = {
 };
 
 export type UseWorkspaceTokenReturn = WorkspaceTokenState & {
+  refreshing: boolean;
   connect: () => Promise<void>;
   disconnect: () => Promise<void>;
 };
@@ -54,6 +55,7 @@ export function useWorkspaceToken(): UseWorkspaceTokenReturn {
   }, [mx, elevoConfig]);
 
   // Auto-refresh when access token is expired but refresh token is available
+  const [refreshing, setRefreshing] = useState(false);
   const refreshingRef = useRef(false);
   useEffect(() => {
     const refreshToken = connection?.refreshToken;
@@ -63,6 +65,7 @@ export function useWorkspaceToken(): UseWorkspaceTokenReturn {
     if (!oauth) return;
 
     refreshingRef.current = true;
+    setRefreshing(true);
     const doRefresh = async () => {
       try {
         const result = await refreshWorkspaceOAuthToken(
@@ -84,6 +87,7 @@ export function useWorkspaceToken(): UseWorkspaceTokenReturn {
         // Refresh failed (e.g. refresh token expired), keep expired state
       }
       refreshingRef.current = false;
+      setRefreshing(false);
     };
     doRefresh();
   }, [mx, expired, connection, elevoConfig]);
@@ -92,5 +96,5 @@ export function useWorkspaceToken(): UseWorkspaceTokenReturn {
     await mx.setAccountData(AccountDataEvent.ElevoLinks, {});
   }, [mx]);
 
-  return { token, connected, expired, connection, connect, disconnect };
+  return { token, connected, expired, refreshing, connection, connect, disconnect };
 }

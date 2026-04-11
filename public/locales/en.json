@@ -947,6 +947,7 @@
     "connected": "Connected",
     "disconnected": "Disconnected",
     "expired": "Expired",
+    "refreshing": "Refreshing",
     "connectWorkspace": "Connect Workspace",
     "reconnect": "Reconnect",
     "disconnect": "Disconnect",

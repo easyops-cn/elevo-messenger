@@ -947,6 +947,7 @@
     "connected": "已连接",
     "disconnected": "未连接",
     "expired": "已过期",
+    "refreshing": "刷新中",
     "connectWorkspace": "连接工作空间",
     "reconnect": "重新连接",
     "disconnect": "取消连接",
