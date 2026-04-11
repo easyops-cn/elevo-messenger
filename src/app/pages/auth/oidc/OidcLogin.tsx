@@ -47,7 +47,7 @@ export function OidcLogin({ clientId }: OidcLoginProps) {
 
       if (isDesktopTauri) {
         const { invoke } = await import('@tauri-apps/api/core');
-        await invoke('open_oauth_window', { authUrl });
+        await invoke('open_oauth_window', { authUrl, label: 'oauth-matrix' });
         settledRef.current = false;
         setOauthPending(true);
       } else {
@@ -70,7 +70,7 @@ export function OidcLogin({ clientId }: OidcLoginProps) {
       // Handle the OAuth callback with code/state or error.
       unlistenPromises.push(
         listen<{ code?: string; state?: string; error?: string; errorDescription?: string }>(
-          'oauth-callback',
+          'oauth-matrix--callback',
           async (event) => {
             if (settledRef.current) return;
             settledRef.current = true;
@@ -127,7 +127,7 @@ export function OidcLogin({ clientId }: OidcLoginProps) {
 
       // Handle user manually closing the OAuth window.
       unlistenPromises.push(
-        listen('oauth-callback-window-closed', () => {
+        listen('oauth-matrix--window-closed', () => {
           if (settledRef.current) return;
           settledRef.current = true;
           setOauthPending(false);

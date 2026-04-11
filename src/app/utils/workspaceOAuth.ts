@@ -97,8 +97,8 @@ export async function performWorkspaceOAuth(
 
   await invoke('open_oauth_window', {
     authUrl,
+    label: 'oauth-elevo-workspace',
     title: 'Link with Elevo Workspace',
-    callbackEvent: 'workspace-oauth-callback',
   });
 
   return new Promise<WorkspaceOAuthResult>((resolve, reject) => {
@@ -111,7 +111,7 @@ export async function performWorkspaceOAuth(
 
     unlistenPromises.push(
       listen<{ code?: string; state?: string; error?: string; errorDescription?: string }>(
-        'workspace-oauth-callback',
+        'oauth-elevo-workspace--callback',
         async (event) => {
           const { code, state: returnedState, error, errorDescription } = event.payload;
 
@@ -151,7 +151,7 @@ export async function performWorkspaceOAuth(
     );
 
     unlistenPromises.push(
-      listen('workspace-oauth-callback-window-closed', () => {
+      listen('oauth-elevo-workspace--window-closed', () => {
         cleanup();
         reject(new Error('OAuth window was closed before authentication completed.'));
       })
