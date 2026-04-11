@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { MouseEventHandler, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Box,
@@ -12,7 +12,11 @@ import {
   Badge,
   config,
   color,
+  Menu,
+  PopOut,
+  RectCords,
 } from 'folds';
+import FocusTrap from 'focus-trap-react';
 import { Page, PageContent, PageHeader } from '../../../components/page';
 import { SequenceCard } from '../../../components/sequence-card';
 import { SequenceCardStyle } from '../styles.css';
@@ -20,6 +24,7 @@ import { SettingTile } from '../../../components/setting-tile';
 import { isDesktopTauri } from '../../../plugins/useTauriOpener';
 import { useWorkspaceToken } from '../../../hooks/useWorkspaceToken';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
+import { stopPropagation } from '../../../utils/keyboard';
 
 type LinksProps = {
   requestClose: () => void;
@@ -29,6 +34,7 @@ export function Links({ requestClose }: LinksProps) {
   const { t } = useTranslation();
   const { connected, expired, connection, connect, disconnect } = useWorkspaceToken();
   const [error, setError] = useState<string | null>(null);
+  const [menuCords, setMenuCords] = useState<RectCords>();
 
   const [connectState, startConnect] = useAsyncCallback(
     React.useCallback(async () => {
@@ -46,6 +52,17 @@ export function Links({ requestClose }: LinksProps) {
 
   const isLoading =
     connectState.status === AsyncStatus.Loading || disconnectState.status === AsyncStatus.Loading;
+
+  const handleMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
+    setMenuCords(evt.currentTarget.getBoundingClientRect());
+  };
+
+  const handleDisconnect = () => {
+    setMenuCords(undefined);
+    startDisconnect().catch((e) => setError(e.message ?? String(e)));
+  };
+
+  const isConnected = connected && connection;
 
   return (
     <Page>
@@ -91,69 +108,91 @@ export function Links({ requestClose }: LinksProps) {
               )}
 
               <Box direction="Column" gap="100">
-                <Text size="L400">{t('links.workspaceTitle')}</Text>
+                <Text size="L400">{t('links.connectionList')}</Text>
                 <SequenceCard
                   className={SequenceCardStyle}
                   variant="SurfaceVariant"
                   direction="Column"
                   gap="400"
                 >
-                  {connected && connection ? (
-                    <>
-                      <SettingTile
-                        title={t('links.workspaceConnected')}
-                        description={t('links.workspaceConnectedDesc', {
-                          date: new Date(connection.connectedAt).toLocaleString(),
-                          scope: connection.scope,
-                        })}
-                        after={
-                          <Badge variant="Success" size="500" fill="Soft" radii="Pill">
-                            {t('links.connected')}
-                          </Badge>
-                        }
-                      />
-                      <SettingTile
-                        title={t('links.serverUrl')}
-                        description={connection.serverUrl}
-                      />
-                      <SettingTile
-                        after={
-                          <Button
+                  <SettingTile
+                    title={t('links.workspaceTitle')}
+                    after={
+                      isConnected ? (
+                        <Box alignItems="Center" gap="200">
+                          <Box as="span" gap="100" alignItems="Center">
+                            <Badge variant="Success" fill="Solid" size="200" radii="Pill" />
+                            <Text
+                              as="span"
+                              size="L400"
+                              style={{ color: color.Success.Main }}
+                            >
+                              {t('links.connected')}
+                            </Text>
+                          </Box>
+                          <IconButton
+                            aria-pressed={!!menuCords}
                             size="300"
-                            variant="Critical"
-                            fill="Soft"
+                            variant="Secondary"
                             radii="300"
-                            onClick={() =>
-                              startDisconnect().catch((e) => setError(e.message ?? String(e)))
-                            }
-                            disabled={isLoading}
-                            before={
-                              disconnectState.status === AsyncStatus.Loading ? (
-                                <Spinner size="100" variant="Secondary" />
-                              ) : (
-                                <Icon src={Icons.Cross} size="100" />
-                              )
-                            }
+                            onClick={handleMenu}
                           >
-                            <Text size="B300">{t('links.disconnect')}</Text>
-                          </Button>
-                        }
-                      />
-                    </>
-                  ) : expired && connection ? (
-                    <>
-                      <SettingTile
-                        title={t('links.workspaceExpired')}
-                        description={t('links.workspaceExpiredDesc')}
-                        after={
-                          <Badge variant="Critical" size="200" fill="Soft" radii="Pill">
-                            {t('links.expired')}
-                          </Badge>
-                        }
-                      />
-                      {isDesktopTauri ? (
-                        <SettingTile
-                          after={
+                            <Icon size="100" src={Icons.VerticalDots} />
+                          </IconButton>
+                          <PopOut
+                            anchor={menuCords}
+                            offset={5}
+                            position="Bottom"
+                            align="End"
+                            content={
+                              <FocusTrap
+                                focusTrapOptions={{
+                                  initialFocus: false,
+                                  onDeactivate: () => setMenuCords(undefined),
+                                  clickOutsideDeactivates: true,
+                                  isKeyForward: (evt: KeyboardEvent) =>
+                                    evt.key === 'ArrowDown' || evt.key === 'ArrowRight',
+                                  isKeyBackward: (evt: KeyboardEvent) =>
+                                    evt.key === 'ArrowUp' || evt.key === 'ArrowLeft',
+                                  escapeDeactivates: stopPropagation,
+                                }}
+                              >
+                                <Menu style={{ padding: config.space.S100 }}>
+                                  <Button
+                                    size="300"
+                                    variant="Critical"
+                                    fill="Soft"
+                                    radii="300"
+                                    onClick={handleDisconnect}
+                                    disabled={isLoading}
+                                    before={
+                                      disconnectState.status === AsyncStatus.Loading ? (
+                                        <Spinner size="100" variant="Secondary" />
+                                      ) : (
+                                        <Icon src={Icons.Cross} size="100" />
+                                      )
+                                    }
+                                  >
+                                    <Text size="B300">{t('links.disconnect')}</Text>
+                                  </Button>
+                                </Menu>
+                              </FocusTrap>
+                            }
+                          />
+                        </Box>
+                      ) : expired ? (
+                        <Box alignItems="Center" gap="200">
+                          <Box as="span" gap="100" alignItems="Center">
+                            <Badge variant="Critical" fill="Solid" size="200" radii="Pill" />
+                            <Text
+                              as="span"
+                              size="L400"
+                              style={{ color: color.Critical.Main }}
+                            >
+                              {t('links.expired')}
+                            </Text>
+                          </Box>
+                          {isDesktopTauri && (
                             <Button
                               size="300"
                               variant="Primary"
@@ -164,7 +203,7 @@ export function Links({ requestClose }: LinksProps) {
                               }
                               disabled={isLoading}
                               before={
-                                isLoading ? (
+                                connectState.status === AsyncStatus.Loading ? (
                                   <Spinner size="100" variant="Secondary" />
                                 ) : (
                                   <Icon src={Icons.Link} size="100" />
@@ -173,58 +212,31 @@ export function Links({ requestClose }: LinksProps) {
                             >
                               <Text size="B300">{t('links.reconnect')}</Text>
                             </Button>
+                          )}
+                        </Box>
+                      ) : isDesktopTauri ? (
+                        <Button
+                          size="300"
+                          variant="Primary"
+                          fill="Solid"
+                          radii="300"
+                          onClick={() =>
+                            startConnect().catch((e) => setError(e.message ?? String(e)))
                           }
-                        />
-                      ) : (
-                        <SettingTile
-                          title={t('links.desktopOnly')}
-                          description={t('links.desktopOnlyDesc')}
-                        />
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <SettingTile
-                        title={t('links.workspaceNotConnected')}
-                        description={t('links.workspaceNotConnectedDesc')}
-                        after={
-                          <Badge variant="Secondary" size="500" fill="Soft" radii="Pill">
-                            {t('links.disconnected')}
-                          </Badge>
-                        }
-                      />
-                      {isDesktopTauri ? (
-                        <SettingTile
-                          after={
-                            <Button
-                              size="300"
-                              variant="Primary"
-                              fill="Solid"
-                              radii="300"
-                              onClick={() =>
-                                startConnect().catch((e) => setError(e.message ?? String(e)))
-                              }
-                              disabled={isLoading}
-                              before={
-                                isLoading ? (
-                                  <Spinner size="100" variant="Secondary" />
-                                ) : (
-                                  <Icon src={Icons.Link} size="100" />
-                                )
-                              }
-                            >
-                              <Text size="B300">{t('links.connectWorkspace')}</Text>
-                            </Button>
+                          disabled={isLoading}
+                          before={
+                            connectState.status === AsyncStatus.Loading ? (
+                              <Spinner size="100" variant="Secondary" />
+                            ) : (
+                              <Icon src={Icons.Link} size="100" />
+                            )
                           }
-                        />
-                      ) : (
-                        <SettingTile
-                          title={t('links.desktopOnly')}
-                          description={t('links.desktopOnlyDesc')}
-                        />
-                      )}
-                    </>
-                  )}
+                        >
+                          <Text size="B300">{t('links.connectWorkspace')}</Text>
+                        </Button>
+                      ) : undefined
+                    }
+                  />
                 </SequenceCard>
               </Box>
             </Box>

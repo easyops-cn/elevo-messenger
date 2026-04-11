@@ -936,6 +936,7 @@
     "oauthNotConnectedDesc": "Connect your Elevo Workspace account to browse and add workspaces."
   },
   "links": {
+    "connectionList": "Connection List",
     "workspaceTitle": "Elevo Workspace",
     "workspaceConnected": "Workspace Connected",
     "workspaceConnectedDesc": "Connected on {{date}} with scope: {{scope}}",

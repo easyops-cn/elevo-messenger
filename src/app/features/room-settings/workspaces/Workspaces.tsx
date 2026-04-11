@@ -10,6 +10,7 @@ import {
   Button,
   Spinner,
   Scroll,
+  color,
 } from 'folds';
 import { Page, PageContent, PageHeader } from '../../../components/page';
 import { SequenceCard } from '../../../components/sequence-card';
@@ -146,38 +147,38 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                     direction="Column"
                     gap="400"
                   >
-                    {connected ? (
-                      <SettingTile
-                        title={t('workspaces.oauthConnected')}
-                        description={t('workspaces.oauthConnectedDesc', {
-                          date: new Date().toLocaleString(),
-                        })}
-                        after={
-                          <Badge variant="Success" size="500" fill="Soft" radii="Pill">
-                            {t('links.connected')}
-                          </Badge>
-                        }
-                      />
-                    ) : expired ? (
-                      <>
-                        <SettingTile
-                          title={t('workspaces.oauthExpired')}
-                          description={t('workspaces.oauthExpiredDesc')}
-                          after={
-                            <Badge variant="Critical" size="200" fill="Soft" radii="Pill">
-                              {t('links.expired')}
-                            </Badge>
-                          }
-                        />
-                        {isDesktopTauri && (
-                          <SettingTile
-                            after={
+                    <SettingTile
+                      title={t('links.workspaceTitle')}
+                      after={
+                        connected ? (
+                          <Box as="span" gap="100" alignItems="Center">
+                            <Badge variant="Success" fill="Solid" size="200" radii="Pill" />
+                            <Text
+                              as="span"
+                              size="L400"
+                              style={{ color: color.Success.Main }}
+                            >
+                              {t('links.connected')}
+                            </Text>
+                          </Box>
+                        ) : expired ? (
+                          <Box alignItems="Center" gap="200">
+                            <Box as="span" gap="100" alignItems="Center">
+                              <Badge variant="Critical" fill="Solid" size="200" radii="Pill" />
+                              <Text
+                                as="span"
+                                size="L400"
+                                style={{ color: color.Critical.Main }}
+                              >
+                                {t('links.expired')}
+                              </Text>
+                            </Box>
+                            {isDesktopTauri && (
                               <Button
                                 size="300"
-                                variant="Secondary"
-                                fill="Soft"
+                                variant="Primary"
+                                fill="Solid"
                                 radii="300"
-                                outlined
                                 onClick={() =>
                                   startConnect().catch((e) =>
                                     setConnectError(e.message ?? String(e))
@@ -194,59 +195,33 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                               >
                                 <Text size="B300">{t('links.reconnect')}</Text>
                               </Button>
+                            )}
+                          </Box>
+                        ) : isDesktopTauri ? (
+                          <Button
+                            size="300"
+                            variant="Primary"
+                            fill="Solid"
+                            radii="300"
+                            onClick={() =>
+                              startConnect().catch((e) =>
+                                setConnectError(e.message ?? String(e))
+                              )
                             }
-                          />
-                        )}
-                      </>
-                    ) : !token ? (
-                      <>
-                        <SettingTile
-                          title={t('workspaces.oauthNotConnected')}
-                          description={t('workspaces.oauthNotConnectedDesc')}
-                          after={
-                            <Badge variant="Secondary" size="500" fill="Soft" radii="Pill">
-                              {t('links.disconnected')}
-                            </Badge>
-                          }
-                        />
-                        {isDesktopTauri && (
-                          <SettingTile
-                            after={
-                              <Button
-                                size="300"
-                                variant="Primary"
-                                fill="Soft"
-                                radii="300"
-                                outlined
-                                onClick={() =>
-                                  startConnect().catch((e) =>
-                                    setConnectError(e.message ?? String(e))
-                                  )
-                                }
-                                disabled={isConnecting}
-                                before={
-                                  isConnecting ? (
-                                    <Spinner size="100" variant="Secondary" />
-                                  ) : (
-                                    <Icon src={Icons.Link} size="100" />
-                                  )
-                                }
-                              >
-                                <Text size="B300">{t('links.connectWorkspace')}</Text>
-                              </Button>
+                            disabled={isConnecting}
+                            before={
+                              isConnecting ? (
+                                <Spinner size="100" variant="Secondary" />
+                              ) : (
+                                <Icon src={Icons.Link} size="100" />
+                              )
                             }
-                          />
-                        )}
-                      </>
-                    ) : null}
-
-                    {!isDesktopTauri && !connected && !expired && (
-                      <SettingTile
-                        title={t('links.desktopOnly')}
-                        description={t('links.desktopOnlyDesc')}
-                      />
-                    )}
-
+                          >
+                            <Text size="B300">{t('links.connectWorkspace')}</Text>
+                          </Button>
+                        ) : undefined
+                      }
+                    />
                     {connectError && (
                       <Text size="T200" style={{ color: 'var(--mx-danger)' }}>
                         {connectError}

@@ -936,6 +936,7 @@
     "oauthNotConnectedDesc": "连接您的 Elevo 工作空间账户以浏览和添加工作空间。"
   },
   "links": {
+    "connectionList": "连接列表",
     "workspaceTitle": "Elevo 工作空间",
     "workspaceConnected": "工作空间已连接",
     "workspaceConnectedDesc": "连接时间：{{date}}，权限范围：{{scope}}",
