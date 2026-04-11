@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import { setTauriSettings } from './utils/tauriStore';
 
 const STORAGE_KEY = 'settings';
 export type DateFormat = 'D MMM YYYY' | 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY/MM/DD' | '';
@@ -90,6 +91,7 @@ export const getSettings = () => {
 
 export const setSettings = (settings: Settings) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  setTauriSettings(settings);
 };
 
 const baseSettings = atom<Settings>(getSettings());

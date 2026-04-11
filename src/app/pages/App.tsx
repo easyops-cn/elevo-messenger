@@ -13,8 +13,14 @@ import { createRouter } from './Router';
 import { ScreenSizeProvider, useScreenSize } from '../hooks/useScreenSize';
 import { useCompositionEndTracking } from '../hooks/useComposingCheck';
 import { TitleBar } from '../components/titlebar/TitleBar';
+import { useTauriSettingsSync } from '../hooks/useTauriSettingsSync';
 
 const queryClient = new QueryClient();
+
+function TauriSettingsSync() {
+  useTauriSettingsSync();
+  return null;
+}
 
 function App() {
   const screenSize = useScreenSize();
@@ -38,6 +44,7 @@ function App() {
                   <ClientConfigProvider value={clientConfig}>
                     <QueryClientProvider client={queryClient}>
                       <JotaiProvider>
+                        <TauriSettingsSync />
                         <TitleBar />
                         <RouterProvider router={createRouter(clientConfig, screenSize)} />
                       </JotaiProvider>
