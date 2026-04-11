@@ -127,7 +127,7 @@ export function OidcLogin({ clientId }: OidcLoginProps) {
 
       // Handle user manually closing the OAuth window.
       unlistenPromises.push(
-        listen('oauth-window-closed', () => {
+        listen('oauth-callback-window-closed', () => {
           if (settledRef.current) return;
           settledRef.current = true;
           setOauthPending(false);
