@@ -26,6 +26,10 @@ import {
   CONTACTS_PATH,
   CONTACTS_CONTACTS_PATH,
   CONTACTS_ROLE_PATH,
+  HOME_CREATE_CHAT_PATH,
+  ME_INVITES_PATH,
+  ME_NOTIFICATIONS_PATH,
+  ME_PATH,
   OIDC_CALLBACK_PATH,
 } from './paths';
 import { trimLeadingSlash, trimTrailingSlash } from '../utils/common';
@@ -93,6 +97,7 @@ export const getResetPasswordPath = (server?: string): string => {
 
 export const getHomePath = (): string => HOME_PATH;
 export const getHomeCreatePath = (): string => HOME_CREATE_PATH;
+export const getHomeCreateChatPath = (): string => HOME_CREATE_CHAT_PATH;
 export const getHomeJoinPath = (): string => HOME_JOIN_PATH;
 export const getHomeSearchPath = (): string => HOME_SEARCH_PATH;
 export const getHomeRoomPath = (roomIdOrAlias: string, eventId?: string): string => {
@@ -169,3 +174,7 @@ export const getContactsRolePath = (roleName: string): string =>
   CONTACTS_ROLE_PATH.replace(':roleName', encodeURIComponent(roleName));
 
 export const getOidcCallbackPath = (): string => OIDC_CALLBACK_PATH;
+
+export const getMePath = (): string => ME_PATH;
+export const getMeNotificationsPath = (): string => ME_NOTIFICATIONS_PATH;
+export const getMeInvitesPath = (): string => ME_INVITES_PATH;

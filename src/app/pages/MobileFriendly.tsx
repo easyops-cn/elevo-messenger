@@ -1,28 +1,8 @@
-import { ReactNode } from 'react';
+import React, { ReactNode } from 'react';
 import { useMatch } from 'react-router-dom';
+import { Box } from 'folds';
 import { ScreenSize, useScreenSizeContext } from '../hooks/useScreenSize';
-import { DIRECT_PATH, EXPLORE_PATH, HOME_PATH, INBOX_PATH, SPACE_PATH } from './paths';
-
-type MobileFriendlyClientNavProps = {
-  children: ReactNode;
-};
-export function MobileFriendlyClientNav({ children }: MobileFriendlyClientNavProps) {
-  const screenSize = useScreenSizeContext();
-  const homeMatch = useMatch({ path: HOME_PATH, caseSensitive: true, end: true });
-  const directMatch = useMatch({ path: DIRECT_PATH, caseSensitive: true, end: true });
-  const spaceMatch = useMatch({ path: SPACE_PATH, caseSensitive: true, end: true });
-  const exploreMatch = useMatch({ path: EXPLORE_PATH, caseSensitive: true, end: true });
-  const inboxMatch = useMatch({ path: INBOX_PATH, caseSensitive: true, end: true });
-
-  if (
-    screenSize === ScreenSize.Mobile &&
-    !(homeMatch || directMatch || spaceMatch || exploreMatch || inboxMatch)
-  ) {
-    return null;
-  }
-
-  return children;
-}
+import { BottomNav } from './client/BottomNav';
 
 type MobileFriendlyPageNavProps = {
   path: string;
@@ -35,10 +15,16 @@ export function MobileFriendlyPageNav({ path, children }: MobileFriendlyPageNavP
     caseSensitive: true,
     end: true,
   });
+  const isMobile = screenSize === ScreenSize.Mobile;
 
-  if (screenSize === ScreenSize.Mobile && !exactPath) {
+  if (isMobile && !exactPath) {
     return null;
   }
 
-  return children;
+  return (
+    <Box direction="Column" grow={isMobile ? 'Yes' : undefined} shrink={isMobile ? 'Yes' : 'No'}>
+      {children}
+      <BottomNav />
+    </Box>
+  )
 }

@@ -5,6 +5,7 @@ import {
   Avatar,
   Box,
   Button,
+  Chip,
   Icon,
   IconButton,
   Icons,
@@ -17,13 +18,12 @@ import {
   toRem,
 } from 'folds';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import FocusTrap from 'focus-trap-react';
-import { factoryRoomIdByActivity, factoryRoomIdByAtoZ } from '../../../utils/sort';
+import { factoryRoomIdByActivity } from '../../../utils/sort';
 import {
   NavButton,
   NavCategory,
-  NavCategoryHeader,
   NavEmptyCenter,
   NavEmptyLayout,
   NavItem,
@@ -34,6 +34,7 @@ import {
   encodeSearchParamValueArray,
   getExplorePath,
   getHomeCreatePath,
+  getHomeCreateChatPath,
   getHomeRoomPath,
   getHomeSearchPath,
   withSearchParam,
@@ -42,20 +43,20 @@ import { getCanonicalAliasOrRoomId } from '../../../utils/matrix';
 import { useSelectedRoom } from '../../../hooks/router/useSelectedRoom';
 import {
   useHomeCreateSelected,
+  useHomeCreateChatSelected,
   useHomeSearchSelected,
 } from '../../../hooks/router/useHomeSelected';
+import { useAllHomeRooms } from './useAllHomeRooms';
 import { useHomeRooms } from './useHomeRooms';
+import { useDirectRooms } from '../direct/useDirectRooms';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { VirtualTile } from '../../../components/virtualizer';
-import { RoomNavCategoryButton, RoomNavItem } from '../../../features/room-nav';
-import { makeNavCategoryId } from '../../../state/closedNavCategories';
+import { RoomNavItem } from '../../../features/room-nav';
 import { roomToUnreadAtom } from '../../../state/room/roomToUnread';
-import { useCategoryHandler } from '../../../hooks/useCategoryHandler';
 import { useNavToActivePathMapper } from '../../../hooks/useNavToActivePathMapper';
 import { PageNav, PageNavHeader, PageNavContent } from '../../../components/page';
 import { useRoomsUnread } from '../../../state/hooks/unread';
 import { markAsRead } from '../../../utils/notifications';
-import { useClosedNavCategoriesAtom } from '../../../state/hooks/closedNavCategories';
 import { stopPropagation } from '../../../utils/keyboard';
 import { useSetting } from '../../../state/hooks/settings';
 import { settingsAtom } from '../../../state/settings';
@@ -66,20 +67,21 @@ import {
 import { UseStateProvider } from '../../../components/UseStateProvider';
 import { JoinAddressPrompt } from '../../../components/join-address-prompt';
 import { _RoomSearchParams } from '../../paths';
+import { mDirectAtom } from '../../../state/mDirectList';
 
 type HomeMenuProps = {
   requestClose: () => void;
+  rooms: string[];
 };
-const HomeMenu = forwardRef<HTMLDivElement, HomeMenuProps>(({ requestClose }, ref) => {
+const HomeMenu = forwardRef<HTMLDivElement, HomeMenuProps>(({ requestClose, rooms }, ref) => {
   const { t } = useTranslation();
-  const orphanRooms = useHomeRooms();
   const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
-  const unread = useRoomsUnread(orphanRooms, roomToUnreadAtom);
+  const unread = useRoomsUnread(rooms, roomToUnreadAtom);
   const mx = useMatrixClient();
 
   const handleMarkAsRead = () => {
     if (!unread) return;
-    orphanRooms.forEach((rId) => markAsRead(mx, rId, hideActivity));
+    rooms.forEach((rId) => markAsRead(mx, rId, hideActivity));
     requestClose();
   };
 
@@ -102,8 +104,7 @@ const HomeMenu = forwardRef<HTMLDivElement, HomeMenuProps>(({ requestClose }, re
   );
 });
 
-function HomeHeader() {
-  const { t } = useTranslation();
+function HomeHeader({ rooms }: { rooms: string[] }) {
   const [menuAnchor, setMenuAnchor] = useState<RectCords>();
 
   const handleOpenMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
@@ -120,7 +121,7 @@ function HomeHeader() {
         <Box alignItems="Center" grow="Yes" gap="300">
           <Box grow="Yes">
             <Text size="H4" truncate>
-              {t('home.title')}
+              Elevo Messenger
             </Text>
           </Box>
           <Box>
@@ -147,7 +148,7 @@ function HomeHeader() {
               escapeDeactivates: stopPropagation,
             }}
           >
-            <HomeMenu requestClose={() => setMenuAnchor(undefined)} />
+            <HomeMenu requestClose={() => setMenuAnchor(undefined)} rooms={rooms} />
           </FocusTrap>
         }
       />
@@ -155,22 +156,66 @@ function HomeHeader() {
   );
 }
 
-function HomeEmpty() {
+type HomeRoomFilter = 'people' | 'rooms';
+
+function HomeFilterChips({
+  activeFilter,
+  onFilterChange,
+}: {
+  activeFilter: HomeRoomFilter | null;
+  onFilterChange: (filter: HomeRoomFilter | null) => void;
+}) {
+  const { t } = useTranslation();
+
+  const handleFilterClick = (filter: HomeRoomFilter) => {
+    onFilterChange(activeFilter === filter ? null : filter);
+  };
+
+  return (
+    <Box gap="100" wrap="Wrap">
+      <Chip
+        variant={activeFilter === 'people' ? 'Success' : 'SurfaceVariant'}
+        outlined
+        radii="Pill"
+        aria-pressed={activeFilter === 'people'}
+        onClick={() => handleFilterClick('people')}
+      >
+        <Text size="T200" priority={activeFilter === 'people' ? '500' : '300'}>
+          {t('home.filter.people')}
+        </Text>
+      </Chip>
+      <Chip
+        variant={activeFilter === 'rooms' ? 'Success' : 'SurfaceVariant'}
+        outlined
+        radii="Pill"
+        aria-pressed={activeFilter === 'rooms'}
+        onClick={() => handleFilterClick('rooms')}
+      >
+        <Text size="T200" priority={activeFilter === 'rooms' ? '500' : '300'}>
+          {t('home.filter.rooms')}
+        </Text>
+      </Chip>
+    </Box>
+  );
+}
+
+function HomeEmpty({ activeFilter }: { activeFilter: HomeRoomFilter | null }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const isPeople = activeFilter === 'people';
 
   return (
     <NavEmptyCenter>
       <NavEmptyLayout
-        icon={<Icon size="600" src={Icons.Hash} />}
+        icon={<Icon size="600" src={isPeople ? Icons.Mention : Icons.Hash} />}
         title={
           <Text size="H5" align="Center">
-            {t('home.noRooms')}
+            {isPeople ? t('home.noDirectMessages') : t('home.noRooms')}
           </Text>
         }
         content={
           <Text size="T300" align="Center">
-            {t('home.noRoomsDesc')}
+            {isPeople ? t('home.noDirectMessagesDesc') : t('home.noRoomsDesc')}
           </Text>
         }
         options={
@@ -197,34 +242,33 @@ function HomeEmpty() {
   );
 }
 
-const DEFAULT_CATEGORY_ID = makeNavCategoryId('home', 'room');
 export function Home() {
   const { t } = useTranslation();
   const mx = useMatrixClient();
+  const mDirects = useAtomValue(mDirectAtom);
   useNavToActivePathMapper('home');
   const scrollRef = useRef<HTMLDivElement>(null);
-  const rooms = useHomeRooms();
+
+  const [activeFilter, setActiveFilter] = useState<HomeRoomFilter | null>(null);
+
+  const allRooms = useAllHomeRooms();
+  const groupRooms = useHomeRooms();
+  const directRooms = useDirectRooms();
+  const rooms = activeFilter === 'people' ? directRooms : activeFilter === 'rooms' ? groupRooms : allRooms;
+
   const notificationPreferences = useRoomsNotificationPreferencesContext();
-  const roomToUnread = useAtomValue(roomToUnreadAtom);
   const navigate = useNavigate();
 
   const selectedRoomId = useSelectedRoom();
   const createRoomSelected = useHomeCreateSelected();
+  const createChatSelected = useHomeCreateChatSelected();
   const searchSelected = useHomeSearchSelected();
   const noRoomToDisplay = rooms.length === 0;
-  const [closedCategories, setClosedCategories] = useAtom(useClosedNavCategoriesAtom());
 
   const sortedRooms = useMemo(() => {
-    const items = Array.from(rooms).sort(
-      closedCategories.has(DEFAULT_CATEGORY_ID)
-        ? factoryRoomIdByActivity(mx)
-        : factoryRoomIdByAtoZ(mx)
-    );
-    if (closedCategories.has(DEFAULT_CATEGORY_ID)) {
-      return items.filter((rId) => roomToUnread.has(rId) || rId === selectedRoomId);
-    }
+    const items = Array.from(rooms).sort(factoryRoomIdByActivity(mx));
     return items;
-  }, [mx, rooms, closedCategories, roomToUnread, selectedRoomId]);
+  }, [mx, rooms]);
 
   const virtualizer = useVirtualizer({
     count: sortedRooms.length,
@@ -233,15 +277,12 @@ export function Home() {
     overscan: 10,
   });
 
-  const handleCategoryClick = useCategoryHandler(setClosedCategories, (categoryId) =>
-    closedCategories.has(categoryId)
-  );
 
   return (
     <PageNav>
-      <HomeHeader />
+      <HomeHeader rooms={rooms} />
       {noRoomToDisplay ? (
-        <HomeEmpty />
+        <HomeEmpty activeFilter={activeFilter} />
       ) : (
         <PageNavContent scrollRef={scrollRef}>
           <Box direction="Column" gap="300">
@@ -256,6 +297,22 @@ export function Home() {
                       <Box as="span" grow="Yes">
                         <Text as="span" size="Inherit" truncate>
                           {t('home.createRoom')}
+                        </Text>
+                      </Box>
+                    </Box>
+                  </NavItemContent>
+                </NavButton>
+              </NavItem>
+              <NavItem variant="Background" radii="400" aria-selected={createChatSelected}>
+                <NavButton onClick={() => navigate(getHomeCreateChatPath())}>
+                  <NavItemContent>
+                    <Box as="span" grow="Yes" alignItems="Center" gap="200">
+                      <Avatar size="200" radii="400">
+                        <Icon src={Icons.Message} size="100" />
+                      </Avatar>
+                      <Box as="span" grow="Yes">
+                        <Text as="span" size="Inherit" truncate>
+                          {t('direct.createChat')}
                         </Text>
                       </Box>
                     </Box>
@@ -317,16 +374,8 @@ export function Home() {
                 </NavLink>
               </NavItem>
             </NavCategory>
+            <HomeFilterChips activeFilter={activeFilter} onFilterChange={setActiveFilter} />
             <NavCategory>
-              <NavCategoryHeader>
-                <RoomNavCategoryButton
-                  closed={closedCategories.has(DEFAULT_CATEGORY_ID)}
-                  data-category-id={DEFAULT_CATEGORY_ID}
-                  onClick={handleCategoryClick}
-                >
-                  {t('home.rooms')}
-                </RoomNavCategoryButton>
-              </NavCategoryHeader>
               <div
                 style={{
                   position: 'relative',
@@ -338,6 +387,7 @@ export function Home() {
                   const room = mx.getRoom(roomId);
                   if (!room) return null;
                   const selected = selectedRoomId === roomId;
+                  const isDirect = mDirects.has(room.roomId);
 
                   return (
                     <VirtualTile
@@ -353,6 +403,8 @@ export function Home() {
                           notificationPreferences,
                           room.roomId
                         )}
+                        showAvatar={isDirect}
+                        direct={isDirect}
                       />
                     </VirtualTile>
                   );

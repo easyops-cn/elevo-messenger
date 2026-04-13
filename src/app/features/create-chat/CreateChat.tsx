@@ -12,7 +12,7 @@ import { ErrorCode } from '../../cs-errorcode';
 import { millisecondsToMinutes } from '../../utils/common';
 import { createRoomEncryptionState } from '../../components/create-room';
 import { useAlive } from '../../hooks/useAlive';
-import { getDirectRoomPath } from '../../pages/pathUtils';
+import { getHomeRoomPath } from '../../pages/pathUtils';
 
 type CreateChatProps = {
   defaultUserId?: string;
@@ -23,7 +23,7 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
   const alive = useAlive();
   const navigate = useNavigate();
 
-  const [encryption, setEncryption] = useState(true);
+  const [encryption, setEncryption] = useState(false);
   const [invalidUserId, setInvalidUserId] = useState(false);
 
   const [createState, create] = useAsyncCallback<string, Error | MatrixError, [string, boolean]>(
@@ -69,7 +69,7 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
     create(userId, encryption).then((roomId) => {
       if (alive()) {
         userIdInput.value = '';
-        navigate(getDirectRoomPath(roomId));
+        navigate(getHomeRoomPath(roomId));
       }
     });
   };

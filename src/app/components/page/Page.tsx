@@ -33,9 +33,10 @@ export function PageNav({ size, children }: ClientDrawerLayoutProps & css.PageNa
 
   return (
     <Box
-      grow={isMobile ? 'Yes' : undefined}
+      grow="Yes"
+      shrink="Yes"
       className={css.PageNav({ size })}
-      shrink={isMobile ? 'Yes' : 'No'}
+      style={{ width: isMobile ? '100%' : undefined }}
     >
       <Box grow="Yes" direction="Column">
         {children}

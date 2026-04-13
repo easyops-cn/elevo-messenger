@@ -1,32 +1,15 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Icon, Icons, Text, Scroll, IconButton } from 'folds';
-import { useAtomValue } from 'jotai';
 import { Page, PageContent, PageContentCenter, PageHeader } from '../../../components/page';
 import { MessageSearch } from '../../../features/message-search';
-import { useSpace } from '../../../hooks/useSpace';
-import { useRecursiveChildRoomScopeFactory, useSpaceChildren } from '../../../state/hooks/roomList';
-import { allRoomsAtom } from '../../../state/room-list/roomList';
-import { mDirectAtom } from '../../../state/mDirectList';
-import { roomToParentsAtom } from '../../../state/room/roomToParents';
-import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';
 
 export function SpaceSearch() {
   const { t } = useTranslation();
-  const mx = useMatrixClient();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const space = useSpace();
   const screenSize = useScreenSizeContext();
-
-  const mDirects = useAtomValue(mDirectAtom);
-  const roomToParents = useAtomValue(roomToParentsAtom);
-  const rooms = useSpaceChildren(
-    allRoomsAtom,
-    space.roomId,
-    useRecursiveChildRoomScopeFactory(mx, mDirects, roomToParents)
-  );
 
   return (
     <Page>
@@ -56,12 +39,7 @@ export function SpaceSearch() {
         <Scroll ref={scrollRef} hideTrack visibility="Hover">
           <PageContent>
             <PageContentCenter>
-              <MessageSearch
-                defaultRoomsFilterName={space.name}
-                allowGlobal
-                rooms={rooms}
-                scrollRef={scrollRef}
-              />
+              <MessageSearch scrollRef={scrollRef} />
             </PageContentCenter>
           </PageContent>
         </Scroll>

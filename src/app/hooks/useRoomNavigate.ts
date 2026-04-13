@@ -3,7 +3,6 @@ import { NavigateOptions, useNavigate } from 'react-router-dom';
 import { useAtomValue } from 'jotai';
 import { getCanonicalAliasOrRoomId } from '../utils/matrix';
 import {
-  getDirectRoomPath,
   getHomeRoomPath,
   getSpacePath,
   getSpaceRoomPath,
@@ -11,7 +10,6 @@ import {
 import { useMatrixClient } from './useMatrixClient';
 import { getOrphanParents, guessPerfectParent } from '../utils/room';
 import { roomToParentsAtom } from '../state/room/roomToParents';
-import { mDirectAtom } from '../state/mDirectList';
 import { useSelectedSpace } from './router/useSelectedSpace';
 import { settingsAtom } from '../state/settings';
 import { useSetting } from '../state/hooks/settings';
@@ -20,7 +18,6 @@ export const useRoomNavigate = () => {
   const navigate = useNavigate();
   const mx = useMatrixClient();
   const roomToParents = useAtomValue(roomToParentsAtom);
-  const mDirects = useAtomValue(mDirectAtom);
   const spaceSelectedId = useSelectedSpace();
   const [developerTools] = useSetting(settingsAtom, 'developerTools');
 
@@ -55,14 +52,9 @@ export const useRoomNavigate = () => {
         return;
       }
 
-      if (mDirects.has(roomId)) {
-        navigate(getDirectRoomPath(roomIdOrAlias, eventId), opts);
-        return;
-      }
-
       navigate(getHomeRoomPath(roomIdOrAlias, eventId), opts);
     },
-    [mx, navigate, spaceSelectedId, roomToParents, mDirects, developerTools]
+    [mx, navigate, spaceSelectedId, roomToParents, developerTools]
   );
 
   return {

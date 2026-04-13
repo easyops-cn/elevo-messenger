@@ -3,14 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { Box, Icon, Icons, Text, Scroll, IconButton } from 'folds';
 import { Page, PageContent, PageContentCenter, PageHeader } from '../../../components/page';
 import { MessageSearch } from '../../../features/message-search';
-import { useHomeRooms } from './useHomeRooms';
 import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';
 
 export function HomeSearch() {
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const rooms = useHomeRooms();
   const screenSize = useScreenSizeContext();
 
   return (
@@ -41,12 +39,7 @@ export function HomeSearch() {
         <Scroll ref={scrollRef} hideTrack visibility="Hover">
           <PageContent>
             <PageContentCenter>
-              <MessageSearch
-                defaultRoomsFilterName={t('home.title')}
-                allowGlobal
-                rooms={rooms}
-                scrollRef={scrollRef}
-              />
+              <MessageSearch scrollRef={scrollRef} />
             </PageContentCenter>
           </PageContent>
         </Scroll>

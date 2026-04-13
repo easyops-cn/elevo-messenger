@@ -186,7 +186,7 @@ export const getDMRoomFor = (mx: MatrixClient, userId: string): Room | undefined
     .filter(
       (room) =>
         room.getMyMembership() === Membership.Join &&
-        room.hasEncryptionStateEvent() &&
+        // room.hasEncryptionStateEvent() &&
         room.getMembers().length <= 2
     );
 
