@@ -726,7 +726,12 @@
     "resetWarning": "You will lose access to your encrypted messages.",
     "reset": "Reset",
     "unexpectedError": "Unexpected Error!",
-    "authNotSupported": "Authentication method not supported."
+    "authNotSupported": "Authentication method not supported.",
+    "recoveryPassphrase": "Recovery Passphrase",
+    "verifyManually": "Verify Manually",
+    "selectMethod": "Select a verification method.",
+    "provideRecoveryKey": "Provide recovery key.",
+    "deviceVerified": "Device verified!"
   },
   "backup": {
     "encryptionBackup": "Encryption Backup",

@@ -726,7 +726,12 @@
     "resetWarning": "您将无法访问已加密的消息。",
     "reset": "重置",
     "unexpectedError": "意外错误！",
-    "authNotSupported": "不支持此认证方式。"
+    "authNotSupported": "不支持此认证方式。",
+    "recoveryPassphrase": "恢复密码短语",
+    "verifyManually": "手动验证",
+    "selectMethod": "选择验证方式。",
+    "provideRecoveryKey": "提供恢复密钥。",
+    "deviceVerified": "设备已验证！"
   },
   "backup": {
     "encryptionBackup": "加密备份",
