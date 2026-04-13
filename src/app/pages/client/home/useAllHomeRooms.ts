@@ -1,5 +1,4 @@
 import { useCallback } from 'react';
-import { useAtomValue } from 'jotai';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { allRoomsAtom } from '../../../state/room-list/roomList';
 import { useSelectedRooms, RoomSelector } from '../../../state/hooks/roomList';

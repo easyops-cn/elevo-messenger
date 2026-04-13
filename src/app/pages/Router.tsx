@@ -35,6 +35,7 @@ import {
   CONTACTS_PATH,
   _CONTACTS_CONTACTS_PATH,
   _CONTACTS_ROLE_PATH,
+  _CREATE_CHAT_PATH,
 } from './paths';
 import {
   getAppPathFromHref,
@@ -72,6 +73,7 @@ import { SpaceSettingsRenderer } from '../features/space-settings';
 import { UserRoomProfileRenderer } from '../components/UserRoomProfileRenderer';
 import { CreateRoomModalRenderer } from '../features/create-room';
 import { HomeCreateRoom } from './client/home/CreateRoom';
+import { HomeCreateChat } from './client/home/CreateChatPage';
 import { Create } from './client/create';
 import { CreateSpaceModalRenderer } from '../features/create-space';
 import { SearchModalRenderer } from '../features/search';
@@ -187,6 +189,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
         >
           {mobile ? null : <Route index element={<WelcomePage />} />}
           <Route path={_CREATE_PATH} element={<HomeCreateRoom />} />
+          <Route path={_CREATE_CHAT_PATH} element={<HomeCreateChat />} />
           <Route path={_JOIN_PATH} element={<p>join</p>} />
           <Route path={_SEARCH_PATH} element={<HomeSearch />} />
           <Route

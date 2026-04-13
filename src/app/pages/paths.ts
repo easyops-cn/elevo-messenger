@@ -46,6 +46,11 @@ export const _ROOM_PATH = ':roomIdOrAlias/:eventId?/';
 
 export const HOME_PATH = '/home/';
 export const HOME_CREATE_PATH = `/home/${_CREATE_PATH}`;
+export const _CREATE_CHAT_PATH = 'create-chat/';
+export type HomeCreateChatSearchParams = {
+  userId?: string;
+};
+export const HOME_CREATE_CHAT_PATH = `/home/${_CREATE_CHAT_PATH}`;
 export const HOME_JOIN_PATH = `/home/${_JOIN_PATH}`;
 export const HOME_SEARCH_PATH = `/home/${_SEARCH_PATH}`;
 export const HOME_ROOM_PATH = `/home/${_ROOM_PATH}`;

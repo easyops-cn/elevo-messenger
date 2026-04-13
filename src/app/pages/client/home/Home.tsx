@@ -34,6 +34,7 @@ import {
   encodeSearchParamValueArray,
   getExplorePath,
   getHomeCreatePath,
+  getHomeCreateChatPath,
   getHomeRoomPath,
   getHomeSearchPath,
   withSearchParam,
@@ -42,6 +43,7 @@ import { getCanonicalAliasOrRoomId } from '../../../utils/matrix';
 import { useSelectedRoom } from '../../../hooks/router/useSelectedRoom';
 import {
   useHomeCreateSelected,
+  useHomeCreateChatSelected,
   useHomeSearchSelected,
 } from '../../../hooks/router/useHomeSelected';
 import { useAllHomeRooms } from './useAllHomeRooms';
@@ -260,6 +262,7 @@ export function Home() {
 
   const selectedRoomId = useSelectedRoom();
   const createRoomSelected = useHomeCreateSelected();
+  const createChatSelected = useHomeCreateChatSelected();
   const searchSelected = useHomeSearchSelected();
   const noRoomToDisplay = rooms.length === 0;
 
@@ -295,6 +298,22 @@ export function Home() {
                       <Box as="span" grow="Yes">
                         <Text as="span" size="Inherit" truncate>
                           {t('home.createRoom')}
+                        </Text>
+                      </Box>
+                    </Box>
+                  </NavItemContent>
+                </NavButton>
+              </NavItem>
+              <NavItem variant="Background" radii="400" aria-selected={createChatSelected}>
+                <NavButton onClick={() => navigate(getHomeCreateChatPath())}>
+                  <NavItemContent>
+                    <Box as="span" grow="Yes" alignItems="Center" gap="200">
+                      <Avatar size="200" radii="400">
+                        <Icon src={Icons.Message} size="100" />
+                      </Avatar>
+                      <Box as="span" grow="Yes">
+                        <Text as="span" size="Inherit" truncate>
+                          {t('direct.createChat')}
                         </Text>
                       </Box>
                     </Box>
