@@ -171,7 +171,7 @@ export function Explore() {
   const selectedServer = useExploreServer();
 
   return (
-    <PageNav>
+    <PageNav stretch>
       <PageNavHeader>
         <Box grow="Yes" gap="300">
           <Box grow="Yes">

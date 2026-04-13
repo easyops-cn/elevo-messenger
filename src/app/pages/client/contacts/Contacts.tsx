@@ -25,7 +25,7 @@ export function Contacts() {
   const handleSearchClick = useCallback(() => openSearch(true), [openSearch]);
 
   return (
-    <PageNav>
+    <PageNav stretch>
       <PageNavHeader>
         <Box grow="Yes" gap="300">
           <Box grow="Yes">

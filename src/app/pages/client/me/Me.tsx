@@ -94,7 +94,7 @@ export function Me() {
     }), []);
 
   return (
-    <PageNav>
+    <PageNav stretch>
       <PageNavHeader>
         <Box grow="Yes" gap="300">
           <Box grow="Yes">
@@ -148,7 +148,7 @@ export function Me() {
               </NavItem>
             )}
             <NavItem variant="Background" radii="400">
-              <button onClick={openSettings} type="button" style={{ width: '100%' }}>
+              <button onClick={() => openSettings()} type="button" style={{ width: '100%' }}>
                 <NavItemContent>
                   <Box as="span" grow="Yes" alignItems="Center" gap="200">
                     <Avatar size="200" radii="400">

@@ -279,7 +279,7 @@ export function Home() {
 
 
   return (
-    <PageNav>
+    <PageNav stretch>
       <HomeHeader rooms={rooms} />
       {noRoomToDisplay ? (
         <HomeEmpty activeFilter={activeFilter} />
