@@ -804,9 +804,6 @@ export const Message = as<'div', MessageProps>(
       <Box
         direction="Column"
         alignSelf={isOwn && messageLayout !== MessageLayout.Compact ? 'End' : 'Start'}
-        className={
-          isOwn && messageLayout === MessageLayout.Modern ? layoutCss.ModernOwnContent : undefined
-        }
         style={{ maxWidth: '100%' }}
       >
         {reply}
@@ -826,6 +823,32 @@ export const Message = as<'div', MessageProps>(
           children
         )}
         {reactions}
+      </Box>
+    );
+
+    const msgBubbleContentJSX = (
+      <Box
+        direction="Column"
+        className={
+          isOwn && messageLayout === MessageLayout.Modern ? layoutCss.ModernOwnContent : undefined
+        }
+        style={{ maxWidth: '100%' }}
+      >
+        {edit && onEditId ? (
+          <MessageEditor
+            style={{
+              maxWidth: '100%',
+              width: '100vw',
+            }}
+            roomId={room.roomId}
+            room={room}
+            mEvent={mEvent}
+            imagePackRooms={imagePackRooms}
+            onCancel={() => onEditId()}
+          />
+        ) : (
+          children
+        )}
       </Box>
     );
 
@@ -1137,15 +1160,25 @@ export const Message = as<'div', MessageProps>(
             isOwn={isOwn}
             before={avatarJSX}
             header={headerJSX}
+            beforeContent={reply}
+            afterContent={reactions}
             onContextMenu={handleContextMenu}
           >
-            {msgContentJSX}
+            {msgBubbleContentJSX}
           </BubbleLayout>
         )}
         {messageLayout !== MessageLayout.Compact && messageLayout !== MessageLayout.Bubble && (
           <ModernLayout isOwn={isOwn} before={avatarJSX} onContextMenu={handleContextMenu}>
             {headerJSX}
-            {msgContentJSX}
+            <Box
+              direction="Column"
+              alignSelf={isOwn ? 'End' : 'Start'}
+              style={{ maxWidth: '100%' }}
+            >
+              {reply}
+              {msgBubbleContentJSX}
+              {reactions}
+            </Box>
           </ModernLayout>
         )}
       </MessageBase>

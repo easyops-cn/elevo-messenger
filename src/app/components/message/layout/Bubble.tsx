@@ -51,16 +51,23 @@ type BubbleLayoutProps = {
   hideBubble?: boolean;
   before?: ReactNode;
   header?: ReactNode;
+  beforeContent?: ReactNode;
+  afterContent?: ReactNode;
 };
 
 export const BubbleLayout = as<'div', BubbleLayoutProps>(
-  ({ isOwn, hideBubble, before, header, children, ...props }, ref) => (
+  ({ isOwn, hideBubble, before, header, beforeContent, afterContent, children, ...props }, ref) => (
     <Box gap="300" direction={isOwn ? 'RowReverse' : 'Row'} {...props} ref={ref}>
       <Box className={css.BubbleBefore} shrink="No">
         {before}
       </Box>
       <Box grow="Yes" direction="Column">
         {header}
+        {beforeContent && (
+          <Box style={isOwn ? { alignSelf: 'End' } : undefined}>
+            {beforeContent}
+          </Box>
+        )}
         {hideBubble ? (
           children
         ) : (
@@ -84,6 +91,11 @@ export const BubbleLayout = as<'div', BubbleLayoutProps>(
               {before ? (isOwn ? <BubbleRightArrow variant="Primary" /> : <BubbleLeftArrow variant="SurfaceVariant" />) : null}
               {children}
             </Box>
+          </Box>
+        )}
+        {afterContent && (
+          <Box style={isOwn ? { alignSelf: 'End' } : undefined}>
+            {afterContent}
           </Box>
         )}
       </Box>
