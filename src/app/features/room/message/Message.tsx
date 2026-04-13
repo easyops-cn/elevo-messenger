@@ -52,16 +52,12 @@ import {
   getMemberAvatarMxc,
   getMemberDisplayName,
 } from '../../../utils/room';
-import {
-  getCanonicalAliasOrRoomId,
-  getMxIdLocalPart,
-  isRoomAlias,
-  mxcUrlToHttp,
-} from '../../../utils/matrix';
+import { getMxIdLocalPart, mxcUrlToHttp } from '../../../utils/matrix';
 import { MessageLayout, MessageSpacing } from '../../../state/settings';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useRecentEmoji } from '../../../hooks/useRecentEmoji';
 import * as css from './styles.css';
+import * as layoutCss from '../../../components/message/layout/layout.css';
 import { EventReaders } from '../../../components/event-readers';
 import { TextViewer } from '../../../components/text-viewer';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
@@ -721,6 +717,7 @@ export const Message = as<'div', MessageProps>(
     const mx = useMatrixClient();
     const useAuthentication = useMediaAuthentication();
     const senderId = mEvent.getSender() ?? '';
+    const isOwn = senderId === mx.getUserId();
 
     const [hover, setHover] = useState(false);
     const { hoverProps } = useHover({ onHoverChange: setHover });
@@ -744,10 +741,10 @@ export const Message = as<'div', MessageProps>(
     const headerJSX = !collapse && (
       <Box
         gap="300"
-        direction={messageLayout === MessageLayout.Compact ? 'RowReverse' : 'Row'}
-        justifyContent="SpaceBetween"
+        direction={messageLayout === MessageLayout.Compact || isOwn ? 'RowReverse' : 'Row'}
+        justifyContent={messageLayout === MessageLayout.Compact ? 'SpaceBetween' : 'Start'}
         alignItems="Baseline"
-        grow="Yes"
+        grow="No"
       >
         <Box alignItems="Center" gap="200">
           <Username
@@ -767,24 +764,14 @@ export const Message = as<'div', MessageProps>(
           </Username>
           {tagIconSrc && <PowerIcon size="100" iconSrc={tagIconSrc} />}
         </Box>
-        <Box shrink="No" gap="100">
-          {messageLayout === MessageLayout.Modern && hover && (
-            <>
-              <Text as="span" size="T200" priority="300">
-                {senderId}
-              </Text>
-              <Text as="span" size="T200" priority="300">
-                |
-              </Text>
-            </>
-          )}
+        {(messageLayout === MessageLayout.Compact || hover) && (
           <Time
             ts={mEvent.getTs()}
-            compact={messageLayout === MessageLayout.Compact}
+            compact
             hour24Clock={hour24Clock}
             dateFormatString={dateFormatString}
           />
-        </Box>
+        )}
       </Box>
     );
 
@@ -814,7 +801,14 @@ export const Message = as<'div', MessageProps>(
     );
 
     const msgContentJSX = (
-      <Box direction="Column" alignSelf="Start" style={{ maxWidth: '100%' }}>
+      <Box
+        direction="Column"
+        alignSelf={isOwn && messageLayout !== MessageLayout.Compact ? 'End' : 'Start'}
+        className={
+          isOwn && messageLayout === MessageLayout.Modern ? layoutCss.ModernOwnContent : undefined
+        }
+        style={{ maxWidth: '100%' }}
+      >
         {reply}
         {edit && onEditId ? (
           <MessageEditor
@@ -884,6 +878,10 @@ export const Message = as<'div', MessageProps>(
         collapse={collapse}
         highlight={highlight}
         selected={!!menuAnchor || !!emojiBoardAnchor}
+        own={messageLayout === MessageLayout.Compact ? false : isOwn}
+        style={
+          isOwn && messageLayout !== MessageLayout.Compact ? { marginLeft: 'auto' } : undefined
+        }
         {...props}
         {...hoverProps}
         {...focusWithinProps}
@@ -1135,12 +1133,17 @@ export const Message = as<'div', MessageProps>(
           </CompactLayout>
         )}
         {messageLayout === MessageLayout.Bubble && (
-          <BubbleLayout before={avatarJSX} header={headerJSX} onContextMenu={handleContextMenu}>
+          <BubbleLayout
+            isOwn={isOwn}
+            before={avatarJSX}
+            header={headerJSX}
+            onContextMenu={handleContextMenu}
+          >
             {msgContentJSX}
           </BubbleLayout>
         )}
         {messageLayout !== MessageLayout.Compact && messageLayout !== MessageLayout.Bubble && (
-          <ModernLayout before={avatarJSX} onContextMenu={handleContextMenu}>
+          <ModernLayout isOwn={isOwn} before={avatarJSX} onContextMenu={handleContextMenu}>
             {headerJSX}
             {msgContentJSX}
           </ModernLayout>
