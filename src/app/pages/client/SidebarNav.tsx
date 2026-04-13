@@ -30,7 +30,7 @@ export function SidebarNav() {
           <Scroll ref={scrollRef} variant="Background" size="0">
             <SidebarStack>
               <HomeTab />
-              <DirectTab />
+              {/* <DirectTab /> */}
               <ContactsTab />
             </SidebarStack>
             <SpaceTabs scrollRef={scrollRef} />

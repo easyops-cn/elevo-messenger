@@ -142,11 +142,15 @@
     "title": "首页",
     "noRooms": "暂无房间",
     "noRoomsDesc": "您还没有任何房间。",
+    "noDirectMessages": "暂无私信",
+    "noDirectMessagesDesc": "您还没有任何私信。",
     "createRoom": "创建房间",
     "exploreCommunity": "探索社区房间",
     "joinWithAddress": "通过地址加入",
     "messageSearch": "消息搜索",
-    "rooms": "房间"
+    "rooms": "房间",
+    "filter.people": "联系人",
+    "filter.rooms": "房间"
   },
   "direct": {
     "title": "私信",
