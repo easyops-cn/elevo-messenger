@@ -22,6 +22,7 @@ import {
   as,
   color,
   config,
+  toRem,
 } from 'folds';
 import React, {
   FormEventHandler,
@@ -55,6 +56,7 @@ import {
 import { getMxIdLocalPart, mxcUrlToHttp } from '../../../utils/matrix';
 import { MessageLayout, MessageSpacing } from '../../../state/settings';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
+import { useScreenSizeContext, ScreenSize } from '../../../hooks/useScreenSize';
 import { useRecentEmoji } from '../../../hooks/useRecentEmoji';
 import * as css from './styles.css';
 import * as layoutCss from '../../../components/message/layout/layout.css';
@@ -716,6 +718,8 @@ export const Message = as<'div', MessageProps>(
   ) => {
     const mx = useMatrixClient();
     const useAuthentication = useMediaAuthentication();
+    const screenSize = useScreenSizeContext();
+    const isMobile = screenSize === ScreenSize.Mobile;
     const senderId = mEvent.getSender() ?? '';
     const isOwn = senderId === mx.getUserId();
 
@@ -903,7 +907,19 @@ export const Message = as<'div', MessageProps>(
         selected={!!menuAnchor || !!emojiBoardAnchor}
         own={messageLayout === MessageLayout.Compact ? false : isOwn}
         style={
-          isOwn && messageLayout !== MessageLayout.Compact ? { marginLeft: 'auto' } : undefined
+          messageLayout !== MessageLayout.Compact
+            ? {
+                maxWidth: isMobile ? 'calc(100% - 56px)' : 'min(50vw, calc(100% - 56px))',
+                ...(isOwn
+                  ? {
+                      alignSelf: 'flex-end',
+                      marginLeft: toRem(56),
+                    }
+                  : {
+                      marginRight: toRem(56),
+                    }),
+              }
+            : undefined
         }
         {...props}
         {...hoverProps}
