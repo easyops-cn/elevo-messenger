@@ -27,6 +27,9 @@ import {
   CONTACTS_CONTACTS_PATH,
   CONTACTS_ROLE_PATH,
   HOME_CREATE_CHAT_PATH,
+  ME_INVITES_PATH,
+  ME_NOTIFICATIONS_PATH,
+  ME_PATH,
   OIDC_CALLBACK_PATH,
 } from './paths';
 import { trimLeadingSlash, trimTrailingSlash } from '../utils/common';
@@ -171,3 +174,7 @@ export const getContactsRolePath = (roleName: string): string =>
   CONTACTS_ROLE_PATH.replace(':roleName', encodeURIComponent(roleName));
 
 export const getOidcCallbackPath = (): string => OIDC_CALLBACK_PATH;
+
+export const getMePath = (): string => ME_PATH;
+export const getMeNotificationsPath = (): string => ME_NOTIFICATIONS_PATH;
+export const getMeInvitesPath = (): string => ME_INVITES_PATH;

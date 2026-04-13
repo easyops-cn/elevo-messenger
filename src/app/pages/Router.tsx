@@ -36,6 +36,7 @@ import {
   _CONTACTS_CONTACTS_PATH,
   _CONTACTS_ROLE_PATH,
   _CREATE_CHAT_PATH,
+  ME_PATH,
 } from './paths';
 import {
   getAppPathFromHref,
@@ -46,6 +47,7 @@ import {
   getLoginPath,
   getOriginBaseUrl,
   getSpaceLobbyPath,
+  getMeNotificationsPath,
 } from './pathUtils';
 import { ClientBindAtoms, ClientLayout, ClientRoot } from './client';
 import { Home, HomeRouteRoomProvider, HomeSearch } from './client/home';
@@ -54,14 +56,14 @@ import { RouteSpaceProvider, Space, SpaceRouteRoomProvider, SpaceSearch } from '
 import { Explore, FeaturedRooms, PublicRooms } from './client/explore';
 import { Notifications, Inbox, Invites } from './client/inbox';
 import { Contacts, ContactsPage, ContactsProvider, ContactsRolePage } from './client/contacts';
+import { Me } from './client/me';
 import { setAfterLoginRedirectPath } from './afterLoginRedirectPath';
 import { Room } from '../features/room';
 import { Lobby } from '../features/lobby';
 import { WelcomePage } from './client/WelcomePage';
-import { SidebarNav } from './client/SidebarNav';
+import { MobileFriendlyPageNav } from './MobileFriendly';
 import { PageRoot } from '../components/page';
 import { ScreenSize } from '../hooks/useScreenSize';
-import { MobileFriendlyPageNav, MobileFriendlyClientNav } from './MobileFriendly';
 import { ClientInitStorageAtom } from './client/ClientInitStorageAtom';
 import { ClientNonUIFeatures } from './client/ClientNonUIFeatures';
 import { AuthRouteThemeManager } from './ThemeManager';
@@ -145,13 +147,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
                     <ClientNonUIFeatures>
                       <UpdateCheckerProvider>
                         <CallEmbedProvider>
-                          <ClientLayout
-                            nav={
-                              <MobileFriendlyClientNav>
-                                <SidebarNav />
-                              </MobileFriendlyClientNav>
-                            }
-                          >
+                          <ClientLayout>
                             <Outlet />
                           </ClientLayout>
                           <CallStatusRenderer />
@@ -280,7 +276,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             </PageRoot>
           }
         >
-          {mobile ? null : (
+          {mobile ? <Route index element={<div />} /> : (
             <Route
               index
               loader={() => redirect(getExploreFeaturedPath())}
@@ -331,7 +327,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             </ContactsProvider>
           }
         >
-          {mobile ? null : (
+          {mobile ? <Route index element={<div />} /> : (
             <Route
               index
               loader={() => redirect(getContactsContactsPath())}
@@ -340,6 +336,30 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           )}
           <Route path={_CONTACTS_CONTACTS_PATH} element={<ContactsPage />} />
           <Route path={_CONTACTS_ROLE_PATH} element={<ContactsRolePage />} />
+        </Route>
+        <Route
+          path={ME_PATH}
+          element={
+            <PageRoot
+              nav={
+                <MobileFriendlyPageNav path={ME_PATH}>
+                  <Me />
+                </MobileFriendlyPageNav>
+              }
+            >
+              <Outlet />
+            </PageRoot>
+          }
+        >
+          {mobile ? <Route index element={<div />} /> : (
+            <Route
+              index
+              loader={() => redirect(getMeNotificationsPath())}
+              element={<WelcomePage />}
+            />
+          )}
+          <Route path={_NOTIFICATIONS_PATH} element={<Notifications />} />
+          <Route path={_INVITES_PATH} element={<Invites />} />
         </Route>
       </Route>
       <Route path="/*" element={<p>Page not found</p>} />

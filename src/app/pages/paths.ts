@@ -101,3 +101,7 @@ export const _CONTACTS_CONTACTS_PATH = 'all/';
 export const CONTACTS_CONTACTS_PATH = `/contacts/${_CONTACTS_CONTACTS_PATH}`;
 export const _CONTACTS_ROLE_PATH = 'role/:roleName/';
 export const CONTACTS_ROLE_PATH = `/contacts/${_CONTACTS_ROLE_PATH}`;
+
+export const ME_PATH = '/me/';
+export const ME_NOTIFICATIONS_PATH = `/me/${_NOTIFICATIONS_PATH}`;
+export const ME_INVITES_PATH = `/me/${_INVITES_PATH}`;
