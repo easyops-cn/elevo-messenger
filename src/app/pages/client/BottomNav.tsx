@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtomValue } from 'jotai';
-import { Icon, Icons, Tooltip, TooltipProvider } from 'folds';
+import { color, Icon, Icons, Tooltip, TooltipProvider } from 'folds';
 import { ContactIcon } from '../../icons/ContactIcon';
 import { useHomeSelected } from '../../hooks/router/useHomeSelected';
 import { useContactsSelected } from '../../hooks/router/useContacts';
@@ -21,6 +21,12 @@ import {
   joinPathComponent,
 } from '../pathUtils';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
+import { useMatrixClient } from '../../hooks/useMatrixClient';
+import { useDeviceList, useSplitCurrentDevice } from '../../hooks/useDeviceList';
+import {
+  useDeviceVerificationStatus,
+  VerificationStatus,
+} from '../../hooks/useDeviceVerificationStatus';
 import * as css from './BottomNav.css';
 
 export function BottomNav() {
@@ -40,6 +46,22 @@ export function BottomNav() {
   // Me badge
   const allInvites = useAtomValue(allInvitesAtom);
   const inviteCount = allInvites.length;
+
+  // Unverified devices
+  const mx = useMatrixClient();
+  const crypto = mx.getCrypto();
+  const [devices] = useDeviceList();
+  const [currentDevice] = useSplitCurrentDevice(devices);
+  const verificationStatus = useDeviceVerificationStatus(
+    crypto,
+    mx.getSafeUserId(),
+    currentDevice?.device_id
+  );
+  const unverified = verificationStatus === VerificationStatus.Unverified;
+
+  const meIconColor = unverified
+      ? color.Critical.Main
+      : undefined;
 
   const handleHomeClick = () => {
     const activePath = navToActivePath.get('home');
@@ -117,7 +139,7 @@ export function BottomNav() {
             aria-label="Me"
             type="button"
           >
-            <Icon src={Icons.User} filled={meSelected} size="300" />
+            <Icon src={Icons.User} filled={meSelected} size="300" style={meIconColor ? { color: meIconColor } : undefined} />
             {inviteCount > 0 && (
               <span className={css.BottomNavItemBadge}>
                 <UnreadBadge highlight count={inviteCount} />
