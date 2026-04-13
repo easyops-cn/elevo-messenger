@@ -84,8 +84,6 @@ export const MessageBase = recipe({
     DefaultReset,
     {
       marginTop: SpacingVar,
-      padding: `${config.space.S100} ${config.space.S200} ${config.space.S100} ${config.space.S400}`,
-      borderRadius: `0 ${config.radii.R400} ${config.radii.R400} 0`,
     },
   ],
   variants: {
@@ -100,9 +98,20 @@ export const MessageBase = recipe({
     },
     highlight: HighlightVariant,
     selected: SelectedVariant,
+    own: {
+      true: {
+        padding: `${config.space.S100} ${config.space.S400} ${config.space.S100} ${config.space.S200}`,
+        borderRadius: `${config.radii.R400} 0 0 ${config.radii.R400}`,
+      },
+      false: {
+        padding: `${config.space.S100} ${config.space.S200} ${config.space.S100} ${config.space.S400}`,
+        borderRadius: `0 ${config.radii.R400} ${config.radii.R400} 0`,
+      },
+    },
   },
   defaultVariants: {
     space: '400',
+    own: false,
   },
 });
 
@@ -147,6 +156,18 @@ export const BubbleContent = style({
   position: 'relative',
 });
 
+export const BubbleContentOwn = style({
+  backgroundColor: color.Primary.Container,
+  color: color.Primary.OnContainer,
+});
+
+export const ModernOwnContent = style({
+  backgroundColor: color.Primary.Container,
+  color: color.Primary.OnContainer,
+  borderRadius: config.radii.R400,
+  padding: `${config.space.S100} ${config.space.S200}`,
+});
+
 export const BubbleContentArrowLeft = style({
   borderTopLeftRadius: 0,
 });
@@ -158,6 +179,19 @@ export const BubbleLeftArrow = style({
   position: 'absolute',
   top: 0,
   left: toRem(-8),
+  zIndex: 1,
+});
+
+export const BubbleContentArrowRight = style({
+  borderTopRightRadius: 0,
+});
+
+export const BubbleRightArrow = style({
+  width: toRem(9),
+  height: toRem(8),
+  position: 'absolute',
+  top: 0,
+  right: toRem(-8),
   zIndex: 1,
 });
 

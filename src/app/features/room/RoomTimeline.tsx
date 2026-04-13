@@ -1331,7 +1331,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
               time={timeJSX}
               iconSrc={parsed.icon}
               content={
-                <Box grow="Yes" direction="Column">
+                <Box grow="No" direction="Column">
                   <Text size="T300" priority="300">
                     {parsed.body}
                   </Text>
@@ -1373,7 +1373,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
               time={timeJSX}
               iconSrc={Icons.Hash}
               content={
-                <Box grow="Yes" direction="Column">
+                <Box grow="No" direction="Column">
                   <Text size="T300" priority="300">
                     <b>{senderName}</b>
                     {t('Organisms.RoomCommon.changed_room_name')}
@@ -1416,7 +1416,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
               time={timeJSX}
               iconSrc={Icons.Hash}
               content={
-                <Box grow="Yes" direction="Column">
+                <Box grow="No" direction="Column">
                   <Text size="T300" priority="300">
                     <b>{senderName}</b>
                     {' changed room topic'}
@@ -1459,7 +1459,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
               time={timeJSX}
               iconSrc={Icons.Hash}
               content={
-                <Box grow="Yes" direction="Column">
+                <Box grow="No" direction="Column">
                   <Text size="T300" priority="300">
                     <b>{senderName}</b>
                     {' changed room avatar'}
@@ -1510,7 +1510,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
               time={timeJSX}
               iconSrc={callJoined ? Icons.Phone : Icons.PhoneDown}
               content={
-                <Box grow="Yes" direction="Column">
+                <Box grow="No" direction="Column">
                   <Text size="T300" priority="300">
                     <b>{senderName}</b>
                     {callJoined ? ' joined the call' : ' ended the call'}
@@ -1555,7 +1555,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
             time={timeJSX}
             iconSrc={Icons.Code}
             content={
-              <Box grow="Yes" direction="Column">
+              <Box grow="No" direction="Column">
                 <Text size="T300" priority="300">
                   <b>{senderName}</b>
                   {' sent '}
@@ -1605,7 +1605,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
             time={timeJSX}
             iconSrc={Icons.Code}
             content={
-              <Box grow="Yes" direction="Column">
+              <Box grow="No" direction="Column">
                 <Text size="T300" priority="300">
                   <b>{senderName}</b>
                   {' sent '}

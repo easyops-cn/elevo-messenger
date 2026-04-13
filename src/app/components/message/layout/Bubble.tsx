@@ -26,35 +26,76 @@ function BubbleLeftArrow({ variant }: BubbleArrowProps) {
   );
 }
 
+function BubbleRightArrow({ variant }: BubbleArrowProps) {
+  return (
+    <svg
+      className={css.BubbleRightArrow}
+      width="9"
+      height="8"
+      viewBox="0 0 9 8"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        fillRule="evenodd"
+        clipRule="evenodd"
+        d="M0 8V0H4.17157C5.95338 0 6.84571 2.15428 5.58578 3.41421L1 8H0Z"
+        fill={color[variant].Container}
+      />
+    </svg>
+  );
+}
+
 type BubbleLayoutProps = {
+  isOwn?: boolean;
   hideBubble?: boolean;
   before?: ReactNode;
   header?: ReactNode;
+  beforeContent?: ReactNode;
+  afterContent?: ReactNode;
 };
 
 export const BubbleLayout = as<'div', BubbleLayoutProps>(
-  ({ hideBubble, before, header, children, ...props }, ref) => (
-    <Box gap="300" {...props} ref={ref}>
+  ({ isOwn, hideBubble, before, header, beforeContent, afterContent, children, ...props }, ref) => (
+    <Box gap="300" direction={isOwn ? 'RowReverse' : 'Row'} {...props} ref={ref}>
       <Box className={css.BubbleBefore} shrink="No">
         {before}
       </Box>
       <Box grow="Yes" direction="Column">
         {header}
+        {beforeContent && (
+          <Box style={isOwn ? { alignSelf: 'End' } : undefined}>
+            {beforeContent}
+          </Box>
+        )}
         {hideBubble ? (
           children
         ) : (
-          <Box>
+          <Box style={isOwn ? { alignSelf: 'End' } : undefined}>
             <Box
               className={
                 hideBubble
                   ? undefined
-                  : classNames(css.BubbleContent, before ? css.BubbleContentArrowLeft : undefined)
+                  : classNames(
+                      css.BubbleContent,
+                      isOwn && css.BubbleContentOwn,
+                      before
+                        ? isOwn
+                          ? css.BubbleContentArrowRight
+                          : css.BubbleContentArrowLeft
+                        : undefined
+                    )
               }
               direction="Column"
             >
-              {before ? <BubbleLeftArrow variant="SurfaceVariant" /> : null}
+              {before ? (isOwn ? <BubbleRightArrow variant="Primary" /> : <BubbleLeftArrow variant="SurfaceVariant" />) : null}
               {children}
             </Box>
+          </Box>
+        )}
+        {afterContent && (
+          <Box style={isOwn ? { alignSelf: 'End' } : undefined}>
+            {afterContent}
           </Box>
         )}
       </Box>
