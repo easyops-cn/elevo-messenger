@@ -30,7 +30,6 @@ export const _LOBBY_PATH = 'lobby/';
  * Like: url?rooms=!one:server,!two:server
  */
 export type _SearchPathSearchParams = {
-  global?: string;
   term?: string;
   order?: string;
   rooms?: string;

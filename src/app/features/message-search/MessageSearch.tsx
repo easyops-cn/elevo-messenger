@@ -8,7 +8,6 @@ import { useSearchParams } from 'react-router-dom';
 import { SearchOrderBy } from 'matrix-js-sdk';
 import { PageHero, PageHeroEmpty, PageHeroSection } from '../../components/page';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { _SearchPathSearchParams } from '../../pages/paths';
 import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 import { SequenceCard } from '../../components/sequence-card';
@@ -25,30 +24,10 @@ import { SearchInput } from './SearchInput';
 import { SearchFilters } from './SearchFilters';
 import { VirtualTile } from '../../components/virtualizer';
 
-const useSearchPathSearchParams = (searchParams: URLSearchParams): _SearchPathSearchParams =>
-  useMemo(
-    () => ({
-      global: searchParams.get('global') ?? undefined,
-      term: searchParams.get('term') ?? undefined,
-      order: searchParams.get('order') ?? undefined,
-      rooms: searchParams.get('rooms') ?? undefined,
-      senders: searchParams.get('senders') ?? undefined,
-    }),
-    [searchParams]
-  );
-
 type MessageSearchProps = {
-  defaultRoomsFilterName: string;
-  allowGlobal?: boolean;
-  rooms: string[];
-  senders?: string[];
   scrollRef: RefObject<HTMLDivElement>;
 };
 export function MessageSearch({
-  defaultRoomsFilterName,
-  allowGlobal,
-  rooms,
-  senders,
   scrollRef,
 }: MessageSearchProps) {
   const { t } = useTranslation();
@@ -65,36 +44,34 @@ export function MessageSearch({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const scrollTopAnchorRef = useRef<HTMLDivElement>(null);
   const [searchParams, setSearchParams] = useSearchParams();
-  const searchPathSearchParams = useSearchPathSearchParams(searchParams);
   const { navigateRoom } = useRoomNavigate();
 
+  const term = searchParams.get('term') ?? undefined;
+  const order = searchParams.get('order') ?? undefined;
+  const roomsParam = searchParams.get('rooms') ?? undefined;
+  const sendersParam = searchParams.get('senders') ?? undefined;
+
   const searchParamRooms = useMemo(() => {
-    if (searchPathSearchParams.rooms) {
-      const joinedRoomIds = decodeSearchParamValueArray(searchPathSearchParams.rooms).filter(
+    if (roomsParam) {
+      return decodeSearchParamValueArray(roomsParam).filter(
         (rId) => allRooms.includes(rId)
       );
-      return joinedRoomIds;
     }
     return undefined;
-  }, [allRooms, searchPathSearchParams.rooms]);
+  }, [allRooms, roomsParam]);
   const searchParamsSenders = useMemo(() => {
-    if (searchPathSearchParams.senders) {
-      return decodeSearchParamValueArray(searchPathSearchParams.senders);
+    if (sendersParam) {
+      return decodeSearchParamValueArray(sendersParam);
     }
     return undefined;
-  }, [searchPathSearchParams.senders]);
+  }, [sendersParam]);
 
-  const msgSearchParams: MessageSearchParams = useMemo(() => {
-    const isGlobal = searchPathSearchParams.global === 'true';
-    const defaultRooms = isGlobal ? undefined : rooms;
-
-    return {
-      term: searchPathSearchParams.term,
-      order: searchPathSearchParams.order ?? SearchOrderBy.Recent,
-      rooms: searchParamRooms ?? defaultRooms,
-      senders: searchParamsSenders ?? senders,
-    };
-  }, [searchPathSearchParams, searchParamRooms, searchParamsSenders, rooms, senders]);
+  const msgSearchParams: MessageSearchParams = useMemo(() => ({
+    term,
+    order: order ?? SearchOrderBy.Recent,
+    rooms: searchParamRooms,
+    senders: searchParamsSenders,
+  }), [term, order, searchParamRooms, searchParamsSenders]);
 
   const searchMessages = useMessageSearch(msgSearchParams);
 
@@ -126,11 +103,11 @@ export function MessageSearch({
   });
   const vItems = virtualizer.getVirtualItems();
 
-  const handleSearch = (term: string) => {
+  const handleSearch = (newTerm: string) => {
     setSearchParams((prevParams) => {
       const newParams = new URLSearchParams(prevParams);
       newParams.delete('term');
-      newParams.append('term', term);
+      newParams.append('term', newTerm);
       return newParams;
     });
   };
@@ -155,23 +132,13 @@ export function MessageSearch({
       return newParams;
     });
   };
-  const handleGlobalChange = (global?: boolean) => {
-    setSearchParams((prevParams) => {
-      const newParams = new URLSearchParams(prevParams);
-      newParams.delete('global');
-      if (global) {
-        newParams.append('global', 'true');
-      }
-      return newParams;
-    });
-  };
 
-  const handleOrderChange = (order?: string) => {
+  const handleOrderChange = (newOrder?: string) => {
     setSearchParams((prevParams) => {
       const newParams = new URLSearchParams(prevParams);
       newParams.delete('order');
-      if (order) {
-        newParams.append('order', order);
+      if (newOrder) {
+        newParams.append('order', newOrder);
       }
       return newParams;
     });
@@ -214,13 +181,9 @@ export function MessageSearch({
           onReset={handleSearchClear}
         />
         <SearchFilters
-          defaultRoomsFilterName={defaultRoomsFilterName}
-          allowGlobal={allowGlobal}
-          roomList={searchPathSearchParams.global === 'true' ? allRooms : rooms}
+          roomList={allRooms}
           selectedRooms={searchParamRooms}
           onSelectedRoomsChange={handleSelectedRoomsChange}
-          global={searchPathSearchParams.global === 'true'}
-          onGlobalChange={handleGlobalChange}
           order={msgSearchParams.order}
           onOrderChange={handleOrderChange}
         />

@@ -339,25 +339,17 @@ function SelectRoomButton({ roomList, selectedRooms, onChange }: SelectRoomButto
 }
 
 type SearchFiltersProps = {
-  defaultRoomsFilterName: string;
-  allowGlobal?: boolean;
   roomList: string[];
   selectedRooms?: string[];
   onSelectedRoomsChange: (selectedRooms?: string[]) => void;
-  global?: boolean;
-  onGlobalChange: (global?: boolean) => void;
   order?: string;
   onOrderChange: (order?: string) => void;
 };
 export function SearchFilters({
-  defaultRoomsFilterName,
-  allowGlobal,
   roomList,
   selectedRooms,
   onSelectedRoomsChange,
-  global,
   order,
-  onGlobalChange,
   onOrderChange,
 }: SearchFiltersProps) {
   const { t } = useTranslation();
@@ -367,32 +359,6 @@ export function SearchFilters({
     <Box direction="Column" gap="100">
       <Text size="L400">{t('common.filter')}</Text>
       <Box gap="200" wrap="Wrap">
-        <Chip
-          variant={!global ? 'Success' : 'Surface'}
-          aria-pressed={!global}
-          before={!global && <Icon size="100" src={Icons.Check} />}
-          outlined
-          onClick={() => onGlobalChange()}
-        >
-          <Text size="T200">{defaultRoomsFilterName}</Text>
-        </Chip>
-        {allowGlobal && (
-          <Chip
-            variant={global ? 'Success' : 'Surface'}
-            aria-pressed={global}
-            before={global && <Icon size="100" src={Icons.Check} />}
-            outlined
-            onClick={() => onGlobalChange(true)}
-          >
-            <Text size="T200">{t('search.global')}</Text>
-          </Chip>
-        )}
-        <Line
-          style={{ margin: `${config.space.S100} 0` }}
-          direction="Vertical"
-          variant="Surface"
-          size="300"
-        />
         {selectedRooms?.map((roomId) => {
           const room = mx.getRoom(roomId);
           if (!room) return null;
