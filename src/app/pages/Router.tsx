@@ -42,6 +42,8 @@ import {
   getAppPathFromHref,
   getExploreFeaturedPath,
   getHomePath,
+  getHomeCreateChatPath,
+  getHomeRoomPath,
   getInboxNotificationsPath,
   getContactsContactsPath,
   getLoginPath,
@@ -51,7 +53,6 @@ import {
 } from './pathUtils';
 import { ClientBindAtoms, ClientLayout, ClientRoot } from './client';
 import { Home, HomeRouteRoomProvider, HomeSearch } from './client/home';
-import { Direct, DirectCreate, DirectRouteRoomProvider } from './client/direct';
 import { RouteSpaceProvider, Space, SpaceRouteRoomProvider, SpaceSearch } from './client/space';
 import { Explore, FeaturedRooms, PublicRooms } from './client/explore';
 import { Notifications, Inbox, Invites } from './client/inbox';
@@ -199,29 +200,23 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
         </Route>
         <Route
           path={DIRECT_PATH}
-          element={
-            <PageRoot
-              nav={
-                <MobileFriendlyPageNav path={DIRECT_PATH}>
-                  <Direct />
-                </MobileFriendlyPageNav>
-              }
-            >
-              <Outlet />
-            </PageRoot>
-          }
-        >
-          {mobile ? null : <Route index element={<WelcomePage />} />}
-          <Route path={_CREATE_PATH} element={<DirectCreate />} />
-          <Route
-            path={_ROOM_PATH}
-            element={
-              <DirectRouteRoomProvider>
-                <Room />
-              </DirectRouteRoomProvider>
-            }
-          />
-        </Route>
+          loader={() => redirect(getHomePath())}
+        />
+        <Route
+          path={`/direct/${_CREATE_CHAT_PATH}`}
+          loader={() => redirect(getHomeCreateChatPath())}
+        />
+        <Route
+          path={`/direct/${_CREATE_PATH}`}
+          loader={() => redirect(getHomeCreateChatPath())}
+        />
+        <Route
+          path={`/direct/${_ROOM_PATH}`}
+          loader={({ params }) => {
+            const { roomIdOrAlias, eventId } = params as { roomIdOrAlias: string; eventId?: string };
+            return redirect(getHomeRoomPath(decodeURIComponent(roomIdOrAlias), eventId ? decodeURIComponent(eventId) : undefined));
+          }}
+        />
         <Route
           path={SPACE_PATH}
           element={
