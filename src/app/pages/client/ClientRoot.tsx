@@ -39,6 +39,7 @@ import { getFallbackSession } from '../../state/sessions';
 import { matrixReadyAtom } from '../../state/matrixReady';
 import { AutoDiscovery } from './AutoDiscovery';
 import { ElevoConfigLoader } from '../../components/ElevoConfigLoader';
+import { DeviceVerificationGate } from '../../components/DeviceVerificationGate';
 
 function ClientRootLoading() {
   return (
@@ -225,17 +226,19 @@ export function ClientRoot({ children }: ClientRootProps) {
         ) : (
           <MatrixClientProvider value={mx}>
             <ElevoConfigLoader mx={mx}>
-              <ServerConfigsLoader>
-                {(serverConfigs) => (
-                  <CapabilitiesProvider value={serverConfigs.capabilities ?? {}}>
-                    <MediaConfigProvider value={serverConfigs.mediaConfig ?? {}}>
-                      <AuthMetadataProvider value={serverConfigs.authMetadata}>
-                        {children}
-                      </AuthMetadataProvider>
-                    </MediaConfigProvider>
-                  </CapabilitiesProvider>
-                )}
-              </ServerConfigsLoader>
+              <DeviceVerificationGate>
+                <ServerConfigsLoader>
+                  {(serverConfigs) => (
+                    <CapabilitiesProvider value={serverConfigs.capabilities ?? {}}>
+                      <MediaConfigProvider value={serverConfigs.mediaConfig ?? {}}>
+                        <AuthMetadataProvider value={serverConfigs.authMetadata}>
+                          {children}
+                        </AuthMetadataProvider>
+                      </MediaConfigProvider>
+                    </CapabilitiesProvider>
+                  )}
+                </ServerConfigsLoader>
+              </DeviceVerificationGate>
             </ElevoConfigLoader>
           </MatrixClientProvider>
         )}

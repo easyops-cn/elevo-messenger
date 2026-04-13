@@ -973,5 +973,16 @@
   "toolCall": {
     "inprogressDescription": "执行中...",
     "completedDescription": "已完成"
+  },
+  "verification_gate": {
+    "title": "验证此设备",
+    "description": "此设备尚未验证。请验证以访问加密消息。",
+    "cross_device_title": "从其他设备验证",
+    "cross_device_description": "您也可以从另一台已验证的设备验证此设备。",
+    "step_open_device": "打开您的另一台已验证设备。",
+    "step_open_settings": "打开设置。",
+    "step_find_device": "在设备/会话部分找到此设备。",
+    "step_initiate": "发起验证。",
+    "logout": "退出登录"
   }
 }

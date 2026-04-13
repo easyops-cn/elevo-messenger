@@ -1,0 +1,153 @@
+import React, { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { Box, Button, Header, Icon, Icons, Scroll, Spinner, Text, config, color } from 'folds';
+import classNames from 'classnames';
+import { useMatrixClient } from '../hooks/useMatrixClient';
+import { useCrossSigningActive } from '../hooks/useCrossSigning';
+import {
+  useDeviceVerificationStatus,
+  VerificationStatus,
+} from '../hooks/useDeviceVerificationStatus';
+import {
+  useSecretStorageDefaultKeyId,
+  useSecretStorageKeyContent,
+} from '../hooks/useSecretStorage';
+import { ManualVerificationTile } from './ManualVerification';
+import { ReceiveSelfDeviceVerification } from './DeviceVerification';
+import { AutoRestoreBackupOnVerification } from './BackupRestore';
+import { InfoCard } from './info-card';
+import { SplashScreen } from './splash-screen';
+import { AuthFooter } from '../pages/auth/AuthFooter';
+import * as authCss from '../pages/auth/styles.css';
+import * as PatternsCss from '../styles/Patterns.css';
+import ElevoLogo from '../../../public/res/apple/apple-touch-icon-144x144.png';
+import { logoutClient, clearLoginData } from '../../client/initMatrix';
+
+function VerificationGateLoading() {
+  return (
+    <SplashScreen>
+      <Box direction="Column" grow="Yes" alignItems="Center" justifyContent="Center" gap="400">
+        <Spinner variant="Secondary" size="600" />
+      </Box>
+    </SplashScreen>
+  );
+}
+
+function VerificationGateScreen() {
+  const { t } = useTranslation();
+  const mx = useMatrixClient();
+  const defaultSecretStorageKeyId = useSecretStorageDefaultKeyId();
+  const defaultSecretStorageKeyContent = useSecretStorageKeyContent(
+    defaultSecretStorageKeyId ?? ''
+  );
+
+  const [loggingOut, setLoggingOut] = useState(false);
+
+  const handleLogout = useCallback(async () => {
+    setLoggingOut(true);
+    try {
+      await logoutClient(mx);
+    } catch {
+      await clearLoginData();
+    }
+  }, [mx]);
+
+  const hasSecretStorage = !!defaultSecretStorageKeyId && !!defaultSecretStorageKeyContent;
+
+  return (
+    <Scroll variant="Background" visibility="Hover" size="300" hideTrack>
+      <Box
+        className={classNames(authCss.AuthLayout, PatternsCss.BackgroundDotPattern)}
+        direction="Column"
+        alignItems="Center"
+        justifyContent="SpaceBetween"
+        gap="400"
+      >
+        <Box direction="Column" className={authCss.AuthCard}>
+          <Header className={authCss.AuthHeader} size="600" variant="Surface">
+            <Box grow="Yes" direction="Row" gap="300" alignItems="Center">
+              <img className={authCss.AuthLogo} src={ElevoLogo} alt={t('auth.elevoLogo')} />
+              <Text size="H3">{t('auth.elevoMessenger')}</Text>
+            </Box>
+          </Header>
+          <Box className={authCss.AuthCardContent} direction="Column" justifyContent="Start">
+            <Box direction="Column" gap="400">
+              <Box direction="Column" gap="100">
+                <Text size="H4">{t('verification_gate.title')}</Text>
+                <Text size="T300" style={{ color: color.Surface.OnContainer }}>
+                  {t('verification_gate.description')}
+                </Text>
+              </Box>
+
+              {hasSecretStorage && (
+                <ManualVerificationTile
+                  secretStorageKeyId={defaultSecretStorageKeyId}
+                  secretStorageKeyContent={defaultSecretStorageKeyContent}
+                />
+              )}
+
+              <InfoCard
+                variant="Secondary"
+                title={t('verification_gate.cross_device_title')}
+                description={t('verification_gate.cross_device_description')}
+              >
+                <Text as="div" size="T200">
+                  <ul style={{ margin: `${config.space.S100} 0`, paddingLeft: config.space.S400 }}>
+                    <li>{t('verification_gate.step_open_device')}</li>
+                    <li>{t('verification_gate.step_open_settings')}</li>
+                    <li>{t('verification_gate.step_find_device')}</li>
+                    <li>{t('verification_gate.step_initiate')}</li>
+                  </ul>
+                </Text>
+              </InfoCard>
+
+              <Button
+                variant="Critical"
+                fill="None"
+                size="400"
+                radii="300"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                before={loggingOut ? <Spinner size="200" variant="Critical" /> : undefined}
+              >
+                <Text as="span" size="B400">
+                  {t('verification_gate.logout')}
+                </Text>
+              </Button>
+            </Box>
+          </Box>
+        </Box>
+        <AuthFooter />
+        <ReceiveSelfDeviceVerification />
+        <AutoRestoreBackupOnVerification />
+      </Box>
+    </Scroll>
+  );
+}
+
+type DeviceVerificationGateProps = {
+  children: JSX.Element;
+};
+export function DeviceVerificationGate({ children }: DeviceVerificationGateProps) {
+  const mx = useMatrixClient();
+  const crypto = mx.getCrypto();
+  const crossSigningActive = useCrossSigningActive();
+  const verificationStatus = useDeviceVerificationStatus(
+    crypto,
+    mx.getSafeUserId(),
+    mx.getDeviceId() ?? undefined
+  );
+
+  if (!crossSigningActive) return children;
+
+  if (verificationStatus === VerificationStatus.Unknown) return <VerificationGateLoading />;
+
+  if (
+    verificationStatus === VerificationStatus.Verified ||
+    verificationStatus === VerificationStatus.Unsupported
+  ) {
+    return children;
+  }
+
+  return <VerificationGateScreen />;
+}

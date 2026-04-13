@@ -975,5 +975,16 @@
   "toolCall": {
     "inprogressDescription": "Running...",
     "completedDescription": "Completed"
+  },
+  "verification_gate": {
+    "title": "Verify This Device",
+    "description": "This device is not verified. Verify it to access your encrypted messages.",
+    "cross_device_title": "Verify from Another Device",
+    "cross_device_description": "You can also verify this device from another verified device.",
+    "step_open_device": "Open your other verified device.",
+    "step_open_settings": "Open Settings.",
+    "step_find_device": "Find this device in Devices/Sessions section.",
+    "step_initiate": "Initiate verification.",
+    "logout": "Logout"
   }
 }
