@@ -23,7 +23,7 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
   const alive = useAlive();
   const navigate = useNavigate();
 
-  const [encryption, setEncryption] = useState(true);
+  const [encryption, setEncryption] = useState(false);
   const [invalidUserId, setInvalidUserId] = useState(false);
 
   const [createState, create] = useAsyncCallback<string, Error | MatrixError, [string, boolean]>(
