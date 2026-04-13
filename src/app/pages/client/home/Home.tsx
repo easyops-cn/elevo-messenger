@@ -105,7 +105,6 @@ const HomeMenu = forwardRef<HTMLDivElement, HomeMenuProps>(({ requestClose, room
 });
 
 function HomeHeader({ rooms }: { rooms: string[] }) {
-  const { t } = useTranslation();
   const [menuAnchor, setMenuAnchor] = useState<RectCords>();
 
   const handleOpenMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
@@ -122,7 +121,7 @@ function HomeHeader({ rooms }: { rooms: string[] }) {
         <Box alignItems="Center" grow="Yes" gap="300">
           <Box grow="Yes">
             <Text size="H4" truncate>
-              {t('home.title')}
+              Elevo Messenger
             </Text>
           </Box>
           <Box>
