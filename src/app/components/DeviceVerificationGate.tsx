@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Button, Header, Icon, Icons, Scroll, Spinner, Text, config, color } from 'folds';
 import classNames from 'classnames';
+import { IMyDevice } from 'matrix-js-sdk';
 import { useMatrixClient } from '../hooks/useMatrixClient';
 import { useCrossSigningActive } from '../hooks/useCrossSigning';
 import {
@@ -12,6 +13,11 @@ import {
   useSecretStorageDefaultKeyId,
   useSecretStorageKeyContent,
 } from '../hooks/useSecretStorage';
+import { useDeviceList, useSplitCurrentDevice } from '../hooks/useDeviceList';
+import { useSetting } from '../state/hooks/settings';
+import { settingsAtom } from '../state/settings';
+import { timeDayMonYear, timeHourMinute, today, yesterday } from '../utils/time';
+import { BreakWord } from '../styles/Text.css';
 import { ManualVerificationTile } from './ManualVerification';
 import { ReceiveSelfDeviceVerification } from './DeviceVerification';
 import { AutoRestoreBackupOnVerification } from './BackupRestore';
@@ -33,6 +39,43 @@ function VerificationGateLoading() {
   );
 }
 
+function CurrentDeviceInfo({ device }: { device: IMyDevice }) {
+  const { t } = useTranslation();
+  const [hour24Clock] = useSetting(settingsAtom, 'hour24Clock');
+  const [dateFormatString] = useSetting(settingsAtom, 'dateFormatString');
+  const activeTs = device.last_seen_ts;
+
+  return (
+    <Box direction="Column" gap="100">
+      <Text size="L400">{t('verification_gate.current_device')}</Text>
+      <Box direction="Column" gap="100">
+        <Text className={BreakWord} size="T300">
+          {device.display_name ?? device.device_id}
+        </Text>
+        <Text className={BreakWord} size="T200" priority="300">
+          {t('settings.deviceSettings.deviceId')}
+          <i>{device.device_id}</i>
+        </Text>
+        {typeof device.last_seen_ip === 'string' && (
+          <Text className={BreakWord} size="T200" priority="300">
+            {t('settings.deviceSettings.ipAddress')}
+            <i>{device.last_seen_ip}</i>
+          </Text>
+        )}
+        {typeof activeTs === 'number' && (
+          <Text className={BreakWord} size="T200" priority="300">
+            {t('settings.deviceSettings.lastActivity')}
+            {today(activeTs) && t('settings.deviceSettings.today')}
+            {yesterday(activeTs) && t('settings.deviceSettings.yesterday')}
+            {!today(activeTs) && !yesterday(activeTs) && timeDayMonYear(activeTs, dateFormatString)}{' '}
+            {timeHourMinute(activeTs, hour24Clock)}
+          </Text>
+        )}
+      </Box>
+    </Box>
+  );
+}
+
 function VerificationGateScreen() {
   const { t } = useTranslation();
   const mx = useMatrixClient();
@@ -41,6 +84,8 @@ function VerificationGateScreen() {
     defaultSecretStorageKeyId ?? ''
   );
 
+  const [devices] = useDeviceList();
+  const [currentDevice] = useSplitCurrentDevice(devices);
   const [loggingOut, setLoggingOut] = useState(false);
 
   const handleLogout = useCallback(async () => {
@@ -100,6 +145,10 @@ function VerificationGateScreen() {
                   </ul>
                 </Text>
               </InfoCard>
+
+              {currentDevice && (
+                <CurrentDeviceInfo device={currentDevice} />
+              )}
 
               <Button
                 variant="Critical"

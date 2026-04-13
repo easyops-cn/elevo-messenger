@@ -984,6 +984,7 @@
   "verification_gate": {
     "title": "Verify This Device",
     "description": "This device is not verified. Verify it to access your encrypted messages.",
+    "current_device": "This Device",
     "cross_device_title": "Verify from Another Device",
     "cross_device_description": "You can also verify this device from another verified device.",
     "step_open_device": "Open your other verified device.",

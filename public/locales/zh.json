@@ -982,6 +982,7 @@
   "verification_gate": {
     "title": "验证此设备",
     "description": "此设备尚未验证。请验证以访问加密消息。",
+    "current_device": "当前设备",
     "cross_device_title": "从其他设备验证",
     "cross_device_description": "您也可以从另一台已验证的设备验证此设备。",
     "step_open_device": "打开您的另一台已验证设备。",
