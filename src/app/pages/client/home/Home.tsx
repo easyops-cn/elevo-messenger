@@ -18,7 +18,7 @@ import {
   toRem,
 } from 'folds';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import FocusTrap from 'focus-trap-react';
 import { factoryRoomIdByActivity } from '../../../utils/sort';
 import {
@@ -28,7 +28,6 @@ import {
   NavEmptyLayout,
   NavItem,
   NavItemContent,
-  NavLink,
 } from '../../../components/nav';
 import {
   encodeSearchParamValueArray,
@@ -36,7 +35,6 @@ import {
   getHomeCreatePath,
   getHomeCreateChatPath,
   getHomeRoomPath,
-  getHomeSearchPath,
   withSearchParam,
 } from '../../pathUtils';
 import { getCanonicalAliasOrRoomId } from '../../../utils/matrix';
@@ -44,7 +42,6 @@ import { useSelectedRoom } from '../../../hooks/router/useSelectedRoom';
 import {
   useHomeCreateSelected,
   useHomeCreateChatSelected,
-  useHomeSearchSelected,
 } from '../../../hooks/router/useHomeSelected';
 import { useAllHomeRooms } from './useAllHomeRooms';
 import { useHomeRooms } from './useHomeRooms';
@@ -68,6 +65,7 @@ import { UseStateProvider } from '../../../components/UseStateProvider';
 import { JoinAddressPrompt } from '../../../components/join-address-prompt';
 import { _RoomSearchParams } from '../../paths';
 import { mDirectAtom } from '../../../state/mDirectList';
+import { searchModalAtom } from '../../../state/searchModal';
 
 type HomeMenuProps = {
   requestClose: () => void;
@@ -262,7 +260,7 @@ export function Home() {
   const selectedRoomId = useSelectedRoom();
   const createRoomSelected = useHomeCreateSelected();
   const createChatSelected = useHomeCreateChatSelected();
-  const searchSelected = useHomeSearchSelected();
+  const setSearchOpen = useSetAtom(searchModalAtom);
   const noRoomToDisplay = rooms.length === 0;
 
   const sortedRooms = useMemo(() => {
@@ -357,21 +355,21 @@ export function Home() {
                   </>
                 )}
               </UseStateProvider>
-              <NavItem variant="Background" radii="400" aria-selected={searchSelected}>
-                <NavLink to={getHomeSearchPath()}>
+              <NavItem variant="Background" radii="400">
+                <NavButton onClick={() => setSearchOpen(true)}>
                   <NavItemContent>
                     <Box as="span" grow="Yes" alignItems="Center" gap="200">
                       <Avatar size="200" radii="400">
-                        <Icon src={Icons.Search} size="100" filled={searchSelected} />
+                        <Icon src={Icons.Search} size="100" />
                       </Avatar>
                       <Box as="span" grow="Yes">
                         <Text as="span" size="Inherit" truncate>
-                          {t('home.messageSearch')}
+                          {t('home.search')}
                         </Text>
                       </Box>
                     </Box>
                   </NavItemContent>
-                </NavLink>
+                </NavButton>
               </NavItem>
             </NavCategory>
             <HomeFilterChips activeFilter={activeFilter} onFilterChange={setActiveFilter} />
