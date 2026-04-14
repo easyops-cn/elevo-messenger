@@ -33,7 +33,10 @@ import { SpecVersions } from './SpecVersions';
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { useSyncState } from '../../hooks/useSyncState';
 import { stopPropagation } from '../../utils/keyboard';
+import { SyncStatusBridge } from './SyncStatusBridge';
 import { SyncStatus } from './SyncStatus';
+import { isDesktopTauri } from '../../plugins/useTauriOpener';
+import { isMacOS } from '../../utils/user-agent';
 import { AuthMetadataProvider } from '../../hooks/useAuthMetadata';
 import { getFallbackSession } from '../../state/sessions';
 import { matrixReadyAtom } from '../../state/matrixReady';
@@ -192,7 +195,8 @@ export function ClientRoot({ children }: ClientRootProps) {
   return (
     <AutoDiscovery userId={userId!} baseUrl={baseUrl!}>
       <SpecVersions baseUrl={baseUrl!}>
-        {mx && <SyncStatus mx={mx} />}
+        {mx && <SyncStatusBridge mx={mx} />}
+        {mx && !(isDesktopTauri && isMacOS()) && <SyncStatus mx={mx} />}
         {loading && <ClientRootOptions mx={mx} />}
         {(loadState.status === AsyncStatus.Error || startState.status === AsyncStatus.Error) && (
           <SplashScreen>
@@ -206,12 +210,26 @@ export function ClientRoot({ children }: ClientRootProps) {
               <Dialog>
                 <Box direction="Column" gap="400" style={{ padding: config.space.S400 }}>
                   {loadState.status === AsyncStatus.Error && (
-                    <Text>{`Failed to load. ${loadState.error.message}`}</Text>
+                    <>
+                      <Text>{`Failed to load. ${loadState.error.message}`}</Text>
+
+                      <Button variant="Critical" onClick={() => {
+                        if (mx) {
+                          logoutClient(mx);
+                          return;
+                        }
+                        clearLoginData();
+                      }}>
+                        <Text as="span" size="B400">
+                          Clear storage and retry
+                        </Text>
+                      </Button>
+                    </>
                   )}
                   {startState.status === AsyncStatus.Error && (
                     <Text>{`Failed to start. ${startState.error.message}`}</Text>
                   )}
-                  <Button variant="Critical" onClick={mx ? () => startMatrix(mx) : loadMatrix}>
+                  <Button variant="Secondary" onClick={mx ? () => startMatrix(mx) : loadMatrix}>
                     <Text as="span" size="B400">
                       Retry
                     </Text>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Avatar, Box, Icon, Icons, Text } from 'folds';
 import { useAtomValue } from 'jotai';
 import { NavCategory, NavItem, NavItemContent, NavLink } from '../../../components/nav';
@@ -16,6 +17,7 @@ import { Settings, SettingsPages } from '../../../features/settings';
 import { onOpenAbout } from '../../../state/update/UpdateCheckerContext';
 
 function InvitesNavItem() {
+  const { t } = useTranslation();
   const invitesSelected = useMeInvitesSelected();
   const allInvites = useAtomValue(allInvitesAtom);
   const inviteCount = allInvites.length;
@@ -35,7 +37,7 @@ function InvitesNavItem() {
             </Avatar>
             <Box as="span" grow="Yes">
               <Text as="span" size="Inherit" truncate>
-                Invites
+                {t('inbox.invites')}
               </Text>
             </Box>
             {inviteCount > 0 && <UnreadBadge highlight count={inviteCount} />}
@@ -48,6 +50,7 @@ function InvitesNavItem() {
 
 export function Me() {
   useNavToActivePathMapper('me');
+  const { t } = useTranslation();
   const notificationsSelected = useMeNotificationsSelected();
 
   const [settings, setSettings] = useState(false);
@@ -72,7 +75,7 @@ export function Me() {
         <Box grow="Yes" gap="300">
           <Box grow="Yes">
             <Text size="H4" truncate>
-              Me
+              {t('common.me')}
             </Text>
           </Box>
         </Box>
@@ -90,7 +93,7 @@ export function Me() {
                     </Avatar>
                     <Box as="span" grow="Yes">
                       <Text as="span" size="Inherit" truncate>
-                        Notifications
+                        {t('settings.notifications')}
                       </Text>
                     </Box>
                   </Box>
@@ -107,7 +110,7 @@ export function Me() {
                     </Avatar>
                     <Box as="span" grow="Yes">
                       <Text as="span" size="Inherit" truncate>
-                        Settings
+                        {t('common.settings')}
                       </Text>
                     </Box>
                   </Box>

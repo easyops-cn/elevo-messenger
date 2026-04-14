@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Avatar,
   Box,
-  Button,
   Chip,
   Icon,
   IconButton,
@@ -18,7 +17,7 @@ import {
   toRem,
 } from 'folds';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import FocusTrap from 'focus-trap-react';
 import { factoryRoomIdByActivity } from '../../../utils/sort';
 import {
@@ -28,23 +27,17 @@ import {
   NavEmptyLayout,
   NavItem,
   NavItemContent,
-  NavLink,
 } from '../../../components/nav';
 import {
-  encodeSearchParamValueArray,
-  getExplorePath,
   getHomeCreatePath,
   getHomeCreateChatPath,
   getHomeRoomPath,
-  getHomeSearchPath,
-  withSearchParam,
 } from '../../pathUtils';
 import { getCanonicalAliasOrRoomId } from '../../../utils/matrix';
 import { useSelectedRoom } from '../../../hooks/router/useSelectedRoom';
 import {
   useHomeCreateSelected,
   useHomeCreateChatSelected,
-  useHomeSearchSelected,
 } from '../../../hooks/router/useHomeSelected';
 import { useAllHomeRooms } from './useAllHomeRooms';
 import { useHomeRooms } from './useHomeRooms';
@@ -64,10 +57,8 @@ import {
   getRoomNotificationMode,
   useRoomsNotificationPreferencesContext,
 } from '../../../hooks/useRoomsNotificationPreferences';
-import { UseStateProvider } from '../../../components/UseStateProvider';
-import { JoinAddressPrompt } from '../../../components/join-address-prompt';
-import { _RoomSearchParams } from '../../paths';
 import { mDirectAtom } from '../../../state/mDirectList';
+import { searchModalAtom } from '../../../state/searchModal';
 
 type HomeMenuProps = {
   requestClose: () => void;
@@ -195,13 +186,24 @@ function HomeFilterChips({
           {t('home.filter.rooms')}
         </Text>
       </Chip>
+      {activeFilter && (
+        <Chip
+          variant="SurfaceVariant"
+          outlined
+          radii="Pill"
+          onClick={() => onFilterChange(null)}
+        >
+          <Box alignItems="Center">
+            <Icon src={Icons.Cross} size="100" />
+          </Box>
+        </Chip>
+      )}
     </Box>
   );
 }
 
 function HomeEmpty({ activeFilter }: { activeFilter: HomeRoomFilter | null }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const isPeople = activeFilter === 'people';
 
   return (
@@ -217,25 +219,6 @@ function HomeEmpty({ activeFilter }: { activeFilter: HomeRoomFilter | null }) {
           <Text size="T300" align="Center">
             {isPeople ? t('home.noDirectMessagesDesc') : t('home.noRoomsDesc')}
           </Text>
-        }
-        options={
-          <>
-            <Button onClick={() => navigate(getHomeCreatePath())} variant="Secondary" size="300">
-              <Text size="B300" truncate>
-                {t('home.createRoom')}
-              </Text>
-            </Button>
-            <Button
-              onClick={() => navigate(getExplorePath())}
-              variant="Secondary"
-              fill="Soft"
-              size="300"
-            >
-              <Text size="B300" truncate>
-                {t('home.exploreCommunity')}
-              </Text>
-            </Button>
-          </>
         }
       />
     </NavEmptyCenter>
@@ -262,7 +245,7 @@ export function Home() {
   const selectedRoomId = useSelectedRoom();
   const createRoomSelected = useHomeCreateSelected();
   const createChatSelected = useHomeCreateChatSelected();
-  const searchSelected = useHomeSearchSelected();
+  const setSearchOpen = useSetAtom(searchModalAtom);
   const noRoomToDisplay = rooms.length === 0;
 
   const sortedRooms = useMemo(() => {
@@ -281,10 +264,7 @@ export function Home() {
   return (
     <PageNav stretch>
       <HomeHeader rooms={rooms} />
-      {noRoomToDisplay ? (
-        <HomeEmpty activeFilter={activeFilter} />
-      ) : (
-        <PageNavContent scrollRef={scrollRef}>
+      <PageNavContent scrollRef={scrollRef}>
           <Box direction="Column" gap="300">
             <NavCategory>
               <NavItem variant="Background" radii="400" aria-selected={createRoomSelected}>
@@ -319,101 +299,66 @@ export function Home() {
                   </NavItemContent>
                 </NavButton>
               </NavItem>
-              <UseStateProvider initial={false}>
-                {(open, setOpen) => (
-                  <>
-                    <NavItem variant="Background" radii="400">
-                      <NavButton onClick={() => setOpen(true)}>
-                        <NavItemContent>
-                          <Box as="span" grow="Yes" alignItems="Center" gap="200">
-                            <Avatar size="200" radii="400">
-                              <Icon src={Icons.Link} size="100" />
-                            </Avatar>
-                            <Box as="span" grow="Yes">
-                              <Text as="span" size="Inherit" truncate>
-                                {t('home.joinWithAddress')}
-                              </Text>
-                            </Box>
-                          </Box>
-                        </NavItemContent>
-                      </NavButton>
-                    </NavItem>
-                    {open && (
-                      <JoinAddressPrompt
-                        onCancel={() => setOpen(false)}
-                        onOpen={(roomIdOrAlias, viaServers, eventId) => {
-                          setOpen(false);
-                          const path = getHomeRoomPath(roomIdOrAlias, eventId);
-                          navigate(
-                            viaServers
-                              ? withSearchParam<_RoomSearchParams>(path, {
-                                  viaServers: encodeSearchParamValueArray(viaServers),
-                                })
-                              : path
-                          );
-                        }}
-                      />
-                    )}
-                  </>
-                )}
-              </UseStateProvider>
-              <NavItem variant="Background" radii="400" aria-selected={searchSelected}>
-                <NavLink to={getHomeSearchPath()}>
+              <NavItem variant="Background" radii="400">
+                <NavButton onClick={() => setSearchOpen(true)}>
                   <NavItemContent>
                     <Box as="span" grow="Yes" alignItems="Center" gap="200">
                       <Avatar size="200" radii="400">
-                        <Icon src={Icons.Search} size="100" filled={searchSelected} />
+                        <Icon src={Icons.Search} size="100" />
                       </Avatar>
                       <Box as="span" grow="Yes">
                         <Text as="span" size="Inherit" truncate>
-                          {t('home.messageSearch')}
+                          {t('home.search')}
                         </Text>
                       </Box>
                     </Box>
                   </NavItemContent>
-                </NavLink>
+                </NavButton>
               </NavItem>
             </NavCategory>
             <HomeFilterChips activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-            <NavCategory>
-              <div
-                style={{
-                  position: 'relative',
-                  height: virtualizer.getTotalSize(),
-                }}
-              >
-                {virtualizer.getVirtualItems().map((vItem) => {
-                  const roomId = sortedRooms[vItem.index];
-                  const room = mx.getRoom(roomId);
-                  if (!room) return null;
-                  const selected = selectedRoomId === roomId;
-                  const isDirect = mDirects.has(room.roomId);
+            {noRoomToDisplay ? (
+              <HomeEmpty activeFilter={activeFilter} />
+            ) : (
+              <NavCategory>
+                <div
+                  style={{
+                    position: 'relative',
+                    height: virtualizer.getTotalSize(),
+                  }}
+                >
+                  {virtualizer.getVirtualItems().map((vItem) => {
+                    const roomId = sortedRooms[vItem.index];
+                    const room = mx.getRoom(roomId);
+                    if (!room) return null;
+                    const selected = selectedRoomId === roomId;
+                    const isDirect = mDirects.has(room.roomId);
 
-                  return (
-                    <VirtualTile
-                      virtualItem={vItem}
-                      key={vItem.index}
-                      ref={virtualizer.measureElement}
-                    >
-                      <RoomNavItem
-                        room={room}
-                        selected={selected}
-                        linkPath={getHomeRoomPath(getCanonicalAliasOrRoomId(mx, roomId))}
-                        notificationMode={getRoomNotificationMode(
-                          notificationPreferences,
-                          room.roomId
-                        )}
-                        showAvatar={isDirect}
-                        direct={isDirect}
-                      />
-                    </VirtualTile>
-                  );
-                })}
-              </div>
-            </NavCategory>
+                    return (
+                      <VirtualTile
+                        virtualItem={vItem}
+                        key={vItem.index}
+                        ref={virtualizer.measureElement}
+                      >
+                        <RoomNavItem
+                          room={room}
+                          selected={selected}
+                          linkPath={getHomeRoomPath(getCanonicalAliasOrRoomId(mx, roomId))}
+                          notificationMode={getRoomNotificationMode(
+                            notificationPreferences,
+                            room.roomId
+                          )}
+                          showAvatar={isDirect}
+                          direct={isDirect}
+                        />
+                      </VirtualTile>
+                    );
+                  })}
+                </div>
+              </NavCategory>
+            )}
           </Box>
         </PageNavContent>
-      )}
     </PageNav>
   );
 }

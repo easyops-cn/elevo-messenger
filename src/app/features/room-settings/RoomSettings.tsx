@@ -2,8 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import { Avatar, Box, config, Icon, IconButton, Icons, IconSrc, MenuItem, Text } from 'folds';
-import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { JoinRule } from 'matrix-js-sdk';
+import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { PageNav, PageNavContent, PageNavHeader, PageRoot } from '../../components/page';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
@@ -20,6 +20,7 @@ import { RoomSettingsPage } from '../../state/roomSettings';
 import { useRoom } from '../../hooks/useRoom';
 import { DeveloperTools } from '../common-settings/developer-tools';
 import { Workspaces } from './workspaces';
+import { UsersIcon } from '../../icons/UsersIcon';
 
 type RoomSettingsMenuItem = {
   page: RoomSettingsPage;
@@ -40,7 +41,7 @@ const useRoomSettingsMenuItems = (): RoomSettingsMenuItem[] => {
         {
           page: RoomSettingsPage.MembersPage,
           nameKey: 'roomSettings.members',
-          icon: Icons.User,
+          icon: UsersIcon,
         },
         {
           page: RoomSettingsPage.PermissionsPage,

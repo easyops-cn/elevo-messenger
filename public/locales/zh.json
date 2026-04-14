@@ -7,6 +7,7 @@
     "login": "登录",
     "register": "注册",
     "logout": "退出登录",
+    "me": "我的",
     "settings": "设置",
     "custom": "自定义",
     "retry": "重试",
@@ -148,6 +149,7 @@
     "exploreCommunity": "探索社区房间",
     "joinWithAddress": "通过地址加入",
     "messageSearch": "消息搜索",
+    "search": "搜索",
     "rooms": "房间",
     "filter.people": "联系人",
     "filter.rooms": "房间"
@@ -656,7 +658,8 @@
     "featuredByClientSubtitle": "查找和探索由客户端提供商推荐的公共房间和空间。",
     "featuredSpaces": "推荐空间",
     "featuredRooms": "推荐房间",
-    "noFeaturedRooms": "没有客户端提供商推荐的房间或空间。"
+    "noFeaturedRooms": "没有客户端提供商推荐的房间或空间。",
+    "spaces": "空间"
   },
   "inbox": {
     "invites": "邀请",
@@ -896,6 +899,7 @@
   },
   "contacts": {
     "title": "通讯录",
+    "all": "所有人",
     "search": "搜索",
     "searchPlaceholder": "搜索联系人",
     "resultCount_one": "{{count}} 个结果",

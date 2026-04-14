@@ -39,6 +39,7 @@ import { useOpenSpaceSettings } from '../../state/hooks/spaceSettings';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { InviteUserPrompt } from '../../components/invite-user-prompt';
+import { UsersIcon } from '../../icons/UsersIcon';
 
 type LobbyMenuProps = {
   powerLevels: IPowerLevels;
@@ -226,7 +227,7 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
                   ref={triggerRef}
                   onClick={() => setPeopleDrawer((drawer) => !drawer)}
                 >
-                  <Icon size="400" src={Icons.User} />
+                  <Icon size="400" src={UsersIcon} />
                 </IconButton>
               )}
             </TooltipProvider>

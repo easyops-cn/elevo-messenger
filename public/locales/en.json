@@ -7,6 +7,7 @@
     "login": "Login",
     "register": "Register",
     "logout": "Logout",
+    "me": "Me",
     "settings": "Settings",
     "custom": "Custom",
     "retry": "Retry",
@@ -148,6 +149,7 @@
     "exploreCommunity": "Explore Community Rooms",
     "joinWithAddress": "Join with Address",
     "messageSearch": "Message Search",
+    "search": "Search",
     "rooms": "Rooms",
     "filter.people": "People",
     "filter.rooms": "Rooms"
@@ -656,7 +658,8 @@
     "featuredByClientSubtitle": "Find and explore public rooms and spaces featured by client provider.",
     "featuredSpaces": "Featured Spaces",
     "featuredRooms": "Featured Rooms",
-    "noFeaturedRooms": "No rooms or spaces featured by client provider."
+    "noFeaturedRooms": "No rooms or spaces featured by client provider.",
+    "spaces": "Spaces"
   },
   "inbox": {
     "invites": "Invites",
@@ -896,6 +899,7 @@
   },
   "contacts": {
     "title": "Contacts",
+    "all": "All",
     "search": "Search",
     "searchPlaceholder": "Search for contacts",
     "resultCount_one": "{{count}} Result",

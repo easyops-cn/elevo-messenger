@@ -1,10 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
+import { SyncStatusText } from './SyncStatusText';
+import { matrixReadyAtom } from '../../state/matrixReady';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import * as css from './TitleBar.css';
 import { isMacOS } from '../../utils/user-agent';
 import { searchModalAtom } from '../../state/searchModal';
-import { matrixReadyAtom } from '../../state/matrixReady';
 
 function MinimizeIcon() {
   return (
@@ -176,6 +177,7 @@ export function TitleBar() {
         </div>
       )}
       {matrixReady && <TitleBarSearchBox />}
+      {isMacOS() && <SyncStatusText side="right" />}
       {isMacOS() ? (
         <div className={css.TrafficLightSpacer} />
       ) : (
