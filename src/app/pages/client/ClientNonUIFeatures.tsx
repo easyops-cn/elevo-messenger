@@ -16,7 +16,7 @@ import { settingsAtom } from '../../state/settings';
 import { allInvitesAtom } from '../../state/room-list/inviteList';
 import { usePreviousValue } from '../../hooks/usePreviousValue';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { getInboxInvitesPath, getInboxNotificationsPath } from '../pathUtils';
+import { getMeInvitesPath, getMeNotificationsPath } from '../pathUtils';
 import {
   getMemberDisplayName,
   getNotificationType,
@@ -100,7 +100,7 @@ function InviteNotifications() {
       });
 
       noti.onclick = () => {
-        if (!window.closed) navigate(getInboxInvitesPath());
+        if (!window.closed) navigate(getMeInvitesPath());
         noti.close();
       };
     },
@@ -165,7 +165,7 @@ function MessageNotifications() {
       });
 
       noti.onclick = () => {
-        if (!window.closed) navigate(getInboxNotificationsPath());
+        if (!window.closed) navigate(getMeNotificationsPath());
         noti.close();
         notifRef.current = undefined;
       };
