@@ -899,6 +899,7 @@
   },
   "contacts": {
     "title": "通讯录",
+    "all": "所有人",
     "search": "搜索",
     "searchPlaceholder": "搜索联系人",
     "resultCount_one": "{{count}} 个结果",

@@ -899,6 +899,7 @@
   },
   "contacts": {
     "title": "Contacts",
+    "all": "All",
     "search": "Search",
     "searchPlaceholder": "Search for contacts",
     "resultCount_one": "{{count}} Result",

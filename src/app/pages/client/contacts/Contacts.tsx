@@ -1,6 +1,5 @@
-import React, { useCallback } from 'react';
-import { Avatar, Box, Icon, Icons, Text } from 'folds';
-import { useSetAtom } from 'jotai';
+import React from 'react';
+import { Avatar, Box, Icon, Text } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { ContactIcon } from '../../../icons/ContactIcon';
 import { NavCategory, NavItem, NavItemContent, NavLink } from '../../../components/nav';
@@ -12,7 +11,6 @@ import {
 import { useNavToActivePathMapper } from '../../../hooks/useNavToActivePathMapper';
 import { PageNav, PageNavContent, PageNavHeader } from '../../../components/page';
 import { useContactsContext } from './ContactsContext';
-import { searchModalAtom } from '../../../state/searchModal';
 
 export function Contacts() {
   const { t } = useTranslation();
@@ -21,8 +19,6 @@ export function Contacts() {
   const selectedRole = useContactsRoleSelected();
   const { roles } = useContactsContext();
   const othersSelected = selectedRole === 'Unknown';
-  const openSearch = useSetAtom(searchModalAtom);
-  const handleSearchClick = useCallback(() => openSearch(true), [openSearch]);
 
   return (
     <PageNav stretch>
@@ -32,9 +28,6 @@ export function Contacts() {
             <Text size="H4" truncate>
               {t('contacts.title')}
             </Text>
-          </Box>
-          <Box as="button" alignItems="Center" justifyContent="Center" onClick={handleSearchClick} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }}>
-            <Icon src={Icons.Search} size="200" />
           </Box>
         </Box>
       </PageNavHeader>
@@ -51,7 +44,7 @@ export function Contacts() {
                     </Avatar>
                     <Box as="span" grow="Yes">
                       <Text as="span" size="Inherit" truncate>
-                        {t('contacts.title')}
+                        {t('contacts.all')}
                       </Text>
                     </Box>
                   </Box>
