@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Avatar,
   Box,
-  Button,
   Chip,
   Icon,
   IconButton,
@@ -30,7 +29,6 @@ import {
   NavItemContent,
 } from '../../../components/nav';
 import {
-  getExplorePath,
   getHomeCreatePath,
   getHomeCreateChatPath,
   getHomeRoomPath,
@@ -206,7 +204,6 @@ function HomeFilterChips({
 
 function HomeEmpty({ activeFilter }: { activeFilter: HomeRoomFilter | null }) {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const isPeople = activeFilter === 'people';
 
   return (
@@ -222,25 +219,6 @@ function HomeEmpty({ activeFilter }: { activeFilter: HomeRoomFilter | null }) {
           <Text size="T300" align="Center">
             {isPeople ? t('home.noDirectMessagesDesc') : t('home.noRoomsDesc')}
           </Text>
-        }
-        options={
-          <>
-            <Button onClick={() => navigate(getHomeCreatePath())} variant="Secondary" size="300">
-              <Text size="B300" truncate>
-                {t('home.createRoom')}
-              </Text>
-            </Button>
-            <Button
-              onClick={() => navigate(getExplorePath())}
-              variant="Secondary"
-              fill="Soft"
-              size="300"
-            >
-              <Text size="B300" truncate>
-                {t('home.exploreCommunity')}
-              </Text>
-            </Button>
-          </>
         }
       />
     </NavEmptyCenter>
@@ -286,10 +264,7 @@ export function Home() {
   return (
     <PageNav stretch>
       <HomeHeader rooms={rooms} />
-      {noRoomToDisplay ? (
-        <HomeEmpty activeFilter={activeFilter} />
-      ) : (
-        <PageNavContent scrollRef={scrollRef}>
+      <PageNavContent scrollRef={scrollRef}>
           <Box direction="Column" gap="300">
             <NavCategory>
               <NavItem variant="Background" radii="400" aria-selected={createRoomSelected}>
@@ -342,45 +317,48 @@ export function Home() {
               </NavItem>
             </NavCategory>
             <HomeFilterChips activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-            <NavCategory>
-              <div
-                style={{
-                  position: 'relative',
-                  height: virtualizer.getTotalSize(),
-                }}
-              >
-                {virtualizer.getVirtualItems().map((vItem) => {
-                  const roomId = sortedRooms[vItem.index];
-                  const room = mx.getRoom(roomId);
-                  if (!room) return null;
-                  const selected = selectedRoomId === roomId;
-                  const isDirect = mDirects.has(room.roomId);
+            {noRoomToDisplay ? (
+              <HomeEmpty activeFilter={activeFilter} />
+            ) : (
+              <NavCategory>
+                <div
+                  style={{
+                    position: 'relative',
+                    height: virtualizer.getTotalSize(),
+                  }}
+                >
+                  {virtualizer.getVirtualItems().map((vItem) => {
+                    const roomId = sortedRooms[vItem.index];
+                    const room = mx.getRoom(roomId);
+                    if (!room) return null;
+                    const selected = selectedRoomId === roomId;
+                    const isDirect = mDirects.has(room.roomId);
 
-                  return (
-                    <VirtualTile
-                      virtualItem={vItem}
-                      key={vItem.index}
-                      ref={virtualizer.measureElement}
-                    >
-                      <RoomNavItem
-                        room={room}
-                        selected={selected}
-                        linkPath={getHomeRoomPath(getCanonicalAliasOrRoomId(mx, roomId))}
-                        notificationMode={getRoomNotificationMode(
-                          notificationPreferences,
-                          room.roomId
-                        )}
-                        showAvatar={isDirect}
-                        direct={isDirect}
-                      />
-                    </VirtualTile>
-                  );
-                })}
-              </div>
-            </NavCategory>
+                    return (
+                      <VirtualTile
+                        virtualItem={vItem}
+                        key={vItem.index}
+                        ref={virtualizer.measureElement}
+                      >
+                        <RoomNavItem
+                          room={room}
+                          selected={selected}
+                          linkPath={getHomeRoomPath(getCanonicalAliasOrRoomId(mx, roomId))}
+                          notificationMode={getRoomNotificationMode(
+                            notificationPreferences,
+                            room.roomId
+                          )}
+                          showAvatar={isDirect}
+                          direct={isDirect}
+                        />
+                      </VirtualTile>
+                    );
+                  })}
+                </div>
+              </NavCategory>
+            )}
           </Box>
         </PageNavContent>
-      )}
     </PageNav>
   );
 }
