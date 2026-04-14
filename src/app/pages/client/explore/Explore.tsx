@@ -1,7 +1,8 @@
-import React, { FormEventHandler, useCallback, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
+import { useAtomValue } from 'jotai';
 import {
   Avatar,
   Box,
@@ -26,18 +27,28 @@ import {
   NavItemContent,
   NavLink,
 } from '../../../components/nav';
-import { getExploreFeaturedPath, getExploreServerPath } from '../../pathUtils';
+import { getExploreFeaturedPath, getExploreServerPath, getExploreSpacePath } from '../../pathUtils';
 import { useClientConfig } from '../../../hooks/useClientConfig';
 import {
   useExploreFeaturedSelected,
   useExploreServer,
+  useExploreSpaceSelected,
 } from '../../../hooks/router/useExploreSelected';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
-import { getMxIdServer } from '../../../utils/matrix';
+import { getMxIdServer, getCanonicalAliasOrRoomId } from '../../../utils/matrix';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import { useNavToActivePathMapper } from '../../../hooks/useNavToActivePathMapper';
 import { PageNav, PageNavContent, PageNavHeader } from '../../../components/page';
 import { stopPropagation } from '../../../utils/keyboard';
+import { RoomAvatar } from '../../../components/room-avatar';
+import { useOrphanSpaces } from '../../../state/hooks/roomList';
+import { useSidebarItems } from '../../../hooks/useSidebarItems';
+import { roomToParentsAtom } from '../../../state/room/roomToParents';
+import { allRoomsAtom } from '../../../state/room-list/roomList';
+import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
+import { getRoomAvatarUrl } from '../../../utils/room';
+import { nameInitials } from '../../../utils/common';
+import type { ISidebarFolder } from '../../../hooks/useSidebarItems';
 
 export function AddServer() {
   const { t } = useTranslation();
@@ -57,11 +68,10 @@ export function AddServer() {
     return server || undefined;
   };
 
-  const handleSubmit: FormEventHandler<HTMLFormElement> = (evt) => {
+  const handleSubmit: React.FormEventHandler<HTMLFormElement> = (evt) => {
     evt.preventDefault();
     const server = getInputServer();
     if (!server) return;
-    // explore(server);
 
     navigate(getExploreServerPath(server));
     setDialog(false);
@@ -120,19 +130,6 @@ export function AddServer() {
                   )}
                 </Box>
                 <Box direction="Column" gap="200">
-                  {/* <Button
-                    type="submit"
-                    variant="Secondary"
-                    before={
-                      exploreState.status === AsyncStatus.Loading ? (
-                        <Spinner fill="Solid" variant="Secondary" size="200" />
-                      ) : undefined
-                    }
-                    aria-disabled={exploreState.status === AsyncStatus.Loading}
-                  >
-                    <Text size="B400">Save</Text>
-                  </Button> */}
-
                   <Button type="submit" onClick={handleView} variant="Secondary" fill="Soft">
                     <Text size="B400">{t('common.view')}</Text>
                   </Button>
@@ -169,6 +166,12 @@ export function Explore() {
 
   const featuredSelected = useExploreFeaturedSelected();
   const selectedServer = useExploreServer();
+  const selectedExploreSpace = useExploreSpaceSelected();
+
+  const roomToParents = useAtomValue(roomToParentsAtom);
+  const orphanSpaces = useOrphanSpaces(mx, allRoomsAtom, roomToParents);
+  const [sidebarItems] = useSidebarItems(orphanSpaces);
+  const useAuth = useMediaAuthentication();
 
   return (
     <PageNav stretch>
@@ -260,9 +263,91 @@ export function Explore() {
               ))}
             </NavCategory>
           )}
-          <Box direction="Column">
-            <AddServer />
-          </Box>
+          {sidebarItems.length > 0 && (
+            <NavCategory>
+              <NavCategoryHeader>
+                <Text size="O400" style={{ paddingLeft: config.space.S200 }}>
+                  {t('explore.spaces')}
+                </Text>
+              </NavCategoryHeader>
+              {sidebarItems.map((item) => {
+                if (typeof item === 'object') {
+                  const folder = item as ISidebarFolder;
+                  const firstSpaceId = folder.content[0];
+                  const firstSpace = firstSpaceId ? mx.getRoom(firstSpaceId) : undefined;
+                  if (!firstSpace) return null;
+
+                  return (
+                    <NavItem
+                      key={folder.id}
+                      variant="Background"
+                      radii="400"
+                      aria-selected={folder.content.includes(selectedExploreSpace ?? '')}
+                    >
+                      <NavLink
+                        to={getExploreSpacePath(
+                          getCanonicalAliasOrRoomId(mx, firstSpace.roomId)
+                        )}
+                      >
+                        <NavItemContent>
+                          <Box as="span" grow="Yes" alignItems="Center" gap="200">
+                            <Avatar size="200" radii="400">
+                              <Text size="T200">{nameInitials(folder.name ?? '', 2)}</Text>
+                            </Avatar>
+                            <Box as="span" grow="Yes">
+                              <Text as="span" size="Inherit" truncate>
+                                {folder.name ??
+                                  folder.content
+                                    .map((id) => mx.getRoom(id)?.name)
+                                    .filter(Boolean)
+                                    .join(', ')}
+                              </Text>
+                            </Box>
+                          </Box>
+                        </NavItemContent>
+                      </NavLink>
+                    </NavItem>
+                  );
+                }
+
+                const space = mx.getRoom(item);
+                if (!space) return null;
+
+                return (
+                  <NavItem
+                    key={space.roomId}
+                    variant="Background"
+                    radii="400"
+                    aria-selected={space.roomId === selectedExploreSpace}
+                  >
+                    <NavLink
+                      to={getExploreSpacePath(getCanonicalAliasOrRoomId(mx, space.roomId))}
+                    >
+                      <NavItemContent>
+                        <Box as="span" grow="Yes" alignItems="Center" gap="200">
+                          <Avatar size="200" radii="400">
+                            <RoomAvatar
+                              roomId={space.roomId}
+                              src={getRoomAvatarUrl(mx, space, 96, useAuth) ?? undefined}
+                              alt={space.name}
+                              renderFallback={() => (
+                                <Text size="T200">{nameInitials(space.name, 2)}</Text>
+                              )}
+                            />
+                          </Avatar>
+                          <Box as="span" grow="Yes">
+                            <Text as="span" size="Inherit" truncate>
+                              {space.name}
+                            </Text>
+                          </Box>
+                        </Box>
+                      </NavItemContent>
+                    </NavLink>
+                  </NavItem>
+                );
+              })}
+            </NavCategory>
+          )}
         </Box>
       </PageNavContent>
     </PageNav>

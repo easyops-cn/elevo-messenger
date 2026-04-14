@@ -31,6 +31,7 @@ import {
   _ROOM_PATH,
   _SEARCH_PATH,
   _SERVER_PATH,
+  _EXPLORE_SPACE_PATH,
   CREATE_PATH,
   CONTACTS_PATH,
   _CONTACTS_CONTACTS_PATH,
@@ -55,6 +56,7 @@ import { ClientBindAtoms, ClientLayout, ClientRoot } from './client';
 import { Home, HomeRouteRoomProvider, HomeSearch } from './client/home';
 import { RouteSpaceProvider, Space, SpaceRouteRoomProvider, SpaceSearch } from './client/space';
 import { Explore, FeaturedRooms, PublicRooms } from './client/explore';
+import { ExploreSpaceProvider } from './client/explore/ExploreSpaceProvider';
 import { Notifications, Inbox, Invites } from './client/inbox';
 import { Contacts, ContactsPage, ContactsProvider, ContactsRolePage } from './client/contacts';
 import { Me } from './client/me';
@@ -280,6 +282,14 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           )}
           <Route path={_FEATURED_PATH} element={<FeaturedRooms />} />
           <Route path={_SERVER_PATH} element={<PublicRooms />} />
+          <Route
+            path={_EXPLORE_SPACE_PATH}
+            element={
+              <ExploreSpaceProvider>
+                <Lobby />
+              </ExploreSpaceProvider>
+            }
+          />
         </Route>
         <Route path={CREATE_PATH} element={<Create />} />
         <Route

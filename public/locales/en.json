@@ -658,7 +658,8 @@
     "featuredByClientSubtitle": "Find and explore public rooms and spaces featured by client provider.",
     "featuredSpaces": "Featured Spaces",
     "featuredRooms": "Featured Rooms",
-    "noFeaturedRooms": "No rooms or spaces featured by client provider."
+    "noFeaturedRooms": "No rooms or spaces featured by client provider.",
+    "spaces": "Spaces"
   },
   "inbox": {
     "invites": "Invites",

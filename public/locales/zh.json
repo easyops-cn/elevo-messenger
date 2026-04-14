@@ -658,7 +658,8 @@
     "featuredByClientSubtitle": "查找和探索由客户端提供商推荐的公共房间和空间。",
     "featuredSpaces": "推荐空间",
     "featuredRooms": "推荐房间",
-    "noFeaturedRooms": "没有客户端提供商推荐的房间或空间。"
+    "noFeaturedRooms": "没有客户端提供商推荐的房间或空间。",
+    "spaces": "空间"
   },
   "inbox": {
     "invites": "邀请",

@@ -37,7 +37,7 @@ import { useCategoryHandler } from '../../hooks/useCategoryHandler';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { allRoomsAtom } from '../../state/room-list/roomList';
 import { getCanonicalAliasOrRoomId, rateLimitedActions } from '../../utils/matrix';
-import { getSpaceRoomPath } from '../../pages/pathUtils';
+import { getHomeRoomPath } from '../../pages/pathUtils';
 import { StateEvent } from '../../../types/matrix/room';
 import { CanDropCallback, useDnDMonitor } from './DnD';
 import { ASCIILexicalTable, orderKeys } from '../../utils/ASCIILexicalTable';
@@ -413,8 +413,7 @@ export function Lobby() {
   const handleOpenRoom: MouseEventHandler<HTMLButtonElement> = (evt) => {
     const rId = evt.currentTarget.getAttribute('data-room-id');
     if (!rId) return;
-    const pSpaceIdOrAlias = getCanonicalAliasOrRoomId(mx, space.roomId);
-    navigate(getSpaceRoomPath(pSpaceIdOrAlias, getCanonicalAliasOrRoomId(mx, rId)));
+    navigate(getHomeRoomPath(getCanonicalAliasOrRoomId(mx, rId)));
   };
 
   const togglePinToSidebar = useCallback(
