@@ -264,37 +264,13 @@ export const getRoomIconSrc = (
   joinRule?: JoinRule
 ): IconSrc => {
   if (roomType === RoomType.Space) {
-    if (joinRule === JoinRule.Public) return icons.SpaceGlobe;
-    if (
-      joinRule === JoinRule.Invite ||
-      joinRule === JoinRule.Knock ||
-      joinRule === JoinRule.Private
-    ) {
-      return icons.SpaceLock;
-    }
     return icons.Space;
   }
 
   if (roomType === RoomType.Call) {
-    if (joinRule === JoinRule.Public) return icons.VolumeHighGlobe;
-    if (
-      joinRule === JoinRule.Invite ||
-      joinRule === JoinRule.Knock ||
-      joinRule === JoinRule.Private
-    ) {
-      return icons.VolumeHighLock;
-    }
     return icons.VolumeHigh;
   }
 
-  if (joinRule === JoinRule.Public) return icons.HashGlobe;
-  if (
-    joinRule === JoinRule.Invite ||
-    joinRule === JoinRule.Knock ||
-    joinRule === JoinRule.Private
-  ) {
-    return icons.HashLock;
-  }
   return icons.Hash;
 };
 
