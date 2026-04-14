@@ -31,10 +31,11 @@ export function SyncStatus({ mx }: SyncStatusProps) {
   );
 
   if (
-    (stateData.current === SyncState.Prepared ||
-      stateData.current === SyncState.Syncing ||
-      stateData.current === SyncState.Catchup) &&
-    stateData.previous !== SyncState.Syncing
+    stateData.current === SyncState.Prepared ||
+    stateData.current === SyncState.Catchup ||
+    (stateData.current === SyncState.Syncing &&
+      stateData.previous !== SyncState.Prepared &&
+      stateData.previous !== SyncState.Syncing)
   ) {
     return (
       <Box direction="Column" shrink="No">

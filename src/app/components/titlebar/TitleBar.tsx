@@ -169,7 +169,6 @@ export function TitleBar() {
       data-tauri-drag-region
       onDoubleClick={handleDoubleClick}
     >
-      {!isMacOS() && <SyncStatusText side="left" />}
       {isMacOS() ? (
         <div className={css.TrafficLightSpacer} />
       ) : (

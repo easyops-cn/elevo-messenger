@@ -1,5 +1,5 @@
 import { MatrixClient, SyncState } from 'matrix-js-sdk';
-import React, { useCallback } from 'react';
+import { useCallback } from 'react';
 import { useSetAtom } from 'jotai';
 import { useSyncState } from '../../hooks/useSyncState';
 import { syncStateAtom, type SyncStatusInfo } from '../../state/syncState';
@@ -13,7 +13,7 @@ export function SyncStatusBridge({ mx }: SyncStatusBridgeProps) {
 
   useSyncState(
     mx,
-    useCallback((current: SyncState, previous: SyncState | undefined) => {
+    useCallback((current: SyncState, previous: SyncState | null) => {
       setSyncState((prev: SyncStatusInfo) => {
         if (prev.state === current && prev.previous === previous) {
           return prev;

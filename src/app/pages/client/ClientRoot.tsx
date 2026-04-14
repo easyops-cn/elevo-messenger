@@ -36,6 +36,7 @@ import { stopPropagation } from '../../utils/keyboard';
 import { SyncStatusBridge } from './SyncStatusBridge';
 import { SyncStatus } from './SyncStatus';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
+import { isMacOS } from '../../utils/user-agent';
 import { AuthMetadataProvider } from '../../hooks/useAuthMetadata';
 import { getFallbackSession } from '../../state/sessions';
 import { matrixReadyAtom } from '../../state/matrixReady';
@@ -195,7 +196,7 @@ export function ClientRoot({ children }: ClientRootProps) {
     <AutoDiscovery userId={userId!} baseUrl={baseUrl!}>
       <SpecVersions baseUrl={baseUrl!}>
         {mx && <SyncStatusBridge mx={mx} />}
-        {mx && !isDesktopTauri && <SyncStatus mx={mx} />}
+        {mx && !(isDesktopTauri && isMacOS()) && <SyncStatus mx={mx} />}
         {loading && <ClientRootOptions mx={mx} />}
         {(loadState.status === AsyncStatus.Error || startState.status === AsyncStatus.Error) && (
           <SplashScreen>

@@ -15,10 +15,11 @@ export function SyncStatusText({ side }: SyncStatusTextProps) {
   let variant: 'success' | 'warning' | 'critical' | null = null;
 
   if (
-    (state === SyncState.Prepared ||
-      state === SyncState.Syncing ||
-      state === SyncState.Catchup) &&
-    previous !== SyncState.Syncing
+    state === SyncState.Prepared ||
+    state === SyncState.Catchup ||
+    (state === SyncState.Syncing &&
+      previous !== SyncState.Prepared &&
+      previous !== SyncState.Syncing)
   ) {
     text = 'Connecting...';
     variant = 'success';
@@ -34,7 +35,9 @@ export function SyncStatusText({ side }: SyncStatusTextProps) {
 
   return (
     <span
-      className={`${css.SyncStatusText} ${css[variant]} ${side === 'right' ? css.positionRight : css.positionLeft}`}
+      className={`${css.SyncStatusText} ${css[variant]} ${
+        side === 'right' ? css.positionRight : css.positionLeft
+      }`}
     >
       {text}
     </span>
