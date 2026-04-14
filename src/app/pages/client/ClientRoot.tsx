@@ -210,12 +210,26 @@ export function ClientRoot({ children }: ClientRootProps) {
               <Dialog>
                 <Box direction="Column" gap="400" style={{ padding: config.space.S400 }}>
                   {loadState.status === AsyncStatus.Error && (
-                    <Text>{`Failed to load. ${loadState.error.message}`}</Text>
+                    <>
+                      <Text>{`Failed to load. ${loadState.error.message}`}</Text>
+
+                      <Button variant="Critical" onClick={() => {
+                        if (mx) {
+                          logoutClient(mx);
+                          return;
+                        }
+                        clearLoginData();
+                      }}>
+                        <Text as="span" size="B400">
+                          Clear storage and retry
+                        </Text>
+                      </Button>
+                    </>
                   )}
                   {startState.status === AsyncStatus.Error && (
                     <Text>{`Failed to start. ${startState.error.message}`}</Text>
                   )}
-                  <Button variant="Critical" onClick={mx ? () => startMatrix(mx) : loadMatrix}>
+                  <Button variant="Secondary" onClick={mx ? () => startMatrix(mx) : loadMatrix}>
                     <Text as="span" size="B400">
                       Retry
                     </Text>
