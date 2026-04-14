@@ -41,14 +41,19 @@ export function BottomNav() {
   const allInvites = useAtomValue(allInvitesAtom);
   const inviteCount = allInvites.length;
 
-  const handleHomeClick = () => {
-    const activePath = navToActivePath.get('home');
+  const handleNavClick = (key: string, defaultPath: string) => {
+    const activePath = navToActivePath.get(key);
     if (activePath && screenSize !== ScreenSize.Mobile) {
       navigate(joinPathComponent(activePath));
       return;
     }
-    navigate(getHomePath());
+    navigate(defaultPath);
   };
+
+  const handleHomeClick = () => handleNavClick('home', getHomePath());
+  const handleContactsClick = () => handleNavClick('contacts', getContactsPath());
+  const handleExploreClick = () => handleNavClick('explore', getExplorePath());
+  const handleMeClick = () => handleNavClick('me', getMePath());
 
   return (
     <div className={css.BottomNavContainer}>
@@ -81,7 +86,7 @@ export function BottomNav() {
           <button
             ref={triggerRef}
             className={css.BottomNavItem({ active: contactsSelected })}
-            onClick={() => navigate(getContactsPath())}
+            onClick={handleContactsClick}
             aria-label="Contacts"
             type="button"
           >
@@ -97,7 +102,7 @@ export function BottomNav() {
           <button
             ref={triggerRef}
             className={css.BottomNavItem({ active: exploreSelected })}
-            onClick={() => navigate(getExplorePath())}
+            onClick={handleExploreClick}
             aria-label="Explore"
             type="button"
           >
@@ -113,7 +118,7 @@ export function BottomNav() {
           <button
             ref={triggerRef}
             className={css.BottomNavItem({ active: meSelected })}
-            onClick={() => navigate(getMePath())}
+            onClick={handleMeClick}
             aria-label="Me"
             type="button"
           >
