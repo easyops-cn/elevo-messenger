@@ -18,6 +18,7 @@ import { Members } from '../common-settings/members';
 import { DeveloperTools } from '../common-settings/developer-tools';
 import { General } from './general';
 import { Permissions } from './permissions';
+import { UsersIcon } from '../../icons/UsersIcon';
 
 type SpaceSettingsMenuItem = {
   page: SpaceSettingsPage;
@@ -36,7 +37,7 @@ const useSpaceSettingsMenuItems = (): SpaceSettingsMenuItem[] =>
       {
         page: SpaceSettingsPage.MembersPage,
         nameKey: 'roomSettings.members',
-        icon: Icons.User,
+        icon: UsersIcon,
       },
       {
         page: SpaceSettingsPage.PermissionsPage,

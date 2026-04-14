@@ -7,7 +7,6 @@ import {
   Button,
   Dialog,
   Icon,
-  Icons,
   Overlay,
   OverlayBackdrop,
   OverlayCenter,
@@ -34,6 +33,7 @@ import { useElementSizeObserver } from '../../hooks/useElementSizeObserver';
 import { getRoomAvatarUrl, getStateEvent } from '../../utils/room';
 import { useStateEventCallback } from '../../hooks/useStateEventCallback';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
+import { UsersIcon } from '../../icons/UsersIcon';
 
 type GridColumnCount = '1' | '2' | '3';
 const getGridColumnCount = (gridWidth: number): GridColumnCount => {
@@ -254,7 +254,7 @@ export const RoomCard = as<'div', RoomCardProps>(
         </Box>
         {typeof joinedMemberCount === 'number' && (
           <Box gap="100">
-            <Icon size="50" src={Icons.User} />
+            <Icon size="50" src={UsersIcon} />
             <Text size="T200">{`${millify(joinedMemberCount)} ${t('common.members')}`}</Text>
           </Box>
         )}
