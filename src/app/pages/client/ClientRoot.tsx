@@ -33,7 +33,9 @@ import { SpecVersions } from './SpecVersions';
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { useSyncState } from '../../hooks/useSyncState';
 import { stopPropagation } from '../../utils/keyboard';
+import { SyncStatusBridge } from './SyncStatusBridge';
 import { SyncStatus } from './SyncStatus';
+import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import { AuthMetadataProvider } from '../../hooks/useAuthMetadata';
 import { getFallbackSession } from '../../state/sessions';
 import { matrixReadyAtom } from '../../state/matrixReady';
@@ -192,7 +194,8 @@ export function ClientRoot({ children }: ClientRootProps) {
   return (
     <AutoDiscovery userId={userId!} baseUrl={baseUrl!}>
       <SpecVersions baseUrl={baseUrl!}>
-        {mx && <SyncStatus mx={mx} />}
+        {mx && <SyncStatusBridge mx={mx} />}
+        {mx && !isDesktopTauri && <SyncStatus mx={mx} />}
         {loading && <ClientRootOptions mx={mx} />}
         {(loadState.status === AsyncStatus.Error || startState.status === AsyncStatus.Error) && (
           <SplashScreen>
