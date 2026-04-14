@@ -193,6 +193,18 @@ function HomeFilterChips({
           {t('home.filter.rooms')}
         </Text>
       </Chip>
+      {activeFilter && (
+        <Chip
+          variant="SurfaceVariant"
+          outlined
+          radii="Pill"
+          onClick={() => onFilterChange(null)}
+        >
+          <Box alignItems="Center">
+            <Icon src={Icons.Cross} size="100" />
+          </Box>
+        </Chip>
+      )}
     </Box>
   );
 }
