@@ -2,7 +2,6 @@ import { useMatch } from 'react-router-dom';
 import {
   getHomeCreatePath,
   getHomeCreateChatPath,
-  getHomeJoinPath,
   getHomePath,
   getHomeSearchPath,
 } from '../../pages/pathUtils';
@@ -33,16 +32,6 @@ export const useHomeCreateChatSelected = (): boolean => {
     caseSensitive: true,
     end: false,
   });
-  return !!match;
-};
-
-export const useHomeJoinSelected = (): boolean => {
-  const match = useMatch({
-    path: getHomeJoinPath(),
-    caseSensitive: true,
-    end: false,
-  });
-
   return !!match;
 };
 
