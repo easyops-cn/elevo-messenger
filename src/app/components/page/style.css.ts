@@ -121,16 +121,11 @@ export const PageContentCenter = style([
 ]);
 
 export const PageMainFloating = style({
-  // backgroundColor: color.Surface.Container,
-  // color: color.Surface.OnContainer,
-  // boxShadow: config.shadow.E200,
-  // border: `${config.borderWidth.B400} solid ${color.Surface.Container}`,
-  // borderRadius: config.radii.R500,
-  backgroundColor: '#FDFDFD',
+  backgroundColor: color.Surface.Container,
   color: color.Surface.OnContainer,
-  boxShadow: config.shadow.E300,
-  border: `1px solid ${color.Surface.Container}`,
-  // borderRadius: '12px',
+  // boxShadow: config.shadow.E300,
+  boxShadow: '0 11px 13.7px 0 rgba(0, 0, 0, 0.05)',
+  border: `${config.borderWidth.B300} solid ${color.Surface.Container}`,
   borderRadius: config.radii.R500,
   overflow: 'hidden',
   margin: config.space.S400,

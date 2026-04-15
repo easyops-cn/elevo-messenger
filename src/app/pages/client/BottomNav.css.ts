@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { RecipeVariants, recipe } from '@vanilla-extract/recipes';
 import { DefaultReset, color, config, Disabled, FocusOutline, toRem } from 'folds';
+import { elevoColor } from '../../../config.css';
 
 export const BottomNavContainer = style([
   DefaultReset,
@@ -9,13 +10,13 @@ export const BottomNavContainer = style([
     alignItems: 'center',
     justifyContent: 'space-evenly',
     gap: config.space.S100,
-    padding: config.space.S100,
+    padding: `${config.space.S100} ${config.space.S300}`,
     margin: `${config.space.S400} ${config.space.S300}`,
     borderRadius: config.radii.Pill,
-    backgroundColor: color.Background.Container,
+    backgroundColor: elevoColor.Background.NavBar,
     color: color.Background.OnContainer,
     flexShrink: 0,
-    boxShadow: config.shadow.E400,
+    boxShadow: `${elevoColor.shadow.SpecularHighlight}, ${elevoColor.shadow.NavBar}`,
   },
 ]);
 

@@ -4,14 +4,14 @@ import { color } from 'folds';
 export const lightTheme = createTheme(color, {
   Background: {
     Container: '#F7F7F7',
-    ContainerHover: '#E5E5E5',
-    ContainerActive: '#D9D9D9',
+    ContainerHover: 'rgba(0, 0, 0, 0.04)',
+    ContainerActive: 'rgba(0, 0, 0, 0.08)',
     ContainerLine: '#CCCCCC',
     OnContainer: '#000000',
   },
 
   Surface: {
-    Container: '#FFFFFF',
+    Container: '#FDFDFD',
     ContainerHover: '#F2F2F2',
     ContainerActive: '#E5E5E5',
     ContainerLine: '#D9D9D9',
@@ -27,7 +27,7 @@ export const lightTheme = createTheme(color, {
   },
 
   Primary: {
-    Main: '#1858D5',
+    Main: '#007AFF',
     MainHover: '#164FC0',
     MainActive: '#144BB5',
     MainLine: '#1346AA',
@@ -124,7 +124,7 @@ export const silverTheme = createTheme(color, {
   },
 
   Primary: {
-    Main: '#1245A8',
+    Main: '#007AFF',
     MainHover: '#103E97',
     MainActive: '#0F3B8F',
     MainLine: '#0E3786',
@@ -197,15 +197,15 @@ export const silverTheme = createTheme(color, {
 
 const darkThemeData = {
   Background: {
-    Container: '#1A1A1A',
-    ContainerHover: '#262626',
-    ContainerActive: '#333333',
+    Container: '#3C3C3C',
+    ContainerHover: 'rgba(255, 255, 255, 0.2)',
+    ContainerActive: 'rgba(255, 255, 255, 0.1)',
     ContainerLine: '#404040',
     OnContainer: '#F2F2F2',
   },
 
   Surface: {
-    Container: '#262626',
+    Container: '#1E1E1E',
     ContainerHover: '#333333',
     ContainerActive: '#404040',
     ContainerLine: '#4D4D4D',
@@ -221,7 +221,7 @@ const darkThemeData = {
   },
 
   Primary: {
-    Main: '#BDB6EC',
+    Main: '#0A84FF',
     MainHover: '#B2AAE9',
     MainActive: '#ADA3E8',
     MainLine: '#A79DE6',
