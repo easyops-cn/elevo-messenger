@@ -979,6 +979,15 @@
     "description": "点击此处登录您的 {{provider}} 账户以继续操作",
     "doneDescription": "您的 {{provider}} 账户已关联"
   },
+  "askUserQuestion": {
+    "title": "问卷",
+    "answeredTitle": "回答",
+    "submitted": "已提交",
+    "other": "其他",
+    "otherPlaceholder": "请输入您的回答...",
+    "submit": "提交",
+    "submitting": "提交中..."
+  },
   "toolCall": {
     "inprogressDescription": "执行中...",
     "completedDescription": "已完成"

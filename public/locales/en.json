@@ -981,6 +981,15 @@
     "description": "Click here to log in to your {{provider}} account to continue",
     "doneDescription": "Your {{provider}} account has been linked"
   },
+  "askUserQuestion": {
+    "title": "Questionnaire",
+    "answeredTitle": "Answers",
+    "submitted": "Submitted",
+    "other": "Other",
+    "otherPlaceholder": "Enter your answer...",
+    "submit": "Submit",
+    "submitting": "Submitting..."
+  },
   "toolCall": {
     "inprogressDescription": "Running...",
     "completedDescription": "Completed"
