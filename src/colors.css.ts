@@ -3,7 +3,7 @@ import { color } from 'folds';
 
 export const lightTheme = createTheme(color, {
   Background: {
-    Container: '#F2F2F2',
+    Container: '#F7F7F7',
     ContainerHover: '#E5E5E5',
     ContainerActive: '#D9D9D9',
     ContainerLine: '#CCCCCC',

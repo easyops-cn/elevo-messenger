@@ -9,16 +9,16 @@ export const BottomNavContainer = style([
     alignItems: 'center',
     justifyContent: 'space-evenly',
     gap: config.space.S100,
-    padding: `${config.space.S200} ${config.space.S100}`,
-    borderTop: `${config.borderWidth.B300} solid ${color.Background.ContainerLine}`,
+    padding: config.space.S100,
+    margin: `${config.space.S300} ${config.space.S200}`,
+    borderRadius: config.radii.Pill,
     backgroundColor: color.Background.Container,
     color: color.Background.OnContainer,
     flexShrink: 0,
+    boxShadow: `0 ${toRem(2)} ${toRem(8)} rgba(0, 0, 0, 0.15)`,
   },
 ]);
 
-const INDICATOR_HEIGHT = 3;
-const INDICATOR_RADIUS = 2;
 export const BottomNavItem = recipe({
   base: [
     DefaultReset,
@@ -42,18 +42,6 @@ export const BottomNavItem = recipe({
         '&:active': {
           backgroundColor: color.Background.ContainerActive,
         },
-        '&::after': {
-          content: '',
-          display: 'none',
-          position: 'absolute',
-          bottom: toRem(-4),
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: toRem(INDICATOR_RADIUS * 2 + INDICATOR_HEIGHT),
-          height: toRem(INDICATOR_HEIGHT),
-          borderRadius: config.radii.R400,
-          background: 'CurrentColor',
-        },
       },
     },
   ],
@@ -61,11 +49,6 @@ export const BottomNavItem = recipe({
     active: {
       true: {
         color: color.Primary.Main,
-        selectors: {
-          '&::after': {
-            display: 'block',
-          },
-        },
       },
     },
   },
