@@ -27,7 +27,7 @@ import {
 import { MatrixClient, Room, RoomMember } from 'matrix-js-sdk';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import classNames from 'classnames';
-import { Page, PageContent, PageContentCenter, PageHeader } from '../../../components/page';
+import { Page, PageContent, PageContentCenter, PageHeader, PageMain } from '../../../components/page';
 import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';
 import { ContainerColor } from '../../../styles/ContainerColor.css';
@@ -465,8 +465,9 @@ export function ContactsPage() {
   const { room } = useContactsContext();
 
   return (
-    <Page>
-      <PageHeader balance>
+    <PageMain>
+      <Page>
+        <PageHeader balance>
         <Box grow="Yes" gap="200">
           <Box grow="Yes" basis="No">
             {screenSize === ScreenSize.Mobile && (
@@ -514,5 +515,6 @@ export function ContactsPage() {
         )}
       </Box>
     </Page>
+    </PageMain>
   );
 }

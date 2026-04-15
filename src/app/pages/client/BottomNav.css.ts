@@ -10,12 +10,12 @@ export const BottomNavContainer = style([
     justifyContent: 'space-evenly',
     gap: config.space.S100,
     padding: config.space.S100,
-    margin: `${config.space.S300} ${config.space.S200}`,
+    margin: `${config.space.S400} ${config.space.S300}`,
     borderRadius: config.radii.Pill,
     backgroundColor: color.Background.Container,
     color: color.Background.OnContainer,
     flexShrink: 0,
-    boxShadow: `0 ${toRem(2)} ${toRem(8)} rgba(0, 0, 0, 0.15)`,
+    boxShadow: config.shadow.E400,
   },
 ]);
 

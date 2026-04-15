@@ -30,6 +30,7 @@ import {
   PageHero,
   PageHeroEmpty,
   PageHeroSection,
+  PageMain,
 } from '../../../components/page';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { allInvitesAtom } from '../../../state/room-list/inviteList';
@@ -753,8 +754,9 @@ export function Invites() {
   };
 
   return (
-    <Page>
-      <PageHeader balance>
+    <PageMain>
+      <Page>
+        <PageHeader balance>
         <Box grow="Yes" gap="200">
           <Box grow="Yes" basis="No">
             {screenSize === ScreenSize.Mobile && (
@@ -827,5 +829,6 @@ export function Invites() {
         </Scroll>
       </Box>
     </Page>
+    </PageMain>
   );
 }

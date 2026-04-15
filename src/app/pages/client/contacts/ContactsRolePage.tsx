@@ -5,7 +5,7 @@ import { Room } from 'matrix-js-sdk';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useRoomMembers } from '../../../hooks/useRoomMembers';
 import { PowerLevelsContextProvider, usePowerLevels } from '../../../hooks/usePowerLevels';
-import { Page, PageContent, PageContentCenter, PageHeader } from '../../../components/page';
+import { Page, PageContent, PageContentCenter, PageHeader, PageMain } from '../../../components/page';
 import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';
 import { ContainerColor } from '../../../styles/ContainerColor.css';
@@ -34,8 +34,9 @@ export function ContactsRolePage() {
   const roleName = selectedRole ?? '';
 
   return (
-    <Page>
-      <PageHeader balance>
+    <PageMain>
+      <Page>
+        <PageHeader balance>
         <Box grow="Yes" gap="200">
           <Box grow="Yes" basis="No">
             {screenSize === ScreenSize.Mobile && (
@@ -83,5 +84,6 @@ export function ContactsRolePage() {
         )}
       </Box>
     </Page>
+    </PageMain>
   );
 }

@@ -18,6 +18,7 @@ import { CallView } from '../call/CallView';
 import { RoomViewHeader } from './RoomViewHeader';
 import { callChatAtom } from '../../state/callEmbed';
 import { CallChatView } from './CallChatView';
+import { PageMain } from '../../components/page';
 
 export function Room() {
   const { eventId } = useParams();
@@ -48,31 +49,32 @@ export function Room() {
   return (
     <PowerLevelsContextProvider value={powerLevels}>
       <Box grow="Yes">
-        {callView && (screenSize === ScreenSize.Desktop || !chat) && (
-          <Box grow="Yes" direction="Column">
-            <RoomViewHeader callView />
-            <Box grow="Yes">
-              <CallView />
+        <PageMain>
+          {callView && (screenSize === ScreenSize.Desktop || !chat) && (
+            <Box grow="Yes" direction="Column">
+              <RoomViewHeader callView />
+              <Box grow="Yes">
+                <CallView />
+              </Box>
             </Box>
-          </Box>
-        )}
-        {!callView && (
-          <Box grow="Yes" direction="Column">
-            <RoomViewHeader />
-            <Box grow="Yes">
-              <RoomView eventId={eventId} />
+          )}
+          {!callView && (
+            <Box grow="Yes" direction="Column">
+              <RoomViewHeader />
+              <Box grow="Yes">
+                <RoomView eventId={eventId} />
+              </Box>
             </Box>
-          </Box>
-        )}
-
-        {callView && chat && (
-          <>
-            {screenSize === ScreenSize.Desktop && (
-              <Line variant="Background" direction="Vertical" size="300" />
-            )}
-            <CallChatView />
-          </>
-        )}
+          )}
+          {callView && chat && (
+            <>
+              {screenSize === ScreenSize.Desktop && (
+                <Line variant="Background" direction="Vertical" size="300" />
+              )}
+              <CallChatView />
+            </>
+          )}
+        </PageMain>
         {!callView && screenSize === ScreenSize.Desktop && isDrawer && (
           <>
             <Line variant="Background" direction="Vertical" size="300" />

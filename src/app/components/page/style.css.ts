@@ -119,3 +119,20 @@ export const PageContentCenter = style([
     margin: 'auto',
   },
 ]);
+
+export const PageMainFloating = style({
+  // backgroundColor: color.Surface.Container,
+  // color: color.Surface.OnContainer,
+  // boxShadow: config.shadow.E200,
+  // border: `${config.borderWidth.B400} solid ${color.Surface.Container}`,
+  // borderRadius: config.radii.R500,
+  backgroundColor: '#FDFDFD',
+  color: color.Surface.OnContainer,
+  boxShadow: config.shadow.E300,
+  border: `1px solid ${color.Surface.Container}`,
+  // borderRadius: '12px',
+  borderRadius: config.radii.R500,
+  overflow: 'hidden',
+  margin: config.space.S400,
+  marginLeft: config.space.S0,
+});

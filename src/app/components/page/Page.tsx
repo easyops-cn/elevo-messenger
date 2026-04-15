@@ -1,5 +1,5 @@
 import React, { ComponentProps, MutableRefObject, ReactNode } from 'react';
-import { Box, Header, Line, Scroll, Text, as } from 'folds';
+import { Box, Header, Scroll, Text, as } from 'folds';
 import classNames from 'classnames';
 import { ContainerColor } from '../../styles/ContainerColor.css';
 import * as css from './style.css';
@@ -11,14 +11,9 @@ type PageRootProps = {
 };
 
 export function PageRoot({ nav, children }: PageRootProps) {
-  const screenSize = useScreenSizeContext();
-
   return (
     <Box grow="Yes" className={ContainerColor({ variant: 'Background' })}>
       {nav}
-      {screenSize !== ScreenSize.Mobile && (
-        <Line variant="Background" size="300" direction="Vertical" />
-      )}
       {children}
     </Box>
   );
@@ -49,7 +44,7 @@ export function PageNav({ stretch, size, children }: ClientDrawerLayoutProps & c
 export const PageNavHeader = as<'header', css.PageNavHeaderVariants>(
   ({ className, outlined, ...props }, ref) => (
     <Header
-      className={classNames(css.PageNavHeader({ outlined }), className)}
+      className={classNames(css.PageNavHeader({ outlined: false }), className)}
       variant="Background"
       size="600"
       {...props}
@@ -77,6 +72,20 @@ export function PageNavContent({
       >
         <div className={css.PageNavContent}>{children}</div>
       </Scroll>
+    </Box>
+  );
+}
+
+export function PageMain({ children }: { children: ReactNode }) {
+  const screenSize = useScreenSizeContext();
+
+  return (
+    <Box
+      grow="Yes"
+      direction="Column"
+      className={screenSize === ScreenSize.Desktop ? css.PageMainFloating : undefined}
+    >
+      {children}
     </Box>
   );
 }
