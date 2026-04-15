@@ -14,6 +14,7 @@ import { ScreenSizeProvider, useScreenSize } from '../hooks/useScreenSize';
 import { useCompositionEndTracking } from '../hooks/useComposingCheck';
 import { TitleBar } from '../components/titlebar/TitleBar';
 import { useTauriSettingsSync } from '../hooks/useTauriSettingsSync';
+import './App.css';
 
 const queryClient = new QueryClient();
 
