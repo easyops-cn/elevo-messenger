@@ -135,10 +135,11 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
 
   return (
     <PageRoot
+      variant="Surface"
       nav={
         screenSize === ScreenSize.Mobile && activePage !== undefined ? undefined : (
           <PageNav size="300">
-            <PageNavHeader outlined={false}>
+            <PageNavHeader modal>
               <Box grow="Yes" gap="200">
                 <Avatar size="200" radii="300">
                   <UserAvatar
@@ -153,7 +154,7 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
               </Box>
               <Box shrink="No">
                 {screenSize === ScreenSize.Mobile && (
-                  <IconButton onClick={requestClose} variant="Background">
+                  <IconButton onClick={requestClose} variant="Surface">
                     <Icon src={Icons.Cross} />
                   </IconButton>
                 )}
@@ -165,7 +166,7 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
                   {menuItems.map((item) => (
                     <MenuItem
                       key={item.nameKey}
-                      variant="Background"
+                      variant="Surface"
                       radii="400"
                       aria-pressed={activePage === item.page}
                       before={<Icon src={item.icon} size="100" filled={activePage === item.page} />}

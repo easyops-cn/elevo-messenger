@@ -28,9 +28,9 @@ export const lightTheme = createTheme(color, {
 
   Primary: {
     Main: '#007AFF',
-    MainHover: '#164FC0',
-    MainActive: '#144BB5',
-    MainLine: '#1346AA',
+    MainHover: '#007AFF',
+    MainActive: '#007AFF',
+    MainLine: '#007AFF',
     OnMain: '#FFFFFF',
     Container: '#E8EEFB',
     ContainerHover: '#DCE6F9',
@@ -125,9 +125,9 @@ export const silverTheme = createTheme(color, {
 
   Primary: {
     Main: '#007AFF',
-    MainHover: '#103E97',
-    MainActive: '#0F3B8F',
-    MainLine: '#0E3786',
+    MainHover: '#007AFF',
+    MainActive: '#007AFF',
+    MainLine: '#007AFF',
     OnMain: '#FFFFFF',
     Container: '#C4D0E9',
     ContainerHover: '#B8C7E5',
@@ -222,9 +222,9 @@ const darkThemeData = {
 
   Primary: {
     Main: '#0A84FF',
-    MainHover: '#B2AAE9',
-    MainActive: '#ADA3E8',
-    MainLine: '#A79DE6',
+    MainHover: '#0A84FF',
+    MainActive: '#0A84FF',
+    MainLine: '#0A84FF',
     OnMain: '#FFFFFF',
     Container: '#413C65',
     ContainerHover: '#494370',

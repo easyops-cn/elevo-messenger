@@ -42,9 +42,9 @@ export const PageNavHeader = recipe({
   },
 
   variants: {
-    outlined: {
+    modal: {
       true: {
-        borderBottomWidth: 1,
+        marginTop: config.space.S0,
       },
     },
     isDesktopMac: {
@@ -54,7 +54,7 @@ export const PageNavHeader = recipe({
     }
   },
   defaultVariants: {
-    outlined: true,
+    modal: false,
     isDesktopMac: false,
   },
 });
@@ -79,7 +79,7 @@ export const PageHeader = recipe({
     outlined: {
       true: {
         borderBottomWidth: config.borderWidth.B300,
-        boxShadow: elevoColor.shadow.Header,
+        // boxShadow: elevoColor.shadow.Header,
       },
     },
   },

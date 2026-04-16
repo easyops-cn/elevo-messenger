@@ -66,10 +66,10 @@ export function Room() {
               </Box>
             </Box>
           )}
-          {callView && chat && (
-            <CallChatView />
-          )}
         </PageMain>
+        {callView && chat && (
+          <CallChatView />
+        )}
         {!callView && screenSize === ScreenSize.Desktop && isDrawer && (
           <MembersDrawer key={room.roomId} room={room} members={members} />
         )}

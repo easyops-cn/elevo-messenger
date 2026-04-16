@@ -1,5 +1,5 @@
 import React, { ComponentProps, MutableRefObject, ReactNode } from 'react';
-import { Box, Header, Scroll, Text, as } from 'folds';
+import { Box, Header, Line, Scroll, Text, as } from 'folds';
 import classNames from 'classnames';
 import { ContainerColor } from '../../styles/ContainerColor.css';
 import * as css from './style.css';
@@ -10,12 +10,18 @@ import { isMacOS } from '../../utils/user-agent';
 type PageRootProps = {
   nav: ReactNode;
   children: ReactNode;
+  variant?: 'Background' | 'Surface';
 };
 
-export function PageRoot({ nav, children }: PageRootProps) {
+export function PageRoot({ nav, children, variant }: PageRootProps) {
+  const screenSize = useScreenSizeContext();
+
   return (
-    <Box grow="Yes" className={ContainerColor({ variant: 'Background' })}>
+    <Box grow="Yes" className={ContainerColor({ variant: variant ?? 'Background' })}>
       {nav}
+      {screenSize !== ScreenSize.Mobile && variant === 'Surface' && (
+        <Line variant="Background" size="300" direction="Vertical" />
+      )}
       {children}
     </Box>
   );
@@ -32,7 +38,7 @@ export function PageNav({ stretch, size, children }: ClientDrawerLayoutProps & c
   return (
     <Box
       grow={stretch ? "Yes" : undefined}
-      shrink={stretch ? "Yes" : undefined}
+      shrink={stretch ? "Yes" : "No"}
       className={css.PageNav({ size })}
       style={{ width: isMobile ? '100%' : undefined }}
     >
@@ -44,9 +50,9 @@ export function PageNav({ stretch, size, children }: ClientDrawerLayoutProps & c
 }
 
 export const PageNavHeader = as<'header', css.PageNavHeaderVariants>(
-  ({ className, outlined, ...props }, ref) => (
+  ({ className, modal, ...props }, ref) => (
     <Header
-      className={classNames(css.PageNavHeader({ outlined: false, isDesktopMac: isDesktopTauri && isMacOS() }), className)}
+      className={classNames(css.PageNavHeader({ modal, isDesktopMac: isDesktopTauri && isMacOS() }), className)}
       variant="Background"
       size="600"
       {...props}
