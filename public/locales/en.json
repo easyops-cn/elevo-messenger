@@ -982,13 +982,16 @@
     "doneDescription": "Your {{provider}} account has been linked"
   },
   "askUserQuestion": {
-    "title": "Questionnaire",
-    "answeredTitle": "Answers",
     "submitted": "Submitted",
+    "answeredTitle": "User answered the question",
+    "questionLabel": "Q: ",
+    "answerLabel": "A: ",
     "other": "Other",
     "otherPlaceholder": "Enter your answer...",
     "submit": "Submit",
-    "submitting": "Submitting..."
+    "submitting": "Submitting...",
+    "questionTab": "Q{{index}}/{{total}}",
+    "assignedTo": "This question should be answered by {{name}}"
   },
   "toolCall": {
     "inprogressDescription": "Running...",

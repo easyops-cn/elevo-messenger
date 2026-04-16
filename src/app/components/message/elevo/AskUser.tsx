@@ -1,10 +1,31 @@
 import React, { CSSProperties, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod/v4';
-import { Box, Chip, Icon, Icons, Text, color, config, toRem } from 'folds';
+import { Badge, Box, Icon, Icons, Text, config } from 'folds';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/types';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useRoom } from '../../../hooks/useRoom';
+import { CheckboxIcon } from '../../../icons/CheckboxIcon';
+import { RadioIcon } from '../../../icons/RadioIcon';
+import {
+  CardContainer,
+  CardHeader,
+  CardBody,
+  CardFooter,
+  QuestionTabsBar,
+  QuestionTab,
+  OptionItem,
+  OptionIcon,
+  SubmitButton,
+  OtherInput,
+  SubmittedIcon,
+  SubmittedText,
+  AssignedHint,
+  AnsweredItem,
+} from './AskUser.css';
+import { DisabledRadioIcon } from '../../../icons/DisabledRadioIcon';
+import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
+import { getMemberDisplayName } from '../../../utils/room';
 
 // Schemas & Types
 
@@ -39,115 +60,69 @@ type AskUserAnsweredData = z.infer<typeof AskUserAnsweredSchema>;
 
 // Parsers
 
-export function parseAskUserQuestion(content: Record<string, unknown>): AskUserQuestionData | undefined {
+export function parseAskUserQuestion(
+  content: Record<string, unknown>
+): AskUserQuestionData | undefined {
   const result = AskUserQuestionSchema.safeParse(content['vip.elevo.ask_user_question']);
   return result.success ? result.data : undefined;
 }
 
-export function parseAskUserAnswered(content: Record<string, unknown>): AskUserAnsweredData | undefined {
+export function parseAskUserAnswered(
+  content: Record<string, unknown>
+): AskUserAnsweredData | undefined {
   const result = AskUserAnsweredSchema.safeParse(content['vip.elevo.ask_user_answered']);
   return result.success ? result.data : undefined;
 }
 
-// Styles
+// Types
 
 type QuestionSelections = Record<number, string[]>;
 
-const cardContainerStyles: CSSProperties = {
-  backgroundColor: color.SurfaceVariant.Container,
-  border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
-  borderRadius: config.radii.R400,
-  maxWidth: toRem(600),
-  overflow: 'hidden',
-};
-
-const cardHeaderStyles: CSSProperties = {
-  padding: `${config.space.S200} ${config.space.S300}`,
-  display: 'flex',
-  alignItems: 'center',
-  gap: config.space.S200,
-  backgroundColor: color.SurfaceVariant.Container,
-  cursor: 'pointer',
-  transition: 'background-color 0.15s ease',
-  userSelect: 'none',
-};
-
-const questionBlockStyles: CSSProperties = {
-  padding: `${config.space.S200} ${config.space.S300}`,
-  borderTop: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
-};
-
-const optionItemBase: CSSProperties = {
-  padding: `${config.space.S100} ${config.space.S200}`,
-  borderRadius: config.radii.R300,
-  cursor: 'pointer',
-  border: `${config.borderWidth.B300} solid transparent`,
-  transition: 'background-color 0.15s ease, border-color 0.15s ease',
-  display: 'flex',
-  alignItems: 'center',
-  gap: config.space.S200,
-};
-
-const optionItemDisabled: CSSProperties = {
-  ...optionItemBase,
-  cursor: 'default',
-};
-
-const optionItemSelected: CSSProperties = {
-  ...optionItemBase,
-  backgroundColor: color.Primary.Container,
-  borderColor: color.Primary.Main,
-};
-
 // Components
 
-export function AskUserAnsweredCard({ data, style }: { data: AskUserAnsweredData; style?: CSSProperties }) {
+export function AskUserAnsweredCard({
+  data,
+  style,
+}: {
+  data: AskUserAnsweredData;
+  style?: CSSProperties;
+}) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(true);
 
   return (
     <Box style={style} direction="Column" gap="100">
-      <div
-        style={cardHeaderStyles}
-        onClick={() => setExpanded((v) => !v)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setExpanded((v) => !v);
-          }
-        }}
-        role="button"
-        tabIndex={0}
-      >
-        <Icon src={Icons.Check} size="300" style={{ color: color.Success.Main }} />
-        <Text size="T300" priority="400">
-          {t('askUserQuestion.answeredTitle')}
-        </Text>
-        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="200" />
-      </div>
-      {expanded && (
-        <div style={cardContainerStyles}>
+      <div className={CardContainer}>
+        <div className={CardHeader}>
+          <Text size="T300" priority="400" style={{ fontWeight: 600 }}>
+            {t('askUserQuestion.answeredTitle')}
+          </Text>
+        </div>
+        <div className={CardBody}>
           {Object.entries(data.answers).map(([question, answers]) => (
-            <div key={question} style={questionBlockStyles}>
-              <Text size="T300" priority="400" style={{ marginBottom: config.space.S100 }}>
+            <div key={question} className={AnsweredItem}>
+              <Text size="T300" priority="400">
+                {t('askUserQuestion.questionLabel')}
                 {question}
               </Text>
-              <Box direction="Column" gap="100">
-                {answers.map((answer) => (
-                  <Chip key={answer} variant="Surface" outlined radii="Pill">
-                    <Text size="T200">{answer}</Text>
-                  </Chip>
-                ))}
-              </Box>
+              <Text size="T300" priority="300" style={{ marginTop: config.space.S100 }}>
+                {t('askUserQuestion.answerLabel')}
+                {answers.join(', ')}
+              </Text>
             </div>
           ))}
         </div>
-      )}
+      </div>
     </Box>
   );
 }
 
-export function AskUserQuestionCard({ data, style }: { data: AskUserQuestionData; style?: CSSProperties }) {
+export function AskUserQuestionCard({
+  data,
+  style,
+}: {
+  data: AskUserQuestionData;
+  style?: CSSProperties;
+}) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const room = useRoom();
@@ -156,14 +131,19 @@ export function AskUserQuestionCard({ data, style }: { data: AskUserQuestionData
   const [selections, setSelections] = useState<QuestionSelections>({});
   const [otherTexts, setOtherTexts] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
-  const [expanded, setExpanded] = useState(true);
+  const [activeTab, setActiveTab] = useState(0);
+
+  const isAssignedUser = !data.userId || mx.getUserId() === data.userId;
+  const assignedDisplayName = data.userId
+    ? getMemberDisplayName(room, data.userId) ?? data.userId
+    : undefined;
 
   const canSubmit = useMemo(() => {
     if (submitted) return false;
     for (let i = 0; i < data.questions.length; i += 1) {
       const sel = selections[i] ?? [];
       if (sel.length === 0) return false;
-      if (sel.some((s) => s === 'Other:') && !(otherTexts[String(i)]?.trim())) return false;
+      if (sel.some((s) => s === 'Other:') && !otherTexts[String(i)]?.trim()) return false;
     }
     return true;
   }, [data.questions.length, selections, otherTexts, submitted]);
@@ -196,7 +176,7 @@ export function AskUserQuestionCard({ data, style }: { data: AskUserQuestionData
         return { ...prev, [qIndex]: [...current, label] };
       });
     },
-    [data.questions, submitted],
+    [data.questions, submitted]
   );
 
   const handleSubmit = useCallback(async () => {
@@ -218,7 +198,10 @@ export function AskUserQuestionCard({ data, style }: { data: AskUserQuestionData
       await mx.sendMessage(room.roomId, {
         msgtype: 'm.text',
         body: bodyLines.join('\n'),
-        'vip.elevo.ask_user_question_answers': answers,
+        'vip.elevo.ask_user_question_answers': {
+          questionId: data.questionId,
+          answers,
+        },
       } as unknown as RoomMessageEventContent);
       setSubmitted(true);
     } catch (err) {
@@ -227,171 +210,179 @@ export function AskUserQuestionCard({ data, style }: { data: AskUserQuestionData
     } finally {
       setSubmitting(false);
     }
-  }, [submitting, canSubmit, data.questions, selections, otherTexts, mx, room.roomId]);
+  }, [submitting, canSubmit, data, selections, otherTexts, mx, room.roomId]);
 
-  const optionStyle = (isSelected: boolean): CSSProperties =>
-    submitted ? optionItemDisabled : isSelected ? optionItemSelected : optionItemBase;
+  const currentQuestion = data.questions[activeTab];
+  const currentSel = selections[activeTab] ?? [];
+  const hasOtherSelected = currentSel.includes('Other:');
 
   return (
-    <Box style={style} direction="Column" gap="100">
-      <div
-        style={{
-          ...cardHeaderStyles,
-          borderBottom: submitted
-            ? `${config.borderWidth.B300} solid ${color.Success.Main}`
-            : `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
-        }}
-        onClick={() => setExpanded((v) => !v)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setExpanded((v) => !v);
-          }
-        }}
-        role="button"
-        tabIndex={0}
-      >
-        <Icon
-          src={Icons.Message}
-          size="300"
-          style={{ color: submitted ? color.Success.Main : color.Secondary.Main }}
-        />
-        <Text size="T300" priority="400">
-          {t('askUserQuestion.title')}
-        </Text>
-        {submitted && (
-          <Icon src={Icons.Check} size="200" style={{ color: color.Success.Main }} />
-        )}
-        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="200" />
-      </div>
-      {expanded && (
-        <div style={cardContainerStyles}>
-          {data.questions.map((q, qIndex) => {
-            const currentSel = selections[qIndex] ?? [];
-            const hasOtherSelected = currentSel.includes('Other:');
-
-            return (
-              <div key={q.question} style={questionBlockStyles}>
-                {q.header && (
-                  <Text size="T200" priority="300" style={{ marginBottom: config.space.S100 }}>
-                    {q.header}
-                  </Text>
-                )}
-                <Text size="T300" priority="400" style={{ marginBottom: config.space.S200 }}>
-                  {q.question}
-                </Text>
-                <Box direction="Column" gap="100">
-                  {q.options.map((opt) => {
-                    const isSelected = currentSel.includes(opt.label);
-                    return (
-                      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-                      <div
-                        key={opt.label}
-                        style={optionStyle(isSelected)}
-                        onClick={() => handleOptionToggle(qIndex, opt.label, false)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') {
-                            e.preventDefault();
-                            handleOptionToggle(qIndex, opt.label, false);
-                          }
-                        }}
-                        role={q.multiSelect ? 'checkbox' : 'radio'}
-                        aria-checked={isSelected}
-                        tabIndex={submitted ? -1 : 0}
-                      >
-                        <Icon
-                          src={isSelected ? Icons.Check : q.multiSelect ? Icons.Plus : Icons.PlusCircle}
-                          size="200"
-                          style={{ color: isSelected ? color.Primary.Main : undefined, flexShrink: 0 }}
-                        />
-                        <Box grow="Yes" direction="Column" gap="0">
-                          <Text size="T200" priority="400">
-                            {opt.label}
-                          </Text>
-                          {opt.description && (
-                            <Text size="T200" priority="300">
-                              {opt.description}
-                            </Text>
-                          )}
-                        </Box>
-                      </div>
-                    );
+    <Box style={style} direction="Column" gap="0">
+      <div className={CardContainer}>
+        <div className={QuestionTabsBar}>
+          {data.questions.map((q, qIndex) => (
+            <Badge
+              key={q.question}
+              className={QuestionTab}
+              as="button"
+              variant="Primary"
+              fill={activeTab === qIndex ? 'Solid' : 'None'}
+              size="500"
+              onClick={() => setActiveTab(qIndex)}
+            >
+              <Text as="span" size="L400">
+                {q.header ||
+                  t('askUserQuestion.questionTab', {
+                    index: qIndex + 1,
+                    total: data.questions.length,
                   })}
-                  <div style={optionStyle(hasOtherSelected)}>
-                    <Icon
-                      src={hasOtherSelected ? Icons.Check : q.multiSelect ? Icons.Plus : Icons.PlusCircle}
-                      size="200"
-                      style={{ color: hasOtherSelected ? color.Primary.Main : undefined, flexShrink: 0 }}
-                    />
-                    <Box grow="Yes" direction="Column" gap="100">
-                      <Text
-                        size="T200"
-                        priority="400"
-                        style={{ cursor: submitted ? 'default' : 'pointer' }}
-                        onClick={() => handleOptionToggle(qIndex, 'Other:', true)}
-                      >
-                        {t('askUserQuestion.other')}
+              </Text>
+            </Badge>
+          ))}
+        </div>
+        <div className={CardBody}>
+          <Text size="T300" priority="400" style={{ marginBottom: config.space.S200 }}>
+            {currentQuestion.question}
+          </Text>
+          <Box direction="Column" gap="100">
+            {currentQuestion.options.map((opt) => {
+              const isSelected = currentSel.includes(opt.label);
+              return (
+                // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+                <div
+                  key={opt.label}
+                  className={OptionItem({
+                    selected: isAssignedUser && !submitted && isSelected,
+                    disabled: !isAssignedUser || submitted,
+                  })}
+                  onClick={() => handleOptionToggle(activeTab, opt.label, false)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      handleOptionToggle(activeTab, opt.label, false);
+                    }
+                  }}
+                  role={currentQuestion.multiSelect ? 'checkbox' : 'radio'}
+                  aria-checked={isSelected}
+                  tabIndex={isAssignedUser && !submitted ? 0 : -1}
+                >
+                  <Icon
+                    src={
+                      currentQuestion.multiSelect
+                        ? !isAssignedUser || submitted
+                          ? DisabledCheckboxIcon
+                          : CheckboxIcon
+                        : !isAssignedUser || submitted
+                        ? DisabledRadioIcon
+                        : RadioIcon
+                    }
+                    filled={isSelected}
+                    size="50"
+                    className={OptionIcon}
+                  />
+                  <Box grow="Yes" direction="Column" gap="0">
+                    <Text size="T300" priority="400">
+                      {opt.label}
+                    </Text>
+                    {opt.description && (
+                      <Text size="T300" priority="300">
+                        {opt.description}
                       </Text>
-                      {hasOtherSelected && (
-                        <input
-                          type="text"
-                          value={otherTexts[String(qIndex)] ?? ''}
-                          onChange={(e) => setOtherTexts((prev) => ({ ...prev, [String(qIndex)]: e.target.value }))}
-                          placeholder={t('askUserQuestion.otherPlaceholder')}
-                          disabled={submitted}
-                          style={{
-                            width: '100%',
-                            padding: config.space.S100,
-                            border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
-                            borderRadius: config.radii.R300,
-                            backgroundColor: color.SurfaceVariant.Container,
-                            color: 'inherit',
-                            fontSize: 'inherit',
-                            fontFamily: 'inherit',
-                            outline: 'none',
-                            boxSizing: 'border-box',
-                          }}
-                        />
-                      )}
-                    </Box>
-                  </div>
-                </Box>
-              </div>
-            );
-          })}
-          <div
-            style={{
-              padding: `${config.space.S200} ${config.space.S300}`,
-              borderTop: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
-              display: 'flex',
-              alignItems: 'center',
-              gap: config.space.S200,
-            }}
-          >
-            {submitted ? (
-              <>
-                <Icon src={Icons.Check} size="200" style={{ color: color.Success.Main }} />
-                <Text size="T200" priority="300" style={{ color: color.Success.Main }}>
-                  {t('askUserQuestion.submitted')}
+                    )}
+                  </Box>
+                </div>
+              );
+            })}
+            {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+            <div
+              className={OptionItem({
+                selected: isAssignedUser && !submitted && hasOtherSelected,
+                disabled: !isAssignedUser || submitted,
+              })}
+              onClick={() => handleOptionToggle(activeTab, 'Other:', true)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  handleOptionToggle(activeTab, 'Other:', true);
+                }
+              }}
+              role={currentQuestion.multiSelect ? 'checkbox' : 'radio'}
+              aria-checked={hasOtherSelected}
+              tabIndex={isAssignedUser && !submitted ? 0 : -1}
+            >
+              <Icon
+                src={
+                  currentQuestion.multiSelect
+                    ? !isAssignedUser || submitted
+                      ? DisabledCheckboxIcon
+                      : CheckboxIcon
+                    : !isAssignedUser || submitted
+                    ? DisabledRadioIcon
+                    : RadioIcon
+                }
+                filled={hasOtherSelected}
+                size="50"
+                className={OptionIcon}
+              />
+              <Box grow="Yes" direction="Column" gap="100">
+                <Text size="T300" priority="400">
+                  {t('askUserQuestion.other')}
                 </Text>
-              </>
-            ) : (
-              <Chip
-                as="button"
-                variant="Primary"
-                size="400"
-                radii="300"
-                disabled={!canSubmit || submitting}
+                {hasOtherSelected && (
+                  <input
+                    type="text"
+                    value={otherTexts[String(activeTab)] ?? ''}
+                    onChange={(e) =>
+                      setOtherTexts((prev) => ({ ...prev, [String(activeTab)]: e.target.value }))
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.stopPropagation();
+                      }
+                    }}
+                    placeholder={t('askUserQuestion.otherPlaceholder')}
+                    disabled={!isAssignedUser || submitted}
+                    className={OtherInput}
+                    // eslint-disable-next-line jsx-a11y/no-autofocus
+                    autoFocus
+                  />
+                )}
+              </Box>
+            </div>
+          </Box>
+        </div>
+        <div
+          className={CardFooter}
+          style={{ display: 'flex', alignItems: 'center', gap: config.space.S200 }}
+        >
+          {submitted ? (
+            <>
+              <Icon src={Icons.Check} size="200" className={SubmittedIcon} />
+              <Text size="T300" priority="300" className={SubmittedText}>
+                {t('askUserQuestion.submitted')}
+              </Text>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                className={SubmitButton({
+                  disabled: !canSubmit || submitting || !isAssignedUser,
+                })}
+                disabled={!canSubmit || submitting || !isAssignedUser}
                 onClick={handleSubmit}
               >
-                <Text size="B300">
-                  {submitting ? t('askUserQuestion.submitting') : t('askUserQuestion.submit')}
+                {submitting ? t('askUserQuestion.submitting') : t('askUserQuestion.submit')}
+              </button>
+              {!isAssignedUser && assignedDisplayName && (
+                <Text size="T200" priority="300" className={AssignedHint}>
+                  {t('askUserQuestion.assignedTo', { name: assignedDisplayName })}
                 </Text>
-              </Chip>
-            )}
-          </div>
+              )}
+            </>
+          )}
         </div>
-      )}
+      </div>
     </Box>
   );
 }
