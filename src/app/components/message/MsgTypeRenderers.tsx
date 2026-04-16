@@ -6,7 +6,12 @@ import { IContent } from 'matrix-js-sdk';
 import { invoke } from '@tauri-apps/api/core';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { AskUserQuestionCard, AskUserAnsweredCard, parseAskUserQuestion, parseAskUserAnswered } from './elevo/AskUser';
+import {
+  AskUserQuestionCard,
+  QuestionAnsweredCard,
+  parseAskUserQuestion,
+  parseQuestionAnswered,
+} from './elevo/AskUser';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import { trimReplyFromBody } from '../../utils/room';
 import { MessageTextBody } from './layout';
@@ -178,14 +183,22 @@ function ToolCallCard({ data, style }: ToolCallCardProps) {
       </div>
       {expanded && (
         <div style={toolCallBodyStyles}>
-          <Text size="T200" priority="300" style={{ fontWeight: 500, marginBottom: config.space.S100 }}>
+          <Text
+            size="T200"
+            priority="300"
+            style={{ fontWeight: 500, marginBottom: config.space.S100 }}
+          >
             Input
           </Text>
           <pre style={preStyles}>{formatValue(data.input)}</pre>
           {data.output !== undefined && (
             <>
               <div style={dividerStyles} />
-              <Text size="T200" priority="300" style={{ fontWeight: 500, marginBottom: config.space.S100 }}>
+              <Text
+                size="T200"
+                priority="300"
+                style={{ fontWeight: 500, marginBottom: config.space.S100 }}
+              >
                 Output
               </Text>
               <pre style={preStyles}>{formatValue(data.output)}</pre>
@@ -244,11 +257,13 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
 
     const handleOidcClick = () => {
       if (isDesktopTauri && oidcLogin.url) {
-        invoke('open_oauth_window', { authUrl: oidcLogin.url, label: 'oauth-elevo-bridge' }).catch((err) => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to open OAuth window, falling back to browser:', err);
-          window.open(oidcLogin.url, '_blank', 'noopener,noreferrer');
-        });
+        invoke('open_oauth_window', { authUrl: oidcLogin.url, label: 'oauth-elevo-bridge' }).catch(
+          (err) => {
+            // eslint-disable-next-line no-console
+            console.error('Failed to open OAuth window, falling back to browser:', err);
+            window.open(oidcLogin.url, '_blank', 'noopener,noreferrer');
+          }
+        );
       }
     };
 
@@ -294,9 +309,9 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
     return <AskUserQuestionCard data={askUserQuestion} style={style} />;
   }
 
-  const askUserAnswered = parseAskUserAnswered(content);
-  if (askUserAnswered) {
-    return <AskUserAnsweredCard data={askUserAnswered} style={style} />;
+  const questionAnswered = parseQuestionAnswered(content);
+  if (questionAnswered) {
+    return <QuestionAnsweredCard data={questionAnswered} style={style} />;
   }
 
   const toolCall = parseToolCall(content);

@@ -26,6 +26,7 @@ import {
 import { DisabledRadioIcon } from '../../../icons/DisabledRadioIcon';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { getMemberDisplayName } from '../../../utils/room';
+import { getMxIdLocalPart } from '../../../utils/matrix';
 
 // Schemas & Types
 
@@ -43,20 +44,18 @@ const AskUserQuestionItemSchema = z.object({
 
 const AskUserQuestionSchema = z.object({
   userId: z.string().optional(),
-  questionId: z.string(),
-  sessionId: z.string(),
+  question_id: z.string(),
   questions: z.array(AskUserQuestionItemSchema).min(1),
 });
 
 type AskUserQuestionData = z.infer<typeof AskUserQuestionSchema>;
 
-const AskUserAnsweredSchema = z.object({
-  questionId: z.string(),
-  sessionId: z.string(),
+const QuestionAnsweredSchema = z.object({
+  question_id: z.string(),
   answers: z.record(z.string(), z.array(z.string())),
 });
 
-type AskUserAnsweredData = z.infer<typeof AskUserAnsweredSchema>;
+type QuestionAnsweredData = z.infer<typeof QuestionAnsweredSchema>;
 
 // Parsers
 
@@ -67,10 +66,10 @@ export function parseAskUserQuestion(
   return result.success ? result.data : undefined;
 }
 
-export function parseAskUserAnswered(
+export function parseQuestionAnswered(
   content: Record<string, unknown>
-): AskUserAnsweredData | undefined {
-  const result = AskUserAnsweredSchema.safeParse(content['vip.elevo.ask_user_answered']);
+): QuestionAnsweredData | undefined {
+  const result = QuestionAnsweredSchema.safeParse(content['vip.elevo.question_answered']);
   return result.success ? result.data : undefined;
 }
 
@@ -80,11 +79,11 @@ type QuestionSelections = Record<number, string[]>;
 
 // Components
 
-export function AskUserAnsweredCard({
+export function QuestionAnsweredCard({
   data,
   style,
 }: {
-  data: AskUserAnsweredData;
+  data: QuestionAnsweredData;
   style?: CSSProperties;
 }) {
   const { t } = useTranslation();
@@ -135,7 +134,7 @@ export function AskUserQuestionCard({
 
   const isAssignedUser = !data.userId || mx.getUserId() === data.userId;
   const assignedDisplayName = data.userId
-    ? getMemberDisplayName(room, data.userId) ?? data.userId
+    ? getMemberDisplayName(room, data.userId) ?? getMxIdLocalPart(data.userId) ?? data.userId
     : undefined;
 
   const canSubmit = useMemo(() => {
@@ -199,7 +198,7 @@ export function AskUserQuestionCard({
         msgtype: 'm.text',
         body: bodyLines.join('\n'),
         'vip.elevo.ask_user_question_answers': {
-          questionId: data.questionId,
+          question_id: data.question_id,
           answers,
         },
       } as unknown as RoomMessageEventContent);
