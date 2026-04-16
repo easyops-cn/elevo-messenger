@@ -759,7 +759,8 @@
     "unableDecrypt": "Unable to decrypt",
     "notDecrypted": "Message not decrypted",
     "broken": "Broken message",
-    "empty": "Empty message"
+    "empty": "Empty message",
+    "thinking": "Thinking"
   },
   "search": {
     "sortBy": "Sort by",
@@ -980,6 +981,18 @@
     "title": "Login to {{provider}}",
     "description": "Click here to log in to your {{provider}} account to continue",
     "doneDescription": "Your {{provider}} account has been linked"
+  },
+  "askUserQuestion": {
+    "submitted": "Submitted",
+    "answeredTitle": "User answered the question",
+    "questionLabel": "Q: ",
+    "answerLabel": "A: ",
+    "other": "Other",
+    "otherPlaceholder": "Enter your answer...",
+    "submit": "Submit answers",
+    "submitting": "Submitting...",
+    "questionTab": "Q{{index}}/{{total}}",
+    "assignedTo": "This question should be answered by {{name}}"
   },
   "toolCall": {
     "inprogressDescription": "Running...",

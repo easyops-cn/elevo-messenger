@@ -6,6 +6,12 @@ import { IContent } from 'matrix-js-sdk';
 import { invoke } from '@tauri-apps/api/core';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
+import {
+  AskUserQuestionCard,
+  QuestionAnsweredCard,
+  parseAskUserQuestion,
+  parseQuestionAnswered,
+} from './elevo/AskUser';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import { trimReplyFromBody } from '../../utils/room';
 import { MessageTextBody } from './layout';
@@ -177,14 +183,22 @@ function ToolCallCard({ data, style }: ToolCallCardProps) {
       </div>
       {expanded && (
         <div style={toolCallBodyStyles}>
-          <Text size="T200" priority="300" style={{ fontWeight: 500, marginBottom: config.space.S100 }}>
+          <Text
+            size="T200"
+            priority="300"
+            style={{ fontWeight: 500, marginBottom: config.space.S100 }}
+          >
             Input
           </Text>
           <pre style={preStyles}>{formatValue(data.input)}</pre>
           {data.output !== undefined && (
             <>
               <div style={dividerStyles} />
-              <Text size="T200" priority="300" style={{ fontWeight: 500, marginBottom: config.space.S100 }}>
+              <Text
+                size="T200"
+                priority="300"
+                style={{ fontWeight: 500, marginBottom: config.space.S100 }}
+              >
                 Output
               </Text>
               <pre style={preStyles}>{formatValue(data.output)}</pre>
@@ -192,6 +206,42 @@ function ToolCallCard({ data, style }: ToolCallCardProps) {
           )}
         </div>
       )}
+    </Box>
+  );
+}
+
+type ReasoningCardProps = { style?: CSSProperties; children: ReactNode };
+function ReasoningCard({ style, children }: ReasoningCardProps) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(true);
+
+  return (
+    <Box
+      style={{ ...style, opacity: 0.7, fontSize: config.fontSize.B400 }}
+      direction="Column"
+      gap="100"
+    >
+      <div
+        style={{
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: config.space.S100,
+        }}
+        onClick={() => setExpanded((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setExpanded((v) => !v);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+      >
+        <Text priority="300">{t('message.thinking')}</Text>
+        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="200" />
+      </div>
+      {expanded && children}
     </Box>
   );
 }
@@ -243,11 +293,13 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
 
     const handleOidcClick = () => {
       if (isDesktopTauri && oidcLogin.url) {
-        invoke('open_oauth_window', { authUrl: oidcLogin.url, label: 'oauth-elevo-bridge' }).catch((err) => {
-          // eslint-disable-next-line no-console
-          console.error('Failed to open OAuth window, falling back to browser:', err);
-          window.open(oidcLogin.url, '_blank', 'noopener,noreferrer');
-        });
+        invoke('open_oauth_window', { authUrl: oidcLogin.url, label: 'oauth-elevo-bridge' }).catch(
+          (err) => {
+            // eslint-disable-next-line no-console
+            console.error('Failed to open OAuth window, falling back to browser:', err);
+            window.open(oidcLogin.url, '_blank', 'noopener,noreferrer');
+          }
+        );
       }
     };
 
@@ -288,9 +340,37 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
     return <Box style={style}>{renderOidcCard()}</Box>;
   }
 
+  const askUserQuestion = parseAskUserQuestion(content);
+  if (askUserQuestion) {
+    return <AskUserQuestionCard data={askUserQuestion} style={style} />;
+  }
+
+  const questionAnswered = parseQuestionAnswered(content);
+  if (questionAnswered) {
+    return <QuestionAnsweredCard data={questionAnswered} style={style} />;
+  }
+
   const toolCall = parseToolCall(content);
   if (toolCall) {
     return <ToolCallCard data={toolCall} style={style} />;
+  }
+
+  if (content['vip.elevo.reasoning'] === true) {
+    const trimmedBody = trimReplyFromBody(body);
+    return (
+      <ReasoningCard style={style}>
+        <MessageTextBody
+          preWrap={typeof customBody !== 'string'}
+          jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
+        >
+          {renderBody({
+            body: trimmedBody,
+            customBody: typeof customBody === 'string' ? customBody : undefined,
+          })}
+          {edited && <MessageEditedContent />}
+        </MessageTextBody>
+      </ReasoningCard>
+    );
   }
 
   const trimmedBody = trimReplyFromBody(body);

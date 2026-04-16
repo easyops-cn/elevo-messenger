@@ -98,6 +98,7 @@ import {
 } from '../../../hooks/useMemberPowerTag';
 import { useRoomCreatorsTag } from '../../../hooks/useRoomCreatorsTag';
 import { useRoomCreators } from '../../../hooks/useRoomCreators';
+import { RoomProvider } from '../../../hooks/useRoom';
 
 type RoomNotificationsGroup = {
   roomId: string;
@@ -410,144 +411,146 @@ function RoomNotificationsGroupComp({
   };
 
   return (
-    <Box direction="Column" gap="200">
-      <Header size="300">
-        <Box gap="200" grow="Yes">
-          <Avatar size="200" radii="300">
-            <RoomAvatar
-              roomId={room.roomId}
-              src={getRoomAvatarUrl(mx, room, 96, useAuthentication)}
-              alt={room.name}
-              renderFallback={() => (
-                <RoomIcon
-                  size="50"
-                  roomType={room.getType()}
-                  joinRule={room.getJoinRule() ?? JoinRule.Restricted}
-                  filled
-                />
-              )}
-            />
-          </Avatar>
-          <Text size="H4" truncate>
-            {room.name}
-          </Text>
-        </Box>
-        <Box shrink="No">
-          {unread && (
-            <Chip
-              variant="Primary"
-              radii="Pill"
-              onClick={handleMarkAsRead}
-              before={<Icon size="100" src={Icons.CheckTwice} />}
-            >
-              <Text size="T200">{t('notifications.markAsRead')}</Text>
-            </Chip>
-          )}
-        </Box>
-      </Header>
-      <Box direction="Column" gap="100">
-        {notifications.map((notification) => {
-          const { event } = notification;
-
-          const displayName =
-            getMemberDisplayName(room, event.sender) ??
-            getMxIdLocalPart(event.sender) ??
-            event.sender;
-          const senderAvatarMxc = getMemberAvatarMxc(room, event.sender);
-          const getContent = (() => event.content) as GetContentCallback;
-
-          const relation = event.content['m.relates_to'];
-          const replyEventId = relation?.['m.in_reply_to']?.event_id;
-          const threadRootId =
-            relation?.rel_type === RelationType.Thread ? relation.event_id : undefined;
-
-          const memberPowerTag = getMemberPowerTag(event.sender);
-          const tagColor = memberPowerTag?.color
-            ? accessibleTagColors?.get(memberPowerTag.color)
-            : undefined;
-          const tagIconSrc = memberPowerTag?.icon
-            ? getPowerTagIconSrc(mx, useAuthentication, memberPowerTag.icon)
-            : undefined;
-
-          const usernameColor = legacyUsernameColor ? colorMXID(event.sender) : tagColor;
-
-          return (
-            <SequenceCard
-              key={notification.event.event_id}
-              style={{ padding: config.space.S400 }}
-              variant="SurfaceVariant"
-              direction="Column"
-            >
-              <ModernLayout
-                before={
-                  <AvatarBase>
-                    <Avatar size="300">
-                      <UserAvatar
-                        userId={event.sender}
-                        src={
-                          senderAvatarMxc
-                            ? mxcUrlToHttp(
-                                mx,
-                                senderAvatarMxc,
-                                useAuthentication,
-                                48,
-                                48,
-                                'crop'
-                              ) ?? undefined
-                            : undefined
-                        }
-                        alt={displayName}
-                        renderFallback={() => <Icon size="200" src={Icons.User} filled />}
-                      />
-                    </Avatar>
-                  </AvatarBase>
-                }
-              >
-                <Box gap="300" justifyContent="SpaceBetween" alignItems="Center" grow="Yes">
-                  <Box gap="200" alignItems="Baseline">
-                    <Box alignItems="Center" gap="200">
-                      <Username style={{ color: usernameColor }}>
-                        <Text as="span" truncate>
-                          <UsernameBold>{displayName}</UsernameBold>
-                        </Text>
-                      </Username>
-                      {tagIconSrc && <PowerIcon size="100" iconSrc={tagIconSrc} />}
-                    </Box>
-                    <Time
-                      ts={event.origin_server_ts}
-                      hour24Clock={hour24Clock}
-                      dateFormatString={dateFormatString}
-                    />
-                  </Box>
-                  <Box shrink="No" gap="200" alignItems="Center">
-                    <Chip
-                      data-event-id={event.event_id}
-                      onClick={handleOpenClick}
-                      variant="Secondary"
-                      radii="400"
-                    >
-                      <Text size="T200">{t('common.open')}</Text>
-                    </Chip>
-                  </Box>
-                </Box>
-                {replyEventId && (
-                  <Reply
-                    room={room}
-                    replyEventId={replyEventId}
-                    threadRootId={threadRootId}
-                    onClick={handleOpenClick}
-                    getMemberPowerTag={getMemberPowerTag}
-                    accessibleTagColors={accessibleTagColors}
-                    legacyUsernameColor={legacyUsernameColor}
+    <RoomProvider value={room}>
+      <Box direction="Column" gap="200">
+        <Header size="300">
+          <Box gap="200" grow="Yes">
+            <Avatar size="200" radii="300">
+              <RoomAvatar
+                roomId={room.roomId}
+                src={getRoomAvatarUrl(mx, room, 96, useAuthentication)}
+                alt={room.name}
+                renderFallback={() => (
+                  <RoomIcon
+                    size="50"
+                    roomType={room.getType()}
+                    joinRule={room.getJoinRule() ?? JoinRule.Restricted}
+                    filled
                   />
                 )}
-                {renderMatrixEvent(event.type, false, event, displayName, getContent)}
-              </ModernLayout>
-            </SequenceCard>
-          );
-        })}
+              />
+            </Avatar>
+            <Text size="H4" truncate>
+              {room.name}
+            </Text>
+          </Box>
+          <Box shrink="No">
+            {unread && (
+              <Chip
+                variant="Primary"
+                radii="Pill"
+                onClick={handleMarkAsRead}
+                before={<Icon size="100" src={Icons.CheckTwice} />}
+              >
+                <Text size="T200">{t('notifications.markAsRead')}</Text>
+              </Chip>
+            )}
+          </Box>
+        </Header>
+        <Box direction="Column" gap="100">
+          {notifications.map((notification) => {
+            const { event } = notification;
+
+            const displayName =
+              getMemberDisplayName(room, event.sender) ??
+              getMxIdLocalPart(event.sender) ??
+              event.sender;
+            const senderAvatarMxc = getMemberAvatarMxc(room, event.sender);
+            const getContent = (() => event.content) as GetContentCallback;
+
+            const relation = event.content['m.relates_to'];
+            const replyEventId = relation?.['m.in_reply_to']?.event_id;
+            const threadRootId =
+              relation?.rel_type === RelationType.Thread ? relation.event_id : undefined;
+
+            const memberPowerTag = getMemberPowerTag(event.sender);
+            const tagColor = memberPowerTag?.color
+              ? accessibleTagColors?.get(memberPowerTag.color)
+              : undefined;
+            const tagIconSrc = memberPowerTag?.icon
+              ? getPowerTagIconSrc(mx, useAuthentication, memberPowerTag.icon)
+              : undefined;
+
+            const usernameColor = legacyUsernameColor ? colorMXID(event.sender) : tagColor;
+
+            return (
+              <SequenceCard
+                key={notification.event.event_id}
+                style={{ padding: config.space.S400 }}
+                variant="SurfaceVariant"
+                direction="Column"
+              >
+                <ModernLayout
+                  before={
+                    <AvatarBase>
+                      <Avatar size="300">
+                        <UserAvatar
+                          userId={event.sender}
+                          src={
+                            senderAvatarMxc
+                              ? mxcUrlToHttp(
+                                  mx,
+                                  senderAvatarMxc,
+                                  useAuthentication,
+                                  48,
+                                  48,
+                                  'crop'
+                                ) ?? undefined
+                              : undefined
+                          }
+                          alt={displayName}
+                          renderFallback={() => <Icon size="200" src={Icons.User} filled />}
+                        />
+                      </Avatar>
+                    </AvatarBase>
+                  }
+                >
+                  <Box gap="300" justifyContent="SpaceBetween" alignItems="Center" grow="Yes">
+                    <Box gap="200" alignItems="Baseline">
+                      <Box alignItems="Center" gap="200">
+                        <Username style={{ color: usernameColor }}>
+                          <Text as="span" truncate>
+                            <UsernameBold>{displayName}</UsernameBold>
+                          </Text>
+                        </Username>
+                        {tagIconSrc && <PowerIcon size="100" iconSrc={tagIconSrc} />}
+                      </Box>
+                      <Time
+                        ts={event.origin_server_ts}
+                        hour24Clock={hour24Clock}
+                        dateFormatString={dateFormatString}
+                      />
+                    </Box>
+                    <Box shrink="No" gap="200" alignItems="Center">
+                      <Chip
+                        data-event-id={event.event_id}
+                        onClick={handleOpenClick}
+                        variant="Secondary"
+                        radii="400"
+                      >
+                        <Text size="T200">{t('common.open')}</Text>
+                      </Chip>
+                    </Box>
+                  </Box>
+                  {replyEventId && (
+                    <Reply
+                      room={room}
+                      replyEventId={replyEventId}
+                      threadRootId={threadRootId}
+                      onClick={handleOpenClick}
+                      getMemberPowerTag={getMemberPowerTag}
+                      accessibleTagColors={accessibleTagColors}
+                      legacyUsernameColor={legacyUsernameColor}
+                    />
+                  )}
+                  {renderMatrixEvent(event.type, false, event, displayName, getContent)}
+                </ModernLayout>
+              </SequenceCard>
+            );
+          })}
+        </Box>
       </Box>
-    </Box>
+    </RoomProvider>
   );
 }
 

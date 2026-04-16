@@ -759,7 +759,8 @@
     "unableDecrypt": "无法解密",
     "notDecrypted": "消息未解密",
     "broken": "损坏的消息",
-    "empty": "空消息"
+    "empty": "空消息",
+    "thinking": "思考"
   },
   "search": {
     "sortBy": "排序",
@@ -978,6 +979,18 @@
     "title": "登录 {{provider}}",
     "description": "点击此处登录您的 {{provider}} 账户以继续操作",
     "doneDescription": "您的 {{provider}} 账户已关联"
+  },
+  "askUserQuestion": {
+    "submitted": "已提交",
+    "answeredTitle": "用户已回答问题",
+    "questionLabel": "问：",
+    "answerLabel": "答：",
+    "other": "其他",
+    "otherPlaceholder": "请输入您的回答...",
+    "submit": "提交答案",
+    "submitting": "提交中...",
+    "questionTab": "第{{index}}/{{total}}题",
+    "assignedTo": "该问题由 {{name}} 回答"
   },
   "toolCall": {
     "inprogressDescription": "执行中...",
