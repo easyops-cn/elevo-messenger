@@ -759,7 +759,8 @@
     "unableDecrypt": "无法解密",
     "notDecrypted": "消息未解密",
     "broken": "损坏的消息",
-    "empty": "空消息"
+    "empty": "空消息",
+    "thinking": "思考"
   },
   "search": {
     "sortBy": "排序",

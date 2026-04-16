@@ -759,7 +759,8 @@
     "unableDecrypt": "Unable to decrypt",
     "notDecrypted": "Message not decrypted",
     "broken": "Broken message",
-    "empty": "Empty message"
+    "empty": "Empty message",
+    "thinking": "Thinking"
   },
   "search": {
     "sortBy": "Sort by",

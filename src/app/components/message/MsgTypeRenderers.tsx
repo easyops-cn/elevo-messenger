@@ -210,6 +210,42 @@ function ToolCallCard({ data, style }: ToolCallCardProps) {
   );
 }
 
+type ReasoningCardProps = { style?: CSSProperties; children: ReactNode };
+function ReasoningCard({ style, children }: ReasoningCardProps) {
+  const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(true);
+
+  return (
+    <Box
+      style={{ ...style, opacity: 0.7, fontSize: config.fontSize.B400 }}
+      direction="Column"
+      gap="100"
+    >
+      <div
+        style={{
+          cursor: 'pointer',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: config.space.S100,
+        }}
+        onClick={() => setExpanded((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setExpanded((v) => !v);
+          }
+        }}
+        role="button"
+        tabIndex={0}
+      >
+        <Text priority="300">{t('message.thinking')}</Text>
+        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="200" />
+      </div>
+      {expanded && children}
+    </Box>
+  );
+}
+
 const oidcLinkStyles: CSSProperties = {
   backgroundColor: color.SurfaceVariant.Container,
   color: color.SurfaceVariant.OnContainer,
@@ -317,6 +353,24 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
   const toolCall = parseToolCall(content);
   if (toolCall) {
     return <ToolCallCard data={toolCall} style={style} />;
+  }
+
+  if (content['vip.elevo.reasoning'] === true) {
+    const trimmedBody = trimReplyFromBody(body);
+    return (
+      <ReasoningCard style={style}>
+        <MessageTextBody
+          preWrap={typeof customBody !== 'string'}
+          jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
+        >
+          {renderBody({
+            body: trimmedBody,
+            customBody: typeof customBody === 'string' ? customBody : undefined,
+          })}
+          {edited && <MessageEditedContent />}
+        </MessageTextBody>
+      </ReasoningCard>
+    );
   }
 
   const trimmedBody = trimReplyFromBody(body);
