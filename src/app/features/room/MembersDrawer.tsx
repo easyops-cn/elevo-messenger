@@ -334,7 +334,7 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
                   onChange={handleSearchChange}
                   style={{ paddingRight: config.space.S200 }}
                   placeholder={t('room.typeNamePlaceholder')}
-                  variant="Surface"
+                  variant="Secondary"
                   size="400"
                   radii="400"
                   before={<Icon size="50" src={Icons.Search} />}

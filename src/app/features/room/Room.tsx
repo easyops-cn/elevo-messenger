@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Box, Line } from 'folds';
+import { Box } from 'folds';
 import { useParams } from 'react-router-dom';
 import { isKeyHotkey } from 'is-hotkey';
 import { useAtomValue } from 'jotai';
@@ -67,19 +67,11 @@ export function Room() {
             </Box>
           )}
           {callView && chat && (
-            <>
-              {screenSize === ScreenSize.Desktop && (
-                <Line variant="Background" direction="Vertical" size="300" />
-              )}
-              <CallChatView />
-            </>
+            <CallChatView />
           )}
         </PageMain>
         {!callView && screenSize === ScreenSize.Desktop && isDrawer && (
-          <>
-            <Line variant="Background" direction="Vertical" size="300" />
-            <MembersDrawer key={room.roomId} room={room} members={members} />
-          </>
+          <MembersDrawer key={room.roomId} room={room} members={members} />
         )}
       </Box>
     </PowerLevelsContextProvider>

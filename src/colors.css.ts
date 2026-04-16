@@ -198,7 +198,7 @@ export const silverTheme = createTheme(color, {
 const darkThemeData = {
   Background: {
     Container: '#3C3C3C',
-    ContainerHover: 'rgba(255, 255, 255, 0.2)',
+    ContainerHover: 'rgba(255, 255, 255, 0.075)',
     ContainerActive: 'rgba(255, 255, 255, 0.1)',
     ContainerLine: '#404040',
     OnContainer: '#F2F2F2',
@@ -225,7 +225,7 @@ const darkThemeData = {
     MainHover: '#B2AAE9',
     MainActive: '#ADA3E8',
     MainLine: '#A79DE6',
-    OnMain: '#2C2843',
+    OnMain: '#FFFFFF',
     Container: '#413C65',
     ContainerHover: '#494370',
     ContainerActive: '#50497B',
@@ -239,7 +239,7 @@ const darkThemeData = {
     MainActive: '#D9D9D9',
     MainLine: '#CCCCCC',
     OnMain: '#1A1A1A',
-    Container: '#404040',
+    Container: 'rgba(255, 255, 255, 0.1)',
     ContainerHover: '#4D4D4D',
     ContainerActive: '#595959',
     ContainerLine: '#666666',

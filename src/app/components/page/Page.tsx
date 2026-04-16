@@ -4,6 +4,8 @@ import classNames from 'classnames';
 import { ContainerColor } from '../../styles/ContainerColor.css';
 import * as css from './style.css';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
+import { isDesktopTauri } from '../../plugins/useTauriOpener';
+import { isMacOS } from '../../utils/user-agent';
 
 type PageRootProps = {
   nav: ReactNode;
@@ -44,7 +46,7 @@ export function PageNav({ stretch, size, children }: ClientDrawerLayoutProps & c
 export const PageNavHeader = as<'header', css.PageNavHeaderVariants>(
   ({ className, outlined, ...props }, ref) => (
     <Header
-      className={classNames(css.PageNavHeader({ outlined: false }), className)}
+      className={classNames(css.PageNavHeader({ outlined: false, isDesktopMac: isDesktopTauri && isMacOS() }), className)}
       variant="Background"
       size="600"
       {...props}
@@ -66,7 +68,7 @@ export function PageNavContent({
         ref={scrollRef}
         variant="Background"
         direction="Vertical"
-        size="300"
+        size="400"
         hideTrack
         visibility="Hover"
       >

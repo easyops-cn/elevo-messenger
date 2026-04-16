@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { recipe, RecipeVariants } from '@vanilla-extract/recipes';
 import { DefaultReset, color, config, toRem } from 'folds';
+import { elevoColor } from '../../../config.css';
 
 export const PageNav = recipe({
   variants: {
@@ -22,6 +23,7 @@ export type PageNavVariants = RecipeVariants<typeof PageNav>;
 export const PageNavHeader = recipe({
   base: {
     padding: `0 ${config.space.S200} 0 ${config.space.S300}`,
+    marginTop: config.space.S300,
     flexShrink: 0,
     selectors: {
       'button&': {
@@ -45,18 +47,22 @@ export const PageNavHeader = recipe({
         borderBottomWidth: 1,
       },
     },
+    isDesktopMac: {
+      true: {
+        marginTop: config.space.S700,
+      }
+    }
   },
   defaultVariants: {
     outlined: true,
+    isDesktopMac: false,
   },
 });
 export type PageNavHeaderVariants = RecipeVariants<typeof PageNavHeader>;
 
 export const PageNavContent = style({
   minHeight: '100%',
-  padding: config.space.S200,
-  paddingRight: 0,
-  paddingBottom: config.space.S700,
+  padding: `${config.space.S200} 0 ${config.space.S700} ${config.space.S300}`,
 });
 
 export const PageHeader = recipe({
@@ -73,6 +79,7 @@ export const PageHeader = recipe({
     outlined: {
       true: {
         borderBottomWidth: config.borderWidth.B300,
+        boxShadow: elevoColor.shadow.Header,
       },
     },
   },
@@ -123,8 +130,7 @@ export const PageContentCenter = style([
 export const PageMainFloating = style({
   backgroundColor: color.Surface.Container,
   color: color.Surface.OnContainer,
-  // boxShadow: config.shadow.E300,
-  boxShadow: '0 11px 13.7px 0 rgba(0, 0, 0, 0.05)',
+  boxShadow: elevoColor.shadow.Page,
   border: `${config.borderWidth.B300} solid ${color.Surface.Container}`,
   borderRadius: config.radii.R500,
   overflow: 'hidden',
