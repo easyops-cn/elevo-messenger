@@ -65,6 +65,7 @@ import {
   MSticker,
   ImageContent,
   EventContent,
+  isUserAnswerEvent,
 } from '../../components/message';
 import {
   factoryRenderLinkifyWithMention,
@@ -1657,17 +1658,18 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
       prevEvent.getType() === mEvent.getType() &&
       minuteDifference(prevEvent.getTs(), mEvent.getTs()) < 2;
 
-    const eventJSX = reactionOrEditEvent(mEvent)
-      ? null
-      : renderMatrixEvent(
-          mEvent.getType(),
-          typeof mEvent.getStateKey() === 'string',
-          mEventId,
-          mEvent,
-          item,
-          timelineSet,
-          collapsed
-        );
+    const eventJSX =
+      reactionOrEditEvent(mEvent) || isUserAnswerEvent(mEvent)
+        ? null
+        : renderMatrixEvent(
+            mEvent.getType(),
+            typeof mEvent.getStateKey() === 'string',
+            mEventId,
+            mEvent,
+            item,
+            timelineSet,
+            collapsed
+          );
     prevEvent = mEvent;
     isPrevRendered = !!eventJSX;
 

@@ -2,6 +2,7 @@ import React, { CSSProperties, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod/v4';
 import { Badge, Box, Icon, Icons, Text, config } from 'folds';
+import { MsgType, type MatrixEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/types';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useRoom } from '../../../hooks/useRoom';
@@ -27,6 +28,7 @@ import { DisabledRadioIcon } from '../../../icons/DisabledRadioIcon';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { getMemberDisplayName } from '../../../utils/room';
 import { getMxIdLocalPart } from '../../../utils/matrix';
+import { MessageEvent } from '../../../../types/matrix/room';
 
 // Schemas & Types
 
@@ -56,6 +58,14 @@ const QuestionAnsweredSchema = z.object({
 });
 
 type QuestionAnsweredData = z.infer<typeof QuestionAnsweredSchema>;
+
+export function isUserAnswerEvent(mEvent: MatrixEvent) {
+  return (
+    mEvent.getType() === MessageEvent.RoomMessage &&
+    mEvent.getContent().msgtype === MsgType.Text &&
+    !!mEvent.getContent()['vip.elevo.ask_user_question_answers']
+  );
+}
 
 // Parsers
 
