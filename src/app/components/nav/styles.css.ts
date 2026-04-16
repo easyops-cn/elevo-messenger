@@ -111,7 +111,7 @@ export const NavItemContent = style({
   flexGrow: 1,
   display: 'flex',
   alignItems: 'center',
-  fontWeight: config.fontWeight.W500,
+  fontWeight: config.fontWeight.W400,
 
   selectors: {
     '&:hover': {

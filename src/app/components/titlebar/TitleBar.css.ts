@@ -2,6 +2,7 @@ import { style, globalStyle } from '@vanilla-extract/css';
 import { color, config, DefaultReset, toRem } from 'folds';
 
 export const TITLEBAR_HEIGHT = 38;
+export const MAC_TITLEBAR_HEIGHT = 28;
 
 export const TitleBarContainer = style([
   DefaultReset,
@@ -22,6 +23,18 @@ export const TitleBarContainer = style([
   },
 ]);
 
+export const MacTitleBar = style({
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  height: toRem(MAC_TITLEBAR_HEIGHT),
+  minHeight: toRem(MAC_TITLEBAR_HEIGHT),
+  backgroundColor: 'transparent',
+  borderBottom: 'none',
+  zIndex: config.zIndex.Max,
+});
+
 export const TitleText = style([
   DefaultReset,
   {
@@ -30,45 +43,6 @@ export const TitleText = style([
     pointerEvents: 'none',
   },
 ]);
-
-export const SearchBox = style([
-  DefaultReset,
-  {
-    display: 'flex',
-    alignItems: 'center',
-    gap: toRem(6),
-    height: toRem(26),
-    padding: `0 ${toRem(10)}`,
-    borderRadius: toRem(6),
-    backgroundColor: color.SurfaceVariant.ContainerHover,
-    color: color.SurfaceVariant.OnContainer,
-    fontSize: toRem(12),
-    cursor: 'pointer',
-    // @ts-expect-error non-standard CSS property
-    appRegion: 'no-drag',
-    userSelect: 'none',
-    WebkitUserSelect: 'none',
-    minWidth: 0,
-    maxWidth: toRem(400),
-    flex: 1,
-  },
-]);
-
-export const SearchBoxIcon = style({
-  flexShrink: 0,
-  opacity: 0.6,
-});
-
-export const SearchBoxText = style({
-  flex: 1,
-  opacity: 0.5,
-});
-
-export const SearchBoxShortcut = style({
-  opacity: 0.4,
-  fontSize: toRem(11),
-  flexShrink: 0,
-});
 
 export const TrafficLightSpacer = style({
   width: toRem(70),

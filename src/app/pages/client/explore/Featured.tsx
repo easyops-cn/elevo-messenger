@@ -13,6 +13,7 @@ import {
   PageHeader,
   PageHero,
   PageHeroSection,
+  PageMain,
 } from '../../../components/page';
 import { RoomTopicViewer } from '../../../components/room-topic-viewer';
 import * as css from './style.css';
@@ -29,112 +30,114 @@ export function FeaturedRooms() {
   const { navigateSpace, navigateRoom } = useRoomNavigate();
 
   return (
-    <Page>
-      {screenSize === ScreenSize.Mobile && (
-        <PageHeader>
-          <Box shrink="No">
-            <BackRouteHandler>
-              {(onBack) => (
-                <IconButton onClick={onBack}>
-                  <Icon src={Icons.ArrowLeft} />
-                </IconButton>
-              )}
-            </BackRouteHandler>
-          </Box>
-        </PageHeader>
-      )}
-      <Box grow="Yes">
-        <Scroll hideTrack visibility="Hover">
-          <PageContent>
-            <PageContentCenter>
-              <Box direction="Column" gap="200">
-                <PageHeroSection>
-                  <PageHero
-                    icon={<Icon size="600" src={Icons.Bulb} />}
-                    title={t('explore.featuredByClient')}
-                    subTitle={t('explore.featuredByClientSubtitle')}
-                  />
-                </PageHeroSection>
-                <Box direction="Column" gap="700">
-                  {spaces && spaces.length > 0 && (
-                    <Box direction="Column" gap="400">
-                      <Text size="H4">{t('explore.featuredSpaces')}</Text>
-                      <RoomCardGrid>
-                        {spaces.map((roomIdOrAlias) => (
-                          <RoomSummaryLoader key={roomIdOrAlias} roomIdOrAlias={roomIdOrAlias}>
-                            {(roomSummary) => (
-                              <RoomCard
-                                roomIdOrAlias={roomIdOrAlias}
-                                allRooms={allRooms}
-                                avatarUrl={roomSummary?.avatar_url}
-                                name={roomSummary?.name}
-                                topic={roomSummary?.topic}
-                                memberCount={roomSummary?.num_joined_members}
-                                onView={navigateSpace}
-                                renderTopicViewer={(name, topic, requestClose) => (
-                                  <RoomTopicViewer
-                                    name={name}
-                                    topic={topic}
-                                    requestClose={requestClose}
-                                  />
-                                )}
-                              />
-                            )}
-                          </RoomSummaryLoader>
-                        ))}
-                      </RoomCardGrid>
-                    </Box>
-                  )}
-                  {rooms && rooms.length > 0 && (
-                    <Box direction="Column" gap="400">
-                      <Text size="H4">{t('explore.featuredRooms')}</Text>
-                      <RoomCardGrid>
-                        {rooms.map((roomIdOrAlias) => (
-                          <RoomSummaryLoader key={roomIdOrAlias} roomIdOrAlias={roomIdOrAlias}>
-                            {(roomSummary) => (
-                              <RoomCard
-                                roomIdOrAlias={roomIdOrAlias}
-                                allRooms={allRooms}
-                                avatarUrl={roomSummary?.avatar_url}
-                                name={roomSummary?.name}
-                                topic={roomSummary?.topic}
-                                memberCount={roomSummary?.num_joined_members}
-                                onView={navigateRoom}
-                                renderTopicViewer={(name, topic, requestClose) => (
-                                  <RoomTopicViewer
-                                    name={name}
-                                    topic={topic}
-                                    requestClose={requestClose}
-                                  />
-                                )}
-                              />
-                            )}
-                          </RoomSummaryLoader>
-                        ))}
-                      </RoomCardGrid>
-                    </Box>
-                  )}
-                  {((spaces && spaces.length === 0 && rooms && rooms.length === 0) ||
-                    (!spaces && !rooms)) && (
-                    <Box
-                      className={css.RoomsInfoCard}
-                      direction="Column"
-                      justifyContent="Center"
-                      alignItems="Center"
-                      gap="200"
-                    >
-                      <Icon size="400" src={Icons.Info} />
-                      <Text size="T300" align="Center">
-                        {t('explore.noFeaturedRooms')}
-                      </Text>
-                    </Box>
-                  )}
+    <PageMain>
+      <Page>
+        {screenSize === ScreenSize.Mobile && (
+          <PageHeader>
+            <Box shrink="No">
+              <BackRouteHandler>
+                {(onBack) => (
+                  <IconButton onClick={onBack}>
+                    <Icon src={Icons.ArrowLeft} />
+                  </IconButton>
+                )}
+              </BackRouteHandler>
+            </Box>
+          </PageHeader>
+        )}
+        <Box grow="Yes">
+          <Scroll hideTrack visibility="Hover">
+            <PageContent>
+              <PageContentCenter>
+                <Box direction="Column" gap="200">
+                  <PageHeroSection>
+                    <PageHero
+                      icon={<Icon size="600" src={Icons.Bulb} />}
+                      title={t('explore.featuredByClient')}
+                      subTitle={t('explore.featuredByClientSubtitle')}
+                    />
+                  </PageHeroSection>
+                  <Box direction="Column" gap="700">
+                    {spaces && spaces.length > 0 && (
+                      <Box direction="Column" gap="400">
+                        <Text size="H4">{t('explore.featuredSpaces')}</Text>
+                        <RoomCardGrid>
+                          {spaces.map((roomIdOrAlias) => (
+                            <RoomSummaryLoader key={roomIdOrAlias} roomIdOrAlias={roomIdOrAlias}>
+                              {(roomSummary) => (
+                                <RoomCard
+                                  roomIdOrAlias={roomIdOrAlias}
+                                  allRooms={allRooms}
+                                  avatarUrl={roomSummary?.avatar_url}
+                                  name={roomSummary?.name}
+                                  topic={roomSummary?.topic}
+                                  memberCount={roomSummary?.num_joined_members}
+                                  onView={navigateSpace}
+                                  renderTopicViewer={(name, topic, requestClose) => (
+                                    <RoomTopicViewer
+                                      name={name}
+                                      topic={topic}
+                                      requestClose={requestClose}
+                                    />
+                                  )}
+                                />
+                              )}
+                            </RoomSummaryLoader>
+                          ))}
+                        </RoomCardGrid>
+                      </Box>
+                    )}
+                    {rooms && rooms.length > 0 && (
+                      <Box direction="Column" gap="400">
+                        <Text size="H4">{t('explore.featuredRooms')}</Text>
+                        <RoomCardGrid>
+                          {rooms.map((roomIdOrAlias) => (
+                            <RoomSummaryLoader key={roomIdOrAlias} roomIdOrAlias={roomIdOrAlias}>
+                              {(roomSummary) => (
+                                <RoomCard
+                                  roomIdOrAlias={roomIdOrAlias}
+                                  allRooms={allRooms}
+                                  avatarUrl={roomSummary?.avatar_url}
+                                  name={roomSummary?.name}
+                                  topic={roomSummary?.topic}
+                                  memberCount={roomSummary?.num_joined_members}
+                                  onView={navigateRoom}
+                                  renderTopicViewer={(name, topic, requestClose) => (
+                                    <RoomTopicViewer
+                                      name={name}
+                                      topic={topic}
+                                      requestClose={requestClose}
+                                    />
+                                  )}
+                                />
+                              )}
+                            </RoomSummaryLoader>
+                          ))}
+                        </RoomCardGrid>
+                      </Box>
+                    )}
+                    {((spaces && spaces.length === 0 && rooms && rooms.length === 0) ||
+                      (!spaces && !rooms)) && (
+                      <Box
+                        className={css.RoomsInfoCard}
+                        direction="Column"
+                        justifyContent="Center"
+                        alignItems="Center"
+                        gap="200"
+                      >
+                        <Icon size="400" src={Icons.Info} />
+                        <Text size="T300" align="Center">
+                          {t('explore.noFeaturedRooms')}
+                        </Text>
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
-              </Box>
-            </PageContentCenter>
-          </PageContent>
-        </Scroll>
-      </Box>
-    </Page>
+              </PageContentCenter>
+            </PageContent>
+          </Scroll>
+        </Box>
+      </Page>
+    </PageMain>
   );
 }

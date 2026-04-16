@@ -1,6 +1,7 @@
 import { style } from '@vanilla-extract/css';
 import { RecipeVariants, recipe } from '@vanilla-extract/recipes';
 import { DefaultReset, color, config, Disabled, FocusOutline, toRem } from 'folds';
+import { elevoColor } from '../../../config.css';
 
 export const BottomNavContainer = style([
   DefaultReset,
@@ -9,16 +10,16 @@ export const BottomNavContainer = style([
     alignItems: 'center',
     justifyContent: 'space-evenly',
     gap: config.space.S100,
-    padding: `${config.space.S200} ${config.space.S100}`,
-    borderTop: `${config.borderWidth.B300} solid ${color.Background.ContainerLine}`,
-    backgroundColor: color.Background.Container,
+    padding: `${config.space.S100} ${config.space.S300}`,
+    margin: `${config.space.S400} ${config.space.S300}`,
+    borderRadius: config.radii.Pill,
+    backgroundColor: elevoColor.Background.NavBar,
     color: color.Background.OnContainer,
     flexShrink: 0,
+    boxShadow: `${elevoColor.shadow.SpecularHighlight}, ${elevoColor.shadow.NavBar}`,
   },
 ]);
 
-const INDICATOR_HEIGHT = 3;
-const INDICATOR_RADIUS = 2;
 export const BottomNavItem = recipe({
   base: [
     DefaultReset,
@@ -42,18 +43,6 @@ export const BottomNavItem = recipe({
         '&:active': {
           backgroundColor: color.Background.ContainerActive,
         },
-        '&::after': {
-          content: '',
-          display: 'none',
-          position: 'absolute',
-          bottom: toRem(-4),
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: toRem(INDICATOR_RADIUS * 2 + INDICATOR_HEIGHT),
-          height: toRem(INDICATOR_HEIGHT),
-          borderRadius: config.radii.R400,
-          background: 'CurrentColor',
-        },
       },
     },
   ],
@@ -61,11 +50,6 @@ export const BottomNavItem = recipe({
     active: {
       true: {
         color: color.Primary.Main,
-        selectors: {
-          '&::after': {
-            display: 'block',
-          },
-        },
       },
     },
   },

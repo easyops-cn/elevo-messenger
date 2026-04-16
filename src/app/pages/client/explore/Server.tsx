@@ -33,7 +33,7 @@ import { useAtomValue } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { MatrixClient, Method, RoomType } from 'matrix-js-sdk';
-import { Page, PageContent, PageContentCenter, PageHeader } from '../../../components/page';
+import { Page, PageContent, PageContentCenter, PageHeader, PageMain } from '../../../components/page';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { RoomTopicViewer } from '../../../components/room-topic-viewer';
 import { RoomCard, RoomCardBase, RoomCardGrid } from '../../../components/room-card';
@@ -478,8 +478,9 @@ export function PublicRooms() {
   };
 
   return (
-    <Page>
-      <PageHeader balance>
+    <PageMain>
+      <Page>
+        <PageHeader balance>
         {isSearch ? (
           <>
             <Box grow="Yes" basis="No">
@@ -673,5 +674,6 @@ export function PublicRooms() {
         </Scroll>
       </Box>
     </Page>
+    </PageMain>
   );
 }

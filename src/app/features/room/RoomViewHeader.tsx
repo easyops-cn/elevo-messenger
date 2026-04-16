@@ -2,7 +2,6 @@ import React, { MouseEventHandler, forwardRef, useState } from 'react';
 import FocusTrap from 'focus-trap-react';
 import {
   Box,
-  Avatar,
   Text,
   Overlay,
   OverlayCenter,
@@ -26,7 +25,6 @@ import { useNavigate } from 'react-router-dom';
 import { Room } from 'matrix-js-sdk';
 import { useStateEvent } from '../../hooks/useStateEvent';
 import { PageHeader } from '../../components/page';
-import { RoomAvatar, RoomIcon } from '../../components/room-avatar';
 import { UseStateProvider } from '../../components/UseStateProvider';
 import { RoomTopicViewer } from '../../components/room-topic-viewer';
 import { StateEvent } from '../../../types/matrix/room';
@@ -36,7 +34,7 @@ import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 import { useSpaceOptionally } from '../../hooks/useSpace';
 import { getHomeSearchPath, getSpaceSearchPath, withSearchParam } from '../../pages/pathUtils';
-import { getCanonicalAliasOrRoomId, isRoomAlias, mxcUrlToHttp } from '../../utils/matrix';
+import { getCanonicalAliasOrRoomId, isRoomAlias } from '../../utils/matrix';
 import { _SearchPathSearchParams } from '../../pages/paths';
 import * as css from './RoomViewHeader.css';
 import { useRoomUnread } from '../../state/hooks/unread';
@@ -45,13 +43,12 @@ import { markAsRead } from '../../utils/notifications';
 import { roomToUnreadAtom } from '../../state/room/roomToUnread';
 import { copyToClipboard } from '../../utils/dom';
 import { LeaveRoomPrompt } from '../../components/leave-room-prompt';
-import { useRoomAvatar, useRoomName, useRoomTopic } from '../../hooks/useRoomMeta';
+import { useRoomName, useRoomTopic } from '../../hooks/useRoomMeta';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
 import { stopPropagation } from '../../utils/keyboard';
 import { getMatrixToRoom } from '../../plugins/matrix-to';
 import { getViaServers } from '../../plugins/via-servers';
 import { BackRouteHandler } from '../../components/BackRouteHandler';
-import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useRoomPinnedEvents } from '../../hooks/useRoomPinnedEvents';
 import { RoomPinMenu } from './room-pin-menu';
 import { useOpenRoomSettings } from '../../state/hooks/roomSettings';
@@ -72,7 +69,7 @@ import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
 import { openWorkspacePanel, openTasksPanel, isDesktopTauri } from '../../plugins/useTauriOpener';
 import { TasksIcon } from '../../icons/TasksIcon';
-import { UsersIcon } from '../../icons/UsersIcon';
+import { PanelLeftIcon } from '../../icons/PanelLeftIcon';
 
 type RoomMenuProps = {
   room: Room;
@@ -261,7 +258,6 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
 export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const navigate = useNavigate();
   const mx = useMatrixClient();
-  const useAuthentication = useMediaAuthentication();
   const screenSize = useScreenSizeContext();
   const room = useRoom();
   const space = useSpaceOptionally();
@@ -297,12 +293,8 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const pinnedEvents = useRoomPinnedEvents(room);
   const encryptionEvent = useStateEvent(room, StateEvent.RoomEncryption);
   const encryptedRoom = !!encryptionEvent;
-  const avatarMxc = useRoomAvatar(room, direct);
   const name = useRoomName(room);
   const topic = useRoomTopic(room);
-  const avatarUrl = avatarMxc
-    ? mxcUrlToHttp(mx, avatarMxc, useAuthentication, 96, 96, 'crop') ?? undefined
-    : undefined;
 
   const [peopleDrawer, setPeopleDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
 
@@ -344,29 +336,17 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
           <BackRouteHandler>
             {(onBack) => (
               <Box shrink="No" alignItems="Center">
-                <IconButton fill="None" onClick={onBack}>
-                  <Icon src={Icons.ArrowLeft} />
+                <IconButton size="300" fill="None" onClick={onBack}>
+                  <Icon size="100" src={Icons.ArrowLeft} />
                 </IconButton>
               </Box>
             )}
           </BackRouteHandler>
         )}
         <Box grow="Yes" alignItems="Center" gap="300">
-          {screenSize !== ScreenSize.Mobile && (
-            <Avatar size="300">
-              <RoomAvatar
-                roomId={room.roomId}
-                src={avatarUrl}
-                alt={name}
-                renderFallback={() => (
-                  <RoomIcon size="200" joinRule={room.getJoinRule()} roomType={room.getType()} />
-                )}
-              />
-            </Avatar>
-          )}
           <Box direction="Column">
-            <Text size={topic ? 'H5' : 'H3'} truncate>
-              {name}
+            <Text size="H5" truncate>
+              {`${direct ? '' : '# '}${name}`}
             </Text>
             {topic && (
               <UseStateProvider initial={false}>
@@ -408,7 +388,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
           </Box>
         </Box>
 
-        <Box shrink="No">
+        <Box shrink="No" gap="100">
           {!encryptedRoom && (
             <TooltipProvider
               position="Bottom"
@@ -420,8 +400,8 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
               }
             >
               {(triggerRef) => (
-                <IconButton fill="None" ref={triggerRef} onClick={handleSearchClick}>
-                  <Icon size="400" src={Icons.Search} />
+                <IconButton size="300" fill="None" ref={triggerRef} onClick={handleSearchClick}>
+                  <Icon size="100" src={Icons.Search} />
                 </IconButton>
               )}
             </TooltipProvider>
@@ -437,6 +417,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
           >
             {(triggerRef) => (
               <IconButton
+                size="300"
                 fill="None"
                 style={{ position: 'relative' }}
                 onClick={handleOpenPinMenu}
@@ -451,7 +432,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                       top: toRem(3),
                     }}
                     variant="Secondary"
-                    size="400"
+                    size="300"
                     fill="Solid"
                     radii="Pill"
                   >
@@ -460,7 +441,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                     </Text>
                   </Badge>
                 )}
-                <Icon size="400" src={Icons.Pin} filled={!!pinMenuAnchor} />
+                <Icon size="100" src={Icons.Pin} filled={!!pinMenuAnchor} />
               </IconButton>
             )}
           </TooltipProvider>
@@ -496,11 +477,12 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
             >
               {(triggerRef) => (
                 <IconButton
+                  size="300"
                   fill="None"
                   ref={triggerRef}
                   onClick={() => openTasksPanel(tasksUrl, room.roomId)}
                 >
-                  <Icon size="400" src={TasksIcon} />
+                  <Icon size="100" src={TasksIcon} />
                 </IconButton>
               )}
             </TooltipProvider>
@@ -518,35 +500,12 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
             >
               {(triggerRef) => (
                 <IconButton
+                  size="300"
                   fill="None"
                   ref={triggerRef}
-                  onClick={() =>
-                    openWorkspacePanel(workspaceExplorerUrl, room.roomId)
-                  }
+                  onClick={() => openWorkspacePanel(workspaceExplorerUrl, room.roomId)}
                 >
-                  <Icon size="400" src={Icons.Category} />
-                </IconButton>
-              )}
-            </TooltipProvider>
-          )}
-
-          {screenSize === ScreenSize.Desktop && (
-            <TooltipProvider
-              position="Bottom"
-              offset={4}
-              tooltip={
-                <Tooltip>
-                  {callView ? (
-                    <Text>Members</Text>
-                  ) : (
-                    <Text>{peopleDrawer ? 'Hide Members' : 'Show Members'}</Text>
-                  )}
-                </Tooltip>
-              }
-            >
-              {(triggerRef) => (
-                <IconButton fill="None" ref={triggerRef} onClick={handleMemberToggle}>
-                  <Icon size="400" src={UsersIcon} />
+                  <Icon size="100" src={Icons.Category} />
                 </IconButton>
               )}
             </TooltipProvider>
@@ -564,12 +523,13 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
           >
             {(triggerRef) => (
               <IconButton
+                size="300"
                 fill="None"
                 onClick={handleOpenMenu}
                 ref={triggerRef}
                 aria-pressed={!!menuAnchor}
               >
-                <Icon size="400" src={Icons.VerticalDots} filled={!!menuAnchor} />
+                <Icon size="100" src={Icons.VerticalDots} filled={!!menuAnchor} />
               </IconButton>
             )}
           </TooltipProvider>
@@ -593,6 +553,28 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
               </FocusTrap>
             }
           />
+
+          {screenSize === ScreenSize.Desktop && (
+            <TooltipProvider
+              position="Bottom"
+              offset={4}
+              tooltip={
+                <Tooltip>
+                  {callView ? (
+                    <Text>Members</Text>
+                  ) : (
+                    <Text>{peopleDrawer ? 'Hide Members' : 'Show Members'}</Text>
+                  )}
+                </Tooltip>
+              }
+            >
+              {(triggerRef) => (
+                <IconButton size="300" fill="None" ref={triggerRef} onClick={handleMemberToggle}>
+                  <Icon size="100" src={PanelLeftIcon} />
+                </IconButton>
+              )}
+            </TooltipProvider>
+          )}
         </Box>
       </Box>
     </PageHeader>

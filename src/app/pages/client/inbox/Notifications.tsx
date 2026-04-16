@@ -28,7 +28,7 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { HTMLReactParserOptions } from 'html-react-parser';
 import { Opts as LinkifyOpts } from 'linkifyjs';
 import { useAtomValue } from 'jotai';
-import { Page, PageContent, PageContentCenter, PageHeader } from '../../../components/page';
+import { Page, PageContent, PageContentCenter, PageHeader, PageMain } from '../../../components/page';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { getMxIdLocalPart, mxcUrlToHttp } from '../../../utils/matrix';
 import { InboxNotificationsPathSearchParams } from '../../paths';
@@ -641,29 +641,30 @@ export function Notifications() {
   }, [timelineState, notificationTimeline, lastVItemIndex, loadTimeline]);
 
   return (
-    <Page>
-      <PageHeader balance>
-        <Box grow="Yes" gap="200">
-          <Box grow="Yes" basis="No">
-            {screenSize === ScreenSize.Mobile && (
-              <BackRouteHandler>
-                {(onBack) => (
-                  <IconButton onClick={onBack}>
-                    <Icon src={Icons.ArrowLeft} />
-                  </IconButton>
-                )}
-              </BackRouteHandler>
-            )}
+    <PageMain>
+      <Page>
+        <PageHeader balance>
+          <Box grow="Yes" gap="200">
+            <Box grow="Yes" basis="No">
+              {screenSize === ScreenSize.Mobile && (
+                <BackRouteHandler>
+                  {(onBack) => (
+                    <IconButton onClick={onBack}>
+                      <Icon src={Icons.ArrowLeft} />
+                    </IconButton>
+                  )}
+                </BackRouteHandler>
+              )}
+            </Box>
+            <Box alignItems="Center" gap="200">
+              {screenSize !== ScreenSize.Mobile && <Icon size="400" src={Icons.Message} />}
+              <Text size="H3" truncate>
+                {t('notifications.title')}
+              </Text>
+            </Box>
+            <Box grow="Yes" basis="No" />
           </Box>
-          <Box alignItems="Center" gap="200">
-            {screenSize !== ScreenSize.Mobile && <Icon size="400" src={Icons.Message} />}
-            <Text size="H3" truncate>
-              {t('notifications.title')}
-            </Text>
-          </Box>
-          <Box grow="Yes" basis="No" />
-        </Box>
-      </PageHeader>
+        </PageHeader>
 
       <Box style={{ position: 'relative' }} grow="Yes">
         <Scroll ref={scrollRef} hideTrack visibility="Hover">
@@ -794,5 +795,6 @@ export function Notifications() {
         </Scroll>
       </Box>
     </Page>
+    </PageMain>
   );
 }
