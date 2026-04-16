@@ -1,7 +1,7 @@
 import React, { CSSProperties, useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod/v4';
-import { Badge, Box, Icon, Icons, Text, config } from 'folds';
+import { Box, Icon, Icons, Text, config } from 'folds';
 import { MsgType, type MatrixEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/types';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
@@ -12,7 +12,6 @@ import {
   CardContainer,
   CardHeader,
   CardBody,
-  CardFooter,
   QuestionTabsBar,
   QuestionTab,
   OptionItem,
@@ -23,6 +22,7 @@ import {
   SubmittedText,
   AssignedHint,
   AnsweredItem,
+  QuestionCardFooter,
 } from './AskUser.css';
 import { DisabledRadioIcon } from '../../../icons/DisabledRadioIcon';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
@@ -72,15 +72,27 @@ export function isUserAnswerEvent(mEvent: MatrixEvent) {
 export function parseAskUserQuestion(
   content: Record<string, unknown>
 ): AskUserQuestionData | undefined {
-  const result = AskUserQuestionSchema.safeParse(content['vip.elevo.ask_user_question']);
-  return result.success ? result.data : undefined;
+  const questionContent = content['vip.elevo.ask_user_question'];
+  if (!questionContent) return undefined;
+  const result = AskUserQuestionSchema.safeParse(questionContent);
+  if (result.success) {
+    return result.data;
+  }
+  // eslint-disable-next-line no-console
+  console.error('Failed to parse ask user question content:', result.error);
 }
 
 export function parseQuestionAnswered(
   content: Record<string, unknown>
 ): QuestionAnsweredData | undefined {
-  const result = QuestionAnsweredSchema.safeParse(content['vip.elevo.question_answered']);
-  return result.success ? result.data : undefined;
+  const answeredContent = content['vip.elevo.question_answered'];
+  if (!answeredContent) return undefined;
+  const result = QuestionAnsweredSchema.safeParse(answeredContent);
+  if (result.success) {
+    return result.data;
+  }
+  // eslint-disable-next-line no-console
+  console.error('Failed to parse question answered content:', result.error);
 }
 
 // Types
@@ -228,28 +240,25 @@ export function AskUserQuestionCard({
   return (
     <Box style={style} direction="Column" gap="0">
       <div className={CardContainer}>
-        <div className={QuestionTabsBar}>
-          {data.questions.map((q, qIndex) => (
-            <Badge
-              key={q.question}
-              className={QuestionTab}
-              as="button"
-              variant="Primary"
-              fill={activeTab === qIndex ? 'Solid' : 'None'}
-              size="500"
-              onClick={() => setActiveTab(qIndex)}
-            >
-              <Text as="span" size="L400">
-                {q.header ||
-                  t('askUserQuestion.questionTab', {
-                    index: qIndex + 1,
-                    total: data.questions.length,
-                  })}
-              </Text>
-            </Badge>
-          ))}
-        </div>
         <div className={CardBody}>
+          <div className={QuestionTabsBar}>
+            {data.questions.map((q, qIndex) => (
+              <button
+                key={q.question}
+                type="button"
+                className={QuestionTab({ active: activeTab === qIndex })}
+                onClick={() => setActiveTab(qIndex)}
+              >
+                <Text as="span" size="B400">
+                  {q.header ||
+                    t('askUserQuestion.questionTab', {
+                      index: qIndex + 1,
+                      total: data.questions.length,
+                    })}
+                </Text>
+              </button>
+            ))}
+          </div>
           <Text size="T300" priority="400" style={{ marginBottom: config.space.S200 }}>
             {currentQuestion.question}
           </Text>
@@ -360,10 +369,7 @@ export function AskUserQuestionCard({
             </div>
           </Box>
         </div>
-        <div
-          className={CardFooter}
-          style={{ display: 'flex', alignItems: 'center', gap: config.space.S200 }}
-        >
+        <div className={QuestionCardFooter}>
           {submitted ? (
             <>
               <Icon src={Icons.Check} size="200" className={SubmittedIcon} />

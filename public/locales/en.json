@@ -989,7 +989,7 @@
     "answerLabel": "A: ",
     "other": "Other",
     "otherPlaceholder": "Enter your answer...",
-    "submit": "Submit",
+    "submit": "Submit answers",
     "submitting": "Submitting...",
     "questionTab": "Q{{index}}/{{total}}",
     "assignedTo": "This question should be answered by {{name}}"

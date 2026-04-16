@@ -31,17 +31,46 @@ export const CardFooter = style({
 
 // Question card styles
 
-export const QuestionTabsBar = style([
-  CardHeader,
-  {
-    display: 'flex',
-    gap: config.space.S100,
-    overflowX: 'auto',
-  },
-]);
+export const QuestionCardFooter = style({
+  padding: cardPadding,
+  display: 'flex',
+  alignItems: 'center',
+  gap: config.space.S200,
+});
 
-export const QuestionTab = style({
-  cursor: 'pointer',
+export const QuestionTabsBar = style({
+  display: 'flex',
+  gap: config.space.S300,
+  marginBottom: config.space.S300,
+});
+
+export const QuestionTab = recipe({
+  base: {
+    padding: `${config.space.S100} 0`,
+    border: 'none',
+    background: 'none',
+    cursor: 'pointer',
+    borderBottom: `2px solid transparent`,
+    marginBottom: `-1px`,
+    color: color.Secondary.Main,
+    transition: 'border-color 0.2s, color 0.2s',
+    selectors: {
+      '&:hover': {
+        color: color.Primary.Main,
+      },
+    },
+  },
+  variants: {
+    active: {
+      true: {
+        color: color.Primary.Main,
+        borderBottomColor: color.Primary.Main,
+      },
+    },
+  },
+  defaultVariants: {
+    active: false,
+  },
 });
 
 export const OptionItem = recipe({
