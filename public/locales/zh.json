@@ -977,7 +977,9 @@
   },
   "Organisms": {
     "RoomCommon": {
-      "changed_room_name": " 更改了房间名称"
+      "changed_room_name": " 更改了房间名称",
+      "changed_room_topic": " 更改了房间话题",
+      "changed_room_avatar": " 更改了房间头像"
     }
   },
   "oidcLogin": {
