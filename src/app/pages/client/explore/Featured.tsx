@@ -37,8 +37,8 @@ export function FeaturedRooms() {
             <Box shrink="No">
               <BackRouteHandler>
                 {(onBack) => (
-                  <IconButton onClick={onBack}>
-                    <Icon src={Icons.ArrowLeft} />
+                  <IconButton size="300" fill="None" onClick={onBack}>
+                    <Icon size="100" src={Icons.ArrowLeft} />
                   </IconButton>
                 )}
               </BackRouteHandler>

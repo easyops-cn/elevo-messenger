@@ -135,7 +135,7 @@ export function RoomSettings({ initialPage, requestClose }: RoomSettingsProps) {
               </Box>
               <Box shrink="No">
                 {screenSize === ScreenSize.Mobile && (
-                  <IconButton onClick={requestClose} variant="Surface">
+                  <IconButton size="300" onClick={requestClose} variant="Surface">
                     <Icon src={Icons.Cross} />
                   </IconButton>
                 )}

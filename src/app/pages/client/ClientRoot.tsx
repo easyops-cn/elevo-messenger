@@ -196,7 +196,7 @@ export function ClientRoot({ children }: ClientRootProps) {
     <AutoDiscovery userId={userId!} baseUrl={baseUrl!}>
       <SpecVersions baseUrl={baseUrl!}>
         {mx && <SyncStatusBridge mx={mx} />}
-        {mx && !(isDesktopTauri && isMacOS()) && <SyncStatus mx={mx} />}
+        {mx && !isDesktopTauri && <SyncStatus mx={mx} />}
         {loading && <ClientRootOptions mx={mx} />}
         {(loadState.status === AsyncStatus.Error || startState.status === AsyncStatus.Error) && (
           <SplashScreen>

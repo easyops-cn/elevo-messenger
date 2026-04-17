@@ -48,8 +48,8 @@ export function HomeCreateChat() {
             <Box grow="Yes" alignItems="Center" gap="200">
               <BackRouteHandler>
                 {(onBack) => (
-                  <IconButton onClick={onBack}>
-                    <Icon src={Icons.ArrowLeft} />
+                  <IconButton size="300" fill="None" onClick={onBack}>
+                    <Icon size="100" src={Icons.ArrowLeft} />
                   </IconButton>
                 )}
               </BackRouteHandler>

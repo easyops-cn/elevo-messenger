@@ -262,7 +262,7 @@ export function DeviceVerification({ request, onExit }: DeviceVerificationProps)
                 <Text size="H4">Device Verification</Text>
               </Box>
               <IconButton size="300" radii="300" onClick={handleCancel}>
-                <Icon src={Icons.Cross} />
+                <Icon size="100" src={Icons.Cross} />
               </IconButton>
             </Header>
             <Box style={{ padding: config.space.S400 }} direction="Column" gap="400">

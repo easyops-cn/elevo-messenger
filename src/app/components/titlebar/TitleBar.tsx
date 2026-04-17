@@ -145,7 +145,7 @@ export function TitleBar() {
           <span className={css.AppTitle}>Elevo Messenger</span>
         </div>
       )}
-      {isMacOS() && <SyncStatusText side="right" />}
+      <SyncStatusText side={isMacOS() ? 'left' : 'center'} />
       {isMacOS() ? <div className={css.TrafficLightSpacer} /> : <WindowControls />}
     </div>
   );

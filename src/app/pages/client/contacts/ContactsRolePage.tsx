@@ -42,8 +42,8 @@ export function ContactsRolePage() {
             {screenSize === ScreenSize.Mobile && (
               <BackRouteHandler>
                 {(onBack) => (
-                  <IconButton onClick={onBack}>
-                    <Icon src={Icons.ArrowLeft} />
+                  <IconButton size="300" fill="None" onClick={onBack}>
+                    <Icon size="100" src={Icons.ArrowLeft} />
                   </IconButton>
                 )}
               </BackRouteHandler>
@@ -51,7 +51,7 @@ export function ContactsRolePage() {
           </Box>
           <Box alignItems="Center" gap="200">
             <Icon size="400" src={ContactIcon} />
-            <Text size="H3" truncate>
+            <Text size="H5" truncate>
               {roleName}
             </Text>
           </Box>
