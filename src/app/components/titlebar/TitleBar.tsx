@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { SyncStatusText } from './SyncStatusText';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import * as css from './TitleBar.css';
@@ -14,7 +15,14 @@ function MinimizeIcon() {
 
 function MaximizeIcon() {
   return (
-    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1">
+    <svg
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1"
+    >
       <rect x="0.5" y="0.5" width="9" height="9" />
     </svg>
   );
@@ -22,7 +30,14 @@ function MaximizeIcon() {
 
 function RestoreIcon() {
   return (
-    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1">
+    <svg
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1"
+    >
       <rect x="0.5" y="2.5" width="7" height="7" />
       <polyline points="2.5,2.5 2.5,0.5 9.5,0.5 9.5,7.5 7.5,7.5" />
     </svg>
@@ -38,7 +53,6 @@ function CloseIcon() {
 }
 
 async function getAppWindow() {
-  const { getCurrentWindow } = await import('@tauri-apps/api/window');
   return getCurrentWindow();
 }
 
@@ -132,11 +146,7 @@ export function TitleBar() {
         </div>
       )}
       {isMacOS() && <SyncStatusText side="right" />}
-      {isMacOS() ? (
-        <div className={css.TrafficLightSpacer} />
-      ) : (
-        <WindowControls />
-      )}
+      {isMacOS() ? <div className={css.TrafficLightSpacer} /> : <WindowControls />}
     </div>
   );
 }

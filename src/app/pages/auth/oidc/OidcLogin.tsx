@@ -1,8 +1,13 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import { Box, Button, Icon, Icons, Spinner, Text, color, config } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { generateOidcAuthorizationUrl, completeAuthorizationCodeGrant } from 'matrix-js-sdk/lib/oidc';
+import {
+  generateOidcAuthorizationUrl,
+  completeAuthorizationCodeGrant,
+} from 'matrix-js-sdk/lib/oidc';
 import { secureRandomString } from 'matrix-js-sdk/lib/randomstring';
 import { createClient } from 'matrix-js-sdk';
 import { useAutoDiscoveryInfo } from '../../../hooks/useAutoDiscoveryInfo';
@@ -46,7 +51,6 @@ export function OidcLogin({ clientId }: OidcLoginProps) {
       });
 
       if (isDesktopTauri) {
-        const { invoke } = await import('@tauri-apps/api/core');
         await invoke('open_oauth_window', { authUrl, label: 'oauth-matrix' });
         settledRef.current = false;
         setOauthPending(true);
@@ -64,7 +68,6 @@ export function OidcLogin({ clientId }: OidcLoginProps) {
     const unlistenPromises: Promise<() => void>[] = [];
 
     const setup = async () => {
-      const { listen } = await import('@tauri-apps/api/event');
       if (cancelled) return;
 
       // Handle the OAuth callback with code/state or error.

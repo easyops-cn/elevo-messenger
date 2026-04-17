@@ -1,5 +1,7 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { listen } from '@tauri-apps/api/event';
+import { relaunch } from '@tauri-apps/plugin-process';
+import { check } from '@tauri-apps/plugin-updater';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import { useSetting } from '../hooks/settings';
 import { settingsAtom } from '../settings';
@@ -69,25 +71,31 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
   const [state, setState] = useState<UpdateState>(initial);
   const [autoUpdateCheck] = useSetting(settingsAtom, 'autoUpdateCheck');
   const checkingRef = useRef(false);
-  const pendingUpdateRef = useRef<Awaited<ReturnType<typeof import('@tauri-apps/plugin-updater').check>> | null>(null);
+  const pendingUpdateRef = useRef<Awaited<ReturnType<typeof check>> | null>(null);
 
   const checkAndPrepare = useCallback(async () => {
     if (!isDesktopTauri || checkingRef.current) return;
     checkingRef.current = true;
 
     try {
-      const { check } = await import('@tauri-apps/plugin-updater');
-
       setState((s) => ({ ...s, checking: true, checked: false, error: null }));
       const update = await check();
 
       if (!update) {
-        setState((s) => ({ ...s, checking: false, checked: true, updateAvailable: false, updateDownloaded: false, downloading: false, error: null }));
+        setState((s) => ({
+          ...s,
+          checking: false,
+          checked: true,
+          updateAvailable: false,
+          updateDownloaded: false,
+          downloading: false,
+          error: null,
+        }));
         checkingRef.current = false;
         return;
       }
 
-      const {version} = update;
+      const { version } = update;
       const body = update.body ?? null;
 
       const isWindows = navigator.userAgent.includes('Windows');
@@ -118,7 +126,12 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
       let downloaded = 0;
       let total = 0;
 
-      const onEvent = (event: { event: 'Started'; data: { contentLength?: number } } | { event: 'Progress'; data: { chunkLength: number } } | { event: 'Finished' }) => {
+      const onEvent = (
+        event:
+          | { event: 'Started'; data: { contentLength?: number } }
+          | { event: 'Progress'; data: { chunkLength: number } }
+          | { event: 'Finished' }
+      ) => {
         switch (event.event) {
           case 'Started':
             total = event.data.contentLength ?? 0;
@@ -190,7 +203,6 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
         progress: { downloaded, total },
       }));
     }
-    const { relaunch } = await import('@tauri-apps/plugin-process');
     await relaunch();
   }, []);
 
@@ -210,16 +222,13 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
     if (!isDesktopTauri) return;
 
     let cancelled = false;
-    const unlistenPromise = listen<{ openSettings: boolean }>(
-      'check-for-updates',
-      (event) => {
-        if (cancelled) return;
-        if (event.payload.openSettings) {
-          emitOpenAbout();
-        }
-        checkAndPrepare();
+    const unlistenPromise = listen<{ openSettings: boolean }>('check-for-updates', (event) => {
+      if (cancelled) return;
+      if (event.payload.openSettings) {
+        emitOpenAbout();
       }
-    );
+      checkAndPrepare();
+    });
 
     return () => {
       cancelled = true;
@@ -229,15 +238,14 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
     };
   }, [checkAndPrepare]);
 
-  const value = useMemo<UpdateCheckerContextValue>(() => ({
-    ...state,
-    checkAndPrepare,
-    applyUpdate,
-  }), [checkAndPrepare, applyUpdate, state])
-
-  return (
-    <UpdateCheckerContext.Provider value={value}>
-      {children}
-    </UpdateCheckerContext.Provider>
+  const value = useMemo<UpdateCheckerContextValue>(
+    () => ({
+      ...state,
+      checkAndPrepare,
+      applyUpdate,
+    }),
+    [checkAndPrepare, applyUpdate, state]
   );
+
+  return <UpdateCheckerContext.Provider value={value}>{children}</UpdateCheckerContext.Provider>;
 }
