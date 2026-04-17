@@ -121,11 +121,11 @@ export function QuestionAnsweredCard({
         <div className={CardBody}>
           {Object.entries(data.answers).map(([question, answers]) => (
             <div key={question} className={AnsweredItem}>
-              <Text size="T300" priority="400">
+              <Text size="T300" priority="300">
                 {t('askUserQuestion.questionLabel')}
                 {question}
               </Text>
-              <Text size="T300" priority="300" style={{ marginTop: config.space.S100 }}>
+              <Text size="T300" priority="500" style={{ marginTop: config.space.S100 }}>
                 {t('askUserQuestion.answerLabel')}
                 {answers.join(', ')}
               </Text>
@@ -188,6 +188,10 @@ export function AskUserQuestionCard({
         }
 
         if (!q.multiSelect) {
+          // 单选时自动跳转到下一题
+          if (qIndex < data.questions.length - 1) {
+            setActiveTab(qIndex + 1);
+          }
           return { ...prev, [qIndex]: [label] };
         }
 
