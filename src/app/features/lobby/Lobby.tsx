@@ -539,10 +539,7 @@ export function Lobby() {
           </Page>
         </PageMain>
         {screenSize === ScreenSize.Desktop && isDrawer && (
-          <>
-            <Line variant="Background" direction="Vertical" size="300" />
-            <MembersDrawer room={space} members={members} />
-          </>
+          <MembersDrawer room={space} members={members} />
         )}
       </Box>
     </PowerLevelsContextProvider>

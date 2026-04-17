@@ -82,9 +82,16 @@ export const PageHeader = recipe({
         // boxShadow: elevoColor.shadow.Header,
       },
     },
+    isMobileMac: {
+      true: {
+        paddingTop: 24,
+        height: toRem(54 + 24),
+      }
+    },
   },
   defaultVariants: {
     outlined: true,
+    isMobileMac: false,
   },
 });
 export type PageHeaderVariants = RecipeVariants<typeof PageHeader>;

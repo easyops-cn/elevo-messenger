@@ -762,16 +762,16 @@ export function Invites() {
             {screenSize === ScreenSize.Mobile && (
               <BackRouteHandler>
                 {(onBack) => (
-                  <IconButton onClick={onBack}>
-                    <Icon src={Icons.ArrowLeft} />
+                  <IconButton size="300" fill="None" onClick={onBack}>
+                    <Icon size="100" src={Icons.ArrowLeft} />
                   </IconButton>
                 )}
               </BackRouteHandler>
             )}
           </Box>
           <Box alignItems="Center" gap="200">
-            {screenSize !== ScreenSize.Mobile && <Icon size="400" src={Icons.Mail} />}
-            <Text size="H3" truncate>
+            {screenSize !== ScreenSize.Mobile && <Icon size="300" src={Icons.Mail} />}
+            <Text size="H5" truncate>
               {t('inbox.invites')}
             </Text>
           </Box>

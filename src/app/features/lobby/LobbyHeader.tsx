@@ -169,15 +169,15 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
             <Box shrink="No">
               <BackRouteHandler>
                 {(onBack) => (
-                  <IconButton fill="None" onClick={onBack}>
-                    <Icon src={Icons.ArrowLeft} />
+                  <IconButton size="300" fill="None" onClick={onBack}>
+                    <Icon size="100" src={Icons.ArrowLeft} />
                   </IconButton>
                 )}
               </BackRouteHandler>
             </Box>
             <Box grow="Yes" justifyContent="Center">
               {showProfile && (
-                <Text size="H3" truncate>
+                <Text size="H5" truncate>
                   {name}
                 </Text>
               )}
@@ -197,7 +197,7 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
                       renderFallback={() => <Text size="H4">{nameInitials(name)}</Text>}
                     />
                   </Avatar>
-                  <Text size="H3" truncate>
+                  <Text size="H5" truncate>
                     {name}
                   </Text>
                 </>
@@ -210,6 +210,7 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
           grow={screenSize === ScreenSize.Mobile ? 'No' : 'Yes'}
           basis={screenSize === ScreenSize.Mobile ? 'Yes' : 'No'}
           justifyContent="End"
+          gap="100"
         >
           {screenSize !== ScreenSize.Mobile && (
             <TooltipProvider
@@ -223,11 +224,12 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
             >
               {(triggerRef) => (
                 <IconButton
+                  size="300"
                   fill="None"
                   ref={triggerRef}
                   onClick={() => setPeopleDrawer((drawer) => !drawer)}
                 >
-                  <Icon size="400" src={UsersIcon} />
+                  <Icon size="100" src={UsersIcon} />
                 </IconButton>
               )}
             </TooltipProvider>
@@ -244,12 +246,13 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
           >
             {(triggerRef) => (
               <IconButton
+                size="300"
                 fill="None"
                 onClick={handleOpenMenu}
                 ref={triggerRef}
                 aria-pressed={!!menuAnchor}
               >
-                <Icon size="400" src={Icons.VerticalDots} filled={!!menuAnchor} />
+                <Icon size="100" src={Icons.VerticalDots} filled={!!menuAnchor} />
               </IconButton>
             )}
           </TooltipProvider>

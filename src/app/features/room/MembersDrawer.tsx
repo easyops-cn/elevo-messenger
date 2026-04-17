@@ -93,6 +93,7 @@ function MemberDrawerHeader({ room }: MemberDrawerHeaderProps) {
           >
             {(triggerRef) => (
               <IconButton
+                size="300"
                 ref={triggerRef}
                 variant="Background"
                 onClick={() => setPeopleDrawer(false)}

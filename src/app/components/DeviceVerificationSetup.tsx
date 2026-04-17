@@ -304,7 +304,7 @@ export const DeviceVerificationSetup = forwardRef<HTMLDivElement, DeviceVerifica
             <Text size="H4">{t('verification.setupTitle')}</Text>
           </Box>
           <IconButton size="300" radii="300" onClick={onCancel}>
-            <Icon src={Icons.Cross} />
+            <Icon size="100" src={Icons.Cross} />
           </IconButton>
         </Header>
         <Box style={{ padding: config.space.S400 }} direction="Column" gap="400">

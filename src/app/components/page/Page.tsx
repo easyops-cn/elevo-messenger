@@ -31,14 +31,18 @@ type ClientDrawerLayoutProps = {
   stretch?: boolean;
   children: ReactNode;
 };
-export function PageNav({ stretch, size, children }: ClientDrawerLayoutProps & css.PageNavVariants) {
+export function PageNav({
+  stretch,
+  size,
+  children,
+}: ClientDrawerLayoutProps & css.PageNavVariants) {
   const screenSize = useScreenSizeContext();
   const isMobile = screenSize === ScreenSize.Mobile;
 
   return (
     <Box
-      grow={stretch ? "Yes" : undefined}
-      shrink={stretch ? "Yes" : "No"}
+      grow={stretch ? 'Yes' : undefined}
+      shrink={stretch ? 'Yes' : 'No'}
       className={css.PageNav({ size })}
       style={{ width: isMobile ? '100%' : undefined }}
     >
@@ -52,7 +56,10 @@ export function PageNav({ stretch, size, children }: ClientDrawerLayoutProps & c
 export const PageNavHeader = as<'header', css.PageNavHeaderVariants>(
   ({ className, modal, ...props }, ref) => (
     <Header
-      className={classNames(css.PageNavHeader({ modal, isDesktopMac: isDesktopTauri && isMacOS() }), className)}
+      className={classNames(
+        css.PageNavHeader({ modal, isDesktopMac: isDesktopTauri && isMacOS() }),
+        className
+      )}
       variant="Background"
       size="600"
       {...props}
@@ -91,7 +98,7 @@ export function PageMain({ children }: { children: ReactNode }) {
     <Box
       grow="Yes"
       direction="Column"
-      className={screenSize === ScreenSize.Desktop ? css.PageMainFloating : undefined}
+      className={screenSize !== ScreenSize.Mobile ? css.PageMainFloating : undefined}
     >
       {children}
     </Box>
@@ -109,15 +116,26 @@ export const Page = as<'div'>(({ className, ...props }, ref) => (
 ));
 
 export const PageHeader = as<'div', css.PageHeaderVariants>(
-  ({ className, outlined, balance, ...props }, ref) => (
-    <Header
-      as="header"
-      size="600"
-      className={classNames(css.PageHeader({ balance, outlined }), className)}
-      {...props}
-      ref={ref}
-    />
-  )
+  ({ className, outlined, balance, ...props }, ref) => {
+    const screenSize = useScreenSizeContext();
+
+    return (
+      <Header
+        as="header"
+        size="600"
+        className={classNames(
+          css.PageHeader({
+            balance,
+            outlined,
+            isMobileMac: isDesktopTauri && isMacOS() && screenSize === ScreenSize.Mobile,
+          }),
+          className
+        )}
+        {...props}
+        ref={ref}
+      />
+    );
+  }
 );
 
 export const PageContent = as<'div'>(({ className, ...props }, ref) => (

@@ -10,13 +10,13 @@ import LogoUnreadSVG from '../../../../public/res/svg/cinny-unread.svg';
 import LogoHighlightSVG from '../../../../public/res/svg/cinny-highlight.svg';
 import NotificationSound from '../../../../public/sound/notification.ogg';
 import InviteSound from '../../../../public/sound/invite.ogg';
-import { notificationPermission, setFavicon } from '../../utils/dom';
+import { setFavicon } from '../../utils/dom';
 import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 import { allInvitesAtom } from '../../state/room-list/inviteList';
 import { usePreviousValue } from '../../hooks/usePreviousValue';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { getMeInvitesPath, getMeNotificationsPath } from '../pathUtils';
+import { getMeInvitesPath } from '../pathUtils';
 import {
   getMemberDisplayName,
   getNotificationType,
@@ -29,6 +29,11 @@ import { useSelectedRoom } from '../../hooks/router/useSelectedRoom';
 import { useInboxNotificationsSelected } from '../../hooks/router/useInbox';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useSdkMessageListener, isDesktopTauri, type SdkMessagePayload } from '../../plugins/useTauriOpener';
+import { useRoomNavigate } from '../../hooks/useRoomNavigate';
+import {
+  sendSystemNotification,
+  type SystemNotificationHandle,
+} from '../../utils/notification';
 
 function SystemEmojiFeature() {
   const [twitterEmoji] = useSetting(settingsAtom, 'twitterEmoji');
@@ -91,18 +96,17 @@ function InviteNotifications() {
   const [notificationSound] = useSetting(settingsAtom, 'isNotificationSounds');
 
   const notify = useCallback(
-    (count: number) => {
-      const noti = new window.Notification('Invitation', {
+    async (count: number) => {
+      await sendSystemNotification({
+        title: 'Invitation',
         icon: LogoSVG,
         badge: LogoSVG,
         body: `You have ${count} new invitation request.`,
         silent: true,
+        onClick: () => {
+          if (!window.closed) navigate(getMeInvitesPath());
+        },
       });
-
-      noti.onclick = () => {
-        if (!window.closed) navigate(getMeInvitesPath());
-        noti.close();
-      };
     },
     [navigate]
   );
@@ -114,8 +118,10 @@ function InviteNotifications() {
 
   useEffect(() => {
     if (invites.length > perviousInviteLen && mx.getSyncState() === 'SYNCING') {
-      if (showNotifications && notificationPermission('granted')) {
-        notify(invites.length - perviousInviteLen);
+      if (showNotifications) {
+        notify(invites.length - perviousInviteLen).catch(() => {
+          // Ignore transient notification send errors.
+        });
       }
 
       if (notificationSound) {
@@ -134,22 +140,24 @@ function InviteNotifications() {
 
 function MessageNotifications() {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const notifRef = useRef<Notification>();
+  const notifyRef = useRef<SystemNotificationHandle>();
   const unreadCacheRef = useRef<Map<string, UnreadInfo>>(new Map());
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const [showNotifications] = useSetting(settingsAtom, 'showNotifications');
   const [notificationSound] = useSetting(settingsAtom, 'isNotificationSounds');
 
-  const navigate = useNavigate();
+  const { navigateRoom } = useRoomNavigate();
   const notificationSelected = useInboxNotificationsSelected();
   const selectedRoomId = useSelectedRoom();
 
   const notify = useCallback(
-    ({
+    async ({
       roomName,
       roomAvatar,
       username,
+      roomId,
+      eventId
     }: {
       roomName: string;
       roomAvatar?: string;
@@ -157,23 +165,23 @@ function MessageNotifications() {
       roomId: string;
       eventId: string;
     }) => {
-      const noti = new window.Notification(roomName, {
+      notifyRef.current?.close();
+      notifyRef.current = await sendSystemNotification({
+        title: roomName,
         icon: roomAvatar,
         badge: roomAvatar,
-        body: `New inbox notification from ${username}`,
+        body: `New message from ${username}`,
         silent: true,
+        onClick: () => {
+          if (!window.closed) {
+            window.focus();
+            navigateRoom(roomId, eventId);
+          }
+          notifyRef.current = undefined;
+        },
       });
-
-      noti.onclick = () => {
-        if (!window.closed) navigate(getMeNotificationsPath());
-        noti.close();
-        notifRef.current = undefined;
-      };
-
-      notifRef.current?.close();
-      notifRef.current = noti;
     },
-    [navigate]
+    [navigateRoom]
   );
 
   const playSound = useCallback(() => {
@@ -216,7 +224,7 @@ function MessageNotifications() {
         return;
       }
 
-      if (showNotifications && notificationPermission('granted')) {
+      if (showNotifications) {
         const avatarMxc =
           room.getAvatarFallbackMember()?.getMxcAvatarUrl() ?? room.getMxcAvatarUrl();
         notify({
@@ -227,6 +235,8 @@ function MessageNotifications() {
           username: getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender) ?? sender,
           roomId: room.roomId,
           eventId,
+        }).catch(() => {
+          // Ignore transient notification send errors.
         });
       }
 

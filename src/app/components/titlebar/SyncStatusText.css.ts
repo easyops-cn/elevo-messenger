@@ -2,9 +2,6 @@ import { style } from '@vanilla-extract/css';
 import { color, toRem } from 'folds';
 
 export const SyncStatusText = style({
-  position: 'absolute',
-  top: '50%',
-  transform: 'translateY(-50%)',
   fontSize: toRem(11),
   fontWeight: 500,
   whiteSpace: 'nowrap',
@@ -16,11 +13,14 @@ export const SyncStatusText = style({
 });
 
 export const positionLeft = style({
-  left: toRem(12),
+  position: 'absolute',
+  top: 'calc(50% + 4px)',
+  transform: 'translateY(-50%)',
+  left: toRem(90),
 });
 
-export const positionRight = style({
-  right: toRem(12),
+export const positionCenter = style({
+  
 });
 
 export const success = style({

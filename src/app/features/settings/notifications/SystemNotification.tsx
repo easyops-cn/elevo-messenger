@@ -7,10 +7,14 @@ import { SequenceCardStyle } from '../styles.css';
 import { SettingTile } from '../../../components/setting-tile';
 import { useSetting } from '../../../state/hooks/settings';
 import { settingsAtom } from '../../../state/settings';
-import { getNotificationState, usePermissionState } from '../../../hooks/usePermission';
+import { useNotificationPermissionState } from '../../../hooks/usePermission';
 import { useEmailNotifications } from '../../../hooks/useEmailNotifications';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
+import {
+  isNotificationSupported,
+  requestNotificationPermission as requestSystemNotificationPermission,
+} from '../../../utils/notification';
 
 function EmailNotification() {
   const { t } = useTranslation();
@@ -92,15 +96,18 @@ function EmailNotification() {
 
 export function SystemNotification() {
   const { t } = useTranslation();
-  const notifPermission = usePermissionState('notifications', getNotificationState());
+  const notifPermission = useNotificationPermissionState();
+  const notificationSupported = isNotificationSupported();
   const [showNotifications, setShowNotifications] = useSetting(settingsAtom, 'showNotifications');
   const [isNotificationSounds, setIsNotificationSounds] = useSetting(
     settingsAtom,
     'isNotificationSounds'
   );
 
-  const requestNotificationPermission = () => {
-    window.Notification.requestPermission();
+  const handleRequestNotificationPermission = () => {
+    requestSystemNotificationPermission().catch(() => {
+      // Permission state is refreshed by the hook when focus returns.
+    });
   };
 
   return (
@@ -117,7 +124,7 @@ export function SystemNotification() {
           description={
             notifPermission === 'denied' ? (
               <Text as="span" style={{ color: color.Critical.Main }} size="T200">
-                {'Notification' in window
+                {notificationSupported
                   ? t('settings.notificationSettings.desktopNotificationsBlocked')
                   : t('settings.notificationSettings.desktopNotificationsUnsupported')}
               </Text>
@@ -127,7 +134,7 @@ export function SystemNotification() {
           }
           after={
             notifPermission === 'prompt' ? (
-              <Button size="300" radii="300" onClick={requestNotificationPermission}>
+              <Button size="300" radii="300" onClick={handleRequestNotificationPermission}>
                 <Text size="B300">{t('common.enable')}</Text>
               </Button>
             ) : (

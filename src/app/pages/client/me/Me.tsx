@@ -3,10 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Avatar, Box, Icon, Icons, Text } from 'folds';
 import { useAtomValue } from 'jotai';
 import { NavCategory, NavItem, NavItemContent, NavLink } from '../../../components/nav';
-import { getMeInvitesPath, getMeNotificationsPath } from '../../pathUtils';
+import { getMeInvitesPath } from '../../pathUtils';
 import {
   useMeInvitesSelected,
-  useMeNotificationsSelected,
 } from '../../../hooks/router/useMe';
 import { UnreadBadge } from '../../../components/unread-badge';
 import { allInvitesAtom } from '../../../state/room-list/inviteList';
@@ -51,7 +50,6 @@ function InvitesNavItem() {
 export function Me() {
   useNavToActivePathMapper('me');
   const { t } = useTranslation();
-  const notificationsSelected = useMeNotificationsSelected();
 
   const [settings, setSettings] = useState(false);
   const [initialPage, setInitialPage] = useState<SettingsPages | undefined>(undefined);
@@ -84,22 +82,6 @@ export function Me() {
       <PageNavContent>
         <Box direction="Column" gap="300">
           <NavCategory>
-            <NavItem variant="Background" radii="400" aria-selected={notificationsSelected}>
-              <NavLink to={getMeNotificationsPath()}>
-                <NavItemContent>
-                  <Box as="span" grow="Yes" alignItems="Center" gap="200">
-                    <Avatar size="200" radii="400">
-                      <Icon src={Icons.MessageUnread} size="100" filled={notificationsSelected} />
-                    </Avatar>
-                    <Box as="span" grow="Yes">
-                      <Text as="span" size="Inherit" truncate>
-                        {t('settings.notifications')}
-                      </Text>
-                    </Box>
-                  </Box>
-                </NavItemContent>
-              </NavLink>
-            </NavItem>
             <InvitesNavItem />
             <NavItem variant="Background" radii="400">
               <button onClick={() => openSettings()} type="button" style={{ width: '100%' }}>

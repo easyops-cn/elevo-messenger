@@ -5,7 +5,7 @@ import { syncStateAtom } from '../../state/syncState';
 import * as css from './SyncStatusText.css';
 
 type SyncStatusTextProps = {
-  side: 'left' | 'right';
+  side: 'left' | 'center';
 };
 
 export function SyncStatusText({ side }: SyncStatusTextProps) {
@@ -36,7 +36,7 @@ export function SyncStatusText({ side }: SyncStatusTextProps) {
   return (
     <span
       className={`${css.SyncStatusText} ${css[variant]} ${
-        side === 'right' ? css.positionRight : css.positionLeft
+        side === 'center' ? css.positionCenter : css.positionLeft
       }`}
     >
       {text}

@@ -28,7 +28,13 @@ import { useVirtualizer } from '@tanstack/react-virtual';
 import { HTMLReactParserOptions } from 'html-react-parser';
 import { Opts as LinkifyOpts } from 'linkifyjs';
 import { useAtomValue } from 'jotai';
-import { Page, PageContent, PageContentCenter, PageHeader, PageMain } from '../../../components/page';
+import {
+  Page,
+  PageContent,
+  PageContentCenter,
+  PageHeader,
+  PageMain,
+} from '../../../components/page';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { getMxIdLocalPart, mxcUrlToHttp } from '../../../utils/matrix';
 import { InboxNotificationsPathSearchParams } from '../../paths';
@@ -280,6 +286,7 @@ function RoomNotificationsGroupComp({
             htmlReactParserOptions={htmlReactParserOptions}
             linkifyOpts={linkifyOpts}
             outlineAttachment
+            readOnly
           />
         );
       },
@@ -338,6 +345,7 @@ function RoomNotificationsGroupComp({
                     urlPreview={urlPreview}
                     htmlReactParserOptions={htmlReactParserOptions}
                     linkifyOpts={linkifyOpts}
+                    readOnly
                   />
                 );
               }
@@ -649,16 +657,16 @@ export function Notifications() {
               {screenSize === ScreenSize.Mobile && (
                 <BackRouteHandler>
                   {(onBack) => (
-                    <IconButton onClick={onBack}>
-                      <Icon src={Icons.ArrowLeft} />
+                    <IconButton size="300" fill="None" onClick={onBack}>
+                      <Icon size="100" src={Icons.ArrowLeft} />
                     </IconButton>
                   )}
                 </BackRouteHandler>
               )}
             </Box>
             <Box alignItems="Center" gap="200">
-              {screenSize !== ScreenSize.Mobile && <Icon size="400" src={Icons.Message} />}
-              <Text size="H3" truncate>
+              {screenSize !== ScreenSize.Mobile && <Icon size="300" src={Icons.Message} />}
+              <Text size="H5" truncate>
                 {t('notifications.title')}
               </Text>
             </Box>
@@ -666,92 +674,118 @@ export function Notifications() {
           </Box>
         </PageHeader>
 
-      <Box style={{ position: 'relative' }} grow="Yes">
-        <Scroll ref={scrollRef} hideTrack visibility="Hover">
-          <PageContent>
-            <PageContentCenter>
-              <Box direction="Column" gap="200">
-                <Box ref={scrollTopAnchorRef} direction="Column" gap="100">
-                  <span data-spacing-node />
-                  <Text size="L400">{t('common.filter')}</Text>
-                  <Box gap="200">
-                    <Chip
-                      onClick={() => setOnlyHighlighted(false)}
-                      variant={!onlyHighlight ? 'Success' : 'Surface'}
-                      aria-pressed={!onlyHighlight}
-                      before={!onlyHighlight && <Icon size="100" src={Icons.Check} />}
-                      outlined
-                    >
-                      <Text size="T200">{t('notifications.allNotifications')}</Text>
-                    </Chip>
-                    <Chip
-                      onClick={() => setOnlyHighlighted(true)}
-                      variant={onlyHighlight ? 'Success' : 'Surface'}
-                      aria-pressed={onlyHighlight}
-                      before={onlyHighlight && <Icon size="100" src={Icons.Check} />}
-                      outlined
-                    >
-                      <Text size="T200">{t('notifications.highlighted')}</Text>
-                    </Chip>
-                  </Box>
-                </Box>
-                <ScrollTopContainer
-                  scrollRef={scrollRef}
-                  anchorRef={scrollTopAnchorRef}
-                  onVisibilityChange={handleScrollTopVisibility}
-                >
-                  <IconButton
-                    onClick={() => virtualizer.scrollToOffset(0)}
-                    variant="SurfaceVariant"
-                    radii="Pill"
-                    outlined
-                    size="300"
-                    aria-label={t('common.scrollToTop')}
-                  >
-                    <Icon src={Icons.ChevronTop} size="300" />
-                  </IconButton>
-                </ScrollTopContainer>
-                <div
-                  style={{
-                    position: 'relative',
-                    height: virtualizer.getTotalSize(),
-                  }}
-                >
-                  {vItems.map((vItem) => {
-                    const group = notificationTimeline.groups[vItem.index];
-                    if (!group) return null;
-                    const groupRoom = mx.getRoom(group.roomId);
-                    if (!groupRoom) return null;
-
-                    return (
-                      <VirtualTile
-                        virtualItem={vItem}
-                        style={{ paddingTop: config.space.S500 }}
-                        ref={virtualizer.measureElement}
-                        key={vItem.index}
+        <Box style={{ position: 'relative' }} grow="Yes">
+          <Scroll ref={scrollRef} hideTrack visibility="Hover">
+            <PageContent>
+              <PageContentCenter>
+                <Box direction="Column" gap="200">
+                  <Box ref={scrollTopAnchorRef} direction="Column" gap="100">
+                    <span data-spacing-node />
+                    <Text size="L400">{t('common.filter')}</Text>
+                    <Box gap="200">
+                      <Chip
+                        onClick={() => setOnlyHighlighted(false)}
+                        variant={!onlyHighlight ? 'Success' : 'Surface'}
+                        aria-pressed={!onlyHighlight}
+                        before={!onlyHighlight && <Icon size="100" src={Icons.Check} />}
+                        outlined
                       >
-                        <RoomNotificationsGroupComp
-                          room={groupRoom}
-                          notifications={group.notifications}
-                          mediaAutoLoad={mediaAutoLoad}
-                          urlPreview={urlPreview}
-                          hideActivity={hideActivity}
-                          onOpen={navigateRoom}
-                          legacyUsernameColor={
-                            legacyUsernameColor || mDirects.has(groupRoom.roomId)
-                          }
-                          hour24Clock={hour24Clock}
-                          dateFormatString={dateFormatString}
-                        />
-                      </VirtualTile>
-                    );
-                  })}
-                </div>
+                        <Text size="T200">{t('notifications.allNotifications')}</Text>
+                      </Chip>
+                      <Chip
+                        onClick={() => setOnlyHighlighted(true)}
+                        variant={onlyHighlight ? 'Success' : 'Surface'}
+                        aria-pressed={onlyHighlight}
+                        before={onlyHighlight && <Icon size="100" src={Icons.Check} />}
+                        outlined
+                      >
+                        <Text size="T200">{t('notifications.highlighted')}</Text>
+                      </Chip>
+                    </Box>
+                  </Box>
+                  <ScrollTopContainer
+                    scrollRef={scrollRef}
+                    anchorRef={scrollTopAnchorRef}
+                    onVisibilityChange={handleScrollTopVisibility}
+                  >
+                    <IconButton
+                      onClick={() => virtualizer.scrollToOffset(0)}
+                      variant="SurfaceVariant"
+                      radii="Pill"
+                      outlined
+                      size="300"
+                      aria-label={t('common.scrollToTop')}
+                    >
+                      <Icon src={Icons.ChevronTop} size="300" />
+                    </IconButton>
+                  </ScrollTopContainer>
+                  <div
+                    style={{
+                      position: 'relative',
+                      height: virtualizer.getTotalSize(),
+                    }}
+                  >
+                    {vItems.map((vItem) => {
+                      const group = notificationTimeline.groups[vItem.index];
+                      if (!group) return null;
+                      const groupRoom = mx.getRoom(group.roomId);
+                      if (!groupRoom) return null;
 
-                {timelineState.status === AsyncStatus.Success &&
-                  notificationTimeline.groups.length === 0 && (
+                      return (
+                        <VirtualTile
+                          virtualItem={vItem}
+                          style={{ paddingTop: config.space.S500 }}
+                          ref={virtualizer.measureElement}
+                          key={vItem.index}
+                        >
+                          <RoomNotificationsGroupComp
+                            room={groupRoom}
+                            notifications={group.notifications}
+                            mediaAutoLoad={mediaAutoLoad}
+                            urlPreview={urlPreview}
+                            hideActivity={hideActivity}
+                            onOpen={navigateRoom}
+                            legacyUsernameColor={
+                              legacyUsernameColor || mDirects.has(groupRoom.roomId)
+                            }
+                            hour24Clock={hour24Clock}
+                            dateFormatString={dateFormatString}
+                          />
+                        </VirtualTile>
+                      );
+                    })}
+                  </div>
+
+                  {timelineState.status === AsyncStatus.Success &&
+                    notificationTimeline.groups.length === 0 && (
+                      <Box
+                        className={ContainerColor({ variant: 'SurfaceVariant' })}
+                        style={{
+                          padding: config.space.S300,
+                          borderRadius: config.radii.R400,
+                        }}
+                        direction="Column"
+                        gap="200"
+                      >
+                        <Text>{t('notifications.noNotifications')}</Text>
+                        <Text size="T200">{t('notifications.noNotificationsDesc')}</Text>
+                      </Box>
+                    )}
+
+                  {timelineState.status === AsyncStatus.Loading && (
+                    <Box direction="Column" gap="100">
+                      {[...Array(8).keys()].map((key) => (
+                        <SequenceCard
+                          variant="SurfaceVariant"
+                          key={key}
+                          style={{ minHeight: toRem(80) }}
+                        />
+                      ))}
+                    </Box>
+                  )}
+                  {timelineState.status === AsyncStatus.Error && (
                     <Box
-                      className={ContainerColor({ variant: 'SurfaceVariant' })}
+                      className={ContainerColor({ variant: 'Critical' })}
                       style={{
                         padding: config.space.S300,
                         borderRadius: config.radii.R400,
@@ -759,42 +793,16 @@ export function Notifications() {
                       direction="Column"
                       gap="200"
                     >
-                      <Text>{t('notifications.noNotifications')}</Text>
-                      <Text size="T200">{t('notifications.noNotificationsDesc')}</Text>
+                      <Text size="L400">{(timelineState.error as Error).name}</Text>
+                      <Text size="T300">{(timelineState.error as Error).message}</Text>
                     </Box>
                   )}
-
-                {timelineState.status === AsyncStatus.Loading && (
-                  <Box direction="Column" gap="100">
-                    {[...Array(8).keys()].map((key) => (
-                      <SequenceCard
-                        variant="SurfaceVariant"
-                        key={key}
-                        style={{ minHeight: toRem(80) }}
-                      />
-                    ))}
-                  </Box>
-                )}
-                {timelineState.status === AsyncStatus.Error && (
-                  <Box
-                    className={ContainerColor({ variant: 'Critical' })}
-                    style={{
-                      padding: config.space.S300,
-                      borderRadius: config.radii.R400,
-                    }}
-                    direction="Column"
-                    gap="200"
-                  >
-                    <Text size="L400">{(timelineState.error as Error).name}</Text>
-                    <Text size="T300">{(timelineState.error as Error).message}</Text>
-                  </Box>
-                )}
-              </Box>
-            </PageContentCenter>
-          </PageContent>
-        </Scroll>
-      </Box>
-    </Page>
+                </Box>
+              </PageContentCenter>
+            </PageContent>
+          </Scroll>
+        </Box>
+      </Page>
     </PageMain>
   );
 }

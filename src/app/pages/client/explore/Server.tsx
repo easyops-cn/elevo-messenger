@@ -496,8 +496,8 @@ export function PublicRooms() {
             </Box>
 
             <Box grow="No" justifyContent="Center" alignItems="Center" gap="200">
-              {screenSize !== ScreenSize.Mobile && <Icon size="400" src={Icons.Search} />}
-              <Text size="H3" truncate>
+              {screenSize !== ScreenSize.Mobile && <Icon size="300" src={Icons.Search} />}
+              <Text size="H5" truncate>
                 {t('common.search')}
               </Text>
             </Box>
@@ -509,16 +509,16 @@ export function PublicRooms() {
               {screenSize === ScreenSize.Mobile && (
                 <BackRouteHandler>
                   {(onBack) => (
-                    <IconButton onClick={onBack}>
-                      <Icon src={Icons.ArrowLeft} />
+                    <IconButton size="300" fill="None" onClick={onBack}>
+                      <Icon size="100" src={Icons.ArrowLeft} />
                     </IconButton>
                   )}
                 </BackRouteHandler>
               )}
             </Box>
             <Box grow="Yes" justifyContent="Center" alignItems="Center" gap="200">
-              {screenSize !== ScreenSize.Mobile && <Icon size="400" src={Icons.Server} />}
-              <Text size="H3" truncate>
+              {screenSize !== ScreenSize.Mobile && <Icon size="300" src={Icons.Server} />}
+              <Text size="H5" truncate>
                 {server}
               </Text>
             </Box>

@@ -1420,7 +1420,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
                 <Box grow="No" direction="Column">
                   <Text size="T300" priority="300">
                     <b>{senderName}</b>
-                    {' changed room topic'}
+                    {t('Organisms.RoomCommon.changed_room_topic')}
                   </Text>
                 </Box>
               }
@@ -1463,7 +1463,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
                 <Box grow="No" direction="Column">
                   <Text size="T300" priority="300">
                     <b>{senderName}</b>
-                    {' changed room avatar'}
+                    {t('Organisms.RoomCommon.changed_room_avatar')}
                   </Text>
                 </Box>
               }

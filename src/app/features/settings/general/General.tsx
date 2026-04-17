@@ -1096,12 +1096,12 @@ export function General({ requestClose }: GeneralProps) {
       <PageHeader outlined={false}>
         <Box grow="Yes" gap="200">
           <Box grow="Yes" alignItems="Center" gap="200">
-            <Text size="H3" truncate>
+            <Text size="H5" truncate>
               {t('settings.general')}
             </Text>
           </Box>
           <Box shrink="No">
-            <IconButton onClick={requestClose} variant="Surface">
+            <IconButton size="300" onClick={requestClose} variant="Surface">
               <Icon src={Icons.Cross} />
             </IconButton>
           </Box>

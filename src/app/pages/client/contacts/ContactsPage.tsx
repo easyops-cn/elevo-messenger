@@ -468,53 +468,53 @@ export function ContactsPage() {
     <PageMain>
       <Page>
         <PageHeader balance>
-        <Box grow="Yes" gap="200">
-          <Box grow="Yes" basis="No">
-            {screenSize === ScreenSize.Mobile && (
-              <BackRouteHandler>
-                {(onBack) => (
-                  <IconButton onClick={onBack}>
-                    <Icon src={Icons.ArrowLeft} />
-                  </IconButton>
-                )}
-              </BackRouteHandler>
-            )}
+          <Box grow="Yes" gap="200">
+            <Box grow="Yes" basis="No">
+              {screenSize === ScreenSize.Mobile && (
+                <BackRouteHandler>
+                  {(onBack) => (
+                    <IconButton size="300" fill="None" onClick={onBack}>
+                      <Icon size="100" src={Icons.ArrowLeft} />
+                    </IconButton>
+                  )}
+                </BackRouteHandler>
+              )}
+            </Box>
+            <Box alignItems="Center" gap="200">
+              {screenSize !== ScreenSize.Mobile && <Icon size="300" src={ContactIcon} />}
+              <Text size="H5" truncate>
+                {t('contacts.title')}
+              </Text>
+            </Box>
+            <Box grow="Yes" basis="No" />
           </Box>
-          <Box alignItems="Center" gap="200">
-            {screenSize !== ScreenSize.Mobile && <Icon size="400" src={ContactIcon} />}
-            <Text size="H3" truncate>
-              {t('contacts.title')}
-            </Text>
-          </Box>
-          <Box grow="Yes" basis="No" />
-        </Box>
-      </PageHeader>
+        </PageHeader>
 
-      <Box style={{ position: 'relative' }} grow="Yes">
-        {room ? (
-          <ContactsRoomMembers room={room} />
-        ) : (
-          <Scroll hideTrack visibility="Hover">
-            <PageContent>
-              <PageContentCenter>
-                <Box
-                  className={ContainerColor({ variant: 'SurfaceVariant' })}
-                  style={{
-                    padding: config.space.S300,
-                    borderRadius: config.radii.R400,
-                  }}
-                  direction="Column"
-                  gap="200"
-                >
-                  <Text>{t('contacts.roomNotFound')}</Text>
-                  <Text size="T200">{t('contacts.roomNotFoundDesc')}</Text>
-                </Box>
-              </PageContentCenter>
-            </PageContent>
-          </Scroll>
-        )}
-      </Box>
-    </Page>
+        <Box style={{ position: 'relative' }} grow="Yes">
+          {room ? (
+            <ContactsRoomMembers room={room} />
+          ) : (
+            <Scroll hideTrack visibility="Hover">
+              <PageContent>
+                <PageContentCenter>
+                  <Box
+                    className={ContainerColor({ variant: 'SurfaceVariant' })}
+                    style={{
+                      padding: config.space.S300,
+                      borderRadius: config.radii.R400,
+                    }}
+                    direction="Column"
+                    gap="200"
+                  >
+                    <Text>{t('contacts.roomNotFound')}</Text>
+                    <Text size="T200">{t('contacts.roomNotFoundDesc')}</Text>
+                  </Box>
+                </PageContentCenter>
+              </PageContent>
+            </Scroll>
+          )}
+        </Box>
+      </Page>
     </PageMain>
   );
 }

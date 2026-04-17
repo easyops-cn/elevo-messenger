@@ -1,16 +1,42 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { getNotificationPermission } from '../utils/notification';
 
-export const getNotificationState = (): PermissionState => {
-  if ('Notification' in window) {
-    if (window.Notification.permission === 'default') {
-      return 'prompt';
-    }
+export const getNotificationState = (): PermissionState => 'prompt';
 
-    return window.Notification.permission;
-  }
+export function useNotificationPermissionState(initialValue: PermissionState = 'prompt') {
+  const [permissionState, setPermissionState] = useState<PermissionState>(initialValue);
 
-  return 'denied';
-};
+  const refreshPermissionState = useCallback(() => {
+    getNotificationPermission()
+      .then(setPermissionState)
+      .catch(() => {
+        setPermissionState('denied');
+      });
+  }, []);
+
+  useEffect(() => {
+    refreshPermissionState();
+
+    const focusHandler = () => {
+      refreshPermissionState();
+    };
+    const visibilityHandler = () => {
+      if (document.visibilityState === 'visible') {
+        refreshPermissionState();
+      }
+    };
+
+    window.addEventListener('focus', focusHandler);
+    document.addEventListener('visibilitychange', visibilityHandler);
+
+    return () => {
+      window.removeEventListener('focus', focusHandler);
+      document.removeEventListener('visibilitychange', visibilityHandler);
+    };
+  }, [refreshPermissionState]);
+
+  return permissionState;
+}
 
 export function usePermissionState(name: PermissionName, initialValue: PermissionState = 'prompt') {
   const [permissionState, setPermissionState] = useState<PermissionState>(initialValue);

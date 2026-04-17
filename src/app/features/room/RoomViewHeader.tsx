@@ -33,7 +33,7 @@ import { useIsDirectRoom, useRoom } from '../../hooks/useRoom';
 import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 import { useSpaceOptionally } from '../../hooks/useSpace';
-import { getHomeSearchPath, getSpaceSearchPath, withSearchParam } from '../../pages/pathUtils';
+import { getHomeSearchPath, withSearchParam } from '../../pages/pathUtils';
 import { getCanonicalAliasOrRoomId, isRoomAlias } from '../../utils/matrix';
 import { _SearchPathSearchParams } from '../../pages/paths';
 import * as css from './RoomViewHeader.css';
@@ -257,10 +257,8 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
 
 export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const navigate = useNavigate();
-  const mx = useMatrixClient();
   const screenSize = useScreenSizeContext();
   const room = useRoom();
-  const space = useSpaceOptionally();
   const [menuAnchor, setMenuAnchor] = useState<RectCords>();
   const [pinMenuAnchor, setPinMenuAnchor] = useState<RectCords>();
   const elevoConfig = useElevoConfig();
@@ -302,9 +300,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
     const searchParams: _SearchPathSearchParams = {
       rooms: room.roomId,
     };
-    const path = space
-      ? getSpaceSearchPath(getCanonicalAliasOrRoomId(mx, space.roomId))
-      : getHomeSearchPath();
+    const path = getHomeSearchPath();
     navigate(withSearchParam(path, searchParams));
   };
 

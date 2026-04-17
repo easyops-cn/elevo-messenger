@@ -20,13 +20,10 @@ import {
   INBOX_PATH,
   REGISTER_PATH,
   RESET_PASSWORD_PATH,
-  SPACE_PATH,
   OIDC_CALLBACK_PATH,
   _CREATE_PATH,
   _FEATURED_PATH,
   _INVITES_PATH,
-  _LOBBY_PATH,
-  _NOTIFICATIONS_PATH,
   _ROOM_PATH,
   _SEARCH_PATH,
   _SERVER_PATH,
@@ -44,19 +41,18 @@ import {
   getHomePath,
   getHomeCreateChatPath,
   getHomeRoomPath,
-  getInboxNotificationsPath,
   getContactsContactsPath,
   getLoginPath,
   getOriginBaseUrl,
-  getSpaceLobbyPath,
-  getMeNotificationsPath,
+  getMeInvitesPath,
+  getInboxInvitesPath,
+  getMePath,
 } from './pathUtils';
 import { ClientBindAtoms, ClientLayout, ClientRoot } from './client';
 import { Home, HomeRouteRoomProvider, HomeSearch } from './client/home';
-import { RouteSpaceProvider, Space, SpaceRouteRoomProvider, SpaceSearch } from './client/space';
 import { Explore, FeaturedRooms, PublicRooms } from './client/explore';
 import { ExploreSpaceProvider } from './client/explore/ExploreSpaceProvider';
-import { Notifications, Inbox, Invites } from './client/inbox';
+import { Invites } from './client/inbox';
 import { Contacts, ContactsPage, ContactsProvider, ContactsRolePage } from './client/contacts';
 import { Me } from './client/me';
 import { setAfterLoginRedirectPath } from './afterLoginRedirectPath';
@@ -218,46 +214,6 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           }}
         />
         <Route
-          path={SPACE_PATH}
-          element={
-            <RouteSpaceProvider>
-              <PageRoot
-                nav={
-                  <MobileFriendlyPageNav path={SPACE_PATH}>
-                    <Space />
-                  </MobileFriendlyPageNav>
-                }
-              >
-                <Outlet />
-              </PageRoot>
-            </RouteSpaceProvider>
-          }
-        >
-          {mobile ? null : (
-            <Route
-              index
-              loader={({ params }) => {
-                const { spaceIdOrAlias } = params;
-                if (spaceIdOrAlias) {
-                  return redirect(getSpaceLobbyPath(spaceIdOrAlias));
-                }
-                return null;
-              }}
-              element={<WelcomePage />}
-            />
-          )}
-          <Route path={_LOBBY_PATH} element={<Lobby />} />
-          <Route path={_SEARCH_PATH} element={<SpaceSearch />} />
-          <Route
-            path={_ROOM_PATH}
-            element={
-              <SpaceRouteRoomProvider>
-                <Room />
-              </SpaceRouteRoomProvider>
-            }
-          />
-        </Route>
-        <Route
           path={EXPLORE_PATH}
           element={
             <PageRoot
@@ -292,28 +248,12 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
         <Route path={CREATE_PATH} element={<Create />} />
         <Route
           path={INBOX_PATH}
-          element={
-            <PageRoot
-              nav={
-                <MobileFriendlyPageNav path={INBOX_PATH}>
-                  <Inbox />
-                </MobileFriendlyPageNav>
-              }
-            >
-              <Outlet />
-            </PageRoot>
-          }
-        >
-          {mobile ? null : (
-            <Route
-              index
-              loader={() => redirect(getInboxNotificationsPath())}
-              element={<WelcomePage />}
-            />
-          )}
-          <Route path={_NOTIFICATIONS_PATH} element={<Notifications />} />
-          <Route path={_INVITES_PATH} element={<Invites />} />
-        </Route>
+          loader={() => redirect(getMePath())}
+        />
+        <Route
+          path={getInboxInvitesPath()}
+          loader={() => redirect(getMeInvitesPath())}
+        />
         <Route
           path={CONTACTS_PATH}
           element={
@@ -357,11 +297,10 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           {mobile ? <Route index element={<div />} /> : (
             <Route
               index
-              loader={() => redirect(getMeNotificationsPath())}
+              loader={() => redirect(getMeInvitesPath())}
               element={<WelcomePage />}
             />
           )}
-          <Route path={_NOTIFICATIONS_PATH} element={<Notifications />} />
           <Route path={_INVITES_PATH} element={<Invites />} />
         </Route>
       </Route>

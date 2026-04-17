@@ -121,11 +121,11 @@ export function QuestionAnsweredCard({
         <div className={CardBody}>
           {Object.entries(data.answers).map(([question, answers]) => (
             <div key={question} className={AnsweredItem}>
-              <Text size="T300" priority="400">
+              <Text size="T300" priority="300">
                 {t('askUserQuestion.questionLabel')}
                 {question}
               </Text>
-              <Text size="T300" priority="300" style={{ marginTop: config.space.S100 }}>
+              <Text size="T300" priority="500" style={{ marginTop: config.space.S100 }}>
                 {t('askUserQuestion.answerLabel')}
                 {answers.join(', ')}
               </Text>
@@ -140,9 +140,11 @@ export function QuestionAnsweredCard({
 export function AskUserQuestionCard({
   data,
   style,
+  readOnly,
 }: {
   data: AskUserQuestionData;
   style?: CSSProperties;
+  readOnly?: boolean;
 }) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
@@ -155,6 +157,7 @@ export function AskUserQuestionCard({
   const [activeTab, setActiveTab] = useState(0);
 
   const isAssignedUser = !data.userId || mx.getUserId() === data.userId;
+  const isDisabled = !isAssignedUser || submitted || readOnly;
   const assignedDisplayName = data.userId
     ? getMemberDisplayName(room, data.userId) ?? getMxIdLocalPart(data.userId) ?? data.userId
     : undefined;
@@ -171,7 +174,7 @@ export function AskUserQuestionCard({
 
   const handleOptionToggle = useCallback(
     (qIndex: number, label: string, isOther: boolean) => {
-      if (submitted) return;
+      if (isDisabled) return;
       const q = data.questions[qIndex];
 
       setSelections((prev) => {
@@ -188,6 +191,10 @@ export function AskUserQuestionCard({
         }
 
         if (!q.multiSelect) {
+          // 单选时自动跳转到下一题
+          if (qIndex < data.questions.length - 1) {
+            setActiveTab(qIndex + 1);
+          }
           return { ...prev, [qIndex]: [label] };
         }
 
@@ -197,7 +204,7 @@ export function AskUserQuestionCard({
         return { ...prev, [qIndex]: [...current, label] };
       });
     },
-    [data.questions, submitted]
+    [data.questions, isDisabled]
   );
 
   const handleSubmit = useCallback(async () => {
@@ -270,8 +277,8 @@ export function AskUserQuestionCard({
                 <div
                   key={opt.label}
                   className={OptionItem({
-                    selected: isAssignedUser && !submitted && isSelected,
-                    disabled: !isAssignedUser || submitted,
+                    selected: isAssignedUser && !isDisabled && isSelected,
+                    disabled: isDisabled,
                   })}
                   onClick={() => handleOptionToggle(activeTab, opt.label, false)}
                   onKeyDown={(e) => {
@@ -282,15 +289,15 @@ export function AskUserQuestionCard({
                   }}
                   role={currentQuestion.multiSelect ? 'checkbox' : 'radio'}
                   aria-checked={isSelected}
-                  tabIndex={isAssignedUser && !submitted ? 0 : -1}
+                  tabIndex={!isDisabled ? 0 : -1}
                 >
                   <Icon
                     src={
                       currentQuestion.multiSelect
-                        ? !isAssignedUser || submitted
+                        ? isDisabled
                           ? DisabledCheckboxIcon
                           : CheckboxIcon
-                        : !isAssignedUser || submitted
+                        : isDisabled
                         ? DisabledRadioIcon
                         : RadioIcon
                     }
@@ -314,8 +321,8 @@ export function AskUserQuestionCard({
             {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
             <div
               className={OptionItem({
-                selected: isAssignedUser && !submitted && hasOtherSelected,
-                disabled: !isAssignedUser || submitted,
+                selected: isAssignedUser && !isDisabled && hasOtherSelected,
+                disabled: isDisabled,
               })}
               onClick={() => handleOptionToggle(activeTab, 'Other:', true)}
               onKeyDown={(e) => {
@@ -326,15 +333,15 @@ export function AskUserQuestionCard({
               }}
               role={currentQuestion.multiSelect ? 'checkbox' : 'radio'}
               aria-checked={hasOtherSelected}
-              tabIndex={isAssignedUser && !submitted ? 0 : -1}
+              tabIndex={isAssignedUser && !submitted && !readOnly ? 0 : -1}
             >
               <Icon
                 src={
                   currentQuestion.multiSelect
-                    ? !isAssignedUser || submitted
+                    ? isDisabled
                       ? DisabledCheckboxIcon
                       : CheckboxIcon
-                    : !isAssignedUser || submitted
+                    : isDisabled
                     ? DisabledRadioIcon
                     : RadioIcon
                 }
@@ -359,7 +366,7 @@ export function AskUserQuestionCard({
                       }
                     }}
                     placeholder={t('askUserQuestion.otherPlaceholder')}
-                    disabled={!isAssignedUser || submitted}
+                    disabled={isDisabled}
                     className={OtherInput}
                     // eslint-disable-next-line jsx-a11y/no-autofocus
                     autoFocus
@@ -382,9 +389,9 @@ export function AskUserQuestionCard({
               <button
                 type="button"
                 className={SubmitButton({
-                  disabled: !canSubmit || submitting || !isAssignedUser,
+                  disabled: !canSubmit || submitting || isDisabled,
                 })}
-                disabled={!canSubmit || submitting || !isAssignedUser}
+                disabled={!canSubmit || submitting || isDisabled}
                 onClick={handleSubmit}
               >
                 {submitting ? t('askUserQuestion.submitting') : t('askUserQuestion.submit')}

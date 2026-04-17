@@ -372,7 +372,7 @@ export function PowersEditor({ powerLevels, requestClose }: PowersEditorProps) {
             </Chip>
           </Box>
           <Box shrink="No">
-            <IconButton onClick={requestClose} variant="Surface">
+            <IconButton size="300" onClick={requestClose} variant="Surface">
               <Icon src={Icons.Cross} />
             </IconButton>
           </Box>
