@@ -110,6 +110,11 @@
   },
   "room": {
     "markAsRead": "Mark as Read",
+    "newMessages": "New Messages",
+    "jumpToUnread": "Jump to Unread",
+    "jumpToLatest": "Jump to Latest",
+    "today": "Today",
+    "yesterday": "Yesterday",
     "notifications": "Notifications",
     "invite": "Invite",
     "copyLink": "Copy Link",

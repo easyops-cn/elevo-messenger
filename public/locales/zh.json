@@ -110,6 +110,11 @@
   },
   "room": {
     "markAsRead": "标记为已读",
+    "newMessages": "新消息",
+    "jumpToUnread": "跳转到未读",
+    "jumpToLatest": "跳转到最新",
+    "today": "今天",
+    "yesterday": "昨天",
     "notifications": "通知",
     "invite": "邀请",
     "copyLink": "复制链接",
