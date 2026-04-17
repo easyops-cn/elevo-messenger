@@ -16,7 +16,7 @@ import { settingsAtom } from '../../state/settings';
 import { allInvitesAtom } from '../../state/room-list/inviteList';
 import { usePreviousValue } from '../../hooks/usePreviousValue';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { getMeInvitesPath, getMeNotificationsPath } from '../pathUtils';
+import { getMeInvitesPath } from '../pathUtils';
 import {
   getMemberDisplayName,
   getNotificationType,
@@ -29,6 +29,7 @@ import { useSelectedRoom } from '../../hooks/router/useSelectedRoom';
 import { useInboxNotificationsSelected } from '../../hooks/router/useInbox';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useSdkMessageListener, isDesktopTauri, type SdkMessagePayload } from '../../plugins/useTauriOpener';
+import { useRoomNavigate } from '../../hooks/useRoomNavigate';
 
 function SystemEmojiFeature() {
   const [twitterEmoji] = useSetting(settingsAtom, 'twitterEmoji');
@@ -134,14 +135,14 @@ function InviteNotifications() {
 
 function MessageNotifications() {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const notifRef = useRef<Notification>();
+  const notifyRef = useRef<Notification>();
   const unreadCacheRef = useRef<Map<string, UnreadInfo>>(new Map());
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const [showNotifications] = useSetting(settingsAtom, 'showNotifications');
   const [notificationSound] = useSetting(settingsAtom, 'isNotificationSounds');
 
-  const navigate = useNavigate();
+  const { navigateRoom } = useRoomNavigate();
   const notificationSelected = useInboxNotificationsSelected();
   const selectedRoomId = useSelectedRoom();
 
@@ -150,6 +151,8 @@ function MessageNotifications() {
       roomName,
       roomAvatar,
       username,
+      roomId,
+      eventId
     }: {
       roomName: string;
       roomAvatar?: string;
@@ -157,23 +160,26 @@ function MessageNotifications() {
       roomId: string;
       eventId: string;
     }) => {
-      const noti = new window.Notification(roomName, {
+      const note = new window.Notification(roomName, {
         icon: roomAvatar,
         badge: roomAvatar,
-        body: `New inbox notification from ${username}`,
+        body: `New message from ${username}`,
         silent: true,
       });
 
-      noti.onclick = () => {
-        if (!window.closed) navigate(getMeNotificationsPath());
-        noti.close();
-        notifRef.current = undefined;
+      note.onclick = () => {
+        if (!window.closed) {
+          window.focus();
+          navigateRoom(roomId, eventId);
+        }
+        note.close();
+        notifyRef.current = undefined;
       };
 
-      notifRef.current?.close();
-      notifRef.current = noti;
+      notifyRef.current?.close();
+      notifyRef.current = note;
     },
-    [navigate]
+    [navigateRoom]
   );
 
   const playSound = useCallback(() => {
