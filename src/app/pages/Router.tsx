@@ -20,12 +20,10 @@ import {
   INBOX_PATH,
   REGISTER_PATH,
   RESET_PASSWORD_PATH,
-  SPACE_PATH,
   OIDC_CALLBACK_PATH,
   _CREATE_PATH,
   _FEATURED_PATH,
   _INVITES_PATH,
-  _LOBBY_PATH,
   _ROOM_PATH,
   _SEARCH_PATH,
   _SERVER_PATH,
@@ -46,17 +44,15 @@ import {
   getContactsContactsPath,
   getLoginPath,
   getOriginBaseUrl,
-  getSpaceLobbyPath,
   getMeInvitesPath,
   getInboxInvitesPath,
   getMePath,
 } from './pathUtils';
 import { ClientBindAtoms, ClientLayout, ClientRoot } from './client';
 import { Home, HomeRouteRoomProvider, HomeSearch } from './client/home';
-import { RouteSpaceProvider, Space, SpaceRouteRoomProvider, SpaceSearch } from './client/space';
 import { Explore, FeaturedRooms, PublicRooms } from './client/explore';
 import { ExploreSpaceProvider } from './client/explore/ExploreSpaceProvider';
-import { Inbox, Invites } from './client/inbox';
+import { Invites } from './client/inbox';
 import { Contacts, ContactsPage, ContactsProvider, ContactsRolePage } from './client/contacts';
 import { Me } from './client/me';
 import { setAfterLoginRedirectPath } from './afterLoginRedirectPath';
@@ -217,46 +213,6 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             return redirect(getHomeRoomPath(decodeURIComponent(roomIdOrAlias), eventId ? decodeURIComponent(eventId) : undefined));
           }}
         />
-        <Route
-          path={SPACE_PATH}
-          element={
-            <RouteSpaceProvider>
-              <PageRoot
-                nav={
-                  <MobileFriendlyPageNav path={SPACE_PATH}>
-                    <Space />
-                  </MobileFriendlyPageNav>
-                }
-              >
-                <Outlet />
-              </PageRoot>
-            </RouteSpaceProvider>
-          }
-        >
-          {mobile ? null : (
-            <Route
-              index
-              loader={({ params }) => {
-                const { spaceIdOrAlias } = params;
-                if (spaceIdOrAlias) {
-                  return redirect(getSpaceLobbyPath(spaceIdOrAlias));
-                }
-                return null;
-              }}
-              element={<WelcomePage />}
-            />
-          )}
-          <Route path={_LOBBY_PATH} element={<Lobby />} />
-          <Route path={_SEARCH_PATH} element={<SpaceSearch />} />
-          <Route
-            path={_ROOM_PATH}
-            element={
-              <SpaceRouteRoomProvider>
-                <Room />
-              </SpaceRouteRoomProvider>
-            }
-          />
-        </Route>
         <Route
           path={EXPLORE_PATH}
           element={
