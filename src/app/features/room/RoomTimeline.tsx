@@ -1678,7 +1678,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
         <MessageBase space={messageSpacing}>
           <TimelineDivider style={{ color: color.Success.Main }} variant="Inherit">
             <Badge as="span" size="500" variant="Success" fill="Solid" radii="300">
-              <Text size="L400">New Messages</Text>
+              <Text size="L400">{t('room.newMessages')}</Text>
             </Badge>
           </TimelineDivider>
         </MessageBase>
@@ -1691,8 +1691,8 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
             <Badge as="span" size="500" variant="Secondary" fill="None" radii="300">
               <Text size="L400">
                 {(() => {
-                  if (today(mEvent.getTs())) return 'Today';
-                  if (yesterday(mEvent.getTs())) return 'Yesterday';
+                  if (today(mEvent.getTs())) return t('room.today');
+                  if (yesterday(mEvent.getTs())) return t('room.yesterday');
                   return timeDayMonthYear(mEvent.getTs());
                 })()}
               </Text>
@@ -1728,7 +1728,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
             before={<Icon size="50" src={Icons.MessageUnread} />}
             onClick={handleJumpToUnread}
           >
-            <Text size="L400">Jump to Unread</Text>
+            <Text size="L400">{t('room.jumpToUnread')}</Text>
           </Chip>
 
           <Chip
@@ -1738,7 +1738,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
             before={<Icon size="50" src={Icons.CheckTwice} />}
             onClick={handleMarkAsRead}
           >
-            <Text size="L400">Mark as Read</Text>
+            <Text size="L400">{t('room.markAsRead')}</Text>
           </Chip>
         </TimelineFloat>
       )}
@@ -1838,7 +1838,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
             before={<Icon size="50" src={Icons.ArrowBottom} />}
             onClick={handleJumpToLatest}
           >
-            <Text size="L400">Jump to Latest</Text>
+            <Text size="L400">{t('room.jumpToLatest')}</Text>
           </Chip>
         </TimelineFloat>
       )}
