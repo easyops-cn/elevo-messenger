@@ -2,12 +2,12 @@ import i18n from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import Backend, { HttpBackendOptions } from 'i18next-http-backend';
 import { initReactI18next } from 'react-i18next';
+import { locale } from '@tauri-apps/plugin-os';
+import { getTauriSettings } from './state/utils/tauriStore';
 import { trimTrailingSlash } from './utils/common';
 import { isDesktopTauri } from './plugins/useTauriOpener';
 
-const chain = i18n
-  .use(Backend)
-  .use(initReactI18next);
+const chain = i18n.use(Backend).use(initReactI18next);
 
 if (!isDesktopTauri) {
   chain.use(LanguageDetector);
@@ -28,14 +28,12 @@ chain
   .then(async () => {
     if (!isDesktopTauri) return;
     try {
-      const { getTauriSettings } = await import('./state/utils/tauriStore');
       const settings = await getTauriSettings<{ language?: string }>();
       const persisted = settings?.language ?? null;
       if (persisted) {
         await i18n.changeLanguage(persisted);
         return;
       }
-      const { locale } = await import('@tauri-apps/plugin-os');
       const osLocale = await locale();
       if (osLocale) {
         const langOnly = osLocale.split('-')[0];
