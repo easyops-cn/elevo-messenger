@@ -111,6 +111,7 @@ type MTextProps = {
   renderBody: (props: RenderBodyProps) => ReactNode;
   renderUrlsPreview?: (urls: string[]) => ReactNode;
   style?: CSSProperties;
+  readOnly?: boolean;
 };
 
 function parseOidcLogin(content: Record<string, unknown>): OidcLoginData | undefined {
@@ -261,7 +262,7 @@ const oidcLinkStyles: CSSProperties = {
   maxWidth: toRem(400),
 };
 
-export function MText({ edited, content, renderBody, renderUrlsPreview, style }: MTextProps) {
+export function MText({ edited, content, renderBody, renderUrlsPreview, style, readOnly }: MTextProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const { body, formatted_body: customBody } = content;
@@ -342,7 +343,7 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style }:
 
   const askUserQuestion = parseAskUserQuestion(content);
   if (askUserQuestion) {
-    return <AskUserQuestionCard data={askUserQuestion} style={style} />;
+    return <AskUserQuestionCard data={askUserQuestion} style={style} readOnly={readOnly} />;
   }
 
   const questionAnswered = parseQuestionAnswered(content);

@@ -13,7 +13,7 @@ export const BottomNavContainer = style([
     padding: `${config.space.S100} ${config.space.S300}`,
     margin: `${config.space.S400} ${config.space.S300}`,
     borderRadius: config.radii.Pill,
-    backgroundColor: elevoColor.Background.NavBar,
+    background: elevoColor.Background.NavBar,
     color: color.Background.OnContainer,
     flexShrink: 0,
     boxShadow: `${elevoColor.shadow.SpecularHighlight}, ${elevoColor.shadow.NavBar}`,
