@@ -12,6 +12,7 @@ export const CardContainer = style({
   border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
   borderRadius: config.radii.R400,
   maxWidth: toRem(600),
+  minWidth: toRem(200),
   overflow: 'hidden',
 });
 
