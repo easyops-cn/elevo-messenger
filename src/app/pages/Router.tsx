@@ -36,6 +36,7 @@ import {
   ME_PATH,
   INBOX_NOTIFICATIONS_PATH,
   INBOX_INVITES_PATH,
+  ME_NOTIFICATIONS_PATH,
 } from './paths';
 import {
   getAppPathFromHref,
@@ -285,6 +286,10 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           <Route path={_CONTACTS_CONTACTS_PATH} element={<ContactsPage />} />
           <Route path={_CONTACTS_ROLE_PATH} element={<ContactsRolePage />} />
         </Route>
+        <Route
+          path={ME_NOTIFICATIONS_PATH}
+          loader={() => redirect(getMePath())}
+        />
         <Route
           path={ME_PATH}
           element={
