@@ -1,6 +1,6 @@
 {
   "name": "elevo-messenger",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Yet another matrix client",
   "main": "index.js",
   "type": "module",
