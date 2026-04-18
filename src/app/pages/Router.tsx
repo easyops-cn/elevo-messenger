@@ -34,6 +34,8 @@ import {
   _CONTACTS_ROLE_PATH,
   _CREATE_CHAT_PATH,
   ME_PATH,
+  INBOX_NOTIFICATIONS_PATH,
+  INBOX_INVITES_PATH,
 } from './paths';
 import {
   getAppPathFromHref,
@@ -45,7 +47,6 @@ import {
   getLoginPath,
   getOriginBaseUrl,
   getMeInvitesPath,
-  getInboxInvitesPath,
   getMePath,
 } from './pathUtils';
 import { ClientBindAtoms, ClientLayout, ClientRoot } from './client';
@@ -251,7 +252,11 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           loader={() => redirect(getMePath())}
         />
         <Route
-          path={getInboxInvitesPath()}
+          path={INBOX_NOTIFICATIONS_PATH}
+          loader={() => redirect(getMePath())}
+        />
+        <Route
+          path={INBOX_INVITES_PATH}
           loader={() => redirect(getMeInvitesPath())}
         />
         <Route
