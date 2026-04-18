@@ -56,14 +56,24 @@ export const BottomNavItem = recipe({
 });
 export type BottomNavItemVariants = RecipeVariants<typeof BottomNavItem>;
 
-export const BottomNavItemBadge = style([
-  DefaultReset,
-  {
-    pointerEvents: 'none',
-    position: 'absolute',
-    zIndex: 1,
-    top: toRem(-2),
-    right: toRem(-2),
-    lineHeight: 0,
-  },
-]);
+export const BottomNavItemBadge = recipe({
+  base: [
+    DefaultReset,
+    {
+      pointerEvents: 'none',
+      position: 'absolute',
+      zIndex: 1,
+      top: toRem(-2),
+      right: toRem(-2),
+      lineHeight: 0,
+    },
+  ],
+  variants: {
+    dot: {
+      true: {
+        top: toRem(2),
+        right: toRem(2),
+      }
+    }
+  }
+});

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Avatar, Box, Icon, Icons, Text } from 'folds';
+import { Avatar, Badge, Box, Icon, Icons, Text } from 'folds';
 import { useAtomValue } from 'jotai';
 import { NavCategory, NavItem, NavItemContent, NavLink } from '../../../components/nav';
 import { getMeInvitesPath } from '../../pathUtils';
@@ -13,7 +13,7 @@ import { useNavToActivePathMapper } from '../../../hooks/useNavToActivePathMappe
 import { PageNav, PageNavContent, PageNavHeader } from '../../../components/page';
 import { Modal500 } from '../../../components/Modal500';
 import { Settings, SettingsPages } from '../../../features/settings';
-import { onOpenAbout } from '../../../state/update/UpdateCheckerContext';
+import { onOpenAbout, useUpdateChecker } from '../../../state/update/UpdateCheckerContext';
 
 function InvitesNavItem() {
   const { t } = useTranslation();
@@ -50,6 +50,7 @@ function InvitesNavItem() {
 export function Me() {
   useNavToActivePathMapper('me');
   const { t } = useTranslation();
+  const { updateAvailable } = useUpdateChecker();
 
   const [settings, setSettings] = useState(false);
   const [initialPage, setInitialPage] = useState<SettingsPages | undefined>(undefined);
@@ -95,6 +96,9 @@ export function Me() {
                         {t('common.settings')}
                       </Text>
                     </Box>
+                    {updateAvailable && (
+                      <Badge variant="Critical" size="200" fill="Solid" radii="Pill" />
+                    )}
                   </Box>
                 </NavItemContent>
               </button>

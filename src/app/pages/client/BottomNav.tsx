@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAtomValue } from 'jotai';
-import { Icon, Icons, Tooltip, TooltipProvider } from 'folds';
+import { Badge, Icon, Icons, Tooltip, TooltipProvider } from 'folds';
 import { ContactIcon } from '../../icons/ContactIcon';
 import { useHomeSelected } from '../../hooks/router/useHomeSelected';
 import { useContactsSelected } from '../../hooks/router/useContacts';
@@ -21,12 +21,14 @@ import {
   joinPathComponent,
 } from '../pathUtils';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
+import { useUpdateChecker } from '../../state/update/UpdateCheckerContext';
 import * as css from './BottomNav.css';
 
 export function BottomNav() {
   const navigate = useNavigate();
   const screenSize = useScreenSizeContext();
   const navToActivePath = useAtomValue(useNavToActivePathAtom());
+  const { updateAvailable } = useUpdateChecker();
 
   const homeSelected = useHomeSelected();
   const contactsSelected = useContactsSelected();
@@ -71,7 +73,7 @@ export function BottomNav() {
           >
             <Icon src={Icons.Home} filled={homeSelected} size="300" />
             {homeUnread && (
-              <span className={css.BottomNavItemBadge}>
+              <span className={css.BottomNavItemBadge()}>
                 <UnreadBadge highlight={homeUnread.highlight > 0} count={homeUnread.total} />
               </span>
             )}
@@ -124,8 +126,13 @@ export function BottomNav() {
           >
             <Icon src={Icons.User} filled={meSelected} size="300" />
             {inviteCount > 0 && (
-              <span className={css.BottomNavItemBadge}>
+              <span className={css.BottomNavItemBadge()}>
                 <UnreadBadge highlight count={inviteCount} />
+              </span>
+            )}
+            {inviteCount === 0 && updateAvailable && (
+              <span className={css.BottomNavItemBadge({ dot: true })}>
+                <Badge variant="Critical" size="200" fill="Solid" radii="Pill" />
               </span>
             )}
           </button>
