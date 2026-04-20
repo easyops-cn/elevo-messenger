@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAtomValue } from 'jotai';
 import { Badge, Icon, Icons, Tooltip, TooltipProvider } from 'folds';
 import { ContactIcon } from '../../icons/ContactIcon';
@@ -25,6 +26,7 @@ import { useUpdateChecker } from '../../state/update/UpdateCheckerContext';
 import * as css from './BottomNav.css';
 
 export function BottomNav() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const screenSize = useScreenSizeContext();
   const navToActivePath = useAtomValue(useNavToActivePathAtom());
@@ -61,14 +63,14 @@ export function BottomNav() {
     <div className={css.BottomNavContainer}>
       <TooltipProvider
         position="Top"
-        tooltip={<Tooltip>Home</Tooltip>}
+        tooltip={<Tooltip>{t('home.title')}</Tooltip>}
       >
         {(triggerRef) => (
           <button
             ref={triggerRef}
             className={css.BottomNavItem({ active: homeSelected })}
             onClick={handleHomeClick}
-            aria-label="Home"
+            aria-label={t('home.title')}
             type="button"
           >
             <Icon src={Icons.Home} filled={homeSelected} size="300" />
@@ -82,14 +84,14 @@ export function BottomNav() {
       </TooltipProvider>
       <TooltipProvider
         position="Top"
-        tooltip={<Tooltip>Contacts</Tooltip>}
+        tooltip={<Tooltip>{t('contacts.title')}</Tooltip>}
       >
         {(triggerRef) => (
           <button
             ref={triggerRef}
             className={css.BottomNavItem({ active: contactsSelected })}
             onClick={handleContactsClick}
-            aria-label="Contacts"
+            aria-label={t('contacts.title')}
             type="button"
           >
             <Icon src={ContactIcon} filled={contactsSelected} size="300" />
@@ -98,14 +100,14 @@ export function BottomNav() {
       </TooltipProvider>
       <TooltipProvider
         position="Top"
-        tooltip={<Tooltip>Explore</Tooltip>}
+        tooltip={<Tooltip>{t('explore.title')}</Tooltip>}
       >
         {(triggerRef) => (
           <button
             ref={triggerRef}
             className={css.BottomNavItem({ active: exploreSelected })}
             onClick={handleExploreClick}
-            aria-label="Explore"
+            aria-label={t('explore.title')}
             type="button"
           >
             <Icon src={Icons.Explore} filled={exploreSelected} size="300" />
@@ -114,14 +116,14 @@ export function BottomNav() {
       </TooltipProvider>
       <TooltipProvider
         position="Top"
-        tooltip={<Tooltip>Me</Tooltip>}
+        tooltip={<Tooltip>{t('common.me')}</Tooltip>}
       >
         {(triggerRef) => (
           <button
             ref={triggerRef}
             className={css.BottomNavItem({ active: meSelected })}
             onClick={handleMeClick}
-            aria-label="Me"
+            aria-label={t('common.me')}
             type="button"
           >
             <Icon src={Icons.User} filled={meSelected} size="300" />
