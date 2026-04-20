@@ -1693,7 +1693,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
                 {(() => {
                   if (today(mEvent.getTs())) return t('room.today');
                   if (yesterday(mEvent.getTs())) return t('room.yesterday');
-                  return timeDayMonthYear(mEvent.getTs());
+                  return timeDayMonthYear(mEvent.getTs(), dateFormatString);
                 })()}
               </Text>
             </Badge>

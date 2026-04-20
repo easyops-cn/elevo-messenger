@@ -48,6 +48,7 @@ export function JumpToTime({ onCancel, onSubmit }: JumpToTimeProps) {
   const [ts, setTs] = useState(() => Date.now());
 
   const [hour24Clock] = useSetting(settingsAtom, 'hour24Clock');
+  const [dateFormatString] = useSetting(settingsAtom, 'dateFormatString');
 
   const [timePickerCords, setTimePickerCords] = useState<RectCords>();
   const [datePickerCords, setDatePickerCords] = useState<RectCords>();
@@ -170,7 +171,7 @@ export function JumpToTime({ onCancel, onSubmit }: JumpToTimeProps) {
                       after={<Icon size="50" src={Icons.ChevronBottom} />}
                       onClick={handleDatePicker}
                     >
-                      <Text size="B300">{timeDayMonthYear(ts)}</Text>
+                      <Text size="B300">{timeDayMonthYear(ts, dateFormatString)}</Text>
                     </Chip>
                     <PopOut
                       anchor={datePickerCords}

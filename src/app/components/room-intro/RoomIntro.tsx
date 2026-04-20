@@ -47,6 +47,7 @@ export const RoomIntro = as<'div', RoomIntroProps>(({ room, ...props }, ref) => 
   );
 
   const [hour24Clock] = useSetting(settingsAtom, 'hour24Clock');
+  const [dateFormatString] = useSetting(settingsAtom, 'dateFormatString');
 
   return (
     <Box direction="Column" grow="Yes" gap="500" {...props} ref={ref}>
@@ -72,7 +73,7 @@ export const RoomIntro = as<'div', RoomIntroProps>(({ room, ...props }, ref) => 
             <Text size="T200" priority="300">
               {'Created by '}
               <b>@{creatorName}</b>
-              {` on ${timeDayMonthYear(ts)} ${timeHourMinute(ts, hour24Clock)}`}
+              {` on ${timeDayMonthYear(ts, dateFormatString)} ${timeHourMinute(ts, hour24Clock)}`}
             </Text>
           )}
         </Box>

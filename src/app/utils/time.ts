@@ -24,7 +24,8 @@ export const timeHourMinute = (ts: number, hour24Clock: boolean): string =>
 export const timeDayMonYear = (ts: number, dateFormatString: string): string =>
   dayjs(ts).format(dateFormatString);
 
-export const timeDayMonthYear = (ts: number): string => dayjs(ts).format('D MMMM YYYY');
+export const timeDayMonthYear = (ts: number, dateFormatString: string): string =>
+  dayjs(ts).format(dateFormatString);
 
 export const daysInMonth = (month: number, year: number): number =>
   dayjs(`${year}-${month}-1`).daysInMonth();
