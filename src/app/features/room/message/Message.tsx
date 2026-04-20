@@ -45,7 +45,7 @@ import {
   ModernLayout,
   Time,
   Username,
-  UsernameBold,
+  UsernameSecondary,
 } from '../../../components/message';
 import {
   canEditEvent,
@@ -75,7 +75,6 @@ import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { useRoomPinnedEvents } from '../../../hooks/useRoomPinnedEvents';
 import { MemberPowerTag, StateEvent } from '../../../../types/matrix/room';
 import { PowerIcon } from '../../../components/power';
-import colorMXID from '../../../../util/colorMXID';
 import { getPowerTagIconSrc } from '../../../hooks/useMemberPowerTag';
 
 export type ReactionHandler = (keyOrMxc: string, shortcode: string) => void;
@@ -322,8 +321,6 @@ export const MessageCopyLinkItem = as<
     onClose?: () => void;
   }
 >(({ room, mEvent, onClose, ...props }, ref) => {
-  const mx = useMatrixClient();
-
   const handleCopy = () => {
     const eventId = mEvent.getId();
     if (!eventId) return;
@@ -707,8 +704,6 @@ export const Message = as<'div', MessageProps>(
       hideReadReceipts,
       showDeveloperTools,
       memberPowerTag,
-      accessibleTagColors,
-      legacyUsernameColor,
       hour24Clock,
       dateFormatString,
       children,
@@ -733,14 +728,9 @@ export const Message = as<'div', MessageProps>(
       getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId;
     const senderAvatarMxc = getMemberAvatarMxc(room, senderId);
 
-    const tagColor = memberPowerTag?.color
-      ? accessibleTagColors?.get(memberPowerTag.color)
-      : undefined;
     const tagIconSrc = memberPowerTag?.icon
       ? getPowerTagIconSrc(mx, useAuthentication, memberPowerTag.icon)
       : undefined;
-
-    const usernameColor = legacyUsernameColor ? colorMXID(senderId) : tagColor;
 
     const headerJSX = !collapse && (
       <Box
@@ -749,21 +739,23 @@ export const Message = as<'div', MessageProps>(
         justifyContent={messageLayout === MessageLayout.Compact ? 'SpaceBetween' : 'Start'}
         alignItems="Baseline"
         grow="No"
+        style={{
+          marginBottom: messageLayout !== MessageLayout.Compact ? config.space.S100 : undefined,
+        }}
       >
         <Box alignItems="Center" gap="200">
           <Username
             as="button"
-            style={{ color: usernameColor }}
             data-user-id={senderId}
             onContextMenu={onUserClick}
             onClick={onUsernameClick}
           >
             <Text
               as="span"
-              size={messageLayout === MessageLayout.Bubble ? 'T300' : 'T400'}
+              size="T300"
               truncate
             >
-              <UsernameBold>{senderDisplayName}</UsernameBold>
+              <UsernameSecondary>{senderDisplayName}</UsernameSecondary>
             </Text>
           </Username>
           {tagIconSrc && <PowerIcon size="100" iconSrc={tagIconSrc} />}

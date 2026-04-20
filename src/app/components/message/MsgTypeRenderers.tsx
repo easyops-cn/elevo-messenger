@@ -214,11 +214,11 @@ function ToolCallCard({ data, style }: ToolCallCardProps) {
 type ReasoningCardProps = { style?: CSSProperties; children: ReactNode };
 function ReasoningCard({ style, children }: ReasoningCardProps) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   return (
     <Box
-      style={{ ...style, opacity: 0.7, fontSize: config.fontSize.B400 }}
+      style={{ ...style, opacity: 0.7, fontSize: config.fontSize.T300 }}
       direction="Column"
       gap="100"
     >
@@ -239,8 +239,8 @@ function ReasoningCard({ style, children }: ReasoningCardProps) {
         role="button"
         tabIndex={0}
       >
-        <Text priority="300">{t('message.thinking')}</Text>
-        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="200" />
+        <Text priority="300" size="T300">{t('message.thinking')}</Text>
+        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="100" />
       </div>
       {expanded && children}
     </Box>

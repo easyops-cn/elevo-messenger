@@ -213,6 +213,10 @@ export const UsernameBold = style({
   fontWeight: 550,
 });
 
+export const UsernameSecondary = style({
+  opacity: 0.6,
+});
+
 export const MessageTextBody = recipe({
   base: {
     wordBreak: 'break-word',

@@ -28,11 +28,15 @@ export const UsernameBold = as<'b'>(({ as: AsUsernameBold = 'b', className, ...p
   <AsUsernameBold className={classNames(css.UsernameBold, className)} {...props} ref={ref} />
 ));
 
+export const UsernameSecondary = as<'span'>(({ as: AsUsernameSecondary = 'span', className, ...props }, ref) => (
+  <AsUsernameSecondary className={classNames(css.UsernameSecondary, className)} {...props} ref={ref} />
+));
+
 export const MessageTextBody = as<'div', css.MessageTextBodyVariants & { notice?: boolean }>(
   ({ as: asComp = 'div', className, preWrap, jumboEmoji, emote, notice, ...props }, ref) => (
     <Text
       as={asComp}
-      size="T400"
+      size="T300"
       priority={notice ? '300' : '400'}
       className={classNames(css.MessageTextBody({ preWrap, jumboEmoji, emote }), className)}
       {...props}
