@@ -45,14 +45,13 @@ import {
   config,
   toRem,
 } from 'folds';
-import { isKeyHotkey } from 'is-hotkey';
 import { Opts as LinkifyOpts } from 'linkifyjs';
 import { useTranslation } from 'react-i18next';
 import { eventWithShortcode, factoryEventSentBy, getMxIdLocalPart } from '../../utils/matrix';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useVirtualPaginator, ItemRange } from '../../hooks/useVirtualPaginator';
 import { useAlive } from '../../hooks/useAlive';
-import { editableActiveElement, scrollToBottom } from '../../utils/dom';
+import { scrollToBottom } from '../../utils/dom';
 import {
   DefaultPlaceholder,
   CompactPlaceholder,
@@ -75,11 +74,9 @@ import {
   renderMatrixMention,
 } from '../../plugins/react-custom-html-parser';
 import {
-  canEditEvent,
   decryptAllTimelineEvent,
   getEditedEvent,
   getEventReactions,
-  getLatestEditableEvt,
   getMemberDisplayName,
   getReactionContent,
   isMembershipChanged,
@@ -101,11 +98,10 @@ import { useDebounce } from '../../hooks/useDebounce';
 import { getResizeObserverEntry, useResizeObserver } from '../../hooks/useResizeObserver';
 import * as css from './RoomTimeline.css';
 import { inSameDay, minuteDifference, timeDayMonthYear, today, yesterday } from '../../utils/time';
-import { createMentionElement, isEmptyEditor, moveCursor } from '../../components/editor';
+import { createMentionElement, moveCursor } from '../../components/editor';
 import { roomIdToReplyDraftAtomFamily } from '../../state/room/roomInputDrafts';
 import { usePowerLevelsContext } from '../../hooks/usePowerLevels';
 import { GetContentCallback, MessageEvent, StateEvent } from '../../../types/matrix/room';
-import { useKeyDown } from '../../hooks/useKeyDown';
 import { useDocumentFocusChange } from '../../hooks/useDocumentFocusChange';
 import { RenderMessageContent } from '../../components/RenderMessageContent';
 import { Image } from '../../components/media';
@@ -771,30 +767,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
         }
       },
       [tryAutoMarkAsRead, unreadInfo, handleOpenEvent]
-    )
-  );
-
-  // Handle up arrow edit
-  useKeyDown(
-    window,
-    useCallback(
-      (evt) => {
-        if (
-          isKeyHotkey('arrowup', evt) &&
-          editableActiveElement() &&
-          document.activeElement?.getAttribute('data-editable-name') === 'RoomInput' &&
-          isEmptyEditor(editor)
-        ) {
-          const editableEvt = getLatestEditableEvt(room.getLiveTimeline(), (mEvt) =>
-            canEditEvent(mx, mEvt)
-          );
-          const editableEvtId = editableEvt?.getId();
-          if (!editableEvtId) return;
-          setEditId(editableEvtId);
-          evt.preventDefault();
-        }
-      },
-      [mx, room, editor]
     )
   );
 
