@@ -384,7 +384,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
           </Box>
         </Box>
 
-        <Box shrink="No" gap="100">
+        <Box shrink="No" gap="100" alignItems="Center">
           {!encryptedRoom && (
             <TooltipProvider
               position="Bottom"
@@ -551,25 +551,31 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
           />
 
           {screenSize === ScreenSize.Desktop && (
-            <TooltipProvider
-              position="Bottom"
-              offset={4}
-              tooltip={
-                <Tooltip>
-                  {callView ? (
-                    <Text>Members</Text>
-                  ) : (
-                    <Text>{peopleDrawer ? 'Hide Members' : 'Show Members'}</Text>
-                  )}
-                </Tooltip>
-              }
-            >
-              {(triggerRef) => (
-                <IconButton size="300" fill="None" ref={triggerRef} onClick={handleMemberToggle}>
-                  <Icon size="100" src={PanelLeftIcon} />
-                </IconButton>
-              )}
-            </TooltipProvider>
+            <>
+              <Line direction="Vertical" size="300" style={{
+                height: toRem(16),
+                margin: `0 ${toRem(6)}`,
+              }} />
+              <TooltipProvider
+                position="Bottom"
+                offset={4}
+                tooltip={
+                  <Tooltip>
+                    {callView ? (
+                      <Text>Members</Text>
+                    ) : (
+                      <Text>{peopleDrawer ? 'Hide Members' : 'Show Members'}</Text>
+                    )}
+                  </Tooltip>
+                }
+              >
+                {(triggerRef) => (
+                  <IconButton size="300" fill="None" ref={triggerRef} onClick={handleMemberToggle}>
+                    <Icon size="100" src={PanelLeftIcon} />
+                  </IconButton>
+                )}
+              </TooltipProvider>
+            </>
           )}
         </Box>
       </Box>
