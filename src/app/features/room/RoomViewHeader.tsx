@@ -1,5 +1,6 @@
 import React, { MouseEventHandler, forwardRef, useState } from 'react';
 import FocusTrap from 'focus-trap-react';
+import { useTranslation } from 'react-i18next';
 import {
   Box,
   Text,
@@ -77,6 +78,7 @@ type RoomMenuProps = {
 };
 const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose }, ref) => {
   const mx = useMatrixClient();
+  const { t } = useTranslation();
   const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
   const unread = useRoomUnread(room.roomId, roomToUnreadAtom);
   const powerLevels = usePowerLevelsContext();
@@ -133,7 +135,7 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
           disabled={!unread}
         >
           <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-            Mark as Read
+            {t('room.markAsRead')}
           </Text>
         </MenuItem>
         <RoomNotificationModeSwitcher roomId={room.roomId} value={notificationMode}>
@@ -152,7 +154,7 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
               onClick={handleOpen}
             >
               <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-                Notifications
+                {t('room.notifications')}
               </Text>
             </MenuItem>
           )}
@@ -171,7 +173,7 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
           disabled={!canInvite}
         >
           <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-            Invite
+            {t('room.invite')}
           </Text>
         </MenuItem>
         <MenuItem
@@ -181,7 +183,7 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
           radii="300"
         >
           <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-            Copy Link
+            {t('room.copyLink')}
           </Text>
         </MenuItem>
         <MenuItem
@@ -191,7 +193,7 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
           radii="300"
         >
           <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-            Room Settings
+            {t('room.roomSettings')}
           </Text>
         </MenuItem>
         <UseStateProvider initial={false}>
@@ -205,7 +207,7 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
                 aria-pressed={promptJump}
               >
                 <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-                  Jump to Time
+                  {t('room.jumpToTime')}
                 </Text>
               </MenuItem>
               {promptJump && (
@@ -237,7 +239,7 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
                 aria-pressed={promptLeave}
               >
                 <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-                  Leave Room
+                  {t('room.leaveRoom')}
                 </Text>
               </MenuItem>
               {promptLeave && (
@@ -256,6 +258,7 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
 });
 
 export function RoomViewHeader({ callView }: { callView?: boolean }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const screenSize = useScreenSizeContext();
   const room = useRoom();
@@ -276,7 +279,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
 
   const firstWorkspace = linkedWorkspaces[0];
   const firstTenant = (elevoConfig.workspaces?.tenants ?? []).find(
-    (t) => t.id === firstWorkspace?.owner_tenant_id
+    (tenant) => tenant.id === firstWorkspace?.owner_tenant_id
   );
   const tasksUrlTemplate = firstTenant
     ? isDesktopTauri
@@ -391,7 +394,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
               offset={4}
               tooltip={
                 <Tooltip>
-                  <Text>Search</Text>
+                  <Text>{t('common.search')}</Text>
                 </Tooltip>
               }
             >
@@ -407,7 +410,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
             offset={4}
             tooltip={
               <Tooltip>
-                <Text>Pinned Messages</Text>
+                <Text>{t('room.pinnedMessages')}</Text>
               </Tooltip>
             }
           >
@@ -467,7 +470,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
               offset={4}
               tooltip={
                 <Tooltip>
-                  <Text>Tasks</Text>
+                  <Text>{t('room.tasks')}</Text>
                 </Tooltip>
               }
             >
@@ -490,7 +493,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
               offset={4}
               tooltip={
                 <Tooltip>
-                  <Text>Workspaces</Text>
+                  <Text>{t('room.workspaces')}</Text>
                 </Tooltip>
               }
             >
@@ -513,7 +516,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
             offset={4}
             tooltip={
               <Tooltip>
-                <Text>More Options</Text>
+                <Text>{t('room.moreOptions')}</Text>
               </Tooltip>
             }
           >
@@ -562,9 +565,9 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                 tooltip={
                   <Tooltip>
                     {callView ? (
-                      <Text>Members</Text>
+                      <Text>{t('common.members')}</Text>
                     ) : (
-                      <Text>{peopleDrawer ? 'Hide Members' : 'Show Members'}</Text>
+                      <Text>{peopleDrawer ? t('room.hideMembers') : t('room.showMembers')}</Text>
                     )}
                   </Tooltip>
                 }
