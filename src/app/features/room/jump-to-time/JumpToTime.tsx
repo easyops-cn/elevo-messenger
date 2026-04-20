@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, useCallback, useMemo, useState } from 'react';
+import React, { MouseEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 import {
@@ -54,6 +54,8 @@ export function JumpToTime({ onCancel, onSubmit }: JumpToTimeProps) {
 
   const [timePickerCords, setTimePickerCords] = useState<RectCords>();
   const [datePickerCords, setDatePickerCords] = useState<RectCords>();
+  const [hideError, setHideError] = useState(false);
+  const prevTsRef = useRef(ts);
 
   const handleTimePicker: MouseEventHandler<HTMLButtonElement> = (evt) => {
     setTimePickerCords(evt.currentTarget.getBoundingClientRect());
@@ -81,6 +83,8 @@ export function JumpToTime({ onCancel, onSubmit }: JumpToTimeProps) {
   );
 
   const handleSubmit = () => {
+    setHideError(false);
+
     timestampToEvent(ts)
       .then((eventId) => {
         if (alive()) {
@@ -89,6 +93,15 @@ export function JumpToTime({ onCancel, onSubmit }: JumpToTimeProps) {
       })
       .catch(() => undefined);
   };
+
+  useEffect(() => {
+    const changed = prevTsRef.current !== ts;
+    prevTsRef.current = ts;
+
+    if (changed && timestampState.status === AsyncStatus.Error) {
+      setHideError(true);
+    }
+  }, [ts, timestampState.status]);
 
   const errorMessage = useMemo(() => {
     if (timestampState.status !== AsyncStatus.Error) return undefined;
@@ -245,7 +258,7 @@ export function JumpToTime({ onCancel, onSubmit }: JumpToTimeProps) {
                   </Chip>
                 </Box>
               </Box>
-              {timestampState.status === AsyncStatus.Error && (
+              {timestampState.status === AsyncStatus.Error && !hideError && (
                 <Text style={{ color: color.Critical.Main }} size="T300">
                   {errorMessage}
                 </Text>
