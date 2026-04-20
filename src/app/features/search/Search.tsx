@@ -28,6 +28,7 @@ import React, {
 import { isKeyHotkey } from 'is-hotkey';
 import { useAtom, useAtomValue } from 'jotai';
 import { Room } from 'matrix-js-sdk';
+import { useTranslation } from 'react-i18next';
 import { useDirects, useOrphanSpaces, useRooms, useSpaces } from '../../state/hooks/roomList';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { mDirectAtom } from '../../state/mDirectList';
@@ -135,6 +136,7 @@ type SearchProps = {
   requestClose: () => void;
 };
 export function Search({ requestClose }: SearchProps) {
+  const { t } = useTranslation();
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -269,7 +271,7 @@ export function Search({ requestClose }: SearchProps) {
                 variant="Background"
                 radii="400"
                 outlined
-                placeholder="Search"
+                placeholder={t('common.search')}
                 before={<Icon size="200" src={Icons.Search} />}
                 onChange={handleInputChange}
                 onKeyDown={handleInputKeyDown}
