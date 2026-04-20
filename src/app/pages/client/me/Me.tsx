@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Avatar, Badge, Box, Icon, Icons, Text } from 'folds';
-import { useAtomValue } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { NavCategory, NavItem, NavItemContent, NavLink } from '../../../components/nav';
 import { getMeInvitesPath } from '../../pathUtils';
 import {
@@ -11,9 +11,8 @@ import { UnreadBadge } from '../../../components/unread-badge';
 import { allInvitesAtom } from '../../../state/room-list/inviteList';
 import { useNavToActivePathMapper } from '../../../hooks/useNavToActivePathMapper';
 import { PageNav, PageNavContent, PageNavHeader } from '../../../components/page';
-import { Modal500 } from '../../../components/Modal500';
-import { Settings, SettingsPages } from '../../../features/settings';
-import { onOpenAbout, useUpdateChecker } from '../../../state/update/UpdateCheckerContext';
+import { useUpdateChecker } from '../../../state/update/UpdateCheckerContext';
+import { settingsModalAtom } from '../../../state/settingsModal';
 
 function InvitesNavItem() {
   const { t } = useTranslation();
@@ -51,22 +50,15 @@ export function Me() {
   useNavToActivePathMapper('me');
   const { t } = useTranslation();
   const { updateAvailable } = useUpdateChecker();
-
-  const [settings, setSettings] = useState(false);
-  const [initialPage, setInitialPage] = useState<SettingsPages | undefined>(undefined);
+  const setSettingsModal = useSetAtom(settingsModalAtom);
 
   const openSettings = () => {
-    setInitialPage(undefined);
-    setSettings(true);
+    setSettingsModal((prev) => ({
+      open: true,
+      initialPage: undefined,
+      requestId: prev.requestId + 1,
+    }));
   };
-  const closeSettings = () => setSettings(false);
-
-  // Listen for "open about" requests from the native menu update check.
-  useEffect(() =>
-    onOpenAbout(() => {
-      setInitialPage(SettingsPages.AboutPage);
-      setSettings(true);
-    }), []);
 
   return (
     <PageNav stretch>
@@ -106,11 +98,6 @@ export function Me() {
           </NavCategory>
         </Box>
       </PageNavContent>
-      {settings && (
-        <Modal500 requestClose={closeSettings}>
-          <Settings initialPage={initialPage} requestClose={closeSettings} />
-        </Modal500>
-      )}
     </PageNav>
   );
 }

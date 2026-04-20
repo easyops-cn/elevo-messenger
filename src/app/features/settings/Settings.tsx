@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Avatar,
   Badge,
@@ -124,6 +124,12 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
     return screenSize === ScreenSize.Mobile ? undefined : SettingsPages.GeneralPage;
   });
   const menuItems = useSettingsMenuItems();
+
+  useEffect(() => {
+    if (initialPage !== undefined) {
+      setActivePage(initialPage);
+    }
+  }, [initialPage]);
 
   const handlePageRequestClose = () => {
     if (screenSize === ScreenSize.Mobile) {
