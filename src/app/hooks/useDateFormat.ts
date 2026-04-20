@@ -10,6 +10,10 @@ export const useDateFormatItems = (): DateFormatItem[] =>
   useMemo(
     () => [
       {
+        format: 'LL',
+        name: 'LL',
+      },
+      {
         format: 'D MMM YYYY',
         name: 'D MMM YYYY',
       },

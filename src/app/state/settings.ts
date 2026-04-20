@@ -3,6 +3,8 @@ import { setTauriSettings } from './utils/tauriStore';
 
 const STORAGE_KEY = 'settings';
 export type DateFormat =
+  | 'LL'
+  | 'll'
   | 'D MMM YYYY'
   | 'DD/MM/YYYY'
   | 'MM/DD/YYYY'
@@ -82,7 +84,7 @@ const defaultSettings: Settings = {
   isNotificationSounds: true,
 
   hour24Clock: false,
-  dateFormatString: 'D MMM YYYY',
+  dateFormatString: 'LL',
 
   developerTools: false,
   autoUpdateCheck: true,
