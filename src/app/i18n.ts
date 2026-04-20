@@ -3,9 +3,23 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import Backend, { HttpBackendOptions } from 'i18next-http-backend';
 import { initReactI18next } from 'react-i18next';
 import { locale } from '@tauri-apps/plugin-os';
+import dayjs from 'dayjs';
+import 'dayjs/locale/zh-cn';
 import { getTauriSettings } from './state/utils/tauriStore';
 import { trimTrailingSlash } from './utils/common';
 import { isDesktopTauri } from './plugins/useTauriOpener';
+
+const DAYJS_LOCALE_MAP: Record<string, string> = {
+  zh: 'zh-cn',
+};
+
+const syncDayjsLocale = (lng: string) => {
+  dayjs.locale(DAYJS_LOCALE_MAP[lng] ?? lng);
+};
+
+syncDayjsLocale(i18n.language);
+
+i18n.on('languageChanged', syncDayjsLocale);
 
 const chain = i18n.use(Backend).use(initReactI18next);
 
