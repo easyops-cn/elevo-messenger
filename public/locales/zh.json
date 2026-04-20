@@ -391,6 +391,19 @@
       "title": "消息",
       "messageLayout": "消息布局",
       "messageSpacing": "消息间距",
+      "messageLayoutOptions": {
+        "modern": "现代",
+        "compact": "紧凑",
+        "bubble": "气泡"
+      },
+      "messageSpacingOptions": {
+        "none": "无",
+        "ultraSmall": "极小",
+        "extraSmall": "特小",
+        "small": "小",
+        "normal": "普通",
+        "large": "大"
+      },
       "legacyUsernameColor": "传统用户名颜色",
       "hideMembershipChange": "隐藏成员变更",
       "hideProfileChange": "隐藏资料变更",

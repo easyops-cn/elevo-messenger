@@ -391,6 +391,19 @@
       "title": "Messages",
       "messageLayout": "Message Layout",
       "messageSpacing": "Message Spacing",
+      "messageLayoutOptions": {
+        "modern": "Modern",
+        "compact": "Compact",
+        "bubble": "Bubble"
+      },
+      "messageSpacingOptions": {
+        "none": "None",
+        "ultraSmall": "Ultra Small",
+        "extraSmall": "Extra Small",
+        "small": "Small",
+        "normal": "Normal",
+        "large": "Large"
+      },
       "legacyUsernameColor": "Legacy Username Color",
       "hideMembershipChange": "Hide Membership Change",
       "hideProfileChange": "Hide Profile Change",
