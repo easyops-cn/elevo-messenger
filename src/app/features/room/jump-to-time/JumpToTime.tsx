@@ -81,12 +81,24 @@ export function JumpToTime({ onCancel, onSubmit }: JumpToTimeProps) {
   );
 
   const handleSubmit = () => {
-    timestampToEvent(ts).then((eventId) => {
-      if (alive()) {
-        onSubmit(eventId);
-      }
-    });
+    timestampToEvent(ts)
+      .then((eventId) => {
+        if (alive()) {
+          onSubmit(eventId);
+        }
+      })
+      .catch(() => undefined);
   };
+
+  const errorMessage = useMemo(() => {
+    if (timestampState.status !== AsyncStatus.Error) return undefined;
+
+    if (timestampState.error.httpStatus === 404 || timestampState.error.errcode === 'M_NOT_FOUND') {
+      return t('room.jumpToTimeEventNotFound');
+    }
+
+    return timestampState.error.message;
+  }, [timestampState, t]);
 
   return (
     <Overlay open backdrop={<OverlayBackdrop />}>
@@ -235,7 +247,7 @@ export function JumpToTime({ onCancel, onSubmit }: JumpToTimeProps) {
               </Box>
               {timestampState.status === AsyncStatus.Error && (
                 <Text style={{ color: color.Critical.Main }} size="T300">
-                  {timestampState.error.message}
+                  {errorMessage}
                 </Text>
               )}
               <Button

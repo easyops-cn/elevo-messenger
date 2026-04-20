@@ -122,6 +122,7 @@
     "jumpToTime": "跳转到时间",
     "jumpToTimePreset": "预设",
     "jumpToTimeBeginning": "起始",
+    "jumpToTimeEventNotFound": "未找到与所选时间相关的事件。",
     "openTimeline": "打开时间线",
     "leaveRoom": "离开房间",
     "pinnedMessages": "置顶消息",

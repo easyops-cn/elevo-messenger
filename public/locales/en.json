@@ -122,6 +122,7 @@
     "jumpToTime": "Jump to Time",
     "jumpToTimePreset": "Preset",
     "jumpToTimeBeginning": "Beginning",
+    "jumpToTimeEventNotFound": "No related event was found for the selected time.",
     "openTimeline": "Open Timeline",
     "leaveRoom": "Leave Room",
     "pinnedMessages": "Pinned Messages",
