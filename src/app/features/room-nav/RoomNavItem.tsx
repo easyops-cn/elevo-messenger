@@ -1,4 +1,5 @@
 import React, { MouseEventHandler, forwardRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Room } from 'matrix-js-sdk';
 import {
   Avatar,
@@ -69,6 +70,7 @@ type RoomNavItemMenuProps = {
 const RoomNavItemMenu = forwardRef<HTMLDivElement, RoomNavItemMenuProps>(
   ({ room, requestClose, notificationMode }, ref) => {
     const mx = useMatrixClient();
+    const { t } = useTranslation();
     const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
     const unread = useRoomUnread(room.roomId, roomToUnreadAtom);
     const powerLevels = usePowerLevels(room);
@@ -122,7 +124,7 @@ const RoomNavItemMenu = forwardRef<HTMLDivElement, RoomNavItemMenuProps>(
             disabled={!unread}
           >
             <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-              Mark as Read
+              {t('room.markAsRead')}
             </Text>
           </MenuItem>
           <RoomNotificationModeSwitcher roomId={room.roomId} value={notificationMode}>
@@ -141,7 +143,7 @@ const RoomNavItemMenu = forwardRef<HTMLDivElement, RoomNavItemMenuProps>(
                 onClick={handleOpen}
               >
                 <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-                  Notifications
+                  {t('room.notifications')}
                 </Text>
               </MenuItem>
             )}
@@ -160,7 +162,7 @@ const RoomNavItemMenu = forwardRef<HTMLDivElement, RoomNavItemMenuProps>(
             disabled={!canInvite}
           >
             <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-              Invite
+              {t('room.invite')}
             </Text>
           </MenuItem>
           <MenuItem
@@ -170,7 +172,7 @@ const RoomNavItemMenu = forwardRef<HTMLDivElement, RoomNavItemMenuProps>(
             radii="300"
           >
             <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-              Copy Link
+              {t('room.copyLink')}
             </Text>
           </MenuItem>
           <MenuItem
@@ -180,7 +182,7 @@ const RoomNavItemMenu = forwardRef<HTMLDivElement, RoomNavItemMenuProps>(
             radii="300"
           >
             <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-              Room Settings
+              {t('room.roomSettings')}
             </Text>
           </MenuItem>
         </Box>
@@ -199,7 +201,7 @@ const RoomNavItemMenu = forwardRef<HTMLDivElement, RoomNavItemMenuProps>(
                   aria-pressed={promptLeave}
                 >
                   <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-                    Leave Room
+                    {t('room.leaveRoom')}
                   </Text>
                 </MenuItem>
                 {promptLeave && (
@@ -219,13 +221,14 @@ const RoomNavItemMenu = forwardRef<HTMLDivElement, RoomNavItemMenuProps>(
 );
 
 function CallChatToggle() {
+  const { t } = useTranslation();
   const [chat, setChat] = useAtom(callChatAtom);
 
   return (
     <IconButton
       onClick={() => setChat(!chat)}
       aria-pressed={chat}
-      aria-label="Toggle Chat"
+      aria-label={t('room.toggleChat')}
       variant="Background"
       fill="None"
       size="300"
@@ -253,6 +256,7 @@ export function RoomNavItem({
   linkPath,
 }: RoomNavItemProps) {
   const mx = useMatrixClient();
+  const { t } = useTranslation();
   const useAuthentication = useMediaAuthentication();
   const [hover, setHover] = useState(false);
   const { hoverProps } = useHover({ onHoverChange: setHover });
@@ -383,7 +387,7 @@ export function RoomNavItem({
             {room.isCallRoom() && callMembers.length > 0 && (
               <Badge variant="Critical" fill="Solid" size="400">
                 <Text as="span" size="L400" truncate>
-                  {callMembers.length} Live
+                  {callMembers.length} {t('room.live')}
                 </Text>
               </Badge>
             )}
@@ -427,7 +431,7 @@ export function RoomNavItem({
               onClick={handleOpenMenu}
               aria-pressed={!!menuAnchor}
               aria-controls={`menu-${room.roomId}`}
-              aria-label="More Options"
+              aria-label={t('room.moreOptions')}
               variant="Background"
               fill="None"
               size="300"
