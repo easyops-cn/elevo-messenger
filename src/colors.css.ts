@@ -7,7 +7,7 @@ export const lightTheme = createTheme(color, {
     ContainerHover: 'rgba(0, 0, 0, 0.04)',
     ContainerActive: 'rgba(0, 0, 0, 0.08)',
     ContainerLine: '#CCCCCC',
-    OnContainer: '#000000',
+    OnContainer: 'rgba(0, 0, 0, 0.85)',
   },
 
   Surface: {
@@ -15,7 +15,7 @@ export const lightTheme = createTheme(color, {
     ContainerHover: '#F2F2F2',
     ContainerActive: '#E5E5E5',
     ContainerLine: '#D9D9D9',
-    OnContainer: '#000000',
+    OnContainer: 'rgba(0, 0, 0, 0.85)',
   },
 
   SurfaceVariant: {
@@ -23,7 +23,7 @@ export const lightTheme = createTheme(color, {
     ContainerHover: '#E5E5E5',
     ContainerActive: '#D9D9D9',
     ContainerLine: '#CCCCCC',
-    OnContainer: '#000000',
+    OnContainer: 'rgba(0, 0, 0, 0.85)',
   },
 
   Primary: {
@@ -31,7 +31,7 @@ export const lightTheme = createTheme(color, {
     MainHover: '#007AFF',
     MainActive: '#007AFF',
     MainLine: '#007AFF',
-    OnMain: '#FFFFFF',
+    OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#E6F4FF',
     ContainerHover: '#BDE1FF',
     ContainerActive: '#6BB3FF',
@@ -44,7 +44,7 @@ export const lightTheme = createTheme(color, {
     MainHover: '#1A1A1A',
     MainActive: '#262626',
     MainLine: '#333333',
-    OnMain: '#FFFFFF',
+    OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#D9D9D9',
     ContainerHover: '#CCCCCC',
     ContainerActive: '#BFBFBF',
@@ -57,7 +57,7 @@ export const lightTheme = createTheme(color, {
     MainHover: '#007744',
     MainActive: '#007041',
     MainLine: '#006A3D',
-    OnMain: '#FFFFFF',
+    OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#E5F3ED',
     ContainerHover: '#D9EDE4',
     ContainerActive: '#CCE6DB',
@@ -70,7 +70,7 @@ export const lightTheme = createTheme(color, {
     MainHover: '#974C00',
     MainActive: '#8F4700',
     MainLine: '#864300',
-    OnMain: '#FFFFFF',
+    OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#F6EEE5',
     ContainerHover: '#F2E5D9',
     ContainerActive: '#EEDDCC',
@@ -83,7 +83,7 @@ export const lightTheme = createTheme(color, {
     MainHover: '#AC0909',
     MainActive: '#A60C0C',
     MainLine: '#9C0B0B',
-    OnMain: '#FFFFFF',
+    OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#F9E7E7',
     ContainerHover: '#F6DBDB',
     ContainerActive: '#F3CFCF',
@@ -104,7 +104,7 @@ export const silverTheme = createTheme(color, {
     ContainerHover: '#D3D3D3',
     ContainerActive: '#C7C7C7',
     ContainerLine: '#BBBBBB',
-    OnContainer: '#000000',
+    OnContainer: 'rgba(0, 0, 0, 0.85)',
   },
 
   Surface: {
@@ -112,7 +112,7 @@ export const silverTheme = createTheme(color, {
     ContainerHover: '#DEDEDE',
     ContainerActive: '#D3D3D3',
     ContainerLine: '#C7C7C7',
-    OnContainer: '#000000',
+    OnContainer: 'rgba(0, 0, 0, 0.85)',
   },
 
   SurfaceVariant: {
@@ -120,7 +120,7 @@ export const silverTheme = createTheme(color, {
     ContainerHover: '#D3D3D3',
     ContainerActive: '#C7C7C7',
     ContainerLine: '#BBBBBB',
-    OnContainer: '#000000',
+    OnContainer: 'rgba(0, 0, 0, 0.85)',
   },
 
   Primary: {
@@ -128,7 +128,7 @@ export const silverTheme = createTheme(color, {
     MainHover: '#007AFF',
     MainActive: '#007AFF',
     MainLine: '#007AFF',
-    OnMain: '#FFFFFF',
+    OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#E6F4FF',
     ContainerHover: '#BDE1FF',
     ContainerActive: '#6BB3FF',
@@ -154,7 +154,7 @@ export const silverTheme = createTheme(color, {
     MainHover: '#01683C',
     MainActive: '#016239',
     MainLine: '#015C36',
-    OnMain: '#FFFFFF',
+    OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#BFDCD0',
     ContainerHover: '#B3D5C7',
     ContainerActive: '#A6CEBD',
@@ -167,7 +167,7 @@ export const silverTheme = createTheme(color, {
     MainHover: '#793C00',
     MainActive: '#723900',
     MainLine: '#6B3600',
-    OnMain: '#FFFFFF',
+    OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#E1D0BF',
     ContainerHover: '#DBC7B2',
     ContainerActive: '#D5BDA6',
@@ -180,7 +180,7 @@ export const silverTheme = createTheme(color, {
     MainHover: '#8D0E0E',
     MainActive: '#850D0D',
     MainLine: '#7E0C0C',
-    OnMain: '#FFFFFF',
+    OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#E7C3C3',
     ContainerHover: '#E2B7B7',
     ContainerActive: '#DDABAB',
@@ -201,7 +201,7 @@ const darkThemeData = {
     ContainerHover: 'rgba(255, 255, 255, 0.075)',
     ContainerActive: 'rgba(255, 255, 255, 0.1)',
     ContainerLine: '#404040',
-    OnContainer: '#F2F2F2',
+    OnContainer: 'rgba(255, 255, 255, 0.85)',
   },
 
   Surface: {
@@ -209,7 +209,7 @@ const darkThemeData = {
     ContainerHover: '#333333',
     ContainerActive: '#404040',
     ContainerLine: '#4D4D4D',
-    OnContainer: '#F2F2F2',
+    OnContainer: 'rgba(255, 255, 255, 0.85)',
   },
 
   SurfaceVariant: {
@@ -217,7 +217,7 @@ const darkThemeData = {
     ContainerHover: '#404040',
     ContainerActive: '#4D4D4D',
     ContainerLine: '#595959',
-    OnContainer: '#F2F2F2',
+    OnContainer: 'rgba(255, 255, 255, 0.85)',
   },
 
   Primary: {
@@ -225,7 +225,7 @@ const darkThemeData = {
     MainHover: '#0A84FF',
     MainActive: '#0A84FF',
     MainLine: '#0A84FF',
-    OnMain: '#FFFFFF',
+    OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#162437',
     ContainerHover: '#142F4F',
     ContainerActive: '#134B85',
@@ -301,7 +301,7 @@ export const butterTheme = createTheme(color, {
     ContainerHover: '#262621',
     ContainerActive: '#33322C',
     ContainerLine: '#403F38',
-    OnContainer: '#FFFBDE',
+    OnContainer: 'rgba(255, 255, 255, 0.85)',
   },
 
   Surface: {
@@ -309,7 +309,7 @@ export const butterTheme = createTheme(color, {
     ContainerHover: '#33322C',
     ContainerActive: '#403F38',
     ContainerLine: '#4D4B43',
-    OnContainer: '#FFFBDE',
+    OnContainer: 'rgba(255, 255, 255, 0.85)',
   },
 
   SurfaceVariant: {
@@ -317,7 +317,7 @@ export const butterTheme = createTheme(color, {
     ContainerHover: '#403F38',
     ContainerActive: '#4D4B43',
     ContainerLine: '#59584E',
-    OnContainer: '#FFFBDE',
+    OnContainer: 'rgba(255, 255, 255, 0.85)',
   },
 
   Secondary: {
