@@ -19,7 +19,7 @@
   --mx-uc-8: hsl(94, 100%, 35%);
 
   --font-emoji: 'Twemoji_DISABLED';
-  --font-secondary: 'InterVariable', var(--font-emoji), sans-serif;
+  --font-secondary: -apple-system, var(--font-emoji), BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 .dark-theme,
@@ -35,7 +35,7 @@
   --mx-uc-7: hsl(243, 100%, 80%);
   --mx-uc-8: hsl(94, 100%, 80%);
 
-  --font-secondary: 'InterVariable', var(--font-emoji), sans-serif;
+  --font-secondary: -apple-system, var(--font-emoji), BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 html {
@@ -50,9 +50,6 @@ body {
   font-family: var(--font-secondary);
   font-size: 16px;
   font-weight: 400;
-
-  /*Why font-variant-ligatures => https://github.com/rsms/inter/issues/222 */
-  font-variant-ligatures: no-contextual;
 }
 #root {
   width: 100%;
