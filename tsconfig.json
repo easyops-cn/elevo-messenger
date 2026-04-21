@@ -11,7 +11,7 @@
     "resolveJsonModule": true,
     "outDir": "dist",
     "skipLibCheck": true,
-    "lib": ["ES2017", "DOM"]
+    "lib": ["ES2020", "DOM"]
   },
   "exclude": ["node_modules", "dist"],
   "include": ["src"]
