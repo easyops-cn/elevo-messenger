@@ -787,7 +787,31 @@
     "notDecrypted": "Message not decrypted",
     "broken": "Broken message",
     "empty": "Empty message",
-    "thinking": "Thinking"
+    "thinking": "Thinking",
+    "viewReactions": "View Reactions",
+    "readReceipts": "Read Receipts",
+    "sourceCode": "Source Code",
+    "viewSource": "View Source",
+    "copyLink": "Copy Link",
+    "pinMessage": "Pin Message",
+    "unpinMessage": "Unpin Message",
+    "deleteMessage": "Delete Message",
+    "deleteMessageConfirm": "This action is irreversible! Are you sure that you want to delete this message?",
+    "reason": "Reason",
+    "optional": "optional",
+    "failedDelete": "Failed to delete message! Please try again.",
+    "deleting": "Deleting...",
+    "delete": "Delete",
+    "reportMessage": "Report Message",
+    "reportMessageDesc": "Report this message to server, which may then notify the appropriate people to take action.",
+    "failedReport": "Failed to report message! Please try again.",
+    "reportedMessage": "Message has been reported to server.",
+    "reporting": "Reporting...",
+    "report": "Report",
+    "noReason": "No reason provided",
+    "addReaction": "Add Reaction",
+    "replyInThread": "Reply in Thread",
+    "editMessage": "Edit Message"
   },
   "search": {
     "sortBy": "Sort by",
@@ -803,7 +827,8 @@
     "searchMessagesSubtitle": "Find helpful messages in your community by searching with related keywords.",
     "noResultsFor": "No results found for \"{{term}}\"",
     "resultsFor": "Results for \"{{term}}\"",
-    "searchForKeyword": "Search for keyword"
+    "searchForKeyword": "Search for keyword",
+    "open": "Open"
   },
   "notifications": {
     "title": "Notification Messages",

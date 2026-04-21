@@ -787,7 +787,31 @@
     "notDecrypted": "消息未解密",
     "broken": "损坏的消息",
     "empty": "空消息",
-    "thinking": "思考"
+    "thinking": "思考",
+    "viewReactions": "查看反应",
+    "readReceipts": "已读回执",
+    "sourceCode": "源代码",
+    "viewSource": "查看源码",
+    "copyLink": "复制链接",
+    "pinMessage": "置顶消息",
+    "unpinMessage": "取消置顶",
+    "deleteMessage": "删除消息",
+    "deleteMessageConfirm": "此操作不可撤销！确定要删除此消息吗？",
+    "reason": "原因",
+    "optional": "可选",
+    "failedDelete": "删除消息失败！请重试。",
+    "deleting": "删除中...",
+    "delete": "删除",
+    "reportMessage": "举报消息",
+    "reportMessageDesc": "将此消息举报到服务器，服务器可能会通知相关人员采取行动。",
+    "failedReport": "举报消息失败！请重试。",
+    "reportedMessage": "消息已举报到服务器。",
+    "reporting": "举报中...",
+    "report": "举报",
+    "noReason": "未提供原因",
+    "addReaction": "添加表情反应",
+    "replyInThread": "在话题中回复",
+    "editMessage": "编辑消息"
   },
   "search": {
     "sortBy": "排序",
@@ -803,7 +827,8 @@
     "searchMessagesSubtitle": "通过关键词搜索社区中有用的消息。",
     "noResultsFor": "未找到 \"{{term}}\" 的结果",
     "resultsFor": "\"{{term}}\" 的结果",
-    "searchForKeyword": "搜索关键词"
+    "searchForKeyword": "搜索关键词",
+    "open": "打开"
   },
   "notifications": {
     "title": "通知消息",

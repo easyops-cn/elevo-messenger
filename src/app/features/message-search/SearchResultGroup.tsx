@@ -1,8 +1,9 @@
 /* eslint-disable react/destructuring-assignment */
 import React, { MouseEventHandler, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { IEventWithRoomId, JoinRule, RelationType, Room } from 'matrix-js-sdk';
 import { HTMLReactParserOptions } from 'html-react-parser';
-import { Avatar, Box, Chip, Header, Icon, Icons, Text, config } from 'folds';
+import { Box, Chip, Header, Icon, Icons, Text, config } from 'folds';
 import { Opts as LinkifyOpts } from 'linkifyjs';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import {
@@ -51,6 +52,7 @@ import {
 } from '../../hooks/useMemberPowerTag';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoomCreatorsTag } from '../../hooks/useRoomCreatorsTag';
+import { Avatar } from '../../components/avatar';
 
 type SearchResultGroupProps = {
   room: Room;
@@ -74,6 +76,7 @@ export function SearchResultGroup({
   hour24Clock,
   dateFormatString,
 }: SearchResultGroupProps) {
+  const { t } = useTranslation();
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const highlightRegex = useMemo(() => makeHighlightRegex(highlights), [highlights]);
@@ -165,7 +168,7 @@ export function SearchResultGroup({
         return (
           <Box grow="Yes" direction="Column">
             <Text size="T400" priority="300">
-              Room Tombstone. {content.body}
+              {t('notifications.roomTombstone', { body: content.body })}
             </Text>
           </Box>
         );
@@ -180,7 +183,7 @@ export function SearchResultGroup({
         <Box grow="Yes" direction="Column">
           <Text size="T400" priority="300">
             <code className={customHtmlCss.Code}>{event.type}</code>
-            {' event'}
+            {t('notifications.event')}
           </Text>
         </Box>
       );
@@ -197,7 +200,7 @@ export function SearchResultGroup({
     <Box direction="Column" gap="200">
       <Header size="300">
         <Box gap="200" grow="Yes">
-          <Avatar size="200" radii="300">
+          <Avatar size="200" radii="Pill">
             <RoomAvatar
               roomId={room.roomId}
               src={getRoomAvatarUrl(mx, room, 96, useAuthentication)}
@@ -258,7 +261,7 @@ export function SearchResultGroup({
               <ModernLayout
                 before={
                   <AvatarBase>
-                    <Avatar size="300">
+                    <Avatar size="300" radii="Pill">
                       <UserAvatar
                         userId={event.sender}
                         src={
@@ -303,7 +306,7 @@ export function SearchResultGroup({
                       variant="Secondary"
                       radii="400"
                     >
-                      <Text size="T200">Open</Text>
+                      <Text size="T200">{t('search.open')}</Text>
                     </Chip>
                   </Box>
                 </Box>
