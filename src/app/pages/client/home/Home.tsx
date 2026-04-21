@@ -211,10 +211,12 @@ export function Home() {
     return items;
   }, [mx, rooms]);
 
+  const GAP = 4;
+
   const virtualizer = useVirtualizer({
     count: sortedRooms.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 38,
+    estimateSize: () => 36 + GAP,
     overscan: 10,
   });
 
@@ -265,7 +267,7 @@ export function Home() {
               <div
                 style={{
                   position: 'relative',
-                  height: virtualizer.getTotalSize(),
+                  height: virtualizer.getTotalSize() + GAP,
                 }}
               >
                 {virtualizer.getVirtualItems().map((vItem) => {
@@ -280,6 +282,7 @@ export function Home() {
                       virtualItem={vItem}
                       key={vItem.index}
                       ref={virtualizer.measureElement}
+                      style={{ top: vItem.start + GAP * vItem.index }}
                     >
                       <RoomNavItem
                         room={room}
