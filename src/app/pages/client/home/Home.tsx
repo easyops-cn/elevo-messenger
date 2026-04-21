@@ -127,6 +127,7 @@ function HomeHeader({ rooms, onSearchOpen }: HomeHeaderProps) {
                 height: toRem(28),
                 padding: `0 ${config.space.S300}`,
                 fontSize: toRem(13),
+                backgroundColor: color.Background.ContainerActive,
               }}
             >
               <Text size="T300" truncate style={{ opacity: config.opacity.Placeholder }}>
