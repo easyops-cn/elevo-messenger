@@ -47,15 +47,16 @@ import { UserAvatar } from '../../components/user-avatar';
 import { useRoomTypingMember } from '../../hooks/useRoomTypingMembers';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useMembershipFilter, useMembershipFilterMenu } from '../../hooks/useMemberFilter';
-import { useMemberPowerSort, useMemberSort, useMemberSortMenu } from '../../hooks/useMemberSort';
-import { useGetMemberPowerLevel, usePowerLevelsContext } from '../../hooks/usePowerLevels';
+import { useMemberSort, useMemberSortMenu } from '../../hooks/useMemberSort';
+import { usePowerLevelsContext } from '../../hooks/usePowerLevels';
 import { MembershipFilterMenu } from '../../components/MembershipFilterMenu';
 import { MemberSortMenu } from '../../components/MemberSortMenu';
 import { useOpenUserRoomProfile, useUserRoomProfileState } from '../../state/hooks/userRoomProfile';
 import { useSpaceOptionally } from '../../hooks/useSpace';
 import { ContainerColor } from '../../styles/ContainerColor.css';
-import { useFlattenPowerTagMembers, useGetMemberPowerTag } from '../../hooks/useMemberPowerTag';
+import { useGetMemberPowerTag } from '../../hooks/useMemberPowerTag';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
+import { MemberPowerTag } from '../../../types/matrix/room';
 
 type MemberDrawerHeaderProps = {
   room: Room;
@@ -104,11 +105,22 @@ function MemberDrawerHeader({ room }: MemberDrawerHeaderProps) {
   );
 }
 
+const BADGE_CONFIG: Record<string, { label: string; variant: 'Primary' | 'Success' }> = {
+  Admin: { label: 'Admin', variant: 'Primary' },
+  Moderator: { label: 'Mod', variant: 'Success' },
+};
+
+const getPowerBadgeConfig = (tag?: MemberPowerTag): { label: string; variant: 'Primary' | 'Success' } | undefined => {
+  if (!tag) return undefined;
+  return BADGE_CONFIG[tag.name];
+};
+
 type MemberItemProps = {
   mx: MatrixClient;
   useAuthentication: boolean;
   room: Room;
   member: RoomMember;
+  powerTag?: MemberPowerTag;
   onClick: MouseEventHandler<HTMLButtonElement>;
   pressed?: boolean;
   typing?: boolean;
@@ -118,6 +130,7 @@ function MemberItem({
   useAuthentication,
   room,
   member,
+  powerTag,
   onClick,
   pressed,
   typing,
@@ -128,6 +141,8 @@ function MemberItem({
   const avatarUrl = avatarMxcUrl
     ? mx.mxcUrlToHttp(avatarMxcUrl, 100, 100, 'crop', undefined, false, useAuthentication)
     : undefined;
+
+  const badge = getPowerBadgeConfig(powerTag);
 
   return (
     <MenuItem
@@ -148,11 +163,23 @@ function MemberItem({
         </Avatar>
       }
       after={
-        typing && (
-          <Badge size="300" variant="Secondary" fill="Soft" radii="Pill" outlined>
-            <TypingIndicator size="300" />
-          </Badge>
-        )
+        <Box alignItems="Center" gap="100" shrink="No">
+          {badge && (
+            <Badge
+              variant={badge.variant}
+              fill="Soft"
+              radii="300"
+              outlined
+            >
+              <Text size="T200">{badge.label}</Text>
+            </Badge>
+          )}
+          {typing && (
+            <Badge size="300" variant="Secondary" fill="Soft" radii="Pill" outlined>
+              <TypingIndicator size="300" />
+            </Badge>
+          )}
+        </Box>
       }
     >
       <Box grow="Yes">
@@ -189,7 +216,6 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
   const powerLevels = usePowerLevelsContext();
   const creators = useRoomCreators(room);
   const getPowerTag = useGetMemberPowerTag(room, creators, powerLevels);
-  const getPowerLevel = useGetMemberPowerLevel(powerLevels);
 
   const fetchingMembers = members.length < room.getJoinedMemberCount();
   const openUserRoomProfile = useOpenUserRoomProfile();
@@ -203,13 +229,12 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
 
   const membershipFilter = useMembershipFilter(membershipFilterIndex, membershipFilterMenu);
   const memberSort = useMemberSort(sortFilterIndex, sortFilterMenu);
-  const memberPowerSort = useMemberPowerSort(creators, getPowerLevel);
 
   const typingMembers = useRoomTypingMember(room.roomId);
 
   const filteredMembers = useMemo(
-    () => members.filter(membershipFilter.filterFn).sort(memberSort.sortFn).sort(memberPowerSort),
-    [members, membershipFilter, memberSort, memberPowerSort]
+    () => members.filter(membershipFilter.filterFn).sort(memberSort.sortFn),
+    [members, membershipFilter, memberSort]
   );
 
   const [result, search] = useAsyncSearch(
@@ -221,10 +246,8 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
 
   const processMembers = result ? result.items : filteredMembers;
 
-  const PLTagOrRoomMember = useFlattenPowerTagMembers(processMembers, getPowerTag);
-
   const virtualizer = useVirtualizer({
-    count: PLTagOrRoomMember.length,
+    count: processMembers.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => 40,
     overscan: 10,
@@ -343,23 +366,8 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
                 }}
               >
                 {virtualizer.getVirtualItems().map((vItem) => {
-                  const tagOrMember = PLTagOrRoomMember[vItem.index];
-                  if (!('userId' in tagOrMember)) {
-                    return (
-                      <Text
-                        style={{
-                          transform: `translateY(${vItem.start}px)`,
-                        }}
-                        data-index={vItem.index}
-                        ref={virtualizer.measureElement}
-                        key={`${room.roomId}-${vItem.index}`}
-                        className={classNames(css.MembersGroupLabel, css.DrawerVirtualItem)}
-                        size="L400"
-                      >
-                        {tagOrMember.name}
-                      </Text>
-                    );
-                  }
+                  const member = processMembers[vItem.index];
+                  const powerTag = getPowerTag(member.userId);
 
                   return (
                     <div
@@ -368,18 +376,19 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
                       }}
                       className={css.DrawerVirtualItem}
                       data-index={vItem.index}
-                      key={`${room.roomId}-${tagOrMember.userId}`}
+                      key={`${room.roomId}-${member.userId}`}
                       ref={virtualizer.measureElement}
                     >
                       <MemberItem
                         mx={mx}
                         useAuthentication={useAuthentication}
                         room={room}
-                        member={tagOrMember}
+                        member={member}
+                        powerTag={powerTag}
                         onClick={handleMemberClick}
-                        pressed={openProfileUserId === tagOrMember.userId}
+                        pressed={openProfileUserId === member.userId}
                         typing={typingMembers.some(
-                          (receipt) => receipt.userId === tagOrMember.userId
+                          (receipt) => receipt.userId === member.userId
                         )}
                       />
                     </div>
