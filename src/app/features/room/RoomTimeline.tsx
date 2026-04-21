@@ -226,6 +226,7 @@ type RoomTimelineProps = {
   eventId?: string;
   roomInputRef: RefObject<HTMLElement>;
   editor: Editor;
+  onRequestScrollToBottom?: React.MutableRefObject<(() => void) | null>;
 };
 
 const PAGINATION_LIMIT = 80;
@@ -428,7 +429,7 @@ const getRoomUnreadInfo = (room: Room, scrollTo = false) => {
   };
 };
 
-export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimelineProps) {
+export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScrollToBottom }: RoomTimelineProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
@@ -500,6 +501,25 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor }: RoomTimeli
     count: 0,
     smooth: true,
   });
+
+  // Expose scrollToBottom for external callers (e.g. RoomInput on submit)
+  useEffect(() => {
+    if (onRequestScrollToBottom) {
+      onRequestScrollToBottom.current = () => {
+        scrollToBottomRef.current.count += 1;
+        scrollToBottomRef.current.smooth = false;
+        const scrollEl = scrollRef.current;
+        if (scrollEl) {
+          scrollToBottom(scrollEl);
+          setAtBottom(true);
+        }
+      };
+
+      return () => {
+        onRequestScrollToBottom.current = null;
+      };
+    }
+  }, [onRequestScrollToBottom]);
 
   const [focusItem, setFocusItem] = useState<
     | {

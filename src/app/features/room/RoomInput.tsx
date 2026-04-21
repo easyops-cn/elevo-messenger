@@ -142,9 +142,10 @@ interface RoomInputProps {
   fileDropContainerRef: RefObject<HTMLElement>;
   roomId: string;
   room: Room;
+  scrollToBottomRef?: React.MutableRefObject<(() => void) | null>;
 }
 export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
-  ({ editor, fileDropContainerRef, roomId, room }, ref) => {
+  ({ editor, fileDropContainerRef, roomId, room, scrollToBottomRef }, ref) => {
     const { t } = useTranslation();
     const mx = useMatrixClient();
     const useAuthentication = useMediaAuthentication();
@@ -378,6 +379,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
 
     const submit = useCallback(() => {
       uploadBoardHandlers.current?.handleSend();
+      scrollToBottomRef?.current?.();
 
       const commandName = getBeginCommand(editor);
       let plainText = toPlainText(editor.children, isMarkdown).trim();
@@ -467,7 +469,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       resetEditorHistory(editor);
       setReplyDraft(undefined);
       sendTypingStatus(false);
-    }, [mx, roomId, editor, replyDraft, sendTypingStatus, setReplyDraft, isMarkdown, commands]);
+    }, [mx, roomId, editor, replyDraft, sendTypingStatus, setReplyDraft, isMarkdown, commands, scrollToBottomRef]);
 
     const handleKeyDown: KeyboardEventHandler = useCallback(
       (evt) => {

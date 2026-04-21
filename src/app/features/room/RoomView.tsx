@@ -57,6 +57,7 @@ const shouldFocusMessageField = (evt: KeyboardEvent): boolean => {
 export function RoomView({ eventId }: { eventId?: string }) {
   const roomInputRef = useRef<HTMLDivElement>(null);
   const roomViewRef = useRef<HTMLDivElement>(null);
+  const timelineScrollToBottomRef = useRef<(() => void) | null>(null);
 
   const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
 
@@ -99,6 +100,7 @@ export function RoomView({ eventId }: { eventId?: string }) {
           eventId={eventId}
           roomInputRef={roomInputRef}
           editor={editor}
+          onRequestScrollToBottom={timelineScrollToBottomRef}
         />
         <RoomViewTyping room={room} />
       </Box>
@@ -119,6 +121,7 @@ export function RoomView({ eventId }: { eventId?: string }) {
                   roomId={roomId}
                   fileDropContainerRef={roomViewRef}
                   ref={roomInputRef}
+                  scrollToBottomRef={timelineScrollToBottomRef}
                 />
               )}
               {!canMessage && (
