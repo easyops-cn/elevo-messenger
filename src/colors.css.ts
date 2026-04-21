@@ -40,7 +40,7 @@ export const lightTheme = createTheme(color, {
   },
 
   Secondary: {
-    Main: '#000000',
+    Main: 'rgba(0, 0, 0, 0.85)',
     MainHover: '#1A1A1A',
     MainActive: '#262626',
     MainLine: '#333333',

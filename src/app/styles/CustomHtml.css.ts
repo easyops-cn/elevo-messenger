@@ -343,3 +343,54 @@ export const ToolCall = recipe({
   ],
   variants: {},
 });
+
+export const TableContainer = style({
+  borderRadius: config.radii.R300,
+  overflow: 'hidden',
+  border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
+});
+
+export const Table = style([
+  DefaultReset,
+  MarginSpaced,
+  {
+    borderCollapse: 'separate',
+    borderSpacing: 0,
+    width: '100%',
+  },
+]);
+
+export const TableCell = style([
+  DefaultReset,
+  {
+    borderRight: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
+    borderBottom: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
+    padding: `${config.space.S100} ${config.space.S200}`,
+    selectors: {
+      '&:last-child': {
+        borderRight: 'none',
+      },
+      'table > tr:last-child > &, tbody > tr:last-child > &': {
+        borderBottom: 'none',
+      },
+    },
+  },
+]);
+
+export const TableHeaderCell = style([
+  TableCell,
+  {
+    fontWeight: config.fontWeight.W600,
+    backgroundColor: color.SurfaceVariant.Container,
+  },
+]);
+
+export const HorizontalRule = style([
+  DefaultReset,
+  MarginSpaced,
+  {
+    border: 'none',
+    borderTop: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
+    margin: `${config.space.S500} 0`,
+  },
+]);

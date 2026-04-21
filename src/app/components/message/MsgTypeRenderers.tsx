@@ -132,7 +132,6 @@ const toolCallHeaderStyles: CSSProperties = {
   alignItems: 'center',
   gap: config.space.S200,
   cursor: 'pointer',
-  transition: 'background-color 0.15s ease',
   width: 'fit-content',
 };
 
@@ -176,11 +175,11 @@ function ToolCallCard({ data, style }: ToolCallCardProps) {
         role="button"
         tabIndex={0}
       >
-        <Icon src={Icons.Terminal} size="300" style={{ color: iconColor }} />
-        <Text size="T300" priority="400">
+        <Icon src={Icons.Terminal} size="100" style={{ color: iconColor }} />
+        <Text size="T200" priority="300">
           {data.title || data.name}
         </Text>
-        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="200" />
+        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="100" />
       </div>
       {expanded && (
         <div style={toolCallBodyStyles}>

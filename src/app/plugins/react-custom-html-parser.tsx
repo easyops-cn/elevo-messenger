@@ -399,6 +399,10 @@ export const getReactCustomHtmlParser = (
           );
         }
 
+        if (name === 'hr') {
+          return <hr {...props} className={css.HorizontalRule} />;
+        }
+
         if (name === 'ul') {
           return (
             <ul {...props} className={css.List}>
@@ -411,6 +415,37 @@ export const getReactCustomHtmlParser = (
             <ol {...props} className={css.List}>
               {domToReact(children, opts)}
             </ol>
+          );
+        }
+
+        if (name === 'table') {
+          return (
+            <div className={css.TableContainer}>
+              <table {...props} className={css.Table}>
+                {domToReact(children, opts)}
+              </table>
+            </div>
+          );
+        }
+        if (name === 'tbody') {
+          return (
+            <tbody {...props}>
+              {domToReact(children, opts)}
+            </tbody>
+          );
+        }
+        if (name === 'th') {
+          return (
+            <th {...props} className={css.TableHeaderCell}>
+              {domToReact(children, opts)}
+            </th>
+          );
+        }
+        if (name === 'td') {
+          return (
+            <td {...props} className={css.TableCell}>
+              {domToReact(children, opts)}
+            </td>
           );
         }
 
@@ -561,9 +596,17 @@ export const getReactCustomHtmlParser = (
       }
 
       if (domNode instanceof DOMText) {
-        const linkify =
-          !(domNode.parent && 'name' in domNode.parent && domNode.parent.name === 'code') &&
-          !(domNode.parent && 'name' in domNode.parent && domNode.parent.name === 'a');
+        let linkify = true;
+
+        if (domNode.parent && 'name' in domNode.parent) {
+          const parentName = domNode.parent.name;
+          // Whitespace text nodes cannot appear as a child of these elements.
+          if (!domNode.data.trim() && ['table', 'thead', 'tbody', 'tr'].includes(parentName)) {
+            // eslint-disable-next-line react/jsx-no-useless-fragment
+            return <></>;
+          }
+          linkify = parentName !== 'code' && parentName !== 'a';
+        }
 
         let jsx = scaleSystemEmoji(domNode.data);
 
