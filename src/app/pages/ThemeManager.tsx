@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect } from 'react';
-import { configClass, varsClass } from 'folds';
+import { varsClass } from 'folds';
 import {
   DarkTheme,
   LightTheme,
@@ -11,13 +11,14 @@ import {
 import { useSetting } from '../state/hooks/settings';
 import { settingsAtom } from '../state/settings';
 import { useTauriThemeSync } from '../plugins/useTauriOpener';
+import { elevoConfig } from '../../config.css';
 
 export function UnAuthRouteThemeManager() {
   const systemThemeKind = useSystemThemeKind();
 
   useEffect(() => {
     document.body.className = '';
-    document.body.classList.add(configClass, varsClass);
+    document.body.classList.add(elevoConfig, varsClass);
     if (systemThemeKind === ThemeKind.Dark) {
       document.body.classList.add(...DarkTheme.classNames);
     }
@@ -37,7 +38,7 @@ export function AuthRouteThemeManager({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     document.body.className = '';
-    document.body.classList.add(configClass, varsClass);
+    document.body.classList.add(elevoConfig, varsClass);
 
     document.body.classList.add(...activeTheme.classNames);
 

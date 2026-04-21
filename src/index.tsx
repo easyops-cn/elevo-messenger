@@ -3,7 +3,7 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import { enableMapSet } from 'immer';
 import 'folds/dist/style.css';
-import { configClass, varsClass } from 'folds';
+import { varsClass } from 'folds';
 
 enableMapSet();
 
@@ -17,8 +17,9 @@ import './app/i18n';
 import { pushSessionToSW } from './sw-session';
 import { getFallbackSession } from './app/state/sessions';
 import { NO_SERVICE_WORKER } from './app/utils/noServiceWorker';
+import { elevoConfig } from './config.css';
 
-document.body.classList.add(configClass, varsClass);
+document.body.classList.add(elevoConfig, varsClass);
 
 // Register Service Worker (skipped when VITE_NO_SERVICE_WORKER is set)
 if (!NO_SERVICE_WORKER && 'serviceWorker' in navigator) {
