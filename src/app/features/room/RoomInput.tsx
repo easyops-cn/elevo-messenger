@@ -114,14 +114,6 @@ import { ReplyLayout, ThreadIndicator } from '../../components/message';
 import { roomToParentsAtom } from '../../state/room/roomToParents';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useImagePackRooms } from '../../hooks/useImagePackRooms';
-import { usePowerLevelsContext } from '../../hooks/usePowerLevels';
-import colorMXID from '../../../util/colorMXID';
-import { useIsDirectRoom } from '../../hooks/useRoom';
-import { useAccessiblePowerTagColors, useGetMemberPowerTag } from '../../hooks/useMemberPowerTag';
-import { useRoomCreators } from '../../hooks/useRoomCreators';
-import { useTheme } from '../../hooks/useTheme';
-import { useRoomCreatorsTag } from '../../hooks/useRoomCreatorsTag';
-import { usePowerLevelTags } from '../../hooks/usePowerLevelTags';
 import { useComposingCheck } from '../../hooks/useComposingCheck';
 import { useSdkMessageListener, SdkMessagePayload } from '../../plugins/useTauriOpener';
 
@@ -159,34 +151,12 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const [enterForNewline] = useSetting(settingsAtom, 'enterForNewline');
     const [isMarkdown] = useSetting(settingsAtom, 'isMarkdown');
     const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
-    const [legacyUsernameColor] = useSetting(settingsAtom, 'legacyUsernameColor');
-    const direct = useIsDirectRoom();
     const commands = useCommands(mx, room);
     const emojiBtnRef = useRef<HTMLButtonElement>(null);
     const roomToParents = useAtomValue(roomToParentsAtom);
-    const powerLevels = usePowerLevelsContext();
-    const creators = useRoomCreators(room);
 
     const [msgDraft, setMsgDraft] = useAtom(roomIdToMsgDraftAtomFamily(roomId));
     const [replyDraft, setReplyDraft] = useAtom(roomIdToReplyDraftAtomFamily(roomId));
-    const replyUserID = replyDraft?.userId;
-
-    const powerLevelTags = usePowerLevelTags(room, powerLevels);
-    const creatorsTag = useRoomCreatorsTag();
-    const getMemberPowerTag = useGetMemberPowerTag(room, creators, powerLevels);
-    const theme = useTheme();
-    const accessibleTagColors = useAccessiblePowerTagColors(
-      theme.kind,
-      creatorsTag,
-      powerLevelTags
-    );
-
-    const replyPowerTag = replyUserID ? getMemberPowerTag(replyUserID) : undefined;
-    const replyPowerColor = replyPowerTag?.color
-      ? accessibleTagColors.get(replyPowerTag.color)
-      : undefined;
-    const replyUsernameColor =
-      legacyUsernameColor || direct ? colorMXID(replyUserID ?? '') : replyPowerColor;
 
     const [uploadBoard, setUploadBoard] = useState(true);
     const [voiceRecordingOpen, setVoiceRecordingOpen] = useState(false);
@@ -698,16 +668,9 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                   <Box direction="Row" gap="200" alignItems="Center">
                     {replyDraft.relation?.rel_type === RelationType.Thread && <ThreadIndicator />}
                     <ReplyLayout
-                      userColor={replyUsernameColor}
-                      username={
-                        <Text size="T300" truncate>
-                          <b>
-                            {getMemberDisplayName(room, replyDraft.userId) ??
+                      username={getMemberDisplayName(room, replyDraft.userId) ??
                               getMxIdLocalPart(replyDraft.userId) ??
                               replyDraft.userId}
-                          </b>
-                        </Text>
-                      }
                     >
                       <Text size="T300" truncate>
                         {trimReplyFromBody(replyDraft.body)}

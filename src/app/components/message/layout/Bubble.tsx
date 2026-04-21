@@ -64,14 +64,14 @@ export const BubbleLayout = as<'div', BubbleLayoutProps>(
       <Box grow="Yes" direction="Column">
         {header}
         {beforeContent && (
-          <Box style={isOwn ? { alignSelf: 'End' } : undefined}>
+          <Box alignSelf={isOwn ? 'End' : undefined} style={isOwn ? { maxWidth: '100%' } : undefined}>
             {beforeContent}
           </Box>
         )}
         {hideBubble ? (
           children
         ) : (
-          <Box style={isOwn ? { alignSelf: 'End' } : undefined}>
+          <Box alignSelf={isOwn ? 'End' : undefined} style={isOwn ? { maxWidth: '100%' } : undefined}>
             <Box
               className={
                 hideBubble
@@ -94,7 +94,7 @@ export const BubbleLayout = as<'div', BubbleLayoutProps>(
           </Box>
         )}
         {afterContent && (
-          <Box style={isOwn ? { alignSelf: 'End' } : undefined}>
+          <Box alignSelf={isOwn ? 'End' : undefined} style={isOwn ? { maxWidth: '100%' } : undefined}>
             {afterContent}
           </Box>
         )}

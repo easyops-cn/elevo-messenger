@@ -1178,17 +1178,15 @@ export const Message = as<'div', MessageProps>(
           </BubbleLayout>
         )}
         {messageLayout !== MessageLayout.Compact && messageLayout !== MessageLayout.Bubble && (
-          <ModernLayout isOwn={isOwn} before={avatarJSX} onContextMenu={handleContextMenu}>
-            {headerJSX}
-            <Box
-              direction="Column"
-              alignSelf={isOwn ? 'End' : 'Start'}
-              style={{ maxWidth: '100%' }}
-            >
-              {reply}
-              {msgBubbleContentJSX}
-              {reactions}
-            </Box>
+          <ModernLayout
+            isOwn={isOwn}
+            before={avatarJSX}
+            header={headerJSX}
+            beforeContent={reply}
+            afterContent={reactions}
+            onContextMenu={handleContextMenu}
+          >
+            {msgBubbleContentJSX}
           </ModernLayout>
         )}
       </MessageBase>

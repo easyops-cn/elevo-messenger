@@ -45,7 +45,8 @@
     "viewLess": "View Less",
     "password": "Password",
     "code": "Code",
-    "reset": "Reset"
+    "reset": "Reset",
+    "reply": "Reply"
   },
   "auth": {
     "login": "Login",

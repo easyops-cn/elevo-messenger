@@ -1,7 +1,8 @@
-import { Box, Icon, Icons, Text, as, color, toRem } from 'folds';
+import { Box, Icon, Icons, Line, Text, as, color, toRem } from 'folds';
 import { EventTimelineSet, Room } from 'matrix-js-sdk';
-import React, { MouseEventHandler, ReactNode, useCallback, useMemo } from 'react';
+import React, { MouseEventHandler, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
+import { useTranslation } from 'react-i18next';
 import { getMemberDisplayName, trimReplyFromBody } from '../../utils/room';
 import { getMxIdLocalPart } from '../../utils/matrix';
 import { LinePlaceholder } from './placeholder';
@@ -10,31 +11,33 @@ import * as css from './Reply.css';
 import { MessageBadEncryptedContent, MessageDeletedContent, MessageFailedContent } from './content';
 import { scaleSystemEmoji } from '../../plugins/react-custom-html-parser';
 import { useRoomEvent } from '../../hooks/useRoomEvent';
-import colorMXID from '../../../util/colorMXID';
 import { GetMemberPowerTag } from '../../hooks/useMemberPowerTag';
 
 type ReplyLayoutProps = {
-  userColor?: string;
-  username?: ReactNode;
+  username?: string;
 };
 export const ReplyLayout = as<'div', ReplyLayoutProps>(
-  ({ username, userColor, className, children, ...props }, ref) => (
-    <Box
-      className={classNames(css.Reply, className)}
-      alignItems="Center"
-      gap="100"
-      {...props}
-      ref={ref}
-    >
-      <Box style={{ color: userColor, maxWidth: toRem(200) }} alignItems="Center" shrink="No">
-        <Icon size="100" src={Icons.ReplyArrow} />
-        {username}
+  ({ username, className, children, ...props }, ref) => {
+    const { t } = useTranslation();
+    return (
+      <Box
+        className={classNames(css.Reply, className)}
+        alignItems="Center"
+        gap="100"
+        {...props}
+        ref={ref}
+      >
+        <Box style={{ maxWidth: toRem(200) }} alignItems="Center" shrink="No">
+          <Text as="span" size="T300">
+            {`${t('common.reply')} ${username ?? ''}:`}
+          </Text>
+        </Box>
+        <Box grow="Yes">
+          {children}
+        </Box>
       </Box>
-      <Box grow="Yes" className={css.ReplyContent}>
-        {children}
-      </Box>
-    </Box>
-  )
+    );
+  }
 );
 
 export const ThreadIndicator = as<'div'>(({ ...props }, ref) => (
@@ -70,9 +73,6 @@ export const Reply = as<'div', ReplyProps>(
       replyEventId,
       threadRootId,
       onClick,
-      getMemberPowerTag,
-      accessibleTagColors,
-      legacyUsernameColor,
       ...props
     },
     ref
@@ -86,10 +86,6 @@ export const Reply = as<'div', ReplyProps>(
 
     const { body } = replyEvent?.getContent() ?? {};
     const sender = replyEvent?.getSender();
-    const powerTag = sender ? getMemberPowerTag?.(sender) : undefined;
-    const tagColor = powerTag?.color ? accessibleTagColors?.get(powerTag.color) : undefined;
-
-    const usernameColor = legacyUsernameColor ? colorMXID(sender ?? replyEventId) : tagColor;
 
     const fallbackBody = replyEvent?.isRedacted() ? (
       <MessageDeletedContent />
@@ -102,19 +98,13 @@ export const Reply = as<'div', ReplyProps>(
 
     return (
       <Box direction="Row" gap="200" alignItems="Center" {...props} ref={ref}>
+        <Line size="500" variant="Primary" direction="Vertical" style={{ height: toRem(14) }} />
         {threadRootId && (
           <ThreadIndicator as="button" data-event-id={threadRootId} onClick={onClick} />
         )}
         <ReplyLayout
           as="button"
-          userColor={usernameColor}
-          username={
-            sender && (
-              <Text size="T300" truncate>
-                <b>{getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender)}</b>
-              </Text>
-            )
-          }
+          username={sender ? (getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender)) : undefined}
           data-event-id={replyEventId}
           onClick={onClick}
         >

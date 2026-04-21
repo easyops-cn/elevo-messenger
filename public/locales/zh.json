@@ -45,7 +45,8 @@
     "viewLess": "收起",
     "password": "密码",
     "code": "代码",
-    "reset": "重置"
+    "reset": "重置",
+    "reply": "回复"
   },
   "auth": {
     "login": "登录",

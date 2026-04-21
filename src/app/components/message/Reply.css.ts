@@ -23,19 +23,13 @@ export const Reply = style({
   minWidth: 0,
   maxWidth: '100%',
   minHeight: config.lineHeight.T300,
+  opacity: config.opacity.P300,
   selectors: {
     'button&': {
       cursor: 'pointer',
     },
-  },
-});
-
-export const ReplyContent = style({
-  opacity: config.opacity.P300,
-
-  selectors: {
-    [`${Reply}:hover &`]: {
+    '&:hover': {
       opacity: config.opacity.P500,
-    },
+    }
   },
 });
