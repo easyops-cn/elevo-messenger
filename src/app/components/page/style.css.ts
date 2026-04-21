@@ -79,7 +79,7 @@ export const PageHeader = recipe({
     outlined: {
       true: {
         borderBottomWidth: config.borderWidth.B300,
-        // boxShadow: elevoColor.shadow.Header,
+        borderBottomColor: elevoColor.Border.ExtremeLight,
       },
     },
     isMobileMac: {
