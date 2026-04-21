@@ -1,5 +1,6 @@
 import { OidcTokenRefresher } from 'matrix-js-sdk/lib/oidc/tokenRefresher';
-import { getOidcSession, OidcSessionData } from '../state/sessions';
+import { getFallbackSession, getOidcSession, OidcSessionData } from '../state/sessions';
+import { pushSessionToSW } from '../../sw-session';
 
 /**
  * Elevo-specific OIDC token refresher.
@@ -26,5 +27,8 @@ export class ElevoOidcTokenRefresher extends OidcTokenRefresher {
     // Update access token stored in the fallback session fields
     localStorage.setItem('elevo_access_token', accessToken);
     localStorage.setItem('elevo_oidc_session', JSON.stringify(updated));
+
+    const session = getFallbackSession();
+    pushSessionToSW(session?.baseUrl, session?.accessToken);
   }
 }
