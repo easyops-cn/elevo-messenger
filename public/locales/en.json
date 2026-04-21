@@ -154,7 +154,7 @@
     "noMembersOfType": "No \"{{type}}\" Members"
   },
   "home": {
-    "title": "Home",
+    "title": "Messages",
     "noRooms": "No Rooms",
     "noRoomsDesc": "You do not have any rooms yet.",
     "noDirectMessages": "No Direct Messages",

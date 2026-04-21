@@ -5,7 +5,7 @@ export function PauseIcon(filled?: boolean) {
   return (
     <g
       stroke="currentColor"
-      strokeWidth="1.5"
+      strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       fill={filled ? 'currentColor' : 'none'}

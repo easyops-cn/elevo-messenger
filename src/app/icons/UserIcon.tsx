@@ -1,7 +1,7 @@
 import React from 'react';
 
-export function PlayIcon(filled?: boolean) {
-  // https://lucide.dev/icons/play
+export function UserIcon(filled?: boolean) {
+  // https://lucide.dev/icons/user
   return (
     <g
       stroke="currentColor"
@@ -10,7 +10,7 @@ export function PlayIcon(filled?: boolean) {
       strokeLinejoin="round"
       fill={filled ? 'currentColor' : 'none'}
     >
-      <path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z" />
+      <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2z"/><circle cx="12" cy="7" r="4"/>
     </g>
   );
 }

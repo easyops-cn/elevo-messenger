@@ -4,7 +4,7 @@ export function DisabledCheckboxIcon(filled?: boolean) {
   // https://lucide.dev/icons/square
   // https://lucide.dev/icons/square-check-big
   return (
-    <g stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <g stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       {filled ? (
         <>
           <path d="M21 10.656V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h12.344" />

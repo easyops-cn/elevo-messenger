@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { Badge, Icon, Icons, Tooltip, TooltipProvider } from 'folds';
+import { Badge, Icon, Tooltip, TooltipProvider } from 'folds';
 import { ContactIcon } from '../../icons/ContactIcon';
 import { useHomeSelected } from '../../hooks/router/useHomeSelected';
 import { useContactsSelected } from '../../hooks/router/useContacts';
@@ -27,6 +27,9 @@ import { Settings, SettingsPages } from '../../features/settings';
 import { onOpenAbout, useUpdateChecker } from '../../state/update/UpdateCheckerContext';
 import { settingsModalAtom } from '../../state/settingsModal';
 import * as css from './BottomNav.css';
+import { MessageCircleIcon } from '../../icons/MessageCircleIcon';
+import { CompassIcon } from '../../icons/Compass';
+import { UserIcon } from '../../icons/UserIcon';
 
 export function BottomNav() {
   const { t } = useTranslation();
@@ -90,7 +93,7 @@ export function BottomNav() {
               aria-label={t('home.title')}
               type="button"
             >
-              <Icon src={Icons.Home} filled={homeSelected} size="300" />
+              <Icon src={MessageCircleIcon} filled={homeSelected} size="300" />
               {homeUnread && (
                 <span className={css.BottomNavItemBadge()}>
                   <UnreadBadge highlight={homeUnread.highlight > 0} count={homeUnread.total} />
@@ -127,7 +130,7 @@ export function BottomNav() {
               aria-label={t('explore.title')}
               type="button"
             >
-              <Icon src={Icons.Explore} filled={exploreSelected} size="300" />
+              <Icon src={CompassIcon} filled={exploreSelected} size="300" />
             </button>
           )}
         </TooltipProvider>
@@ -143,7 +146,7 @@ export function BottomNav() {
               aria-label={t('common.me')}
               type="button"
             >
-              <Icon src={Icons.User} filled={meSelected} size="300" />
+              <Icon src={UserIcon} filled={meSelected} size="300" />
               {inviteCount > 0 && (
                 <span className={css.BottomNavItemBadge()}>
                   <UnreadBadge highlight count={inviteCount} />

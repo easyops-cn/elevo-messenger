@@ -154,7 +154,7 @@
     "noMembersOfType": "没有 \"{{type}}\" 成员"
   },
   "home": {
-    "title": "首页",
+    "title": "消息",
     "noRooms": "暂无房间",
     "noRoomsDesc": "您还没有任何房间。",
     "noDirectMessages": "暂无私信",
