@@ -15,14 +15,14 @@ import { useRoomNavigate } from '../../hooks/useRoomNavigate';
 import { ScrollTopContainer } from '../../components/scroll-top-container';
 import { ContainerColor } from '../../styles/ContainerColor.css';
 import { decodeSearchParamValueArray, encodeSearchParamValueArray } from '../../pages/pathUtils';
-import { useRooms } from '../../state/hooks/roomList';
-import { allRoomsAtom } from '../../state/room-list/roomList';
 import { mDirectAtom } from '../../state/mDirectList';
 import { MessageSearchParams, useMessageSearch } from './useMessageSearch';
 import { SearchResultGroup } from './SearchResultGroup';
 import { SearchInput } from './SearchInput';
 import { SearchFilters } from './SearchFilters';
 import { VirtualTile } from '../../components/virtualizer';
+import { useAllHomeRooms } from '../../pages/client/home/useAllHomeRooms';
+import { RoomProvider } from '../../hooks/useRoom';
 
 type MessageSearchProps = {
   scrollRef: RefObject<HTMLDivElement>;
@@ -33,7 +33,7 @@ export function MessageSearch({
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const mDirects = useAtomValue(mDirectAtom);
-  const allRooms = useRooms(mx, allRoomsAtom, mDirects);
+  const allRooms = useAllHomeRooms();
   const [mediaAutoLoad] = useSetting(settingsAtom, 'mediaAutoLoad');
   const [urlPreview] = useSetting(settingsAtom, 'urlPreview');
   const [legacyUsernameColor] = useSetting(settingsAtom, 'legacyUsernameColor');
@@ -247,17 +247,19 @@ export function MessageSearch({
                   ref={virtualizer.measureElement}
                   key={vItem.index}
                 >
-                  <SearchResultGroup
-                    room={groupRoom}
-                    highlights={highlights}
-                    items={group.items}
-                    mediaAutoLoad={mediaAutoLoad}
-                    urlPreview={urlPreview}
-                    onOpen={navigateRoom}
-                    legacyUsernameColor={legacyUsernameColor || mDirects.has(groupRoom.roomId)}
-                    hour24Clock={hour24Clock}
-                    dateFormatString={dateFormatString}
-                  />
+                  <RoomProvider value={groupRoom}>
+                    <SearchResultGroup
+                      room={groupRoom}
+                      highlights={highlights}
+                      items={group.items}
+                      mediaAutoLoad={mediaAutoLoad}
+                      urlPreview={urlPreview}
+                      onOpen={navigateRoom}
+                      legacyUsernameColor={legacyUsernameColor || mDirects.has(groupRoom.roomId)}
+                      hour24Clock={hour24Clock}
+                      dateFormatString={dateFormatString}
+                    />
+                  </RoomProvider>
                 </VirtualTile>
               );
             })}
