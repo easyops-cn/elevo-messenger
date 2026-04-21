@@ -14,6 +14,7 @@ import {
   PopOut,
   RectCords,
   Text,
+  color,
   config,
   toRem,
 } from 'folds';
@@ -286,7 +287,7 @@ export function Home() {
                 <NavItemContent>
                   <Box as="span" grow="Yes" alignItems="Center" gap="200">
                     <Avatar size="200" radii="400">
-                      <Icon src={Icons.Plus} size="100" />
+                      <Icon src={Icons.Plus} size="200" style={{ color: color.Primary.Main }} />
                     </Avatar>
                     <Box as="span" grow="Yes">
                       <Text as="span" size="Inherit" truncate>
@@ -302,7 +303,7 @@ export function Home() {
                 <NavItemContent>
                   <Box as="span" grow="Yes" alignItems="Center" gap="200">
                     <Avatar size="200" radii="400">
-                      <Icon src={Icons.Message} size="100" />
+                      <Icon src={Icons.Message} size="200" style={{ color: color.Primary.Main }} />
                     </Avatar>
                     <Box as="span" grow="Yes">
                       <Text as="span" size="Inherit" truncate>

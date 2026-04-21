@@ -1,5 +1,4 @@
 import {
-  Avatar,
   Box,
   Button,
   Dialog,
@@ -76,6 +75,7 @@ import { useRoomPinnedEvents } from '../../../hooks/useRoomPinnedEvents';
 import { MemberPowerTag, StateEvent } from '../../../../types/matrix/room';
 import { PowerIcon } from '../../../components/power';
 import { getPowerTagIconSrc } from '../../../hooks/useMemberPowerTag';
+import { Avatar } from '../../../components/avatar';
 
 export type ReactionHandler = (keyOrMxc: string, shortcode: string) => void;
 
@@ -737,11 +737,11 @@ export const Message = as<'div', MessageProps>(
         gap="300"
         direction={messageLayout === MessageLayout.Compact || isOwn ? 'RowReverse' : 'Row'}
         justifyContent={messageLayout === MessageLayout.Compact ? 'SpaceBetween' : 'Start'}
-        alignItems="Baseline"
+        alignItems={messageLayout !== MessageLayout.Compact ? "Center" : "Baseline"}
         grow="No"
-        style={{
-          marginBottom: messageLayout !== MessageLayout.Compact ? config.space.S100 : undefined,
-        }}
+        style={messageLayout !== MessageLayout.Compact ? {
+          height: toRem(32),
+        } : undefined}
       >
         <Box alignItems="Center" gap="200">
           <Username
@@ -779,6 +779,7 @@ export const Message = as<'div', MessageProps>(
           className={css.MessageAvatar}
           as="button"
           size="300"
+          radii="Pill"
           data-user-id={senderId}
           onClick={onUserClick}
         >
@@ -901,7 +902,8 @@ export const Message = as<'div', MessageProps>(
         style={
           messageLayout !== MessageLayout.Compact
             ? {
-                maxWidth: isMobile ? 'calc(100% - 56px)' : 'min(50vw, calc(100% - 56px))',
+                width: 'calc(100% - 56px)',
+                maxWidth: isMobile ? undefined : `max(50vw, ${toRem(800)})`,
                 ...(isOwn
                   ? {
                       alignSelf: 'flex-end',

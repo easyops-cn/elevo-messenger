@@ -17,6 +17,7 @@ import {
   RectCords,
   Badge,
   Spinner,
+  color,
 } from 'folds';
 import { useFocusWithin, useHover } from 'react-aria';
 import FocusTrap from 'focus-trap-react';
@@ -332,7 +333,7 @@ export function RoomNavItem({
       <NavLink to={linkPath} onClick={room.isCallRoom() ? handleStartCall : undefined}>
         <NavItemContent>
           <Box as="span" grow="Yes" alignItems="Center" gap="200">
-            <Avatar size="200" radii="400">
+            <Avatar size="200" radii="Pill">
               {showAvatar ? (
                 <RoomAvatar
                   roomId={room.roomId}
@@ -351,7 +352,7 @@ export function RoomNavItem({
               ) : (
                 <RoomIcon
                   style={{
-                    opacity: unread ? config.opacity.P500 : config.opacity.P300,
+                    color: color.Primary.Main,
                   }}
                   filled={selected}
                   size="100"
