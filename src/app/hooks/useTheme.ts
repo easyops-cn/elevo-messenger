@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { elevoDark, elevoLight, onDarkFontWeight, onLightFontWeight } from '../../config.css';
+import { elevoDark, elevoLight } from '../../config.css';
 import { butterTheme, darkTheme, lightTheme, silverTheme } from '../../colors.css';
 import { settingsAtom } from '../state/settings';
 import { useSetting } from '../state/hooks/settings';
@@ -18,23 +18,23 @@ export type Theme = {
 export const LightTheme: Theme = {
   id: 'light-theme',
   kind: ThemeKind.Light,
-  classNames: [lightTheme, elevoLight, onLightFontWeight, 'prism-light'],
+  classNames: [lightTheme, elevoLight, 'prism-light'],
 };
 
 export const SilverTheme: Theme = {
   id: 'silver-theme',
   kind: ThemeKind.Light,
-  classNames: ['silver-theme', elevoLight, silverTheme, onLightFontWeight, 'prism-light'],
+  classNames: ['silver-theme', elevoLight, silverTheme, 'prism-light'],
 };
 export const DarkTheme: Theme = {
   id: 'dark-theme',
   kind: ThemeKind.Dark,
-  classNames: ['dark-theme', elevoDark, darkTheme, onDarkFontWeight, 'prism-dark'],
+  classNames: ['dark-theme', elevoDark, darkTheme, 'prism-dark'],
 };
 export const ButterTheme: Theme = {
   id: 'butter-theme',
   kind: ThemeKind.Dark,
-  classNames: ['butter-theme', elevoDark, butterTheme, onDarkFontWeight, 'prism-dark'],
+  classNames: ['butter-theme', elevoDark, butterTheme, 'prism-dark'],
 };
 
 export const useThemes = (): Theme[] => {
