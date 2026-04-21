@@ -97,7 +97,7 @@ function MemberItem({
       radii="400"
       onClick={onClick}
       before={
-        <Avatar size="200">
+        <Avatar size="200" radii="Pill">
           <UserAvatar
             userId={member.userId}
             src={avatarUrl ?? undefined}

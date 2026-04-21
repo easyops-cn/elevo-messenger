@@ -344,7 +344,7 @@ export function RoomNavItem({
                   }
                   alt={roomName}
                   renderFallback={() => (
-                    <Text as="span" size="H6">
+                    <Text as="span" size="T300">
                       {nameInitials(roomName)}
                     </Text>
                   )}
@@ -355,7 +355,7 @@ export function RoomNavItem({
                     color: color.Primary.Main,
                   }}
                   filled={selected}
-                  size="100"
+                  size="50"
                   joinRule={room.getJoinRule()}
                   roomType={room.getType()}
                 />

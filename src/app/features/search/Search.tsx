@@ -2,6 +2,7 @@ import FocusTrap from 'focus-trap-react';
 import {
   Avatar,
   Box,
+  color,
   config,
   Icon,
   Icons,
@@ -355,7 +356,7 @@ export function Search({ requestClose }: SearchProps) {
                             </Box>
                           }
                           before={
-                            <Avatar size="200" radii={dm ? '400' : '300'}>
+                            <Avatar size="200" radii="Pill">
                               {dm || room.isSpaceRoom() ? (
                                 <RoomAvatar
                                   roomId={room.roomId}
@@ -366,14 +367,17 @@ export function Search({ requestClose }: SearchProps) {
                                   }
                                   alt={room.name}
                                   renderFallback={() => (
-                                    <Text as="span" size="H6">
+                                    <Text as="span" size="T300">
                                       {nameInitials(room.name)}
                                     </Text>
                                   )}
                                 />
                               ) : (
                                 <RoomIcon
-                                  size="100"
+                                  style={{
+                                    color: color.Primary.Main,
+                                  }}
+                                  size="50"
                                   joinRule={room.getJoinRule()}
                                   roomType={room.getType()}
                                 />

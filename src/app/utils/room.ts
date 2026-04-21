@@ -29,6 +29,8 @@ import {
   StateEvent,
   UnreadInfo,
 } from '../../types/matrix/room';
+import { HashIcon } from '../icons/HashIcon';
+import { Volume2Icon } from '../icons/Volume2Icon';
 
 export const getStateEvent = (
   room: Room,
@@ -268,10 +270,10 @@ export const getRoomIconSrc = (
   }
 
   if (roomType === RoomType.Call) {
-    return icons.VolumeHigh;
+    return Volume2Icon;
   }
 
-  return icons.Hash;
+  return HashIcon;
 };
 
 export const getRoomAvatarUrl = (
