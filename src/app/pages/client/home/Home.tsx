@@ -5,10 +5,10 @@ import {
   Avatar,
   Box,
   Button,
-  Chip,
   Icon,
   IconButton,
   Icons,
+  Line,
   Menu,
   MenuItem,
   PopOut,
@@ -38,8 +38,6 @@ import {
   useHomeCreateChatSelected,
 } from '../../../hooks/router/useHomeSelected';
 import { useAllHomeRooms } from './useAllHomeRooms';
-import { useHomeRooms } from './useHomeRooms';
-import { useDirectRooms } from '../direct/useDirectRooms';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { VirtualTile } from '../../../components/virtualizer';
 import { RoomNavItem } from '../../../features/room-nav';
@@ -57,6 +55,7 @@ import {
 } from '../../../hooks/useRoomsNotificationPreferences';
 import { mDirectAtom } from '../../../state/mDirectList';
 import { searchModalAtom } from '../../../state/searchModal';
+import { HashIcon } from '../../../icons/HashIcon';
 
 type HomeHeaderProps = {
   rooms: string[];
@@ -167,72 +166,21 @@ function HomeHeader({ rooms, onSearchOpen }: HomeHeaderProps) {
   );
 }
 
-type HomeRoomFilter = 'people' | 'rooms';
-
-function HomeFilterChips({
-  activeFilter,
-  onFilterChange,
-}: {
-  activeFilter: HomeRoomFilter | null;
-  onFilterChange: (filter: HomeRoomFilter | null) => void;
-}) {
+function HomeEmpty() {
   const { t } = useTranslation();
-
-  const handleFilterClick = (filter: HomeRoomFilter) => {
-    onFilterChange(activeFilter === filter ? null : filter);
-  };
-
-  return (
-    <Box gap="100" wrap="Wrap">
-      <Chip
-        variant={activeFilter === 'people' ? 'Success' : 'SurfaceVariant'}
-        outlined
-        radii="Pill"
-        aria-pressed={activeFilter === 'people'}
-        onClick={() => handleFilterClick('people')}
-      >
-        <Text size="T200" priority={activeFilter === 'people' ? '500' : '300'}>
-          {t('home.filter.people')}
-        </Text>
-      </Chip>
-      <Chip
-        variant={activeFilter === 'rooms' ? 'Success' : 'SurfaceVariant'}
-        outlined
-        radii="Pill"
-        aria-pressed={activeFilter === 'rooms'}
-        onClick={() => handleFilterClick('rooms')}
-      >
-        <Text size="T200" priority={activeFilter === 'rooms' ? '500' : '300'}>
-          {t('home.filter.rooms')}
-        </Text>
-      </Chip>
-      {activeFilter && (
-        <Chip variant="SurfaceVariant" outlined radii="Pill" onClick={() => onFilterChange(null)}>
-          <Box alignItems="Center">
-            <Icon src={Icons.Cross} size="100" />
-          </Box>
-        </Chip>
-      )}
-    </Box>
-  );
-}
-
-function HomeEmpty({ activeFilter }: { activeFilter: HomeRoomFilter | null }) {
-  const { t } = useTranslation();
-  const isPeople = activeFilter === 'people';
-
+  
   return (
     <NavEmptyCenter>
       <NavEmptyLayout
-        icon={<Icon size="600" src={isPeople ? Icons.Mention : Icons.Hash} />}
+        icon={<Icon size="600" src={HashIcon} />}
         title={
           <Text size="H5" align="Center">
-            {isPeople ? t('home.noDirectMessages') : t('home.noRooms')}
+            {t('home.noRooms')}
           </Text>
         }
         content={
           <Text size="T300" align="Center">
-            {isPeople ? t('home.noDirectMessagesDesc') : t('home.noRoomsDesc')}
+            {t('home.noRoomsDesc')}
           </Text>
         }
       />
@@ -247,13 +195,7 @@ export function Home() {
   useNavToActivePathMapper('home');
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const [activeFilter, setActiveFilter] = useState<HomeRoomFilter | null>(null);
-
-  const allRooms = useAllHomeRooms();
-  const groupRooms = useHomeRooms();
-  const directRooms = useDirectRooms();
-  const rooms =
-    activeFilter === 'people' ? directRooms : activeFilter === 'rooms' ? groupRooms : allRooms;
+  const rooms = useAllHomeRooms();
 
   const notificationPreferences = useRoomsNotificationPreferencesContext();
   const navigate = useNavigate();
@@ -315,9 +257,9 @@ export function Home() {
               </NavButton>
             </NavItem>
           </NavCategory>
-          <HomeFilterChips activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+          <Line size="300" />
           {noRoomToDisplay ? (
-            <HomeEmpty activeFilter={activeFilter} />
+            <HomeEmpty />
           ) : (
             <NavCategory>
               <div
