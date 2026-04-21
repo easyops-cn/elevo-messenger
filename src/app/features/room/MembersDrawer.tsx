@@ -1,7 +1,5 @@
 import React, {
-  ChangeEventHandler,
   MouseEventHandler,
-  useCallback,
   useMemo,
   useRef,
   useState,
@@ -15,7 +13,6 @@ import {
   Icon,
   IconButton,
   Icons,
-  Input,
   MenuItem,
   PopOut,
   RectCords,
@@ -39,7 +36,6 @@ import {
   UseAsyncSearchOptions,
   useAsyncSearch,
 } from '../../hooks/useAsyncSearch';
-import { useDebounce } from '../../hooks/useDebounce';
 import { TypingIndicator } from '../../components/typing-indicator';
 import { getMemberDisplayName, getMemberSearchStr } from '../../utils/room';
 import { getMxIdLocalPart } from '../../utils/matrix';
@@ -216,7 +212,7 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
     [members, membershipFilter, memberSort, memberPowerSort]
   );
 
-  const [result, search, resetSearch] = useAsyncSearch(
+  const [result, search] = useAsyncSearch(
     filteredMembers,
     getRoomMemberStr,
     SEARCH_OPTIONS
@@ -233,17 +229,6 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
     estimateSize: () => 40,
     overscan: 10,
   });
-
-  const handleSearchChange: ChangeEventHandler<HTMLInputElement> = useDebounce(
-    useCallback(
-      (evt) => {
-        if (evt.target.value) search(evt.target.value);
-        else resetSearch();
-      },
-      [search, resetSearch]
-    ),
-    { wait: 200 }
-  );
 
   const handleMemberClick: MouseEventHandler<HTMLButtonElement> = (evt) => {
     const btn = evt.currentTarget as HTMLButtonElement;
@@ -328,42 +313,6 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
                     </PopOut>
                   )}
                 </UseStateProvider>
-              </Box>
-              <Box direction="Column" gap="100">
-                <Input
-                  ref={searchInputRef}
-                  onChange={handleSearchChange}
-                  style={{ paddingRight: config.space.S200 }}
-                  placeholder={t('room.typeNamePlaceholder')}
-                  variant="Secondary"
-                  size="400"
-                  radii="400"
-                  before={<Icon size="50" src={Icons.Search} />}
-                  after={
-                    result && (
-                      <Chip
-                        variant={result.items.length > 0 ? 'Success' : 'Critical'}
-                        size="400"
-                        radii="Pill"
-                        aria-pressed
-                        onClick={() => {
-                          if (searchInputRef.current) {
-                            searchInputRef.current.value = '';
-                            searchInputRef.current.focus();
-                          }
-                          resetSearch();
-                        }}
-                        after={<Icon size="50" src={Icons.Cross} />}
-                      >
-                        <Text size="B300">
-                          {result.items.length
-                            ? t('room.resultCount_other', { count: result.items.length })
-                            : t('room.noResultsCount')}
-                        </Text>
-                      </Chip>
-                    )
-                  }
-                />
               </Box>
             </Box>
 
