@@ -10,7 +10,6 @@ import {
   Chip,
   Icon,
   IconButton,
-  Icons,
   Line,
   PopOut,
   RectCords,
@@ -55,6 +54,8 @@ import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { getEditedEvent, getMentionContent, trimReplyFromFormattedBody } from '../../../utils/room';
 import { mobileOrTablet } from '../../../utils/user-agent';
 import { useComposingCheck } from '../../../hooks/useComposingCheck';
+import { CaseSensitiveIcon } from '../../../icons/CaseSensitiveIcon';
+import { SmileIcon } from '../../../icons/SmileIcon';
 
 type MessageEditorProps = {
   roomId: string;
@@ -298,7 +299,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
                     aria-pressed={toolbar}
                     onClick={() => setToolbar(!toolbar)}
                   >
-                    <Icon size="100" src={toolbar ? Icons.AlphabetUnderline : Icons.Alphabet} />
+                    <Icon size="100" src={CaseSensitiveIcon} />
                   </IconButton>
                   <UseStateProvider initial={undefined}>
                     {(anchor: RectCords | undefined, setAnchor) => (
@@ -338,7 +339,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
                           radii="Pill"
                           fill="None"
                         >
-                          <Icon size="100" src={Icons.Smile} filled={anchor !== undefined} />
+                          <Icon size="100" src={SmileIcon} filled={anchor !== undefined} />
                         </IconButton>
                       </PopOut>
                     )}

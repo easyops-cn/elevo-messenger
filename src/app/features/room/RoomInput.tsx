@@ -117,6 +117,11 @@ import { useImagePackRooms } from '../../hooks/useImagePackRooms';
 import { useComposingCheck } from '../../hooks/useComposingCheck';
 import { useSdkMessageListener, SdkMessagePayload } from '../../plugins/useTauriOpener';
 import { PlusIcon } from '../../icons/PlusIcon';
+import { StickerIcon } from '../../icons/StickerIcon';
+import { SmileIcon } from '../../icons/SmileIcon';
+import { MicIcon } from '../../icons/MicIcon';
+import { SendHorizontalIcon } from '../../icons/SendHorizontalIcon';
+import { CaseSensitiveIcon } from '../../icons/CaseSensitiveIcon';
 
 interface WorkspaceExplorerMessage {
   type: 'select-file';
@@ -736,7 +741,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                     aria-pressed={toolbar}
                     onClick={() => setToolbar(!toolbar)}
                   >
-                    <Icon size="100" src={toolbar ? Icons.AlphabetUnderline : Icons.Alphabet} />
+                    <Icon size="100" src={CaseSensitiveIcon} />
                   </IconButton>
                   <UseStateProvider initial={undefined}>
                     {(emojiBoardTab: EmojiBoardTab | undefined, setEmojiBoardTab) => (
@@ -782,7 +787,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                           >
                             <Icon
                               size="100"
-                              src={Icons.Sticker}
+                              src={StickerIcon}
                               filled={emojiBoardTab === EmojiBoardTab.Sticker}
                             />
                           </IconButton>
@@ -800,7 +805,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                         >
                           <Icon
                             size="100"
-                            src={Icons.Smile}
+                            src={SmileIcon}
                             filled={
                               hideStickerBtn
                                 ? !!emojiBoardTab
@@ -831,7 +836,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                       }
                     }}
                   >
-                    <Icon size="100" src={Icons.Mic} filled={voiceRecordingOpen} />
+                    <Icon size="100" src={MicIcon} filled={voiceRecordingOpen} />
                   </IconButton>
                   <IconButton
                     onClick={submit}
@@ -840,7 +845,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                     radii="Pill"
                     fill="None"
                   >
-                    <Icon size="100" src={Icons.Send} />
+                    <Icon size="100" src={SendHorizontalIcon} />
                   </IconButton>
                 </Box>
               </Box>
