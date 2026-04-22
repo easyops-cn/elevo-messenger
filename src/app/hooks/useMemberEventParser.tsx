@@ -1,9 +1,15 @@
 import React, { ReactNode } from 'react';
-import { IconSrc, Icons } from 'folds';
+import { IconSrc } from 'folds';
 import { MatrixEvent } from 'matrix-js-sdk';
 import { IMemberContent, Membership } from '../../types/matrix/room';
 import { getMxIdLocalPart } from '../utils/matrix';
 import { isMembershipChanged } from '../utils/room';
+import { UserPlusIcon } from '../icons/UserPlusIcon';
+import { UserXIcon } from '../icons/UserXIcon';
+import { UserMinusIcon } from '../icons/UserMinusIcon';
+import { UsersIcon } from '../icons/UsersIcon';
+import { UserCheckIcon } from '../icons/UserCheckIcon';
+import { UserPenIcon } from '../icons/UserPenIcon';
 
 export type ParsedResult = {
   icon: IconSrc;
@@ -22,7 +28,7 @@ export const useMemberEventParser = (): MemberEventParser => {
 
     if (!senderId || !userId)
       return {
-        icon: Icons.User,
+        icon: UsersIcon,
         body: 'Broken membership event',
       };
 
@@ -36,7 +42,7 @@ export const useMemberEventParser = (): MemberEventParser => {
       if (content.membership === Membership.Invite) {
         if (prevContent.membership === Membership.Knock) {
           return {
-            icon: Icons.ArrowGoRightPlus,
+            icon: UserCheckIcon,
             body: (
               <>
                 <b>{senderName}</b>
@@ -50,7 +56,7 @@ export const useMemberEventParser = (): MemberEventParser => {
         }
 
         return {
-          icon: Icons.ArrowGoRightPlus,
+          icon: UserPlusIcon,
           body: (
             <>
               <b>{senderName}</b>
@@ -63,7 +69,7 @@ export const useMemberEventParser = (): MemberEventParser => {
 
       if (content.membership === Membership.Knock) {
         return {
-          icon: Icons.ArrowGoRightPlus,
+          icon: UserPlusIcon,
           body: (
             <>
               <b>{userName}</b>
@@ -76,7 +82,7 @@ export const useMemberEventParser = (): MemberEventParser => {
 
       if (content.membership === Membership.Join) {
         return {
-          icon: Icons.ArrowGoRight,
+          icon: UserCheckIcon,
           body: (
             <>
               <b>{userName}</b>
@@ -89,7 +95,7 @@ export const useMemberEventParser = (): MemberEventParser => {
       if (content.membership === Membership.Leave) {
         if (prevContent.membership === Membership.Invite) {
           return {
-            icon: Icons.ArrowGoRightCross,
+            icon: UserXIcon,
             body:
               senderId === userId ? (
                 <>
@@ -111,7 +117,7 @@ export const useMemberEventParser = (): MemberEventParser => {
 
         if (prevContent.membership === Membership.Knock) {
           return {
-            icon: Icons.ArrowGoRightCross,
+            icon: UserXIcon,
             body:
               senderId === userId ? (
                 <>
@@ -133,7 +139,7 @@ export const useMemberEventParser = (): MemberEventParser => {
 
         if (prevContent.membership === Membership.Ban) {
           return {
-            icon: Icons.ArrowGoLeft,
+            icon: UserMinusIcon,
             body: (
               <>
                 <b>{senderName}</b>
@@ -145,7 +151,7 @@ export const useMemberEventParser = (): MemberEventParser => {
         }
 
         return {
-          icon: Icons.ArrowGoLeft,
+          icon: UserMinusIcon,
           body:
             senderId === userId ? (
               <>
@@ -165,7 +171,7 @@ export const useMemberEventParser = (): MemberEventParser => {
 
       if (content.membership === Membership.Ban) {
         return {
-          icon: Icons.ArrowGoLeft,
+          icon: UserMinusIcon,
           body: (
             <>
               <b>{senderName}</b>
@@ -184,7 +190,7 @@ export const useMemberEventParser = (): MemberEventParser => {
           : getMxIdLocalPart(userId);
 
       return {
-        icon: Icons.Mention,
+        icon: UserPenIcon,
         body:
           typeof content.displayname === 'string' ? (
             <>
@@ -202,7 +208,7 @@ export const useMemberEventParser = (): MemberEventParser => {
     }
     if (content.avatar_url !== prevContent.avatar_url) {
       return {
-        icon: Icons.User,
+        icon: UserPenIcon,
         body:
           content.avatar_url && typeof content.avatar_url === 'string' ? (
             <>
@@ -219,7 +225,7 @@ export const useMemberEventParser = (): MemberEventParser => {
     }
 
     return {
-      icon: Icons.User,
+      icon: UsersIcon,
       body: 'Membership event with no changes',
     };
   };

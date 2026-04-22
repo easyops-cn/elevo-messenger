@@ -487,6 +487,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
   // Expose scrollToBottom for external callers (e.g. RoomInput on submit)
   useEffect(() => {
     if (onRequestScrollToBottom) {
+      // eslint-disable-next-line no-param-reassign
       onRequestScrollToBottom.current = () => {
         scrollToBottomRef.current.count += 1;
         scrollToBottomRef.current.smooth = false;
@@ -498,6 +499,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
       };
 
       return () => {
+        // eslint-disable-next-line no-param-reassign
         onRequestScrollToBottom.current = null;
       };
     }
@@ -1282,7 +1284,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
               iconSrc={parsed.icon}
               content={
                 <Box grow="No" direction="Column">
-                  <Text size="T300" priority="300">
+                  <Text size="T300">
                     {parsed.body}
                   </Text>
                 </Box>
@@ -1324,7 +1326,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
               iconSrc={Icons.Hash}
               content={
                 <Box grow="No" direction="Column">
-                  <Text size="T300" priority="300">
+                  <Text size="T300">
                     <b>{senderName}</b>
                     {t('Organisms.RoomCommon.changed_room_name')}
                   </Text>
@@ -1367,7 +1369,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
               iconSrc={Icons.Hash}
               content={
                 <Box grow="No" direction="Column">
-                  <Text size="T300" priority="300">
+                  <Text size="T300">
                     <b>{senderName}</b>
                     {t('Organisms.RoomCommon.changed_room_topic')}
                   </Text>
@@ -1410,7 +1412,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
               iconSrc={Icons.Hash}
               content={
                 <Box grow="No" direction="Column">
-                  <Text size="T300" priority="300">
+                  <Text size="T300">
                     <b>{senderName}</b>
                     {t('Organisms.RoomCommon.changed_room_avatar')}
                   </Text>
@@ -1461,7 +1463,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
               iconSrc={callJoined ? Icons.Phone : Icons.PhoneDown}
               content={
                 <Box grow="No" direction="Column">
-                  <Text size="T300" priority="300">
+                  <Text size="T300">
                     <b>{senderName}</b>
                     {callJoined ? ' joined the call' : ' ended the call'}
                   </Text>
@@ -1506,7 +1508,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
             iconSrc={Icons.Code}
             content={
               <Box grow="No" direction="Column">
-                <Text size="T300" priority="300">
+                <Text size="T300">
                   <b>{senderName}</b>
                   {' sent '}
                   <code className={customHtmlCss.Code}>{mEvent.getType()}</code>
@@ -1556,7 +1558,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
             iconSrc={Icons.Code}
             content={
               <Box grow="No" direction="Column">
-                <Text size="T300" priority="300">
+                <Text size="T300">
                   <b>{senderName}</b>
                   {' sent '}
                   <code className={customHtmlCss.Code}>{mEvent.getType()}</code>
