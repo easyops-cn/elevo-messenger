@@ -813,7 +813,10 @@
     "noReason": "No reason provided",
     "addReaction": "Add Reaction",
     "replyInThread": "Reply in Thread",
-    "editMessage": "Edit Message"
+    "editMessage": "Edit Message",
+    "image": "[Image]",
+    "file": "[File] {{filename}}",
+    "sticker": "[Sticker]"
   },
   "search": {
     "sortBy": "Sort by",

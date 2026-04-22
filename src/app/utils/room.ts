@@ -551,3 +551,34 @@ export const guessPerfectParent = (
 
   return perfectParent;
 };
+
+export const getLatestMessageText = (
+  room: Room,
+  evt: MatrixEvent,
+  myUserId: string,
+  direct?: boolean,
+  t: (key: string, options?: Record<string, unknown>) => string
+): string | undefined => {
+  const content = evt.getContent();
+  const sender = evt.getSender();
+  if (!sender || !content?.body) return undefined;
+
+  const { msgtype } = content;
+  const eventType = evt.getType();
+
+  let body: string | undefined;
+  if (msgtype === MsgType.Image) {
+    body = t('message.image');
+  } else if (msgtype === MsgType.File) {
+    const filename = content.filename || content.body || '';
+    body = t('message.file', { filename });
+  } else if (eventType === 'm.sticker') {
+    body = t('message.sticker');
+  } else {
+    body = typeof content.body === 'string' ? content.body : '';
+  }
+
+  if (direct || sender === myUserId) return body;
+  const senderName = getMemberDisplayName(room, sender) || sender;
+  return `${senderName}: ${body}`;
+};

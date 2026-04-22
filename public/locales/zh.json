@@ -813,7 +813,10 @@
     "noReason": "未提供原因",
     "addReaction": "添加表情反应",
     "replyInThread": "在话题中回复",
-    "editMessage": "编辑消息"
+    "editMessage": "编辑消息",
+    "image": "[图片]",
+    "file": "[文件] {{filename}}",
+    "sticker": "[表情]"
   },
   "search": {
     "sortBy": "排序",

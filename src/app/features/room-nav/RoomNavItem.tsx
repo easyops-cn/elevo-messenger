@@ -24,7 +24,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import { NavItem, NavItemContent, NavItemOptions, NavLink } from '../../components/nav';
 import { UnreadBadge, UnreadBadgeCenter } from '../../components/unread-badge';
 import { RoomAvatar, RoomIcon } from '../../components/room-avatar';
-import { getDirectRoomAvatarUrl, getRoomAvatarUrl, getStateEvent, getMemberDisplayName } from '../../utils/room';
+import { getDirectRoomAvatarUrl, getRoomAvatarUrl, getStateEvent, getLatestMessageText } from '../../utils/room';
 import { nameInitials } from '../../utils/common';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useRoomUnread } from '../../state/hooks/unread';
@@ -276,15 +276,8 @@ export function RoomNavItem({
 
   const latestMessageText = useMemo(() => {
     if (!latestEvent) return undefined;
-    const content = latestEvent.getContent();
-    const sender = latestEvent.getSender();
-    if (!sender || !content?.body) return undefined;
-
-    const senderName = getMemberDisplayName(room, sender) || sender;
-    const body = typeof content.body === 'string' ? content.body : '';
-    if (direct || sender === mx.getUserId()) return body;
-    return `${senderName}: ${body}`;
-  }, [room, latestEvent, direct, mx]);
+    return getLatestMessageText(room, latestEvent, mx.getSafeUserId(), direct, t);
+  }, [room, latestEvent, direct, mx, t]);
 
   const handleContextMenu: MouseEventHandler<HTMLElement> = (evt) => {
     evt.preventDefault();
