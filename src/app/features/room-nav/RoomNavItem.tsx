@@ -18,7 +18,6 @@ import {
   Spinner,
   color,
 } from 'folds';
-import { useFocusWithin, useHover } from 'react-aria';
 import FocusTrap from 'focus-trap-react';
 import { useAtom, useAtomValue } from 'jotai';
 import { NavItem, NavItemContent, NavItemOptions, NavLink } from '../../components/nav';
@@ -261,9 +260,6 @@ export function RoomNavItem({
   const mx = useMatrixClient();
   const { t } = useTranslation();
   const useAuthentication = useMediaAuthentication();
-  const [hover, setHover] = useState(false);
-  const { hoverProps } = useHover({ onHoverChange: setHover });
-  const { focusWithinProps } = useFocusWithin({ onFocusWithinChange: setHover });
   const [menuAnchor, setMenuAnchor] = useState<RectCords>();
   const unread = useRoomUnread(room.roomId, roomToUnreadAtom);
   const typingMember = useRoomTypingMember(room.roomId).filter(
@@ -288,7 +284,7 @@ export function RoomNavItem({
     });
   };
 
-  const optionsVisible = hover || !!menuAnchor;
+  const optionsVisible = !!menuAnchor;
   const callSession = useCallSession(room);
   const callMembers = useCallMembers(room, callSession);
   const startCall = useCallStart(direct);
@@ -332,8 +328,6 @@ export function RoomNavItem({
       aria-selected={selected}
       data-hover={!!menuAnchor}
       onContextMenu={handleContextMenu}
-      {...hoverProps}
-      {...focusWithinProps}
     >
       <NavLink to={linkPath} onClick={room.isCallRoom() ? handleStartCall : undefined}>
         <NavItemContent>
@@ -366,11 +360,11 @@ export function RoomNavItem({
                 />
               )}
             </Avatar>
-            <Box as="span" grow="Yes" direction="Column" gap="0" justifyContent="Center">
-              <Text as="span" size="Inherit" truncate>
+            <Box as="span" grow="Yes" direction="Column" gap="0" justifyContent="Center" style={{ gap: 2}}>
+              <Text as="span" size="Inherit" truncate style={{ lineHeight: toRem(17)}}>
                 {roomName}
               </Text>
-              <Text as="span" size="T200" truncate style={{ color: elevoColor.Text.Muted, height: toRem(20), }}>
+              <Text as="span" size="T200" truncate style={{ color: elevoColor.Text.Muted, height: toRem(14), lineHeight: toRem(14) }}>
                 {latestMessageText}
               </Text>
             </Box>

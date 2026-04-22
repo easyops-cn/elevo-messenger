@@ -220,7 +220,7 @@ export function Home() {
   const virtualizer = useVirtualizer({
     count: sortedRooms.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 36 + GAP,
+    estimateSize: () => 49 + GAP,
     overscan: 10,
   });
 

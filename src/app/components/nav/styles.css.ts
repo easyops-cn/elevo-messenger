@@ -96,7 +96,7 @@ export const NavItem = recipe({
     radii: RadiiVariant,
     size: {
       Large: {
-        minHeight: toRem(52),
+        minHeight: toRem(49),
       },
       Normal: {
         minHeight: toRem(36),
