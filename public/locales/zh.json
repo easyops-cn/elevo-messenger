@@ -565,6 +565,13 @@
     "spaceSettings": "空间设置"
   },
   "create": {
+    "type": "类型",
+    "chatRoom": "聊天房间",
+    "chatRoomDesc": "消息、照片和视频。",
+    "voiceRoom": "语音房间",
+    "voiceRoomDesc": "实时音频和视频聊天。",
+    "newChatRoom": "新建聊天房间",
+    "newVoiceRoom": "新建语音房间",
     "createSpace": "创建空间",
     "buildSpaceDesc": "为您的社区创建一个空间。",
     "joinWithAddress": "通过地址加入",

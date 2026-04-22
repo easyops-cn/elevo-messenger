@@ -565,6 +565,13 @@
     "spaceSettings": "Space Settings"
   },
   "create": {
+    "type": "Type",
+    "chatRoom": "Chat Room",
+    "chatRoomDesc": "Messages, photos, and videos.",
+    "voiceRoom": "Voice Room",
+    "voiceRoomDesc": "Live audio and video chats.",
+    "newChatRoom": "New Chat Room",
+    "newVoiceRoom": "New Voice Room",
     "createSpace": "Create Space",
     "buildSpaceDesc": "Build a space for your community.",
     "joinWithAddress": "Join with Address",
