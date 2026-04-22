@@ -52,7 +52,7 @@ const NavItemBase = style({
   backgroundColor: Container,
   color: OnContainer,
   outline: 'none',
-  minHeight: toRem(36),
+  minHeight: toRem(52),
 
   selectors: {
     '&:hover, &:focus-visible': {

@@ -166,7 +166,12 @@ export const [elevoLight, elevoColor] = createTheme({
     NavBar: '0 8px 40px 0 rgba(0, 0, 0, 0.12)',
     Page: '0 11px 13.7px 0 rgba(0, 0, 0, 0.05)',
     Header: '0 4px 16px 0 rgba(0, 0, 0, 0.15)',
-  }
+  },
+  Text: {
+    Secondary: 'rgba(0, 0, 0, 0.5)',
+    Muted: 'rgba(0, 0, 0, 0.35)',
+    Disabled: 'rgba(0, 0, 0, 0.26)',
+  },
 });
 
 export const elevoDark = createTheme(elevoColor, {
@@ -182,5 +187,10 @@ export const elevoDark = createTheme(elevoColor, {
     NavBar: '0 8px 40px 0 rgba(0, 0, 0, 0.12)',
     Page: '0 11px 13.7px 0 rgba(0, 0, 0, 0.05)',
     Header: '0 4px 16px 0 rgba(0, 0, 0, 0.15)',
-  }
+  },
+  Text: {
+    Secondary: 'rgba(0, 0, 0, 0.55)',
+    Muted: 'rgba(0, 0, 0, 0.35)',
+    Disabled: 'rgba(0, 0, 0, 0.26)',
+  },
 });

@@ -1,8 +1,7 @@
-import React, { MouseEventHandler, forwardRef, useState } from 'react';
+import React, { MouseEventHandler, forwardRef, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Room } from 'matrix-js-sdk';
 import {
-  Avatar,
   Box,
   Icon,
   IconButton,
@@ -25,7 +24,7 @@ import { useAtom, useAtomValue } from 'jotai';
 import { NavItem, NavItemContent, NavItemOptions, NavLink } from '../../components/nav';
 import { UnreadBadge, UnreadBadgeCenter } from '../../components/unread-badge';
 import { RoomAvatar, RoomIcon } from '../../components/room-avatar';
-import { getDirectRoomAvatarUrl, getRoomAvatarUrl, getStateEvent } from '../../utils/room';
+import { getDirectRoomAvatarUrl, getRoomAvatarUrl, getStateEvent, getMemberDisplayName } from '../../utils/room';
 import { nameInitials } from '../../utils/common';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useRoomUnread } from '../../state/hooks/unread';
@@ -55,6 +54,7 @@ import { getRoomCreatorsForRoomId, useRoomCreators } from '../../hooks/useRoomCr
 import { getRoomPermissionsAPI, useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { InviteUserPrompt } from '../../components/invite-user-prompt';
 import { useRoomName } from '../../hooks/useRoomMeta';
+import { useRoomLatestContentfulEvent } from '../../hooks/useRoomLatestContentfulEvent';
 import { useCallMembers, useCallSession } from '../../hooks/useCall';
 import { useCallEmbed, useCallStart } from '../../hooks/useCallEmbed';
 import { callChatAtom } from '../../state/callEmbed';
@@ -63,6 +63,8 @@ import { useAutoDiscoveryInfo } from '../../hooks/useAutoDiscoveryInfo';
 import { livekitSupport } from '../../hooks/useLivekitSupport';
 import { StateEvent } from '../../../types/matrix/room';
 import { EllipsisVerticalIcon } from '../../icons/EllipsisVerticalIcon';
+import { Avatar } from '../../components/avatar';
+import { elevoColor } from '../../../config.css';
 
 type RoomNavItemMenuProps = {
   room: Room;
@@ -270,6 +272,19 @@ export function RoomNavItem({
   );
 
   const roomName = useRoomName(room);
+  const latestEvent = useRoomLatestContentfulEvent(room);
+
+  const latestMessageText = useMemo(() => {
+    if (!latestEvent) return undefined;
+    const content = latestEvent.getContent();
+    const sender = latestEvent.getSender();
+    if (!sender || !content?.body) return undefined;
+
+    const senderName = getMemberDisplayName(room, sender) || sender;
+    const body = typeof content.body === 'string' ? content.body : '';
+    if (direct || sender === mx.getUserId()) return body;
+    return `${senderName}: ${body}`;
+  }, [room, latestEvent, direct, mx]);
 
   const handleContextMenu: MouseEventHandler<HTMLElement> = (evt) => {
     evt.preventDefault();
@@ -333,8 +348,8 @@ export function RoomNavItem({
     >
       <NavLink to={linkPath} onClick={room.isCallRoom() ? handleStartCall : undefined}>
         <NavItemContent>
-          <Box as="span" grow="Yes" alignItems="Center" gap="200">
-            <Avatar size="200" radii="Pill">
+          <Box as="span" grow="Yes" alignItems="Center" gap="200" style={{ gap: 6 }}>
+            <Avatar size="300" radii="Pill">
               {showAvatar ? (
                 <RoomAvatar
                   roomId={room.roomId}
@@ -356,15 +371,18 @@ export function RoomNavItem({
                     color: color.Primary.Main,
                   }}
                   filled={selected}
-                  size="50"
+                  size="100"
                   joinRule={room.getJoinRule()}
                   roomType={room.getType()}
                 />
               )}
             </Avatar>
-            <Box as="span" grow="Yes">
+            <Box as="span" grow="Yes" direction="Column" gap="0" justifyContent="Center">
               <Text as="span" size="Inherit" truncate>
                 {roomName}
+              </Text>
+              <Text as="span" size="T200" truncate style={{ color: elevoColor.Text.Muted, height: toRem(20), }}>
+                {latestMessageText}
               </Text>
             </Box>
             {!optionsVisible && !unread && !selected && typingMember.length > 0 && (
