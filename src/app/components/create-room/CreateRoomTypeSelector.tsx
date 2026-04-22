@@ -21,7 +21,7 @@ export function CreateRoomTypeSelector({
     <Box shrink="No" direction="Column" gap="100">
       <SequenceCard
         style={{ padding: config.space.S300 }}
-        variant={value === CreateRoomType.TextRoom ? 'Primary' : 'SurfaceVariant'}
+        variant="SurfaceVariant"
         direction="Column"
         gap="100"
         as="button"
@@ -46,7 +46,7 @@ export function CreateRoomTypeSelector({
       </SequenceCard>
       <SequenceCard
         style={{ padding: config.space.S300 }}
-        variant={value === CreateRoomType.VoiceRoom ? 'Primary' : 'SurfaceVariant'}
+        variant="SurfaceVariant"
         direction="Column"
         gap="100"
         as="button"
@@ -64,7 +64,7 @@ export function CreateRoomTypeSelector({
               Voice Room
             </Text>
             <Text size="T300" priority="300" truncate>
-              - Live audio and video conversations.
+              - Live audio and video chats.
             </Text>
             <BetaNoticeBadge />
           </Box>

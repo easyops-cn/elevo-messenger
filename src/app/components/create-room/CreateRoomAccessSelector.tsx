@@ -23,7 +23,7 @@ export function CreateRoomAccessSelector({
       {canRestrict && (
         <SequenceCard
           style={{ padding: config.space.S300 }}
-          variant={value === CreateRoomAccess.Restricted ? 'Primary' : 'SurfaceVariant'}
+          variant="SurfaceVariant"
           direction="Column"
           gap="100"
           as="button"
@@ -45,7 +45,7 @@ export function CreateRoomAccessSelector({
       )}
       <SequenceCard
         style={{ padding: config.space.S300 }}
-        variant={value === CreateRoomAccess.Private ? 'Primary' : 'SurfaceVariant'}
+        variant="SurfaceVariant"
         direction="Column"
         gap="100"
         as="button"
@@ -66,7 +66,7 @@ export function CreateRoomAccessSelector({
       </SequenceCard>
       <SequenceCard
         style={{ padding: config.space.S300 }}
-        variant={value === CreateRoomAccess.Public ? 'Primary' : 'SurfaceVariant'}
+        variant="SurfaceVariant"
         direction="Column"
         gap="100"
         as="button"
