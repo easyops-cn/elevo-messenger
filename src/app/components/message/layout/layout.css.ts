@@ -1,6 +1,7 @@
 import { createVar, keyframes, style, styleVariants } from '@vanilla-extract/css';
 import { recipe, RecipeVariants } from '@vanilla-extract/recipes';
 import { DefaultReset, color, config, toRem } from 'folds';
+import { elevoColor } from '../../../../config.css';
 
 export const StickySection = style({
   position: 'sticky',
@@ -187,18 +188,27 @@ export const BubbleRightArrow = style({
   zIndex: 1,
 });
 
-export const Username = style({
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  textOverflow: 'ellipsis',
-  selectors: {
-    'button&': {
-      cursor: 'pointer',
-    },
-    'button&:hover, button&:focus-visible': {
-      textDecoration: 'underline',
+export const Username = recipe({
+  base: {
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
+    selectors: {
+      'button&': {
+        cursor: 'pointer',
+      },
+      'button&:hover, button&:focus-visible': {
+        textDecoration: 'underline',
+      },
     },
   },
+  variants: {
+    variant: {
+      Secondary: {
+        color: elevoColor.Text.Secondary,
+      }
+    }
+  }
 });
 
 export const UsernameBold = style({
@@ -206,7 +216,7 @@ export const UsernameBold = style({
 });
 
 export const UsernameSecondary = style({
-  opacity: 0.6,
+  color: elevoColor.Text.Secondary,
 });
 
 export const MessageTextBody = recipe({
@@ -235,3 +245,5 @@ export const MessageTextBody = recipe({
 });
 
 export type MessageTextBodyVariants = RecipeVariants<typeof MessageTextBody>;
+
+export type UsernameVariants = RecipeVariants<typeof Username>;

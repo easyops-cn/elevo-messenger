@@ -45,7 +45,6 @@ import {
   ModernLayout,
   Time,
   Username,
-  UsernameSecondary,
 } from '../../../components/message';
 import {
   canEditEvent,
@@ -756,6 +755,7 @@ export const Message = as<'div', MessageProps>(
         <Box alignItems="Center" gap="200">
           <Username
             as="button"
+            variant="Secondary"
             data-user-id={senderId}
             onContextMenu={onUserClick}
             onClick={onUsernameClick}
@@ -765,7 +765,7 @@ export const Message = as<'div', MessageProps>(
               size="T300"
               truncate
             >
-              <UsernameSecondary>{senderDisplayName}</UsernameSecondary>
+              {senderDisplayName}
             </Text>
           </Username>
           {tagIconSrc && <PowerIcon size="100" iconSrc={tagIconSrc} />}

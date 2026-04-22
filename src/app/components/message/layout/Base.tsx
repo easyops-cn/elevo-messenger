@@ -20,16 +20,12 @@ export const AvatarBase = as<'span'>(({ className, ...props }, ref) => (
   <span className={classNames(css.AvatarBase, className)} {...props} ref={ref} />
 ));
 
-export const Username = as<'span'>(({ as: AsUsername = 'span', className, ...props }, ref) => (
-  <AsUsername className={classNames(css.Username, className)} {...props} ref={ref} />
+export const Username = as<'span', css.UsernameVariants>(({ as: AsUsername = 'span', className, variant, ...props }, ref) => (
+  <AsUsername className={classNames(css.Username({ variant }), className)} {...props} ref={ref} />
 ));
 
 export const UsernameBold = as<'b'>(({ as: AsUsernameBold = 'b', className, ...props }, ref) => (
   <AsUsernameBold className={classNames(css.UsernameBold, className)} {...props} ref={ref} />
-));
-
-export const UsernameSecondary = as<'span'>(({ as: AsUsernameSecondary = 'span', className, ...props }, ref) => (
-  <AsUsernameSecondary className={classNames(css.UsernameSecondary, className)} {...props} ref={ref} />
 ));
 
 export const MessageTextBody = as<'div', css.MessageTextBodyVariants & { notice?: boolean }>(
