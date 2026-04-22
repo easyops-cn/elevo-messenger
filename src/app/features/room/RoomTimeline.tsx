@@ -1505,7 +1505,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
                 <Text size="T300">
                   <b>{senderName}</b>
                   {' sent '}
-                  <code className={customHtmlCss.Code}>{mEvent.getType()}</code>
+                  <code className={customHtmlCss.Code} style={{ opacity: 0.6 }}>{mEvent.getType()}</code>
                   {' state event'}
                 </Text>
               </Box>
@@ -1554,7 +1554,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
                 <Text size="T300">
                   <b>{senderName}</b>
                   {' sent '}
-                  <code className={customHtmlCss.Code}>{mEvent.getType()}</code>
+                  <code className={customHtmlCss.Code} style={{ opacity: 0.6 }}>{mEvent.getType()}</code>
                   {' event'}
                 </Text>
               </Box>
