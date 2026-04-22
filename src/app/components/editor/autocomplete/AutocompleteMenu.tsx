@@ -41,7 +41,7 @@ export function AutocompleteMenu({ headerContent, requestClose, children }: Auto
             <Header className={css.AutocompleteMenuHeader} size="400">
               {headerContent}
             </Header>
-            <Scroll style={{ flexGrow: 1 }} onKeyDown={preventScrollWithArrowKey}>
+            <Scroll hideTrack style={{ flexGrow: 1 }} onKeyDown={preventScrollWithArrowKey}>
               <div style={{ padding: config.space.S200 }}>{children}</div>
             </Scroll>
           </Menu>

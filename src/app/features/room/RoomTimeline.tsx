@@ -1686,7 +1686,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
           </Chip>
         </TimelineFloat>
       )}
-      <Scroll ref={scrollRef} visibility="Hover">
+      <Scroll ref={scrollRef} visibility="Hover" hideTrack>
         <Box
           direction="Column"
           justifyContent="End"

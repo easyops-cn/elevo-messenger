@@ -239,7 +239,7 @@ export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
                       >
                         <Box style={{ position: 'relative' }}>
                           <Menu style={{ position: 'absolute', top: 0, zIndex: 1, width: '100%' }}>
-                            <Scroll size="300" style={{ maxHeight: toRem(100) }}>
+                            <Scroll hideTrack size="300" style={{ maxHeight: toRem(100) }}>
                               <div style={{ padding: config.space.S100 }}>
                                 {result.items.map((userId) => {
                                   const username = `${getMxIdLocalPart(userId)}`;

@@ -271,7 +271,7 @@ export function Toolbar() {
 
   return (
     <Box className={css.EditorToolbarBase}>
-      <Scroll direction="Horizontal" size="0">
+      <Scroll direction="Horizontal" size="0" hideTrack>
         <Box className={css.EditorToolbar} alignItems="Center" gap="300">
           <>
             <Box shrink="No" gap="100">

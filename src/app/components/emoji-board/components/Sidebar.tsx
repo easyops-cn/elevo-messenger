@@ -19,7 +19,7 @@ import { MxcImg } from '../../MxcImg';
 export function Sidebar({ children }: { children: ReactNode }) {
   return (
     <Box className={css.Sidebar} shrink="No">
-      <Scroll size="0">
+      <Scroll size="0" hideTrack>
         <Box className={css.SidebarContent} direction="Column" alignItems="Center" gap="100">
           {children}
         </Box>

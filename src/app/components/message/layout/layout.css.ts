@@ -101,7 +101,7 @@ export const MessageBase = recipe({
     selected: SelectedVariant,
     own: {
       true: {
-        padding: `${config.space.S100} ${config.space.S400} ${config.space.S100} ${config.space.S200}`,
+        padding: `${config.space.S100} 0 ${config.space.S100} ${config.space.S200}`,
         borderRadius: `${config.radii.R400} 0 0 ${config.radii.R400}`,
       },
       false: {

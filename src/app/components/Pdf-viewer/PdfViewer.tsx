@@ -173,6 +173,7 @@ export const PdfViewer = as<'div', PdfViewerProps>(
             <Scroll
               ref={scrollRef}
               size="300"
+              hideTrack
               direction="Both"
               variant="Surface"
               visibility="Hover"
