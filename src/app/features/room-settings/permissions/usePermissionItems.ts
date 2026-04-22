@@ -155,13 +155,6 @@ export const usePermissionGroups = (isCallRoom: boolean): PermissionGroup[] => {
         {
           location: {
             state: true,
-            key: StateEvent.PowerLevelTags,
-          },
-          name: t('permissions.editPowerLevels'),
-        },
-        {
-          location: {
-            state: true,
             key: StateEvent.RoomEncryption,
           },
           name: t('permissions.enableEncryption'),

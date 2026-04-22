@@ -22,9 +22,10 @@ import {
 import React, { MouseEventHandler, useCallback, useState } from 'react';
 import FocusTrap from 'focus-trap-react';
 import { isKeyHotkey } from 'is-hotkey';
+import { useTranslation } from 'react-i18next';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useGetMemberPowerLevel, usePowerLevels } from '../../hooks/usePowerLevels';
-import { getPowers, usePowerLevelTags } from '../../hooks/usePowerLevelTags';
+import { BADGE_LABEL_KEYS, getPowers, usePowerLevelTags } from '../../hooks/usePowerLevelTags';
 import { stopPropagation } from '../../utils/keyboard';
 import { StateEvent } from '../../../types/matrix/room';
 import { useOpenRoomSettings } from '../../state/hooks/roomSettings';
@@ -142,6 +143,7 @@ function SharedPowerAlert({ power, onCancel, onChange }: SharedPowerAlertProps) 
 }
 
 export function PowerChip({ userId }: { userId: string }) {
+  const { t } = useTranslation();
   const mx = useMatrixClient();
   const room = useRoom();
   const space = useSpaceOptionally();
@@ -311,7 +313,7 @@ export function PowerChip({ userId }: { userId: string }) {
           aria-pressed={!!cords}
         >
           <Text size="B300" truncate>
-            {tag.name}
+            {t(BADGE_LABEL_KEYS[tag.name], tag.name)}
           </Text>
         </Chip>
       </PopOut>

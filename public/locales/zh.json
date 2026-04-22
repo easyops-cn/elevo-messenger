@@ -152,6 +152,8 @@
     "resultCount_other": "{{count}} 个结果",
     "noResultsCount": "无结果",
     "noMembersOfType": "没有 \"{{type}}\" 成员",
+    "badgeCreator": "创建者",
+    "badgeOwner": "群主",
     "badgeAdmin": "管理员",
     "badgeModerator": "协管员"
   },
@@ -630,7 +632,6 @@
     "changeSpaceAccess": "更改空间访问权限",
     "publishAddress": "发布地址",
     "changeAllPermission": "更改所有权限",
-    "editPowerLevels": "编辑权限等级",
     "upgradeSpace": "升级空间",
     "otherSettings": "其他设置",
     "other": "其他",

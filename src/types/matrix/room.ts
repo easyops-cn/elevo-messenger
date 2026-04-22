@@ -1,5 +1,3 @@
-import { IImageInfo } from './common';
-
 export enum Membership {
   Invite = 'invite',
   Knock = 'knock',
@@ -39,7 +37,6 @@ export enum StateEvent {
   SpaceParent = 'm.space.parent',
 
   PoniesRoomEmotes = 'im.ponies.room_emotes',
-  PowerLevelTags = 'in.cinny.room.power_level_tags',
 }
 
 export enum MessageEvent {
@@ -100,12 +97,6 @@ export type MuteChanges = {
   removed: string[];
 };
 
-export type MemberPowerTagIcon = {
-  key?: string;
-  info?: IImageInfo;
-};
 export type MemberPowerTag = {
   name: string;
-  color?: string;
-  icon?: MemberPowerTagIcon;
 };

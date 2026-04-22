@@ -104,13 +104,6 @@ export const usePermissionGroups = (): PermissionGroup[] => {
         {
           location: {
             state: true,
-            key: StateEvent.PowerLevelTags,
-          },
-          name: t('permissions.editPowerLevels'),
-        },
-        {
-          location: {
-            state: true,
             key: StateEvent.RoomTombstone,
           },
           name: t('permissions.upgradeSpace'),

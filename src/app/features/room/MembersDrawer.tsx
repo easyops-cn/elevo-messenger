@@ -55,6 +55,7 @@ import { useGetMemberPowerTag } from '../../hooks/useMemberPowerTag';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { MemberPowerTag } from '../../../types/matrix/room';
 import { MembershipFilter } from '../../hooks/useMemberFilter';
+import { BADGE_LABEL_KEYS } from '../../hooks/usePowerLevelTags';
 
 type MemberDrawerHeaderProps = {
   room: Room;
@@ -103,11 +104,6 @@ function MemberDrawerHeader({ room }: MemberDrawerHeaderProps) {
   );
 }
 
-const BADGE_LABEL_KEYS: Record<string, string> = {
-  Admin: 'room.badgeAdmin',
-  Moderator: 'room.badgeModerator',
-};
-
 type MemberItemProps = {
   mx: MatrixClient;
   useAuthentication: boolean;
@@ -140,7 +136,7 @@ function MemberItem({
     ? (() => {
         const labelKey = BADGE_LABEL_KEYS[powerTag.name];
         if (!labelKey) return undefined;
-        const variant = powerTag.name === 'Admin' ? 'Primary' as const : 'Success' as const;
+        const variant = powerTag.name === 'Admin' || powerTag.name === 'Creator' || powerTag.name === 'Owner' ? 'Primary' as const : 'Success' as const;
         return { label: t(labelKey), variant };
       })()
     : undefined;

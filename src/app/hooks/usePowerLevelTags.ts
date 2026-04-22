@@ -1,8 +1,7 @@
 import { Room } from 'matrix-js-sdk';
 import { useMemo } from 'react';
 import { IPowerLevels } from './usePowerLevels';
-import { useStateEvent } from './useStateEvent';
-import { MemberPowerTag, StateEvent } from '../../types/matrix/room';
+import { MemberPowerTag } from '../../types/matrix/room';
 
 export type PowerLevelTags = Record<number, MemberPowerTag>;
 
@@ -46,34 +45,28 @@ export const getUsedPowers = (powerLevels: IPowerLevels): Set<number> => {
 };
 
 const DEFAULT_TAGS: PowerLevelTags = {
-  9001: {
-    name: 'Goku',
-    color: '#ff6a00',
-  },
   150: {
-    name: 'Manager',
-    color: '#ff6a7f',
-  },
-  101: {
-    name: 'Founder',
-    color: '#0000ff',
+    name: 'Owner',
   },
   100: {
     name: 'Admin',
-    color: '#0088ff',
   },
   50: {
     name: 'Moderator',
-    color: '#1fd81f',
   },
   0: {
     name: 'Member',
-    color: '#91cfdf',
   },
   [-1]: {
     name: 'Muted',
-    color: '#888888',
   },
+};
+
+export const BADGE_LABEL_KEYS: Record<string, string> = {
+  Creator: 'room.badgeCreator',
+  Owner: 'room.badgeOwner',
+  Admin: 'room.badgeAdmin',
+  Moderator: 'room.badgeModerator',
 };
 
 const generateFallbackTag = (powerLevelTags: PowerLevelTags, power: number): MemberPowerTag => {
@@ -88,11 +81,8 @@ const generateFallbackTag = (powerLevelTags: PowerLevelTags, power: number): Mem
 };
 
 export const usePowerLevelTags = (room: Room, powerLevels: IPowerLevels): PowerLevelTags => {
-  const tagsEvent = useStateEvent(room, StateEvent.PowerLevelTags);
-
   const powerLevelTags: PowerLevelTags = useMemo(() => {
-    const content = tagsEvent?.getContent<PowerLevelTags>();
-    const powerToTags: PowerLevelTags = { ...content };
+    const powerToTags: PowerLevelTags = {};
 
     const powers = getUsedPowers(powerLevels);
     Array.from(powers).forEach((power) => {
@@ -102,7 +92,7 @@ export const usePowerLevelTags = (room: Room, powerLevels: IPowerLevels): PowerL
     });
 
     return powerToTags;
-  }, [powerLevels, tagsEvent]);
+  }, [powerLevels]);
 
   return powerLevelTags;
 };

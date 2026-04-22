@@ -1,11 +1,9 @@
 import { useCallback, useMemo } from 'react';
-import { MatrixClient, Room, RoomMember } from 'matrix-js-sdk';
-import { getPowerLevelTag, PowerLevelTags, usePowerLevelTags } from './usePowerLevelTags';
+import { Room, RoomMember } from 'matrix-js-sdk';
+import { getPowerLevelTag, usePowerLevelTags } from './usePowerLevelTags';
 import { IPowerLevels, readPowerLevel } from './usePowerLevels';
-import { MemberPowerTag, MemberPowerTagIcon } from '../../types/matrix/room';
+import { MemberPowerTag } from '../../types/matrix/room';
 import { useRoomCreatorsTag } from './useRoomCreatorsTag';
-import { ThemeKind } from './useTheme';
-import { accessibleColor } from '../plugins/color';
 
 export type GetMemberPowerTag = (userId: string) => MemberPowerTag;
 
@@ -30,39 +28,6 @@ export const useGetMemberPowerTag = (
   );
 
   return getMemberPowerTag;
-};
-
-export const getPowerTagIconSrc = (
-  mx: MatrixClient,
-  useAuthentication: boolean,
-  icon: MemberPowerTagIcon
-): string | undefined =>
-  icon?.key?.startsWith('mxc://')
-    ? mx.mxcUrlToHttp(icon.key, 96, 96, 'scale', undefined, undefined, useAuthentication) ?? '🌻'
-    : icon?.key;
-
-export const useAccessiblePowerTagColors = (
-  themeKind: ThemeKind,
-  creatorsTag: MemberPowerTag,
-  powerLevelTags: PowerLevelTags
-): Map<string, string> => {
-  const accessibleColors: Map<string, string> = useMemo(() => {
-    const colors: Map<string, string> = new Map();
-    if (creatorsTag.color) {
-      colors.set(creatorsTag.color, accessibleColor(themeKind, creatorsTag.color));
-    }
-
-    Object.values(powerLevelTags).forEach((tag) => {
-      const { color } = tag;
-      if (!color) return;
-
-      colors.set(color, accessibleColor(themeKind, color));
-    });
-
-    return colors;
-  }, [powerLevelTags, creatorsTag, themeKind]);
-
-  return accessibleColors;
 };
 
 export const useFlattenPowerTagMembers = (

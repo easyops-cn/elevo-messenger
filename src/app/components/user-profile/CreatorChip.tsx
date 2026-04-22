@@ -2,7 +2,7 @@ import { Chip, config, Icon, Icons, Menu, MenuItem, PopOut, RectCords, Text } fr
 import React, { MouseEventHandler, useState } from 'react';
 import FocusTrap from 'focus-trap-react';
 import { isKeyHotkey } from 'is-hotkey';
-import { useRoomCreatorsTag } from '../../hooks/useRoomCreatorsTag';
+import { useTranslation } from 'react-i18next';
 import { stopPropagation } from '../../utils/keyboard';
 import { useRoom } from '../../hooks/useRoom';
 import { useSpaceOptionally } from '../../hooks/useSpace';
@@ -10,15 +10,16 @@ import { useOpenRoomSettings } from '../../state/hooks/roomSettings';
 import { useOpenSpaceSettings } from '../../state/hooks/spaceSettings';
 import { SpaceSettingsPage } from '../../state/spaceSettings';
 import { RoomSettingsPage } from '../../state/roomSettings';
+import { BADGE_LABEL_KEYS } from '../../hooks/usePowerLevelTags';
 
 export function CreatorChip() {
+  const { t } = useTranslation();
   const room = useRoom();
   const space = useSpaceOptionally();
   const openRoomSettings = useOpenRoomSettings();
   const openSpaceSettings = useOpenSpaceSettings();
 
   const [cords, setCords] = useState<RectCords>();
-  const tag = useRoomCreatorsTag();
 
   const open: MouseEventHandler<HTMLButtonElement> = (evt) => {
     setCords(evt.currentTarget.getBoundingClientRect());
@@ -71,7 +72,7 @@ export function CreatorChip() {
       }
     >
       <Chip
-        variant="Success"
+        variant="Primary"
         outlined
         radii="Pill"
         before={<Icon size="50" src={Icons.ShieldUser} />}
@@ -79,7 +80,7 @@ export function CreatorChip() {
         aria-pressed={!!cords}
       >
         <Text size="B300" truncate>
-          {tag.name}
+          {t(BADGE_LABEL_KEYS.Creator)}
         </Text>
       </Chip>
     </PopOut>

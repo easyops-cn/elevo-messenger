@@ -152,6 +152,8 @@
     "resultCount_other": "{{count}} Results",
     "noResultsCount": "No Results",
     "noMembersOfType": "No \"{{type}}\" Members",
+    "badgeCreator": "Creator",
+    "badgeOwner": "Owner",
     "badgeAdmin": "Admin",
     "badgeModerator": "Mod"
   },
@@ -630,7 +632,6 @@
     "changeSpaceAccess": "Change Space Access",
     "publishAddress": "Publish Address",
     "changeAllPermission": "Change All Permission",
-    "editPowerLevels": "Edit Power Levels",
     "upgradeSpace": "Upgrade Space",
     "otherSettings": "Other Settings",
     "other": "Other",
