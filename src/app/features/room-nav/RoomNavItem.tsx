@@ -62,7 +62,6 @@ import { useCallPreferencesAtom } from '../../state/hooks/callPreferences';
 import { useAutoDiscoveryInfo } from '../../hooks/useAutoDiscoveryInfo';
 import { livekitSupport } from '../../hooks/useLivekitSupport';
 import { StateEvent } from '../../../types/matrix/room';
-import { EllipsisVerticalIcon } from '../../icons/EllipsisVerticalIcon';
 import { Avatar } from '../../components/avatar';
 import { elevoColor } from '../../../config.css';
 
@@ -289,10 +288,6 @@ export function RoomNavItem({
     });
   };
 
-  const handleOpenMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
-    setMenuAnchor(evt.currentTarget.getBoundingClientRect());
-  };
-
   const optionsVisible = hover || !!menuAnchor;
   const callSession = useCallSession(room);
   const callMembers = useCallMembers(room, callSession);
@@ -438,20 +433,7 @@ export function RoomNavItem({
                 />
               </FocusTrap>
             }
-          >
-            <IconButton
-              onClick={handleOpenMenu}
-              aria-pressed={!!menuAnchor}
-              aria-controls={`menu-${room.roomId}`}
-              aria-label={t('room.moreOptions')}
-              variant="Background"
-              fill="None"
-              size="300"
-              radii="300"
-            >
-              <Icon size="50" src={EllipsisVerticalIcon} />
-            </IconButton>
-          </PopOut>
+          />
         </NavItemOptions>
       )}
     </NavItem>
