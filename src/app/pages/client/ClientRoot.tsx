@@ -5,7 +5,6 @@ import {
   Dialog,
   Icon,
   IconButton,
-  Icons,
   Menu,
   MenuItem,
   PopOut,
@@ -43,6 +42,7 @@ import { matrixReadyAtom } from '../../state/matrixReady';
 import { AutoDiscovery } from './AutoDiscovery';
 import { ElevoConfigLoader } from '../../components/ElevoConfigLoader';
 import { DeviceVerificationGate } from '../../components/DeviceVerificationGate';
+import { EllipsisVerticalIcon } from '../../icons/EllipsisVerticalIcon';
 
 function ClientRootLoading() {
   return (
@@ -77,7 +77,7 @@ function ClientRootOptions({ mx }: { mx?: MatrixClient }) {
       fill="None"
       onClick={handleToggle}
     >
-      <Icon size="200" src={Icons.VerticalDots} />
+      <Icon size="200" src={EllipsisVerticalIcon} />
       <PopOut
         anchor={menuAnchor}
         position="Bottom"

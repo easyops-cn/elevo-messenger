@@ -77,6 +77,7 @@ import { MemberPowerTag, StateEvent } from '../../../../types/matrix/room';
 import { PowerIcon } from '../../../components/power';
 import { getPowerTagIconSrc } from '../../../hooks/useMemberPowerTag';
 import { Avatar } from '../../../components/avatar';
+import { EllipsisVerticalIcon } from '../../../icons/EllipsisVerticalIcon';
 
 export type ReactionHandler = (keyOrMxc: string, shortcode: string) => void;
 
@@ -1162,7 +1163,7 @@ export const Message = as<'div', MessageProps>(
                     onClick={handleOpenMenu}
                     aria-pressed={!!menuAnchor}
                   >
-                    <Icon src={Icons.VerticalDots} size="100" />
+                    <Icon src={EllipsisVerticalIcon} size="100" />
                   </IconButton>
                 </PopOut>
               </Box>
@@ -1341,7 +1342,7 @@ export const Event = as<'div', EventProps>(
                     onClick={handleOpenMenu}
                     aria-pressed={!!menuAnchor}
                   >
-                    <Icon src={Icons.VerticalDots} size="100" />
+                    <Icon src={EllipsisVerticalIcon} size="100" />
                   </IconButton>
                 </PopOut>
               </Box>

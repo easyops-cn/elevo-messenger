@@ -25,6 +25,7 @@ import { isDesktopTauri } from '../../../plugins/useTauriOpener';
 import { useWorkspaceToken } from '../../../hooks/useWorkspaceToken';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import { stopPropagation } from '../../../utils/keyboard';
+import { EllipsisVerticalIcon } from '../../../icons/EllipsisVerticalIcon';
 
 type LinksProps = {
   requestClose: () => void;
@@ -137,7 +138,7 @@ export function Links({ requestClose }: LinksProps) {
                             radii="300"
                             onClick={handleMenu}
                           >
-                            <Icon size="100" src={Icons.VerticalDots} />
+                            <Icon size="100" src={EllipsisVerticalIcon} />
                           </IconButton>
                           <PopOut
                             anchor={menuCords}

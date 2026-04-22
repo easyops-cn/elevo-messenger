@@ -18,6 +18,7 @@ import {
   Line,
   toRem,
 } from 'folds';
+import { SearchIcon } from '../../icons/SearchIcon';
 
 export const ELEVO_WORKSPACES_STATE_KEY = 'vip.elevo.workspaces';
 const PAGE_SIZE = 100;
@@ -117,7 +118,7 @@ export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAd
                 radii="400"
                 outlined
                 placeholder={t('workspaces.searchWorkspaces')}
-                before={<Icon size="200" src={Icons.Search} />}
+                before={<Icon size="200" src={SearchIcon} />}
                 value={query}
                 onChange={(e) => setQuery((e.target as HTMLInputElement).value)}
               />

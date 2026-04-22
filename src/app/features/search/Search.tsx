@@ -61,6 +61,7 @@ import { useKeyDown } from '../../hooks/useKeyDown';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { KeySymbol } from '../../utils/key-symbol';
 import { isMacOS } from '../../utils/user-agent';
+import { SearchIcon } from '../../icons/SearchIcon';
 
 enum SearchRoomType {
   Rooms = '#',
@@ -273,7 +274,7 @@ export function Search({ requestClose }: SearchProps) {
                 radii="400"
                 outlined
                 placeholder={t('common.search')}
-                before={<Icon size="200" src={Icons.Search} />}
+                before={<Icon size="200" src={SearchIcon} />}
                 onChange={handleInputChange}
                 onKeyDown={handleInputKeyDown}
               />

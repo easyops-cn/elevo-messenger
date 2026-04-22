@@ -62,6 +62,7 @@ import { useCallPreferencesAtom } from '../../state/hooks/callPreferences';
 import { useAutoDiscoveryInfo } from '../../hooks/useAutoDiscoveryInfo';
 import { livekitSupport } from '../../hooks/useLivekitSupport';
 import { StateEvent } from '../../../types/matrix/room';
+import { EllipsisVerticalIcon } from '../../icons/EllipsisVerticalIcon';
 
 type RoomNavItemMenuProps = {
   room: Room;
@@ -436,7 +437,7 @@ export function RoomNavItem({
               size="300"
               radii="300"
             >
-              <Icon size="50" src={Icons.VerticalDots} />
+              <Icon size="50" src={EllipsisVerticalIcon} />
             </IconButton>
           </PopOut>
         </NavItemOptions>

@@ -1,6 +1,7 @@
 import React, { FormEventHandler, RefObject } from 'react';
 import { Box, Text, Input, Icon, Icons, Spinner, Chip, config } from 'folds';
 import { useTranslation } from 'react-i18next';
+import { SearchIcon } from '../../icons/SearchIcon';
 
 type SearchProps = {
   active?: boolean;
@@ -40,7 +41,7 @@ export function SearchInput({ active, loading, searchInputRef, onSearch, onReset
           active && loading ? (
             <Spinner variant="Secondary" size="200" />
           ) : (
-            <Icon size="200" src={Icons.Search} />
+            <Icon size="200" src={SearchIcon} />
           )
         }
         after={

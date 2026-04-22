@@ -40,6 +40,7 @@ import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { InviteUserPrompt } from '../../components/invite-user-prompt';
 import { UsersIcon } from '../../icons/UsersIcon';
+import { EllipsisVerticalIcon } from '../../icons/EllipsisVerticalIcon';
 
 type LobbyMenuProps = {
   powerLevels: IPowerLevels;
@@ -252,7 +253,7 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
                 ref={triggerRef}
                 aria-pressed={!!menuAnchor}
               >
-                <Icon size="100" src={Icons.VerticalDots} filled={!!menuAnchor} />
+                <Icon size="100" src={EllipsisVerticalIcon} filled={!!menuAnchor} />
               </IconButton>
             )}
           </TooltipProvider>

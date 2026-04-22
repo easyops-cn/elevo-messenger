@@ -56,6 +56,9 @@ import {
 import { mDirectAtom } from '../../../state/mDirectList';
 import { searchModalAtom } from '../../../state/searchModal';
 import { HashIcon } from '../../../icons/HashIcon';
+import { PlusIcon } from '../../../icons/PlusIcon';
+import { SearchIcon } from '../../../icons/SearchIcon';
+import { EllipsisVerticalIcon } from '../../../icons/EllipsisVerticalIcon';
 
 type HomeHeaderProps = {
   rooms: string[];
@@ -120,7 +123,7 @@ function HomeHeader({ rooms, onSearchOpen }: HomeHeaderProps) {
               variant="Secondary"
               radii="Pill"
               fill="Soft"
-              before={<Icon size="200" src={Icons.Search} style={{ opacity: config.opacity.Placeholder }} />}
+              before={<Icon size="200" src={SearchIcon} style={{ opacity: config.opacity.Placeholder }} />}
               style={{
                 width: '100%',
                 justifyContent: 'flex-start',
@@ -137,7 +140,7 @@ function HomeHeader({ rooms, onSearchOpen }: HomeHeaderProps) {
           </Box>
           <Box shrink="No">
             <IconButton aria-pressed={!!menuAnchor} variant="Background" onClick={handleOpenMenu}>
-              <Icon src={Icons.VerticalDots} size="200" />
+              <Icon src={EllipsisVerticalIcon} size="200" />
             </IconButton>
           </Box>
         </Box>
@@ -232,7 +235,7 @@ export function Home() {
                 <NavItemContent>
                   <Box as="span" grow="Yes" alignItems="Center" gap="200">
                     <Avatar size="200" radii="400">
-                      <Icon src={Icons.Plus} size="200" style={{ color: color.Primary.Main }} />
+                      <Icon src={PlusIcon} size="200" style={{ color: color.Primary.Main }} />
                     </Avatar>
                     <Box as="span" grow="Yes">
                       <Text as="span" size="Inherit" truncate>

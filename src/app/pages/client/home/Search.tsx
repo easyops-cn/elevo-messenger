@@ -5,6 +5,7 @@ import { Page, PageContent, PageContentCenter, PageHeader, PageMain } from '../.
 import { MessageSearch } from '../../../features/message-search';
 import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';
+import { SearchIcon } from '../../../icons/SearchIcon';
 
 export function HomeSearch() {
   const { t } = useTranslation();
@@ -28,7 +29,7 @@ export function HomeSearch() {
               )}
             </Box>
             <Box justifyContent="Center" alignItems="Center" gap="200">
-              {screenSize !== ScreenSize.Mobile && <Icon size="300" src={Icons.Search} />}
+              {screenSize !== ScreenSize.Mobile && <Icon size="300" src={SearchIcon} />}
               <Text size="H5" truncate>
                 {t('home.messageSearch')}
               </Text>

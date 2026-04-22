@@ -21,6 +21,7 @@ import { useRoom } from '../../hooks/useRoom';
 import { DeveloperTools } from '../common-settings/developer-tools';
 import { Workspaces } from './workspaces';
 import { UsersIcon } from '../../icons/UsersIcon';
+import { LayoutGridIcon } from '../../icons/LayoutGridIcon';
 
 type RoomSettingsMenuItem = {
   page: RoomSettingsPage;
@@ -58,7 +59,7 @@ const useRoomSettingsMenuItems = (): RoomSettingsMenuItem[] => {
         items.push({
           page: RoomSettingsPage.WorkspacesPage,
           nameKey: 'workspaces.title',
-          icon: Icons.Category,
+          icon: LayoutGridIcon,
         });
       }
       items.push({

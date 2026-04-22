@@ -36,6 +36,7 @@ import { stopPropagation } from '../../../utils/keyboard';
 import { useAuthMetadata } from '../../../hooks/useAuthMetadata';
 import { withSearchParam } from '../../../pages/pathUtils';
 import { useAccountManagementActions } from '../../../hooks/useAccountManagement';
+import { EllipsisVerticalIcon } from '../../../icons/EllipsisVerticalIcon';
 
 type VerificationStatusBadgeProps = {
   verificationStatus: VerificationStatus;
@@ -302,7 +303,7 @@ export function DeviceVerificationOptions() {
         radii="300"
         onClick={handleMenu}
       >
-        <Icon size="100" src={Icons.VerticalDots} />
+        <Icon size="100" src={EllipsisVerticalIcon} />
       </IconButton>
       <PopOut
         anchor={menuCords}

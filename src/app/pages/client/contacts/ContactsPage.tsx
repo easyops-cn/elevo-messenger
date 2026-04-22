@@ -62,6 +62,7 @@ import { useSpaceOptionally } from '../../../hooks/useSpace';
 import * as css from '../../../features/room/MembersDrawer.css';
 import { ContactIcon } from '../../../icons/ContactIcon';
 import { useContactsContext } from './ContactsContext';
+import { SearchIcon } from '../../../icons/SearchIcon';
 
 type MemberItemProps = {
   mx: MatrixClient;
@@ -262,7 +263,7 @@ export function ContactsMemberList({ room, members, filterRole }: ContactsMember
                   variant="Background"
                   size="500"
                   radii="400"
-                  before={<Icon size="200" src={Icons.Search} />}
+                  before={<Icon size="200" src={SearchIcon} />}
                   after={
                     result && (
                       <Chip

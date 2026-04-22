@@ -69,8 +69,12 @@ import { RoomSettingsPage } from '../../state/roomSettings';
 import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
 import { openWorkspacePanel, openTasksPanel, isDesktopTauri } from '../../plugins/useTauriOpener';
-import { TasksIcon } from '../../icons/TasksIcon';
+import { ListTodoIcon } from '../../icons/ListTodoIcon';
 import { PanelLeftIcon } from '../../icons/PanelLeftIcon';
+import { EllipsisVerticalIcon } from '../../icons/EllipsisVerticalIcon';
+import { LayoutGridIcon } from '../../icons/LayoutGridIcon';
+import { PinIcon } from '../../icons/PinIcon';
+import { SearchIcon } from '../../icons/SearchIcon';
 
 type RoomMenuProps = {
   room: Room;
@@ -400,7 +404,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
             >
               {(triggerRef) => (
                 <IconButton size="300" fill="None" ref={triggerRef} onClick={handleSearchClick}>
-                  <Icon size="100" src={Icons.Search} />
+                  <Icon size="100" src={SearchIcon} />
                 </IconButton>
               )}
             </TooltipProvider>
@@ -440,7 +444,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                     </Text>
                   </Badge>
                 )}
-                <Icon size="100" src={Icons.Pin} filled={!!pinMenuAnchor} />
+                <Icon size="100" src={PinIcon} filled={!!pinMenuAnchor} />
               </IconButton>
             )}
           </TooltipProvider>
@@ -481,7 +485,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                   ref={triggerRef}
                   onClick={() => openTasksPanel(tasksUrl, room.roomId)}
                 >
-                  <Icon size="100" src={TasksIcon} />
+                  <Icon size="100" src={ListTodoIcon} />
                 </IconButton>
               )}
             </TooltipProvider>
@@ -504,7 +508,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                   ref={triggerRef}
                   onClick={() => openWorkspacePanel(workspaceExplorerUrl, room.roomId)}
                 >
-                  <Icon size="100" src={Icons.Category} />
+                  <Icon size="100" src={LayoutGridIcon} />
                 </IconButton>
               )}
             </TooltipProvider>
@@ -528,7 +532,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                 ref={triggerRef}
                 aria-pressed={!!menuAnchor}
               >
-                <Icon size="100" src={Icons.VerticalDots} filled={!!menuAnchor} />
+                <Icon size="100" src={EllipsisVerticalIcon} filled={!!menuAnchor} />
               </IconButton>
             )}
           </TooltipProvider>
