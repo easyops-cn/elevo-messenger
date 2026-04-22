@@ -117,9 +117,6 @@ export const NavItemContent = style({
     '&:hover': {
       textDecoration: 'unset',
     },
-    [`.${NavItemBase}[data-highlight=true] &`]: {
-      fontWeight: config.fontWeight.W600,
-    },
   },
 });
 
