@@ -204,7 +204,12 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         if (data?.type === 'select-file') {
           removeExistingFileRef();
           if (data.file) {
-            const element = createFileRefElement(data.file.path, data.file.name, data.file.workspaceId, data.file.workspaceName);
+            const element = createFileRefElement(
+              data.file.path,
+              data.file.name,
+              data.file.workspaceId,
+              data.file.workspaceName
+            );
             ReactEditor.focus(editor);
             Transforms.select(editor, Editor.end(editor, []));
             Transforms.insertNodes(editor, element);
@@ -215,7 +220,10 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       },
       [editor, removeExistingFileRef]
     );
-    useSdkMessageListener<WorkspaceExplorerMessage>('workspace-explorer', handleWorkspaceFileSelect);
+    useSdkMessageListener<WorkspaceExplorerMessage>(
+      'workspace-explorer',
+      handleWorkspaceFileSelect
+    );
 
     const removeExistingTaskRef = useCallback(() => {
       const [taskRefEntry] = Editor.nodes(editor, {
@@ -244,7 +252,12 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         if (data?.type === 'select-task') {
           removeExistingTaskRef();
           if (data.task) {
-            const element = createTaskRefElement(data.task.id, data.task.workspace_id, data.task.title, data.task.status?.category);
+            const element = createTaskRefElement(
+              data.task.id,
+              data.task.workspace_id,
+              data.task.title,
+              data.task.status?.category
+            );
             ReactEditor.focus(editor);
             Transforms.select(editor, Editor.end(editor, []));
             Transforms.insertNodes(editor, element);
@@ -469,7 +482,17 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       resetEditorHistory(editor);
       setReplyDraft(undefined);
       sendTypingStatus(false);
-    }, [mx, roomId, editor, replyDraft, sendTypingStatus, setReplyDraft, isMarkdown, commands, scrollToBottomRef]);
+    }, [
+      mx,
+      roomId,
+      editor,
+      replyDraft,
+      sendTypingStatus,
+      setReplyDraft,
+      isMarkdown,
+      commands,
+      scrollToBottomRef,
+    ]);
 
     const handleKeyDown: KeyboardEventHandler = useCallback(
       (evt) => {
@@ -531,10 +554,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       const blob = await getImageUrlBlob(stickerUrl);
       const blobUrl = URL.createObjectURL(blob);
       try {
-        const info = await getImageInfo(
-          await loadImageElement(blobUrl),
-          blob
-        );
+        const info = await getImageInfo(await loadImageElement(blobUrl), blob);
 
         mx.sendEvent(roomId, EventType.Sticker, {
           body: label,
@@ -670,9 +690,11 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                   <Box direction="Row" gap="200" alignItems="Center">
                     {replyDraft.relation?.rel_type === RelationType.Thread && <ThreadIndicator />}
                     <ReplyLayout
-                      username={getMemberDisplayName(room, replyDraft.userId) ??
-                              getMxIdLocalPart(replyDraft.userId) ??
-                              replyDraft.userId}
+                      username={
+                        getMemberDisplayName(room, replyDraft.userId) ??
+                        getMxIdLocalPart(replyDraft.userId) ??
+                        replyDraft.userId
+                      }
                     >
                       <Text size="T300" truncate>
                         {trimReplyFromBody(replyDraft.body)}
@@ -683,124 +705,136 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
               </div>
             )
           }
-          before={
-            <IconButton
-              onClick={() => pickFile('*')}
-              variant="SurfaceVariant"
-              size="300"
-              radii="300"
-            >
-              <Icon src={Icons.PlusCircle} />
-            </IconButton>
-          }
-          after={
+          bottom={
             <>
-              <IconButton
-                variant="SurfaceVariant"
-                size="300"
-                radii="300"
-                aria-pressed={voiceRecordingOpen}
-                aria-label="Record voice message"
-                onClick={() => {
-                  if (voiceRecordingOpen) {
-                    const stopped = voiceRecordingRef.current?.stopRecording();
-                    if (!stopped) {
-                      setVoiceRecordingOpen(false);
-                    }
-                  } else {
-                    setVoiceRecordingOpen(true);
-                  }
+              <Box
+                alignItems="Center"
+                justifyContent="SpaceBetween"
+                gap="100"
+                shrink="No"
+                style={{
+                  padding: `0 ${config.space.S200} ${config.space.S200}`,
                 }}
               >
-                <Icon src={Icons.Mic} filled={voiceRecordingOpen} />
-              </IconButton>
-              <IconButton
-                variant="SurfaceVariant"
-                size="300"
-                radii="300"
-                onClick={() => setToolbar(!toolbar)}
-              >
-                <Icon src={toolbar ? Icons.AlphabetUnderline : Icons.Alphabet} />
-              </IconButton>
-              <UseStateProvider initial={undefined}>
-                {(emojiBoardTab: EmojiBoardTab | undefined, setEmojiBoardTab) => (
-                  <PopOut
-                    offset={16}
-                    alignOffset={-44}
-                    position="Top"
-                    align="End"
-                    anchor={
-                      emojiBoardTab === undefined
-                        ? undefined
-                        : emojiBtnRef.current?.getBoundingClientRect() ?? undefined
-                    }
-                    content={
-                      <EmojiBoard
-                        tab={emojiBoardTab}
-                        onTabChange={setEmojiBoardTab}
-                        imagePackRooms={imagePackRooms}
-                        returnFocusOnDeactivate={false}
-                        onEmojiSelect={handleEmoticonSelect}
-                        onCustomEmojiSelect={handleEmoticonSelect}
-                        onStickerSelect={handleStickerSelect}
-                        requestClose={() => {
-                          setEmojiBoardTab((tab) => {
-                            if (tab) {
-                              if (!mobileOrTablet()) ReactEditor.focus(editor);
-                              return undefined;
-                            }
-                            return tab;
-                          });
-                        }}
-                      />
-                    }
+                <Box alignItems="Center" gap="100">
+                  <IconButton
+                    onClick={() => pickFile('*')}
+                    variant="SurfaceVariant"
+                    size="300"
+                    radii="300"
                   >
-                    {!hideStickerBtn && (
-                      <IconButton
-                        aria-pressed={emojiBoardTab === EmojiBoardTab.Sticker}
-                        onClick={() => setEmojiBoardTab(EmojiBoardTab.Sticker)}
-                        variant="SurfaceVariant"
-                        size="300"
-                        radii="300"
-                      >
-                        <Icon
-                          src={Icons.Sticker}
-                          filled={emojiBoardTab === EmojiBoardTab.Sticker}
-                        />
-                      </IconButton>
-                    )}
-                    <IconButton
-                      ref={emojiBtnRef}
-                      aria-pressed={
-                        hideStickerBtn ? !!emojiBoardTab : emojiBoardTab === EmojiBoardTab.Emoji
-                      }
-                      onClick={() => setEmojiBoardTab(EmojiBoardTab.Emoji)}
-                      variant="SurfaceVariant"
-                      size="300"
-                      radii="300"
-                    >
-                      <Icon
-                        src={Icons.Smile}
-                        filled={
-                          hideStickerBtn ? !!emojiBoardTab : emojiBoardTab === EmojiBoardTab.Emoji
+                    <Icon src={Icons.PlusCircle} />
+                  </IconButton>
+                  <IconButton
+                    variant="SurfaceVariant"
+                    size="300"
+                    radii="300"
+                    onClick={() => setToolbar(!toolbar)}
+                  >
+                    <Icon src={toolbar ? Icons.AlphabetUnderline : Icons.Alphabet} />
+                  </IconButton>
+                  <UseStateProvider initial={undefined}>
+                    {(emojiBoardTab: EmojiBoardTab | undefined, setEmojiBoardTab) => (
+                      <PopOut
+                        offset={16}
+                        alignOffset={-44}
+                        position="Top"
+                        align="End"
+                        anchor={
+                          emojiBoardTab === undefined
+                            ? undefined
+                            : emojiBtnRef.current?.getBoundingClientRect() ?? undefined
                         }
-                      />
-                    </IconButton>
-                  </PopOut>
-                )}
-              </UseStateProvider>
-              <IconButton onClick={submit} variant="SurfaceVariant" size="300" radii="300">
-                <Icon src={Icons.Send} />
-              </IconButton>
+                        content={
+                          <EmojiBoard
+                            tab={emojiBoardTab}
+                            onTabChange={setEmojiBoardTab}
+                            imagePackRooms={imagePackRooms}
+                            returnFocusOnDeactivate={false}
+                            onEmojiSelect={handleEmoticonSelect}
+                            onCustomEmojiSelect={handleEmoticonSelect}
+                            onStickerSelect={handleStickerSelect}
+                            requestClose={() => {
+                              setEmojiBoardTab((tab) => {
+                                if (tab) {
+                                  if (!mobileOrTablet()) ReactEditor.focus(editor);
+                                  return undefined;
+                                }
+                                return tab;
+                              });
+                            }}
+                          />
+                        }
+                      >
+                        {!hideStickerBtn && (
+                          <IconButton
+                            aria-pressed={emojiBoardTab === EmojiBoardTab.Sticker}
+                            onClick={() => setEmojiBoardTab(EmojiBoardTab.Sticker)}
+                            variant="SurfaceVariant"
+                            size="300"
+                            radii="300"
+                          >
+                            <Icon
+                              src={Icons.Sticker}
+                              filled={emojiBoardTab === EmojiBoardTab.Sticker}
+                            />
+                          </IconButton>
+                        )}
+                        <IconButton
+                          ref={emojiBtnRef}
+                          aria-pressed={
+                            hideStickerBtn ? !!emojiBoardTab : emojiBoardTab === EmojiBoardTab.Emoji
+                          }
+                          onClick={() => setEmojiBoardTab(EmojiBoardTab.Emoji)}
+                          variant="SurfaceVariant"
+                          size="300"
+                          radii="300"
+                        >
+                          <Icon
+                            src={Icons.Smile}
+                            filled={
+                              hideStickerBtn
+                                ? !!emojiBoardTab
+                                : emojiBoardTab === EmojiBoardTab.Emoji
+                            }
+                          />
+                        </IconButton>
+                      </PopOut>
+                    )}
+                  </UseStateProvider>
+                </Box>
+                <Box alignItems="Center" gap="100">
+                  <IconButton
+                    variant="SurfaceVariant"
+                    size="300"
+                    radii="300"
+                    aria-pressed={voiceRecordingOpen}
+                    aria-label="Record voice message"
+                    onClick={() => {
+                      if (voiceRecordingOpen) {
+                        const stopped = voiceRecordingRef.current?.stopRecording();
+                        if (!stopped) {
+                          setVoiceRecordingOpen(false);
+                        }
+                      } else {
+                        setVoiceRecordingOpen(true);
+                      }
+                    }}
+                  >
+                    <Icon src={Icons.Mic} filled={voiceRecordingOpen} />
+                  </IconButton>
+                  <IconButton onClick={submit} variant="SurfaceVariant" size="300" radii="300">
+                    <Icon src={Icons.Send} />
+                  </IconButton>
+                </Box>
+              </Box>
+              {toolbar && (
+                <div>
+                  <Line variant="SurfaceVariant" size="300" />
+                  <Toolbar />
+                </div>
+              )}
             </>
-          }
-          bottom={
-            toolbar && (
-              <div>
-                <Line variant="SurfaceVariant" size="300" />
-                <Toolbar />
-              </div>
-            )
           }
         />
       </div>
