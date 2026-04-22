@@ -1281,7 +1281,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
             <EventContent
               messageLayout={messageLayout}
               time={timeJSX}
-              iconSrc={parsed.icon}
               content={
                 <Box grow="No" direction="Column">
                   <Text size="T300">
@@ -1323,7 +1322,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
             <EventContent
               messageLayout={messageLayout}
               time={timeJSX}
-              iconSrc={Icons.Hash}
               content={
                 <Box grow="No" direction="Column">
                   <Text size="T300">
@@ -1366,7 +1364,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
             <EventContent
               messageLayout={messageLayout}
               time={timeJSX}
-              iconSrc={Icons.Hash}
               content={
                 <Box grow="No" direction="Column">
                   <Text size="T300">
@@ -1409,7 +1406,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
             <EventContent
               messageLayout={messageLayout}
               time={timeJSX}
-              iconSrc={Icons.Hash}
               content={
                 <Box grow="No" direction="Column">
                   <Text size="T300">
@@ -1460,7 +1456,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
             <EventContent
               messageLayout={messageLayout}
               time={timeJSX}
-              iconSrc={callJoined ? Icons.Phone : Icons.PhoneDown}
               content={
                 <Box grow="No" direction="Column">
                   <Text size="T300">
@@ -1505,7 +1500,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
           <EventContent
             messageLayout={messageLayout}
             time={timeJSX}
-            iconSrc={Icons.Code}
             content={
               <Box grow="No" direction="Column">
                 <Text size="T300">
@@ -1555,7 +1549,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
           <EventContent
             messageLayout={messageLayout}
             time={timeJSX}
-            iconSrc={Icons.Code}
             content={
               <Box grow="No" direction="Column">
                 <Text size="T300">

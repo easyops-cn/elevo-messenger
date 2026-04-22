@@ -1,4 +1,4 @@
-import { Box, Icon, IconSrc } from 'folds';
+import { Box } from 'folds';
 import React, { ReactNode, useState } from 'react';
 import { useHover } from 'react-aria';
 import { BubbleLayout, CompactLayout, ModernLayout } from '..';
@@ -8,10 +8,9 @@ import { elevoColor } from '../../../../config.css';
 export type EventContentProps = {
   messageLayout: number;
   time: ReactNode;
-  iconSrc: IconSrc;
   content: ReactNode;
 };
-export function EventContent({ messageLayout, time, iconSrc, content }: EventContentProps) {
+export function EventContent({ messageLayout, time, content }: EventContentProps) {
   const [hover, setHover] = useState(false);
   const { hoverProps } = useHover({ onHoverChange: setHover });
 
@@ -28,7 +27,7 @@ export function EventContent({ messageLayout, time, iconSrc, content }: EventCon
         alignItems="Center"
         justifyContent="Center"
       >
-        <Icon style={{ opacity: 0.35 }} size="50" src={iconSrc} />
+        {' '}
       </Box>
     </Box>
   );
