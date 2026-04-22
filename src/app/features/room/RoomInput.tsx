@@ -847,10 +847,10 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                 </IconButton>
                 <IconButton
                   onClick={submit}
-                  variant="Surface"
+                  variant="Primary"
                   size="300"
                   radii="Pill"
-                  fill="None"
+                  fill="Soft"
                 >
                   <Icon size="100" src={SendHorizontalIcon} />
                 </IconButton>
