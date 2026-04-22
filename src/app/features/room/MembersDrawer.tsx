@@ -2,7 +2,6 @@ import React, {
   MouseEventHandler,
   useMemo,
   useRef,
-  useState,
 } from 'react';
 import {
   Avatar,
@@ -46,10 +45,8 @@ import { ScrollTopContainer } from '../../components/scroll-top-container';
 import { UserAvatar } from '../../components/user-avatar';
 import { useRoomTypingMember } from '../../hooks/useRoomTypingMembers';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
-import { useMembershipFilter, useMembershipFilterMenu } from '../../hooks/useMemberFilter';
 import { useMemberSort, useMemberSortMenu } from '../../hooks/useMemberSort';
 import { usePowerLevelsContext } from '../../hooks/usePowerLevels';
-import { MembershipFilterMenu } from '../../components/MembershipFilterMenu';
 import { MemberSortMenu } from '../../components/MemberSortMenu';
 import { useOpenUserRoomProfile, useUserRoomProfileState } from '../../state/hooks/userRoomProfile';
 import { useSpaceOptionally } from '../../hooks/useSpace';
@@ -57,6 +54,7 @@ import { ContainerColor } from '../../styles/ContainerColor.css';
 import { useGetMemberPowerTag } from '../../hooks/useMemberPowerTag';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { MemberPowerTag } from '../../../types/matrix/room';
+import { MembershipFilter } from '../../hooks/useMemberFilter';
 
 type MemberDrawerHeaderProps = {
   room: Room;
@@ -225,19 +223,15 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
   const space = useSpaceOptionally();
   const openProfileUserId = useUserRoomProfileState()?.userId;
 
-  const membershipFilterMenu = useMembershipFilterMenu();
   const sortFilterMenu = useMemberSortMenu();
   const [sortFilterIndex, setSortFilterIndex] = useSetting(settingsAtom, 'memberSortFilterIndex');
-  const [membershipFilterIndex, setMembershipFilterIndex] = useState(0);
-
-  const membershipFilter = useMembershipFilter(membershipFilterIndex, membershipFilterMenu);
   const memberSort = useMemberSort(sortFilterIndex, sortFilterMenu);
 
   const typingMembers = useRoomTypingMember(room.roomId);
 
   const filteredMembers = useMemo(
-    () => members.filter(membershipFilter.filterFn).sort(memberSort.sortFn),
-    [members, membershipFilter, memberSort]
+    () => members.filter(MembershipFilter.filterJoined).sort(memberSort.sortFn),
+    [members, memberSort]
   );
 
   const [result, search] = useAsyncSearch(
@@ -273,40 +267,8 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
       <Box className={css.MemberDrawerContentBase} grow="Yes">
         <Scroll ref={scrollRef} variant="Background" size="300" visibility="Hover" hideTrack>
           <Box className={css.MemberDrawerContent} direction="Column" gap="200">
-            <Box ref={scrollTopAnchorRef} className={css.DrawerGroup} direction="Column" gap="200">
-              <Box alignItems="Center" justifyContent="SpaceBetween" gap="200">
-                <UseStateProvider initial={undefined}>
-                  {(anchor: RectCords | undefined, setAnchor) => (
-                    <PopOut
-                      anchor={anchor}
-                      position="Bottom"
-                      align="Start"
-                      offset={4}
-                      content={
-                        <MembershipFilterMenu
-                          selected={membershipFilterIndex}
-                          onSelect={setMembershipFilterIndex}
-                          requestClose={() => setAnchor(undefined)}
-                        />
-                      }
-                    >
-                      <Chip
-                        onClick={
-                          ((evt) =>
-                            setAnchor(
-                              evt.currentTarget.getBoundingClientRect()
-                            )) as MouseEventHandler<HTMLButtonElement>
-                        }
-                        variant="Background"
-                        size="400"
-                        radii="300"
-                        before={<Icon src={Icons.Filter} size="50" />}
-                      >
-                        <Text size="T200">{membershipFilter.name}</Text>
-                      </Chip>
-                    </PopOut>
-                  )}
-                </UseStateProvider>
+            <Box ref={scrollTopAnchorRef} direction="Column" gap="200">
+              <Box alignItems="Center" justifyContent="End" gap="200">
                 <UseStateProvider initial={undefined}>
                   {(anchor: RectCords | undefined, setAnchor) => (
                     <PopOut
@@ -357,11 +319,11 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
 
             {!fetchingMembers && !result && processMembers.length === 0 && (
               <Text style={{ padding: config.space.S300 }} align="Center">
-                {t('room.noMembersOfType', { type: membershipFilter.name })}
+                {t('room.noMembers')}
               </Text>
             )}
 
-            <Box className={css.MembersGroup} direction="Column" gap="100">
+            <Box direction="Column" gap="100">
               <div
                 style={{
                   position: 'relative',

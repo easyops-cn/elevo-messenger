@@ -378,7 +378,7 @@ export function ContactsMemberList({ room, members, filterRole }: ContactsMember
               </Text>
             )}
 
-            <Box className={css.MembersGroup} direction="Column" gap="100">
+            <Box direction="Column" gap="100">
               <div
                 style={{
                   position: 'relative',

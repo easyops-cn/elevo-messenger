@@ -7,7 +7,7 @@ export const MembersDrawer = style({
 
 export const MembersDrawerHeader = style({
   flexShrink: 0,
-  padding: `0 ${config.space.S200} 0 ${config.space.S300}`,
+  padding: `0 ${config.space.S200} 0 ${config.space.S200}`,
   // borderBottomWidth: config.borderWidth.B300,
   marginTop: config.space.S300,
 });
@@ -39,13 +39,6 @@ export const DrawerScrollTop = style({
   animation: `${ScrollBtnAnime} 100ms`,
 });
 
-export const DrawerGroup = style({
-  paddingLeft: config.space.S200,
-});
-
-export const MembersGroup = style({
-  paddingLeft: config.space.S200,
-});
 export const MembersGroupLabel = style({
   padding: config.space.S200,
   selectors: {
