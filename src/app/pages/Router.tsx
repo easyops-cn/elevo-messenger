@@ -28,7 +28,6 @@ import {
   _SEARCH_PATH,
   _SERVER_PATH,
   _EXPLORE_SPACE_PATH,
-  CREATE_PATH,
   CONTACTS_PATH,
   _CONTACTS_CONTACTS_PATH,
   _CONTACTS_ROLE_PATH,
@@ -76,7 +75,6 @@ import { UserRoomProfileRenderer } from '../components/UserRoomProfileRenderer';
 import { CreateRoomModalRenderer } from '../features/create-room';
 import { HomeCreateRoom } from './client/home/CreateRoom';
 import { HomeCreateChat } from './client/home/CreateChatPage';
-import { Create } from './client/create';
 import { CreateSpaceModalRenderer } from '../features/create-space';
 import { SearchModalRenderer } from '../features/search';
 import { getFallbackSession } from '../state/sessions';
@@ -196,23 +194,25 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             }
           />
         </Route>
-        <Route
-          path={DIRECT_PATH}
-          loader={() => redirect(getHomePath())}
-        />
+        <Route path={DIRECT_PATH} loader={() => redirect(getHomePath())} />
         <Route
           path={`/direct/${_CREATE_CHAT_PATH}`}
           loader={() => redirect(getHomeCreateChatPath())}
         />
-        <Route
-          path={`/direct/${_CREATE_PATH}`}
-          loader={() => redirect(getHomeCreateChatPath())}
-        />
+        <Route path={`/direct/${_CREATE_PATH}`} loader={() => redirect(getHomeCreateChatPath())} />
         <Route
           path={`/direct/${_ROOM_PATH}`}
           loader={({ params }) => {
-            const { roomIdOrAlias, eventId } = params as { roomIdOrAlias: string; eventId?: string };
-            return redirect(getHomeRoomPath(decodeURIComponent(roomIdOrAlias), eventId ? decodeURIComponent(eventId) : undefined));
+            const { roomIdOrAlias, eventId } = params as {
+              roomIdOrAlias: string;
+              eventId?: string;
+            };
+            return redirect(
+              getHomeRoomPath(
+                decodeURIComponent(roomIdOrAlias),
+                eventId ? decodeURIComponent(eventId) : undefined
+              )
+            );
           }}
         />
         <Route
@@ -229,7 +229,9 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             </PageRoot>
           }
         >
-          {mobile ? <Route index element={<div />} /> : (
+          {mobile ? (
+            <Route index element={<div />} />
+          ) : (
             <Route
               index
               loader={() => redirect(getExploreFeaturedPath())}
@@ -247,19 +249,9 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             }
           />
         </Route>
-        <Route path={CREATE_PATH} element={<Create />} />
-        <Route
-          path={INBOX_PATH}
-          loader={() => redirect(getMePath())}
-        />
-        <Route
-          path={INBOX_NOTIFICATIONS_PATH}
-          loader={() => redirect(getMePath())}
-        />
-        <Route
-          path={INBOX_INVITES_PATH}
-          loader={() => redirect(getMeInvitesPath())}
-        />
+        <Route path={INBOX_PATH} loader={() => redirect(getMePath())} />
+        <Route path={INBOX_NOTIFICATIONS_PATH} loader={() => redirect(getMePath())} />
+        <Route path={INBOX_INVITES_PATH} loader={() => redirect(getMeInvitesPath())} />
         <Route
           path={CONTACTS_PATH}
           element={
@@ -276,7 +268,9 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             </ContactsProvider>
           }
         >
-          {mobile ? <Route index element={<div />} /> : (
+          {mobile ? (
+            <Route index element={<div />} />
+          ) : (
             <Route
               index
               loader={() => redirect(getContactsContactsPath())}
@@ -286,10 +280,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           <Route path={_CONTACTS_CONTACTS_PATH} element={<ContactsPage />} />
           <Route path={_CONTACTS_ROLE_PATH} element={<ContactsRolePage />} />
         </Route>
-        <Route
-          path={ME_NOTIFICATIONS_PATH}
-          loader={() => redirect(getMePath())}
-        />
+        <Route path={ME_NOTIFICATIONS_PATH} loader={() => redirect(getMePath())} />
         <Route
           path={ME_PATH}
           element={
@@ -304,12 +295,10 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             </PageRoot>
           }
         >
-          {mobile ? <Route index element={<div />} /> : (
-            <Route
-              index
-              loader={() => redirect(getMeInvitesPath())}
-              element={<WelcomePage />}
-            />
+          {mobile ? (
+            <Route index element={<div />} />
+          ) : (
+            <Route index loader={() => redirect(getMeInvitesPath())} element={<WelcomePage />} />
           )}
           <Route path={_INVITES_PATH} element={<Invites />} />
         </Route>

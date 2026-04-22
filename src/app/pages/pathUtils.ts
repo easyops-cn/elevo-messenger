@@ -22,7 +22,6 @@ import {
   SPACE_PATH,
   SPACE_ROOM_PATH,
   SPACE_SEARCH_PATH,
-  CREATE_PATH,
   CONTACTS_PATH,
   CONTACTS_CONTACTS_PATH,
   CONTACTS_ROLE_PATH,
@@ -166,8 +165,6 @@ export const getExploreSpacePath = (spaceIdOrAlias: string): string => {
   };
   return generatePath(EXPLORE_SPACE_PATH, params);
 };
-
-export const getCreatePath = (): string => CREATE_PATH;
 
 export const getInboxPath = (): string => INBOX_PATH;
 export const getInboxNotificationsPath = (): string => INBOX_NOTIFICATIONS_PATH;
