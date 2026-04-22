@@ -362,9 +362,7 @@ export function RoomNavItem({
               )}
             </Avatar>
             <Box as="span" grow="Yes">
-              <Text as="span" size="Inherit" truncate style={{
-                fontWeight: selected ? config.fontWeight.W500 : config.fontWeight.W400,
-              }}>
+              <Text as="span" size="Inherit" truncate>
                 {roomName}
               </Text>
             </Box>

@@ -151,7 +151,9 @@
     "resultCount_one": "{{count}} 个结果",
     "resultCount_other": "{{count}} 个结果",
     "noResultsCount": "无结果",
-    "noMembersOfType": "没有 \"{{type}}\" 成员"
+    "noMembersOfType": "没有 \"{{type}}\" 成员",
+    "badgeAdmin": "管理员",
+    "badgeModerator": "协管员"
   },
   "home": {
     "title": "消息",

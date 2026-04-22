@@ -105,14 +105,9 @@ function MemberDrawerHeader({ room }: MemberDrawerHeaderProps) {
   );
 }
 
-const BADGE_CONFIG: Record<string, { label: string; variant: 'Primary' | 'Success' }> = {
-  Admin: { label: 'Admin', variant: 'Primary' },
-  Moderator: { label: 'Mod', variant: 'Success' },
-};
-
-const getPowerBadgeConfig = (tag?: MemberPowerTag): { label: string; variant: 'Primary' | 'Success' } | undefined => {
-  if (!tag) return undefined;
-  return BADGE_CONFIG[tag.name];
+const BADGE_LABEL_KEYS: Record<string, string> = {
+  Admin: 'room.badgeAdmin',
+  Moderator: 'room.badgeModerator',
 };
 
 type MemberItemProps = {
@@ -135,6 +130,7 @@ function MemberItem({
   pressed,
   typing,
 }: MemberItemProps) {
+  const { t } = useTranslation();
   const name =
     getMemberDisplayName(room, member.userId) ?? getMxIdLocalPart(member.userId) ?? member.userId;
   const avatarMxcUrl = member.getMxcAvatarUrl();
@@ -142,7 +138,14 @@ function MemberItem({
     ? mx.mxcUrlToHttp(avatarMxcUrl, 100, 100, 'crop', undefined, false, useAuthentication)
     : undefined;
 
-  const badge = getPowerBadgeConfig(powerTag);
+  const badge = powerTag
+    ? (() => {
+        const labelKey = BADGE_LABEL_KEYS[powerTag.name];
+        if (!labelKey) return undefined;
+        const variant = powerTag.name === 'Admin' ? 'Primary' as const : 'Success' as const;
+        return { label: t(labelKey), variant };
+      })()
+    : undefined;
 
   return (
     <MenuItem

@@ -151,7 +151,9 @@
     "resultCount_one": "{{count}} Result",
     "resultCount_other": "{{count}} Results",
     "noResultsCount": "No Results",
-    "noMembersOfType": "No \"{{type}}\" Members"
+    "noMembersOfType": "No \"{{type}}\" Members",
+    "badgeAdmin": "Admin",
+    "badgeModerator": "Mod"
   },
   "home": {
     "title": "Messages",
