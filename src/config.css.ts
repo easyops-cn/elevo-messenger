@@ -194,8 +194,8 @@ export const elevoDark = createTheme(elevoColor, {
     Header: '0 4px 16px 0 rgba(0, 0, 0, 0.15)',
   },
   Text: {
-    Secondary: 'rgba(0, 0, 0, 0.55)',
-    Muted: 'rgba(0, 0, 0, 0.35)',
-    Disabled: 'rgba(0, 0, 0, 0.26)',
+    Secondary: 'rgba(255, 255, 255, 0.55)',
+    Muted: 'rgba(255, 255, 255, 0.35)',
+    Disabled: 'rgba(255, 255, 255, 0.26)',
   },
 });
