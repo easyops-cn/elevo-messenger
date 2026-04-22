@@ -3,7 +3,7 @@ import { color } from 'folds';
 
 export const lightTheme = createTheme(color, {
   Background: {
-    Container: '#F7F7F7',
+    Container: '#F9F9F9',
     ContainerHover: 'rgba(0, 0, 0, 0.04)',
     ContainerActive: 'rgba(0, 0, 0, 0.08)',
     ContainerLine: '#CCCCCC',
@@ -11,7 +11,7 @@ export const lightTheme = createTheme(color, {
   },
 
   Surface: {
-    Container: '#FDFDFD',
+    Container: '#FFFFFF',
     ContainerHover: '#F2F2F2',
     ContainerActive: '#E5E5E5',
     ContainerLine: '#D9D9D9',
@@ -197,7 +197,7 @@ export const silverTheme = createTheme(color, {
 
 const darkThemeData = {
   Background: {
-    Container: '#3C3C3C',
+    Container: '#323232',
     ContainerHover: 'rgba(255, 255, 255, 0.075)',
     ContainerActive: 'rgba(255, 255, 255, 0.1)',
     ContainerLine: '#404040',

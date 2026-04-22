@@ -50,8 +50,8 @@ export const PageNavHeader = recipe({
     isDesktopMac: {
       true: {
         marginTop: config.space.S700,
-      }
-    }
+      },
+    },
   },
   defaultVariants: {
     modal: false,
@@ -86,7 +86,7 @@ export const PageHeader = recipe({
       true: {
         paddingTop: 24,
         height: toRem(54 + 24),
-      }
+      },
     },
   },
   defaultVariants: {
@@ -135,7 +135,7 @@ export const PageContentCenter = style([
 ]);
 
 export const PageMainFloating = style({
-  backgroundColor: color.Surface.Container,
+  backgroundColor: elevoColor.Background.Page,
   color: color.Surface.OnContainer,
   boxShadow: elevoColor.shadow.Page,
   border: `${config.borderWidth.B300} solid ${color.Surface.Container}`,

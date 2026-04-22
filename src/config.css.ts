@@ -3,7 +3,8 @@ import { color, config, toRem } from 'folds';
 
 export const elevoConfig = createTheme(config, {
   font: {
-    Inter: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
+    Inter:
+      "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
   },
   fontSize: {
     D400: toRem(45),
@@ -52,41 +53,41 @@ export const elevoConfig = createTheme(config, {
     C400: toRem(16),
   },
   letterSpacing: {
-    D400: "0",
+    D400: '0',
 
-    H1: "0",
-    H2: "0",
-    H3: "0",
-    H4: "0",
-    H5: "0",
-    H6: "0",
+    H1: '0',
+    H2: '0',
+    H3: '0',
+    H4: '0',
+    H5: '0',
+    H6: '0',
 
-    T500: "0",
-    T400: "0",
-    T300: "0",
-    T200: "0",
+    T500: '0',
+    T400: '0',
+    T300: '0',
+    T200: '0',
 
-    B500: "0",
-    B400: "0",
-    B300: "0",
+    B500: '0',
+    B400: '0',
+    B300: '0',
 
-    L400: "0",
-    O400: "0",
-    C400: "0",
+    L400: '0',
+    O400: '0',
+    C400: '0',
   },
   fontWeight: {
-    W100: "100",
-    W200: "200",
-    W300: "300",
-    W400: "400",
-    W500: "500",
-    W600: "600",
-    W700: "700",
-    W800: "800",
-    W900: "900",
+    W100: '100',
+    W200: '200',
+    W300: '300',
+    W400: '400',
+    W500: '500',
+    W600: '600',
+    W700: '700',
+    W800: '800',
+    W900: '900',
   },
   space: {
-    S0: "0",
+    S0: '0',
     S100: toRem(4),
     S200: toRem(8),
     S300: toRem(12),
@@ -96,27 +97,27 @@ export const elevoConfig = createTheme(config, {
     S700: toRem(32),
   },
   radii: {
-    R0: "0",
+    R0: '0',
     R300: toRem(4),
     R400: toRem(8),
     R500: toRem(12),
-    Round: "50%",
-    Pill: "9999px",
+    Round: '50%',
+    Pill: '9999px',
   },
   borderWidth: {
-    B0: "0",
-    B300: "1px",
-    B400: "1.5px",
-    B500: "2px",
-    B600: "3px",
-    B700: "4px",
+    B0: '0',
+    B300: '1px',
+    B400: '1.5px',
+    B500: '2px',
+    B600: '3px',
+    B700: '4px',
   },
   zIndex: {
-    Z100: "100",
-    Z200: "200",
-    Z300: "300",
-    Z400: "400",
-    Max: "9999",
+    Z100: '100',
+    Z200: '200',
+    Z300: '300',
+    Z400: '400',
+    Max: '9999',
   },
   shadow: {
     E100: `0px 1px 6px -2px ${color.Other.Shadow}`,
@@ -125,7 +126,7 @@ export const elevoConfig = createTheme(config, {
     E400: `0px 4px 26px -6px ${color.Other.Shadow}`,
   },
   size: {
-    XInherit: "1em",
+    XInherit: '1em',
     X50: toRem(16),
     X100: toRem(18),
     X200: toRem(20),
@@ -145,23 +146,25 @@ export const elevoConfig = createTheme(config, {
   },
   transition: {},
   opacity: {
-    P500: "1",
-    P400: "0.9",
-    P300: "0.75",
-    Placeholder: "0.5",
-    Disabled: "0.38",
+    P500: '1',
+    P400: '0.9',
+    P300: '0.75',
+    Placeholder: '0.5',
+    Disabled: '0.38',
   },
 });
 
 export const [elevoLight, elevoColor] = createTheme({
   Background: {
     NavBar: 'linear-gradient(0deg, #F7F7F7 0%, #F7F7F7 100%), rgba(255, 255, 255, 0.50)',
+    Page: 'rgba(255, 255, 255, 0.75)',
   },
   Border: {
     ExtremeLight: 'rgba(0, 0, 0, 0.04)',
   },
   shadow: {
-    SpecularHighlight: '-1px -1px 0 0 #FFF inset, 1px 1px 0 0 #FFF inset, 5px 4px 8px 0 rgba(0, 0, 0, 0.03) inset',
+    SpecularHighlight:
+      '-1px -1px 0 0 #FFF inset, 1px 1px 0 0 #FFF inset, 5px 4px 8px 0 rgba(0, 0, 0, 0.03) inset',
     SurfaceContainer: '0 11px 13.7px 0 rgba(0, 0, 0, 0.05)',
     NavBar: '0 8px 40px 0 rgba(0, 0, 0, 0.12)',
     Page: '0 11px 13.7px 0 rgba(0, 0, 0, 0.05)',
@@ -177,12 +180,14 @@ export const [elevoLight, elevoColor] = createTheme({
 export const elevoDark = createTheme(elevoColor, {
   Background: {
     NavBar: 'rgba(0,0,0,0.2)',
+    Page: '#1E1E1E',
   },
   Border: {
     ExtremeLight: 'rgba(255, 255, 255, 0.04)',
   },
   shadow: {
-    SpecularHighlight: '-0.2px -0.5px 1px 0 rgba(255, 255, 255, 0.25) inset, 0.5px 0.6px 1px 0 rgba(255, 255, 255, 0.35) inset, 0 0 7.6px 0 rgba(0, 0, 0, 0.15) inset, 0 4px 4px 0 rgba(0, 0, 0, 0.25)',
+    SpecularHighlight:
+      '-0.2px -0.5px 1px 0 rgba(255, 255, 255, 0.25) inset, 0.5px 0.6px 1px 0 rgba(255, 255, 255, 0.35) inset, 0 0 7.6px 0 rgba(0, 0, 0, 0.15) inset, 0 4px 4px 0 rgba(0, 0, 0, 0.25)',
     SurfaceContainer: '0 11px 13.7px 0 rgba(0, 0, 0, 0.05)',
     NavBar: '0 8px 40px 0 rgba(0, 0, 0, 0.12)',
     Page: '0 11px 13.7px 0 rgba(0, 0, 0, 0.05)',
