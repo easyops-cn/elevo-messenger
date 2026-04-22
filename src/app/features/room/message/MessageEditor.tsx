@@ -263,96 +263,94 @@ export const MessageEditor = as<'div', MessageEditorProps>(
           placeholder={t('room.editMessage')}
           onKeyDown={handleKeyDown}
           onKeyUp={handleKeyUp}
+          top={toolbar && (
+            <div>
+              <Toolbar />
+              <Line variant="Surface" size="300" />
+            </div>
+          )}
           bottom={
-            <>
-              <Box
-                style={{ padding: config.space.S200, paddingTop: 0 }}
-                alignItems="End"
-                justifyContent="SpaceBetween"
-                gap="100"
-              >
-                <Box gap="Inherit">
-                  <Chip
-                    onClick={handleSave}
-                    variant="Primary"
-                    radii="Pill"
-                    disabled={saveState.status === AsyncStatus.Loading}
-                    outlined
-                    before={
-                      saveState.status === AsyncStatus.Loading ? (
-                        <Spinner variant="Primary" fill="Soft" size="100" />
-                      ) : undefined
-                    }
-                  >
-                    <Text size="B300">{t('common.save')}</Text>
-                  </Chip>
-                  <Chip onClick={onCancel} variant="Surface" radii="Pill">
-                    <Text size="B300">{t('common.cancel')}</Text>
-                  </Chip>
-                </Box>
-                <Box gap="Inherit">
-                  <IconButton
-                    variant="Surface"
-                    size="300"
-                    radii="Pill"
-                    fill="None"
-                    aria-pressed={toolbar}
-                    onClick={() => setToolbar(!toolbar)}
-                  >
-                    <Icon size="100" src={CaseSensitiveIcon} />
-                  </IconButton>
-                  <UseStateProvider initial={undefined}>
-                    {(anchor: RectCords | undefined, setAnchor) => (
-                      <PopOut
-                        anchor={anchor}
-                        alignOffset={-8}
-                        position="Top"
-                        align="End"
-                        content={
-                          <EmojiBoard
-                            imagePackRooms={imagePackRooms ?? []}
-                            returnFocusOnDeactivate={false}
-                            onEmojiSelect={handleEmoticonSelect}
-                            onCustomEmojiSelect={handleEmoticonSelect}
-                            requestClose={() => {
-                              setAnchor((v) => {
-                                if (v) {
-                                  if (!mobileOrTablet()) ReactEditor.focus(editor);
-                                  return undefined;
-                                }
-                                return v;
-                              });
-                            }}
-                          />
-                        }
-                      >
-                        <IconButton
-                          aria-pressed={anchor !== undefined}
-                          onClick={
-                            ((evt) =>
-                              setAnchor(
-                                evt.currentTarget.getBoundingClientRect()
-                              )) as MouseEventHandler<HTMLButtonElement>
-                          }
-                          variant="Surface"
-                          size="300"
-                          radii="Pill"
-                          fill="None"
-                        >
-                          <Icon size="100" src={SmileIcon} filled={anchor !== undefined} />
-                        </IconButton>
-                      </PopOut>
-                    )}
-                  </UseStateProvider>
-                </Box>
+            <Box
+              style={{ padding: config.space.S200, paddingTop: 0 }}
+              alignItems="End"
+              justifyContent="SpaceBetween"
+              gap="100"
+            >
+              <Box gap="Inherit">
+                <Chip
+                  onClick={handleSave}
+                  variant="Primary"
+                  radii="Pill"
+                  disabled={saveState.status === AsyncStatus.Loading}
+                  outlined
+                  before={
+                    saveState.status === AsyncStatus.Loading ? (
+                      <Spinner variant="Primary" fill="Soft" size="100" />
+                    ) : undefined
+                  }
+                >
+                  <Text size="B300">{t('common.save')}</Text>
+                </Chip>
+                <Chip onClick={onCancel} variant="Surface" radii="Pill">
+                  <Text size="B300">{t('common.cancel')}</Text>
+                </Chip>
               </Box>
-              {toolbar && (
-                <div>
-                  <Line variant="Surface" size="300" />
-                  <Toolbar />
-                </div>
-              )}
-            </>
+              <Box gap="Inherit">
+                <IconButton
+                  variant="Surface"
+                  size="300"
+                  radii="Pill"
+                  fill="None"
+                  aria-pressed={toolbar}
+                  onClick={() => setToolbar(!toolbar)}
+                >
+                  <Icon size="100" src={CaseSensitiveIcon} />
+                </IconButton>
+                <UseStateProvider initial={undefined}>
+                  {(anchor: RectCords | undefined, setAnchor) => (
+                    <PopOut
+                      anchor={anchor}
+                      alignOffset={-8}
+                      position="Top"
+                      align="End"
+                      content={
+                        <EmojiBoard
+                          imagePackRooms={imagePackRooms ?? []}
+                          returnFocusOnDeactivate={false}
+                          onEmojiSelect={handleEmoticonSelect}
+                          onCustomEmojiSelect={handleEmoticonSelect}
+                          requestClose={() => {
+                            setAnchor((v) => {
+                              if (v) {
+                                if (!mobileOrTablet()) ReactEditor.focus(editor);
+                                return undefined;
+                              }
+                              return v;
+                            });
+                          }}
+                        />
+                      }
+                    >
+                      <IconButton
+                        aria-pressed={anchor !== undefined}
+                        onClick={
+                          ((evt) =>
+                            setAnchor(
+                              evt.currentTarget.getBoundingClientRect()
+                            )) as MouseEventHandler<HTMLButtonElement>
+                        }
+                        variant="Surface"
+                        size="300"
+                        radii="Pill"
+                        fill="None"
+                      >
+                        <Icon size="100" src={SmileIcon} filled={anchor !== undefined} />
+                      </IconButton>
+                    </PopOut>
+                  )}
+                </UseStateProvider>
+              </Box>
+            </Box>
           }
         />
       </div>

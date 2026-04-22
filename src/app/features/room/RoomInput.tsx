@@ -678,7 +678,14 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           onKeyUp={handleKeyUp}
           onPaste={handlePaste}
           top={
-            replyDraft && (
+            <>
+              {toolbar && (
+                <div>
+                  <Toolbar />
+                  <Line variant="Surface" size="300" />
+                </div>
+              )}
+              {replyDraft && (
               <div>
                 <Box
                   alignItems="Center"
@@ -710,94 +717,76 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                   </Box>
                 </Box>
               </div>
-            )
+            )}
+            </>
           }
           bottom={
-            <>
-              <Box
-                alignItems="Center"
-                justifyContent="SpaceBetween"
-                gap="100"
-                shrink="No"
-                style={{
-                  padding: `0 ${config.space.S200} ${config.space.S200}`,
-                }}
-              >
-                <Box alignItems="Center" gap="100">
-                  <IconButton
-                    onClick={() => pickFile('*')}
-                    variant="Surface"
-                    size="300"
-                    radii="Pill"
-                    fill="None"
-                  >
-                    <Icon size="100" src={PlusIcon} />
-                  </IconButton>
-                  <IconButton
-                    variant="Surface"
-                    size="300"
-                    radii="Pill"
-                    fill="None"
-                    aria-pressed={toolbar}
-                    onClick={() => setToolbar(!toolbar)}
-                  >
-                    <Icon size="100" src={CaseSensitiveIcon} />
-                  </IconButton>
-                  <UseStateProvider initial={undefined}>
-                    {(emojiBoardTab: EmojiBoardTab | undefined, setEmojiBoardTab) => (
-                      <PopOut
-                        offset={16}
-                        alignOffset={-44}
-                        position="Top"
-                        align="End"
-                        anchor={
-                          emojiBoardTab === undefined
-                            ? undefined
-                            : emojiBtnRef.current?.getBoundingClientRect() ?? undefined
-                        }
-                        content={
-                          <EmojiBoard
-                            tab={emojiBoardTab}
-                            onTabChange={setEmojiBoardTab}
-                            imagePackRooms={imagePackRooms}
-                            returnFocusOnDeactivate={false}
-                            onEmojiSelect={handleEmoticonSelect}
-                            onCustomEmojiSelect={handleEmoticonSelect}
-                            onStickerSelect={handleStickerSelect}
-                            requestClose={() => {
-                              setEmojiBoardTab((tab) => {
-                                if (tab) {
-                                  if (!mobileOrTablet()) ReactEditor.focus(editor);
-                                  return undefined;
-                                }
-                                return tab;
-                              });
-                            }}
-                          />
-                        }
-                      >
-                        {!hideStickerBtn && (
-                          <IconButton
-                            aria-pressed={emojiBoardTab === EmojiBoardTab.Sticker}
-                            onClick={() => setEmojiBoardTab(EmojiBoardTab.Sticker)}
-                            variant="Surface"
-                            size="300"
-                            radii="Pill"
-                            fill="None"
-                          >
-                            <Icon
-                              size="100"
-                              src={StickerIcon}
-                              filled={emojiBoardTab === EmojiBoardTab.Sticker}
-                            />
-                          </IconButton>
-                        )}
+            <Box
+              alignItems="Center"
+              justifyContent="SpaceBetween"
+              gap="100"
+              shrink="No"
+              style={{
+                padding: `0 ${config.space.S200} ${config.space.S200}`,
+              }}
+            >
+              <Box alignItems="Center" gap="100">
+                <IconButton
+                  onClick={() => pickFile('*')}
+                  variant="Surface"
+                  size="300"
+                  radii="Pill"
+                  fill="None"
+                >
+                  <Icon size="100" src={PlusIcon} />
+                </IconButton>
+                <IconButton
+                  variant="Surface"
+                  size="300"
+                  radii="Pill"
+                  fill="None"
+                  aria-pressed={toolbar}
+                  onClick={() => setToolbar(!toolbar)}
+                >
+                  <Icon size="100" src={CaseSensitiveIcon} />
+                </IconButton>
+                <UseStateProvider initial={undefined}>
+                  {(emojiBoardTab: EmojiBoardTab | undefined, setEmojiBoardTab) => (
+                    <PopOut
+                      offset={16}
+                      alignOffset={-44}
+                      position="Top"
+                      align="End"
+                      anchor={
+                        emojiBoardTab === undefined
+                          ? undefined
+                          : emojiBtnRef.current?.getBoundingClientRect() ?? undefined
+                      }
+                      content={
+                        <EmojiBoard
+                          tab={emojiBoardTab}
+                          onTabChange={setEmojiBoardTab}
+                          imagePackRooms={imagePackRooms}
+                          returnFocusOnDeactivate={false}
+                          onEmojiSelect={handleEmoticonSelect}
+                          onCustomEmojiSelect={handleEmoticonSelect}
+                          onStickerSelect={handleStickerSelect}
+                          requestClose={() => {
+                            setEmojiBoardTab((tab) => {
+                              if (tab) {
+                                if (!mobileOrTablet()) ReactEditor.focus(editor);
+                                return undefined;
+                              }
+                              return tab;
+                            });
+                          }}
+                        />
+                      }
+                    >
+                      {!hideStickerBtn && (
                         <IconButton
-                          ref={emojiBtnRef}
-                          aria-pressed={
-                            hideStickerBtn ? !!emojiBoardTab : emojiBoardTab === EmojiBoardTab.Emoji
-                          }
-                          onClick={() => setEmojiBoardTab(EmojiBoardTab.Emoji)}
+                          aria-pressed={emojiBoardTab === EmojiBoardTab.Sticker}
+                          onClick={() => setEmojiBoardTab(EmojiBoardTab.Sticker)}
                           variant="Surface"
                           size="300"
                           radii="Pill"
@@ -805,57 +794,68 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                         >
                           <Icon
                             size="100"
-                            src={SmileIcon}
-                            filled={
-                              hideStickerBtn
-                                ? !!emojiBoardTab
-                                : emojiBoardTab === EmojiBoardTab.Emoji
-                            }
+                            src={StickerIcon}
+                            filled={emojiBoardTab === EmojiBoardTab.Sticker}
                           />
                         </IconButton>
-                      </PopOut>
-                    )}
-                  </UseStateProvider>
-                </Box>
-                <Box alignItems="Center" gap="100">
-                  <IconButton
-                    variant="Surface"
-                    size="300"
-                    radii="Pill"
-                    fill="None"
-                    aria-pressed={voiceRecordingOpen}
-                    aria-label="Record voice message"
-                    onClick={() => {
-                      if (voiceRecordingOpen) {
-                        const stopped = voiceRecordingRef.current?.stopRecording();
-                        if (!stopped) {
-                          setVoiceRecordingOpen(false);
+                      )}
+                      <IconButton
+                        ref={emojiBtnRef}
+                        aria-pressed={
+                          hideStickerBtn ? !!emojiBoardTab : emojiBoardTab === EmojiBoardTab.Emoji
                         }
-                      } else {
-                        setVoiceRecordingOpen(true);
-                      }
-                    }}
-                  >
-                    <Icon size="100" src={MicIcon} filled={voiceRecordingOpen} />
-                  </IconButton>
-                  <IconButton
-                    onClick={submit}
-                    variant="Surface"
-                    size="300"
-                    radii="Pill"
-                    fill="None"
-                  >
-                    <Icon size="100" src={SendHorizontalIcon} />
-                  </IconButton>
-                </Box>
+                        onClick={() => setEmojiBoardTab(EmojiBoardTab.Emoji)}
+                        variant="Surface"
+                        size="300"
+                        radii="Pill"
+                        fill="None"
+                      >
+                        <Icon
+                          size="100"
+                          src={SmileIcon}
+                          filled={
+                            hideStickerBtn
+                              ? !!emojiBoardTab
+                              : emojiBoardTab === EmojiBoardTab.Emoji
+                          }
+                        />
+                      </IconButton>
+                    </PopOut>
+                  )}
+                </UseStateProvider>
               </Box>
-              {toolbar && (
-                <div>
-                  <Line variant="Surface" size="300" />
-                  <Toolbar />
-                </div>
-              )}
-            </>
+              <Box alignItems="Center" gap="100">
+                <IconButton
+                  variant="Surface"
+                  size="300"
+                  radii="Pill"
+                  fill="None"
+                  aria-pressed={voiceRecordingOpen}
+                  aria-label="Record voice message"
+                  onClick={() => {
+                    if (voiceRecordingOpen) {
+                      const stopped = voiceRecordingRef.current?.stopRecording();
+                      if (!stopped) {
+                        setVoiceRecordingOpen(false);
+                      }
+                    } else {
+                      setVoiceRecordingOpen(true);
+                    }
+                  }}
+                >
+                  <Icon size="100" src={MicIcon} filled={voiceRecordingOpen} />
+                </IconButton>
+                <IconButton
+                  onClick={submit}
+                  variant="Surface"
+                  size="300"
+                  radii="Pill"
+                  fill="None"
+                >
+                  <Icon size="100" src={SendHorizontalIcon} />
+                </IconButton>
+              </Box>
+            </Box>
           }
         />
       </div>
