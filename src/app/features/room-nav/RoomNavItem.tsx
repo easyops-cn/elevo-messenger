@@ -332,6 +332,7 @@ export function RoomNavItem({
     <NavItem
       variant="Background"
       radii="400"
+      size="Large"
       highlight={unread !== undefined}
       aria-selected={selected}
       data-hover={!!menuAnchor}

@@ -9,9 +9,9 @@ export const NavItem = as<
   {
     highlight?: boolean;
   } & css.RoomSelectorVariants
->(({ as: AsNavItem = 'div', className, highlight, variant, radii, children, ...props }, ref) => (
+>(({ as: AsNavItem = 'div', className, highlight, variant, radii, size, children, ...props }, ref) => (
   <AsNavItem
-    className={classNames(css.NavItem({ variant, radii }), className)}
+    className={classNames(css.NavItem({ variant, radii, size }), className)}
     data-highlight={highlight}
     {...props}
     ref={ref}

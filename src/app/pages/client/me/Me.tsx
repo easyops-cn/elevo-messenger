@@ -2,7 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Avatar, Badge, Box, Icon, Icons, Text } from 'folds';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { NavCategory, NavItem, NavItemContent, NavLink } from '../../../components/nav';
+import { NavButton, NavCategory, NavItem, NavItemContent, NavLink } from '../../../components/nav';
 import { getMeInvitesPath } from '../../pathUtils';
 import {
   useMeInvitesSelected,
@@ -77,7 +77,7 @@ export function Me() {
           <NavCategory>
             <InvitesNavItem />
             <NavItem variant="Background" radii="400">
-              <button onClick={() => openSettings()} type="button" style={{ width: '100%' }}>
+              <NavButton onClick={() => openSettings()}>
                 <NavItemContent>
                   <Box as="span" grow="Yes" alignItems="Center" gap="200">
                     <Avatar size="200" radii="400">
@@ -93,7 +93,7 @@ export function Me() {
                     )}
                   </Box>
                 </NavItemContent>
-              </button>
+              </NavButton>
             </NavItem>
           </NavCategory>
         </Box>

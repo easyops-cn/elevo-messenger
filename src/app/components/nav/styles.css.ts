@@ -52,7 +52,6 @@ const NavItemBase = style({
   backgroundColor: Container,
   color: OnContainer,
   outline: 'none',
-  minHeight: toRem(52),
 
   selectors: {
     '&:hover, &:focus-visible': {
@@ -95,10 +94,19 @@ export const NavItem = recipe({
       Critical: getVariant('Critical'),
     },
     radii: RadiiVariant,
+    size: {
+      Large: {
+        minHeight: toRem(52),
+      },
+      Normal: {
+        minHeight: toRem(36),
+      }
+    }
   },
   defaultVariants: {
     variant: 'Surface',
     radii: '400',
+    size: 'Normal',
   },
 });
 
