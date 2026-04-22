@@ -681,8 +681,6 @@ export type MessageProps = {
   hideReadReceipts?: boolean;
   showDeveloperTools?: boolean;
   memberPowerTag?: MemberPowerTag;
-  accessibleTagColors?: Map<string, string>;
-  legacyUsernameColor?: boolean;
   hour24Clock: boolean;
   dateFormatString: string;
 };

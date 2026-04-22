@@ -233,9 +233,6 @@ function PinnedMessage({
           replyEventId={pinnedEvent.replyEventId}
           threadRootId={pinnedEvent.threadRootId}
           onClick={handleOpenClick}
-          getMemberPowerTag={getMemberPowerTag}
-          accessibleTagColors={accessibleTagColors}
-          legacyUsernameColor={legacyUsernameColor}
         />
       )}
       {renderContent(pinnedEvent.getType(), false, pinnedEvent, displayName, getContent)}
