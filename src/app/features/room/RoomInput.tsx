@@ -116,6 +116,7 @@ import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useImagePackRooms } from '../../hooks/useImagePackRooms';
 import { useComposingCheck } from '../../hooks/useComposingCheck';
 import { useSdkMessageListener, SdkMessagePayload } from '../../plugins/useTauriOpener';
+import { PlusIcon } from '../../icons/PlusIcon';
 
 interface WorkspaceExplorerMessage {
   type: 'select-file';
@@ -681,9 +682,10 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                 >
                   <IconButton
                     onClick={() => setReplyDraft(undefined)}
-                    variant="SurfaceVariant"
+                    variant="Surface"
                     size="300"
-                    radii="300"
+                    radii="Pill"
+                    fill="None"
                   >
                     <Icon src={Icons.Cross} size="50" />
                   </IconButton>
@@ -719,19 +721,22 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                 <Box alignItems="Center" gap="100">
                   <IconButton
                     onClick={() => pickFile('*')}
-                    variant="SurfaceVariant"
+                    variant="Surface"
                     size="300"
-                    radii="300"
+                    radii="Pill"
+                    fill="None"
                   >
-                    <Icon src={Icons.PlusCircle} />
+                    <Icon size="100" src={PlusIcon} />
                   </IconButton>
                   <IconButton
-                    variant="SurfaceVariant"
+                    variant="Surface"
                     size="300"
-                    radii="300"
+                    radii="Pill"
+                    fill="None"
+                    aria-pressed={toolbar}
                     onClick={() => setToolbar(!toolbar)}
                   >
-                    <Icon src={toolbar ? Icons.AlphabetUnderline : Icons.Alphabet} />
+                    <Icon size="100" src={toolbar ? Icons.AlphabetUnderline : Icons.Alphabet} />
                   </IconButton>
                   <UseStateProvider initial={undefined}>
                     {(emojiBoardTab: EmojiBoardTab | undefined, setEmojiBoardTab) => (
@@ -770,11 +775,13 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                           <IconButton
                             aria-pressed={emojiBoardTab === EmojiBoardTab.Sticker}
                             onClick={() => setEmojiBoardTab(EmojiBoardTab.Sticker)}
-                            variant="SurfaceVariant"
+                            variant="Surface"
                             size="300"
-                            radii="300"
+                            radii="Pill"
+                            fill="None"
                           >
                             <Icon
+                              size="100"
                               src={Icons.Sticker}
                               filled={emojiBoardTab === EmojiBoardTab.Sticker}
                             />
@@ -786,11 +793,13 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                             hideStickerBtn ? !!emojiBoardTab : emojiBoardTab === EmojiBoardTab.Emoji
                           }
                           onClick={() => setEmojiBoardTab(EmojiBoardTab.Emoji)}
-                          variant="SurfaceVariant"
+                          variant="Surface"
                           size="300"
-                          radii="300"
+                          radii="Pill"
+                          fill="None"
                         >
                           <Icon
+                            size="100"
                             src={Icons.Smile}
                             filled={
                               hideStickerBtn
@@ -805,9 +814,10 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                 </Box>
                 <Box alignItems="Center" gap="100">
                   <IconButton
-                    variant="SurfaceVariant"
+                    variant="Surface"
                     size="300"
-                    radii="300"
+                    radii="Pill"
+                    fill="None"
                     aria-pressed={voiceRecordingOpen}
                     aria-label="Record voice message"
                     onClick={() => {
@@ -821,16 +831,22 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                       }
                     }}
                   >
-                    <Icon src={Icons.Mic} filled={voiceRecordingOpen} />
+                    <Icon size="100" src={Icons.Mic} filled={voiceRecordingOpen} />
                   </IconButton>
-                  <IconButton onClick={submit} variant="SurfaceVariant" size="300" radii="300">
-                    <Icon src={Icons.Send} />
+                  <IconButton
+                    onClick={submit}
+                    variant="Surface"
+                    size="300"
+                    radii="Pill"
+                    fill="None"
+                  >
+                    <Icon size="100" src={Icons.Send} />
                   </IconButton>
                 </Box>
               </Box>
               {toolbar && (
                 <div>
-                  <Line variant="SurfaceVariant" size="300" />
+                  <Line variant="Surface" size="300" />
                   <Toolbar />
                 </div>
               )}

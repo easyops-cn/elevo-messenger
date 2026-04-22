@@ -285,18 +285,20 @@ export const MessageEditor = as<'div', MessageEditorProps>(
                   >
                     <Text size="B300">{t('common.save')}</Text>
                   </Chip>
-                  <Chip onClick={onCancel} variant="SurfaceVariant" radii="Pill">
+                  <Chip onClick={onCancel} variant="Surface" radii="Pill">
                     <Text size="B300">{t('common.cancel')}</Text>
                   </Chip>
                 </Box>
                 <Box gap="Inherit">
                   <IconButton
-                    variant="SurfaceVariant"
+                    variant="Surface"
                     size="300"
-                    radii="300"
+                    radii="Pill"
+                    fill="None"
+                    aria-pressed={toolbar}
                     onClick={() => setToolbar(!toolbar)}
                   >
-                    <Icon size="400" src={toolbar ? Icons.AlphabetUnderline : Icons.Alphabet} />
+                    <Icon size="100" src={toolbar ? Icons.AlphabetUnderline : Icons.Alphabet} />
                   </IconButton>
                   <UseStateProvider initial={undefined}>
                     {(anchor: RectCords | undefined, setAnchor) => (
@@ -331,11 +333,12 @@ export const MessageEditor = as<'div', MessageEditorProps>(
                                 evt.currentTarget.getBoundingClientRect()
                               )) as MouseEventHandler<HTMLButtonElement>
                           }
-                          variant="SurfaceVariant"
+                          variant="Surface"
                           size="300"
-                          radii="300"
+                          radii="Pill"
+                          fill="None"
                         >
-                          <Icon size="400" src={Icons.Smile} filled={anchor !== undefined} />
+                          <Icon size="100" src={Icons.Smile} filled={anchor !== undefined} />
                         </IconButton>
                       </PopOut>
                     )}
@@ -344,7 +347,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
               </Box>
               {toolbar && (
                 <div>
-                  <Line variant="SurfaceVariant" size="300" />
+                  <Line variant="Surface" size="300" />
                   <Toolbar />
                 </div>
               )}

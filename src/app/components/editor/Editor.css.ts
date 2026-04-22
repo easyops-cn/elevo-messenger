@@ -4,10 +4,10 @@ import { color, config, DefaultReset, toRem } from 'folds';
 export const Editor = style([
   DefaultReset,
   {
-    backgroundColor: color.SurfaceVariant.Container,
-    color: color.SurfaceVariant.OnContainer,
-    boxShadow: `inset 0 0 0 ${config.borderWidth.B300} ${color.SurfaceVariant.ContainerLine}`,
-    borderRadius: config.radii.R400,
+    backgroundColor: color.Surface.Container,
+    color: color.Surface.OnContainer,
+    boxShadow: `inset 0 0 0 ${config.borderWidth.B300} ${color.Surface.ContainerLine}`,
+    borderRadius: 10,
     overflow: 'hidden',
   },
 ]);
@@ -60,7 +60,7 @@ export const EditorPlaceholderTextVisual = style([
 ]);
 
 export const EditorToolbarBase = style({
-  padding: `0 ${config.borderWidth.B300}`,
+  padding: config.space.S100,
 });
 
 export const EditorToolbar = style({

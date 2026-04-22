@@ -73,14 +73,15 @@ export function MarkButton({ format, icon, tooltip }: MarkButtonProps) {
       {(triggerRef) => (
         <IconButton
           ref={triggerRef}
-          variant="SurfaceVariant"
+          variant="Surface"
           onClick={handleClick}
           aria-pressed={isMarkActive(editor, format)}
-          size="400"
-          radii="300"
+          size="300"
+          radii="Pill"
+          fill="None"
           disabled={disableInline}
         >
-          <Icon size="200" src={icon} />
+          <Icon size="100" src={icon} />
         </IconButton>
       )}
     </TooltipProvider>
@@ -105,13 +106,14 @@ export function BlockButton({ format, icon, tooltip }: BlockButtonProps) {
       {(triggerRef) => (
         <IconButton
           ref={triggerRef}
-          variant="SurfaceVariant"
+          variant="Surface"
           onClick={handleClick}
           aria-pressed={isBlockActive(editor, format)}
-          size="400"
-          radii="300"
+          size="300"
+          radii="Pill"
+          fill="None"
         >
-          <Icon size="200" src={icon} />
+          <Icon size="100" src={icon} />
         </IconButton>
       )}
     </TooltipProvider>
@@ -165,10 +167,11 @@ export function HeadingBlockButton() {
                   <IconButton
                     ref={triggerRef}
                     onClick={() => handleMenuSelect(1)}
-                    size="400"
-                    radii="300"
+                    size="300"
+                    radii="Pill"
+                    fill="None"
                   >
-                    <Icon size="200" src={Icons.Heading1} />
+                    <Icon size="100" src={Icons.Heading1} />
                   </IconButton>
                 )}
               </TooltipProvider>
@@ -180,10 +183,11 @@ export function HeadingBlockButton() {
                   <IconButton
                     ref={triggerRef}
                     onClick={() => handleMenuSelect(2)}
-                    size="400"
-                    radii="300"
+                    size="300"
+                    radii="Pill"
+                    fill="None"
                   >
-                    <Icon size="200" src={Icons.Heading2} />
+                    <Icon size="100" src={Icons.Heading2} />
                   </IconButton>
                 )}
               </TooltipProvider>
@@ -195,10 +199,11 @@ export function HeadingBlockButton() {
                   <IconButton
                     ref={triggerRef}
                     onClick={() => handleMenuSelect(3)}
-                    size="400"
-                    radii="300"
+                    size="300"
+                    radii="Pill"
+                    fill="None"
                   >
-                    <Icon size="200" src={Icons.Heading3} />
+                    <Icon size="100" src={Icons.Heading3} />
                   </IconButton>
                 )}
               </TooltipProvider>
@@ -209,14 +214,15 @@ export function HeadingBlockButton() {
     >
       <IconButton
         style={{ width: 'unset' }}
-        variant="SurfaceVariant"
+        variant="Surface"
         onClick={handleMenuOpen}
         aria-pressed={isActive}
-        size="400"
-        radii="300"
+        size="300"
+        radii="Pill"
+        fill="None"
       >
-        <Icon size="200" src={level ? Icons[`Heading${level}`] : Icons.Heading1} />
-        <Icon size="200" src={isActive ? Icons.Cross : Icons.ChevronBottom} />
+        <Icon size="100" src={level ? Icons[`Heading${level}`] : Icons.Heading1} />
+        <Icon size="100" src={isActive ? Icons.Cross : Icons.ChevronBottom} />
       </IconButton>
     </PopOut>
   );
@@ -240,12 +246,13 @@ export function ExitFormatting({ tooltip }: ExitFormattingProps) {
       {(triggerRef) => (
         <IconButton
           ref={triggerRef}
-          variant="SurfaceVariant"
+          variant="Surface"
           onClick={handleClick}
-          size="400"
-          radii="300"
+          size="300"
+          radii="Pill"
+          fill="None"
         >
-          <Text size="B400">{`Exit ${KeySymbol.Hyper}`}</Text>
+          <Text size="B300">{`Exit ${KeySymbol.Hyper}`}</Text>
         </IconButton>
       )}
     </TooltipProvider>
@@ -299,7 +306,7 @@ export function Toolbar() {
                 tooltip={<BtnTooltip text="Spoiler" shortCode={`${modKey} + H`} />}
               />
             </Box>
-            <Line variant="SurfaceVariant" direction="Vertical" style={{ height: toRem(12) }} />
+            <Line variant="Surface" direction="Vertical" style={{ height: toRem(12) }} />
           </>
           <Box shrink="No" gap="100">
             <BlockButton
@@ -326,7 +333,7 @@ export function Toolbar() {
           </Box>
           {canEscape && (
             <>
-              <Line variant="SurfaceVariant" direction="Vertical" style={{ height: toRem(12) }} />
+              <Line variant="Surface" direction="Vertical" style={{ height: toRem(12) }} />
               <Box shrink="No" gap="100">
                 <ExitFormatting
                   tooltip={
@@ -345,14 +352,15 @@ export function Toolbar() {
               {(triggerRef) => (
                 <IconButton
                   ref={triggerRef}
-                  variant="SurfaceVariant"
+                  variant="Surface"
                   onClick={() => setIsMarkdown(!isMarkdown)}
                   aria-pressed={isMarkdown}
                   size="300"
-                  radii="300"
+                  radii="Pill"
+                  fill="None"
                   disabled={disableInline || !!isAnyMarkActive(editor)}
                 >
-                  <Icon size="200" src={Icons.Markdown} filled={isMarkdown} />
+                  <Icon size="100" src={Icons.Markdown} filled={isMarkdown} />
                 </IconButton>
               )}
             </TooltipProvider>
