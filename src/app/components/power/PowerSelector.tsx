@@ -2,7 +2,6 @@ import React, { forwardRef, MouseEventHandler, ReactNode, useState } from 'react
 import FocusTrap from 'focus-trap-react';
 import { Box, config, Menu, MenuItem, PopOut, Scroll, Text, toRem, RectCords } from 'folds';
 import { getPowers, PowerLevelTags } from '../../hooks/usePowerLevelTags';
-import { PowerColorBadge } from './PowerColorBadge';
 import { stopPropagation } from '../../utils/keyboard';
 
 type PowerSelectorProps = {
@@ -33,7 +32,6 @@ export const PowerSelector = forwardRef<HTMLDivElement, PowerSelectorProps>(
                   aria-pressed={selected}
                   radii="300"
                   onClick={selected ? undefined : () => onChange(power)}
-                  before={<PowerColorBadge color={tag.color} />}
                   after={<Text size="L400">{power}</Text>}
                 >
                   <Text style={{ flexGrow: 1 }} size="B400" truncate>

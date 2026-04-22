@@ -1,7 +1,6 @@
 import React, { RefObject, useEffect, useMemo, useRef } from 'react';
 import { Text, Box, Icon, Icons, config, Spinner, IconButton, Line, toRem } from 'folds';
 import { useTranslation } from 'react-i18next';
-import { useAtomValue } from 'jotai';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'react-router-dom';
@@ -15,7 +14,6 @@ import { useRoomNavigate } from '../../hooks/useRoomNavigate';
 import { ScrollTopContainer } from '../../components/scroll-top-container';
 import { ContainerColor } from '../../styles/ContainerColor.css';
 import { decodeSearchParamValueArray, encodeSearchParamValueArray } from '../../pages/pathUtils';
-import { mDirectAtom } from '../../state/mDirectList';
 import { MessageSearchParams, useMessageSearch } from './useMessageSearch';
 import { SearchResultGroup } from './SearchResultGroup';
 import { SearchInput } from './SearchInput';
@@ -32,11 +30,9 @@ export function MessageSearch({
 }: MessageSearchProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
-  const mDirects = useAtomValue(mDirectAtom);
   const allRooms = useAllHomeRooms();
   const [mediaAutoLoad] = useSetting(settingsAtom, 'mediaAutoLoad');
   const [urlPreview] = useSetting(settingsAtom, 'urlPreview');
-  const [legacyUsernameColor] = useSetting(settingsAtom, 'legacyUsernameColor');
 
   const [hour24Clock] = useSetting(settingsAtom, 'hour24Clock');
   const [dateFormatString] = useSetting(settingsAtom, 'dateFormatString');
@@ -255,7 +251,6 @@ export function MessageSearch({
                       mediaAutoLoad={mediaAutoLoad}
                       urlPreview={urlPreview}
                       onOpen={navigateRoom}
-                      legacyUsernameColor={legacyUsernameColor || mDirects.has(groupRoom.roomId)}
                       hour24Clock={hour24Clock}
                       dateFormatString={dateFormatString}
                     />

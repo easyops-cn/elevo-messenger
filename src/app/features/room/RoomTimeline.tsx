@@ -115,15 +115,10 @@ import { useRoomNavigate } from '../../hooks/useRoomNavigate';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useIgnoredUsers } from '../../hooks/useIgnoredUsers';
 import { useImagePackRooms } from '../../hooks/useImagePackRooms';
-import { useIsDirectRoom } from '../../hooks/useRoom';
 import { useOpenUserRoomProfile } from '../../state/hooks/userRoomProfile';
 import { useSpaceOptionally } from '../../hooks/useSpace';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
-import { useAccessiblePowerTagColors, useGetMemberPowerTag } from '../../hooks/useMemberPowerTag';
-import { useTheme } from '../../hooks/useTheme';
-import { useRoomCreatorsTag } from '../../hooks/useRoomCreatorsTag';
-import { usePowerLevelTags } from '../../hooks/usePowerLevelTags';
 
 const TimelineFloat = as<'div', css.TimelineFloatVariants>(
   ({ position, className, ...props }, ref) => (
@@ -435,8 +430,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
   const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
   const [messageLayout] = useSetting(settingsAtom, 'messageLayout');
   const [messageSpacing] = useSetting(settingsAtom, 'messageSpacing');
-  const [legacyUsernameColor] = useSetting(settingsAtom, 'legacyUsernameColor');
-  const direct = useIsDirectRoom();
   const [hideMembershipEvents] = useSetting(settingsAtom, 'hideMembershipEvents');
   const [hideNickAvatarEvents] = useSetting(settingsAtom, 'hideNickAvatarEvents');
   const [mediaAutoLoad] = useSetting(settingsAtom, 'mediaAutoLoad');
@@ -455,17 +448,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
   const setReplyDraft = useSetAtom(roomIdToReplyDraftAtomFamily(room.roomId));
   const powerLevels = usePowerLevelsContext();
   const creators = useRoomCreators(room);
-
-  const creatorsTag = useRoomCreatorsTag();
-  const powerLevelTags = usePowerLevelTags(room, powerLevels);
-  const getMemberPowerTag = useGetMemberPowerTag(room, creators, powerLevels);
-
-  const theme = useTheme();
-  const accessiblePowerTagColors = useAccessiblePowerTagColors(
-    theme.kind,
-    creatorsTag,
-    powerLevelTags
-  );
 
   const permissions = useRoomPermissions(creators, powerLevels);
 
@@ -1067,7 +1049,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
             }
             hideReadReceipts={hideActivity}
             showDeveloperTools={showDeveloperTools}
-            memberPowerTag={getMemberPowerTag(senderId)}
             hour24Clock={hour24Clock}
             dateFormatString={dateFormatString}
           >
@@ -1144,7 +1125,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
             }
             hideReadReceipts={hideActivity}
             showDeveloperTools={showDeveloperTools}
-            memberPowerTag={getMemberPowerTag(mEvent.getSender() ?? '')}
             hour24Clock={hour24Clock}
             dateFormatString={dateFormatString}
           >
@@ -1245,7 +1225,6 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
             }
             hideReadReceipts={hideActivity}
             showDeveloperTools={showDeveloperTools}
-            memberPowerTag={getMemberPowerTag(mEvent.getSender() ?? '')}
             hour24Clock={hour24Clock}
             dateFormatString={dateFormatString}
           >

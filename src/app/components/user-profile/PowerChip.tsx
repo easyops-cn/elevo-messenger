@@ -16,7 +16,6 @@ import {
   OverlayCenter,
   PopOut,
   RectCords,
-  Spinner,
   Text,
   toRem,
 } from 'folds';
@@ -24,8 +23,6 @@ import React, { MouseEventHandler, useCallback, useState } from 'react';
 import FocusTrap from 'focus-trap-react';
 import { isKeyHotkey } from 'is-hotkey';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
-import { PowerColorBadge, PowerIcon } from '../power';
 import { useGetMemberPowerLevel, usePowerLevels } from '../../hooks/usePowerLevels';
 import { getPowers, usePowerLevelTags } from '../../hooks/usePowerLevelTags';
 import { stopPropagation } from '../../utils/keyboard';
@@ -39,7 +36,7 @@ import { useOpenSpaceSettings } from '../../state/hooks/spaceSettings';
 import { SpaceSettingsPage } from '../../state/spaceSettings';
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { BreakWord } from '../../styles/Text.css';
-import { getPowerTagIconSrc, useGetMemberPowerTag } from '../../hooks/useMemberPowerTag';
+import { useGetMemberPowerTag } from '../../hooks/useMemberPowerTag';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { useMemberPowerCompare } from '../../hooks/useMemberPowerCompare';
@@ -148,7 +145,6 @@ export function PowerChip({ userId }: { userId: string }) {
   const mx = useMatrixClient();
   const room = useRoom();
   const space = useSpaceOptionally();
-  const useAuthentication = useMediaAuthentication();
   const openRoomSettings = useOpenRoomSettings();
   const openSpaceSettings = useOpenSpaceSettings();
 
@@ -168,7 +164,6 @@ export function PowerChip({ userId }: { userId: string }) {
     (myUserId === userId ? true : hasMorePower(myUserId, userId));
 
   const tag = getMemberPowerTag(userId);
-  const tagIconSrc = tag.icon && getPowerTagIconSrc(mx, useAuthentication, tag.icon);
 
   const [cords, setCords] = useState<RectCords>();
 
@@ -251,8 +246,6 @@ export function PowerChip({ userId }: { userId: string }) {
                 )}
                 {getPowers(powerLevelTags).map((power) => {
                   const powerTag = powerLevelTags[power];
-                  const powerTagIconSrc =
-                    powerTag.icon && getPowerTagIconSrc(mx, useAuthentication, powerTag.icon);
 
                   const selected = getMemberPowerLevel(userId) === power;
                   const canAssignPower = creators.has(myUserId)
@@ -268,12 +261,6 @@ export function PowerChip({ userId }: { userId: string }) {
                       radii="300"
                       aria-disabled={changing || !canChangePowers || !canAssignPower}
                       aria-pressed={selected}
-                      before={<PowerColorBadge color={powerTag.color} />}
-                      after={
-                        powerTagIconSrc ? (
-                          <PowerIcon size="50" iconSrc={powerTagIconSrc} />
-                        ) : undefined
-                      }
                       onClick={
                         canChangePowers && canAssignPower
                           ? () => handlePowerSelect(power)
@@ -319,17 +306,7 @@ export function PowerChip({ userId }: { userId: string }) {
         <Chip
           variant={error ? 'Critical' : 'SurfaceVariant'}
           radii="Pill"
-          before={
-            cords ? (
-              <Icon size="50" src={Icons.ChevronBottom} />
-            ) : (
-              <>
-                {!changing && <PowerColorBadge color={tag.color} />}
-                {changing && <Spinner size="50" variant="Secondary" fill="Soft" />}
-              </>
-            )
-          }
-          after={tagIconSrc ? <PowerIcon size="50" iconSrc={tagIconSrc} /> : undefined}
+          before={<Icon size="50" src={Icons.ShieldUser} />}
           onClick={open}
           aria-pressed={!!cords}
         >

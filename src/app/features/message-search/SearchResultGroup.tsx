@@ -40,18 +40,6 @@ import { UserAvatar } from '../../components/user-avatar';
 import { useMentionClickHandler } from '../../hooks/useMentionClickHandler';
 import { useSpoilerClickHandler } from '../../hooks/useSpoilerClickHandler';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
-import { usePowerLevels } from '../../hooks/usePowerLevels';
-import { usePowerLevelTags } from '../../hooks/usePowerLevelTags';
-import { useTheme } from '../../hooks/useTheme';
-import { PowerIcon } from '../../components/power';
-import colorMXID from '../../../util/colorMXID';
-import {
-  getPowerTagIconSrc,
-  useAccessiblePowerTagColors,
-  useGetMemberPowerTag,
-} from '../../hooks/useMemberPowerTag';
-import { useRoomCreators } from '../../hooks/useRoomCreators';
-import { useRoomCreatorsTag } from '../../hooks/useRoomCreatorsTag';
 import { Avatar } from '../../components/avatar';
 
 type SearchResultGroupProps = {
@@ -61,7 +49,6 @@ type SearchResultGroupProps = {
   mediaAutoLoad?: boolean;
   urlPreview?: boolean;
   onOpen: (roomId: string, eventId: string) => void;
-  legacyUsernameColor?: boolean;
   hour24Clock: boolean;
   dateFormatString: string;
 };
@@ -72,7 +59,6 @@ export function SearchResultGroup({
   mediaAutoLoad,
   urlPreview,
   onOpen,
-  legacyUsernameColor,
   hour24Clock,
   dateFormatString,
 }: SearchResultGroupProps) {
@@ -80,16 +66,6 @@ export function SearchResultGroup({
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const highlightRegex = useMemo(() => makeHighlightRegex(highlights), [highlights]);
-
-  const powerLevels = usePowerLevels(room);
-  const creators = useRoomCreators(room);
-
-  const creatorsTag = useRoomCreatorsTag();
-  const powerLevelTags = usePowerLevelTags(room, powerLevels);
-  const getMemberPowerTag = useGetMemberPowerTag(room, creators, powerLevels);
-
-  const theme = useTheme();
-  const accessibleTagColors = useAccessiblePowerTagColors(theme.kind, creatorsTag, powerLevelTags);
 
   const mentionClickHandler = useMentionClickHandler(room.roomId);
   const spoilerClickHandler = useSpoilerClickHandler();
@@ -241,16 +217,6 @@ export function SearchResultGroup({
           const threadRootId =
             relation?.rel_type === RelationType.Thread ? relation.event_id : undefined;
 
-          const memberPowerTag = getMemberPowerTag(event.sender);
-          const tagColor = memberPowerTag?.color
-            ? accessibleTagColors?.get(memberPowerTag.color)
-            : undefined;
-          const tagIconSrc = memberPowerTag?.icon
-            ? getPowerTagIconSrc(mx, useAuthentication, memberPowerTag.icon)
-            : undefined;
-
-          const usernameColor = legacyUsernameColor ? colorMXID(event.sender) : tagColor;
-
           return (
             <SequenceCard
               key={event.event_id}
@@ -286,12 +252,11 @@ export function SearchResultGroup({
                 <Box gap="300" justifyContent="SpaceBetween" alignItems="Center" grow="Yes">
                   <Box gap="200" alignItems="Baseline">
                     <Box alignItems="Center" gap="200">
-                      <Username style={{ color: usernameColor }}>
+                      <Username>
                         <Text as="span" truncate>
                           <UsernameBold>{displayName}</UsernameBold>
                         </Text>
                       </Username>
-                      {tagIconSrc && <PowerIcon size="100" iconSrc={tagIconSrc} />}
                     </Box>
                     <Time
                       ts={event.origin_server_ts}

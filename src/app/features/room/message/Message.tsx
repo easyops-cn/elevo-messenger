@@ -72,9 +72,7 @@ import { getMatrixToRoomEvent } from '../../../plugins/matrix-to';
 import { getViaServers } from '../../../plugins/via-servers';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { useRoomPinnedEvents } from '../../../hooks/useRoomPinnedEvents';
-import { MemberPowerTag, StateEvent } from '../../../../types/matrix/room';
-import { PowerIcon } from '../../../components/power';
-import { getPowerTagIconSrc } from '../../../hooks/useMemberPowerTag';
+import { StateEvent } from '../../../../types/matrix/room';
 import { Avatar } from '../../../components/avatar';
 import { EllipsisVerticalIcon } from '../../../icons/EllipsisVerticalIcon';
 
@@ -680,7 +678,6 @@ export type MessageProps = {
   reactions?: ReactNode;
   hideReadReceipts?: boolean;
   showDeveloperTools?: boolean;
-  memberPowerTag?: MemberPowerTag;
   hour24Clock: boolean;
   dateFormatString: string;
 };
@@ -709,7 +706,6 @@ export const Message = as<'div', MessageProps>(
       reactions,
       hideReadReceipts,
       showDeveloperTools,
-      memberPowerTag,
       hour24Clock,
       dateFormatString,
       children,
@@ -734,10 +730,6 @@ export const Message = as<'div', MessageProps>(
     const senderDisplayName =
       getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId;
     const senderAvatarMxc = getMemberAvatarMxc(room, senderId);
-
-    const tagIconSrc = memberPowerTag?.icon
-      ? getPowerTagIconSrc(mx, useAuthentication, memberPowerTag.icon)
-      : undefined;
 
     const headerJSX = !collapse && (
       <Box
@@ -766,7 +758,6 @@ export const Message = as<'div', MessageProps>(
               {senderDisplayName}
             </Text>
           </Username>
-          {tagIconSrc && <PowerIcon size="100" iconSrc={tagIconSrc} />}
         </Box>
         {(messageLayout === MessageLayout.Compact || hover) && (
           <Time
