@@ -82,6 +82,8 @@
     "continueWith": "Continue with {{name}}",
     "continueWithSSO": "Continue with SSO",
     "connectingToProvider": "Connecting to provider",
+    "connectingToServer": "Connecting to server",
+    "failedConnectHomeserverDown": "Unable to connect to the homeserver. The homeserver or your internet connection may be down.",
     "or": "Or",
     "resetPassword": "Reset Password",
     "rememberPassword": "Remember your password?",

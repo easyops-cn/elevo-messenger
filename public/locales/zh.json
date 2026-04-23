@@ -82,6 +82,8 @@
     "continueWith": "使用 {{name}} 继续",
     "continueWithSSO": "使用 SSO 继续",
     "connectingToProvider": "正在连接认证服务",
+    "connectingToServer": "正在连接服务器",
+    "failedConnectHomeserverDown": "无法连接到服务器。服务器或您的网络连接可能已断开。",
     "or": "或",
     "resetPassword": "重置密码",
     "rememberPassword": "记得密码？",
