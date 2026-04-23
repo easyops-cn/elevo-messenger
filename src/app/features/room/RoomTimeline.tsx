@@ -1613,8 +1613,8 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
     const newDividerJSX =
       newDivider && eventJSX && eventSender !== mx.getUserId() ? (
         <MessageBase space={messageSpacing}>
-          <TimelineDivider style={{ color: color.Success.Main }}>
-            <Badge as="span" size="500" variant="Success" fill="Solid" radii="300">
+          <TimelineDivider>
+            <Badge as="span" size="500" variant="Success" fill="Soft" radii="300">
               <Text size="L400">{t('room.newMessages')}</Text>
             </Badge>
           </TimelineDivider>

@@ -114,12 +114,6 @@ export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
 
   const inviting = inviteState.status === AsyncStatus.Loading;
 
-  const handleReset = () => {
-    if (inputRef.current) inputRef.current.value = '';
-    setValidUserId(undefined);
-    resetSearch();
-  };
-
   const handleSubmit: FormEventHandler<HTMLFormElement> = (evt) => {
     evt.preventDefault();
     const target = evt.target as HTMLFormElement | undefined;
@@ -131,8 +125,7 @@ export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
 
     invite(validUserId, reason || undefined).then(() => {
       if (alive()) {
-        handleReset();
-        if (reasonInput) reasonInput.value = '';
+        requestClose();
       }
     });
   };
