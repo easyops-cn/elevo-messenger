@@ -1,4 +1,5 @@
-import React, { ReactNode } from 'react';
+import { ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MatrixEvent } from 'matrix-js-sdk';
 import { IMemberContent, Membership } from '../../types/matrix/room';
 import { getMxIdLocalPart } from '../utils/matrix';
@@ -11,6 +12,8 @@ export type ParsedResult = {
 export type MemberEventParser = (mEvent: MatrixEvent) => ParsedResult;
 
 export const useMemberEventParser = (): MemberEventParser => {
+  const { t } = useTranslation();
+
   const parseMemberEvent: MemberEventParser = (mEvent) => {
     const content = mEvent.getContent<IMemberContent>();
     const prevContent = mEvent.getPrevContent() as IMemberContent;
@@ -20,7 +23,7 @@ export const useMemberEventParser = (): MemberEventParser => {
 
     if (!senderId || !userId)
       return {
-        body: 'Broken membership event',
+        body: t('memberEvent.brokenEvent'),
       };
 
     const senderName = getMxIdLocalPart(senderId);
@@ -33,134 +36,69 @@ export const useMemberEventParser = (): MemberEventParser => {
       if (content.membership === Membership.Invite) {
         if (prevContent.membership === Membership.Knock) {
           return {
-            body: (
-              <>
-                <b>{senderName}</b>
-                {' accepted '}
-                <b>{userName}</b>
-                {`'s join request `}
-                {reason}
-              </>
-            ),
+            body: t('memberEvent.acceptedKnock', { senderName, userName, reason }),
           };
         }
 
         return {
-          body: (
-            <>
-              <b>{senderName}</b>
-              {' invited '}
-              <b>{userName}</b> {reason}
-            </>
-          ),
+          body: t('memberEvent.invited', { senderName, userName, reason }),
         };
       }
 
       if (content.membership === Membership.Knock) {
         return {
-          body: (
-            <>
-              <b>{userName}</b>
-              {' request to join room '}
-              {reason}
-            </>
-          ),
+          body: t('memberEvent.knocked', { userName, reason }),
         };
       }
 
       if (content.membership === Membership.Join) {
         return {
-          body: (
-            <>
-              <b>{userName}</b>
-              {' joined the room'}
-            </>
-          ),
+          body: t('memberEvent.joined', { userName }),
         };
       }
 
       if (content.membership === Membership.Leave) {
         if (prevContent.membership === Membership.Invite) {
+          if (senderId === userId) {
+            return {
+              body: t('memberEvent.rejectedInvite', { userName, reason }),
+            };
+          }
           return {
-            body:
-              senderId === userId ? (
-                <>
-                  <b>{userName}</b>
-                  {' rejected the invitation '}
-                  {reason}
-                </>
-              ) : (
-                <>
-                  <b>{senderName}</b>
-                  {' rejected '}
-                  <b>{userName}</b>
-                  {`'s join request `}
-                  {reason}
-                </>
-              ),
+            body: t('memberEvent.rejectedKnock', { senderName, userName, reason }),
           };
         }
 
         if (prevContent.membership === Membership.Knock) {
+          if (senderId === userId) {
+            return {
+              body: t('memberEvent.revokedKnock', { userName, reason }),
+            };
+          }
           return {
-            body:
-              senderId === userId ? (
-                <>
-                  <b>{userName}</b>
-                  {' revoked joined request '}
-                  {reason}
-                </>
-              ) : (
-                <>
-                  <b>{senderName}</b>
-                  {' revoked '}
-                  <b>{userName}</b>
-                  {`'s invite `}
-                  {reason}
-                </>
-              ),
+            body: t('memberEvent.revokedInvite', { senderName, userName, reason }),
           };
         }
 
         if (prevContent.membership === Membership.Ban) {
           return {
-            body: (
-              <>
-                <b>{senderName}</b>
-                {' unbanned '}
-                <b>{userName}</b> {reason}
-              </>
-            ),
+            body: t('memberEvent.unbanned', { senderName, userName, reason }),
           };
         }
 
+        if (senderId === userId) {
+          return {
+            body: t('memberEvent.left', { userName, reason }),
+          };
+        }
         return {
-          body:
-            senderId === userId ? (
-              <>
-                <b>{userName}</b>
-                {' left the room '}
-                {reason}
-              </>
-            ) : (
-              <>
-                <b>{senderName}</b>
-                {' kicked '}
-                <b>{userName}</b> {reason}
-              </>
-            ),
+          body: t('memberEvent.kicked', { senderName, userName, reason }),
         };
       }
 
       if (content.membership === Membership.Ban) {
         return {
-          body: (
-            <>
-              <b>{senderName}</b>
-              {' banned '}
-              <b>{userName}</b> {reason}
-            </>
-          ),
+          body: t('memberEvent.banned', { senderName, userName, reason }),
         };
       }
     }
@@ -171,41 +109,29 @@ export const useMemberEventParser = (): MemberEventParser => {
           ? prevContent.displayname || getMxIdLocalPart(userId)
           : getMxIdLocalPart(userId);
 
+      if (typeof content.displayname === 'string') {
+        return {
+          body: t('memberEvent.changedDisplayName', { prevUserName, userName }),
+        };
+      }
       return {
-        body:
-          typeof content.displayname === 'string' ? (
-            <>
-              <b>{prevUserName}</b>
-              {' changed display name to '}
-              <b>{userName}</b>
-            </>
-          ) : (
-            <>
-              <b>{prevUserName}</b>
-              {' removed their display name '}
-            </>
-          ),
+        body: t('memberEvent.removedDisplayName', { prevUserName }),
       };
     }
+
     if (content.avatar_url !== prevContent.avatar_url) {
+      if (content.avatar_url && typeof content.avatar_url === 'string') {
+        return {
+          body: t('memberEvent.changedAvatar', { userName }),
+        };
+      }
       return {
-        body:
-          content.avatar_url && typeof content.avatar_url === 'string' ? (
-            <>
-              <b>{userName}</b>
-              {' changed their avatar'}
-            </>
-          ) : (
-            <>
-              <b>{userName}</b>
-              {' removed their avatar '}
-            </>
-          ),
+        body: t('memberEvent.removedAvatar', { userName }),
       };
     }
 
     return {
-      body: 'Membership event with no changes',
+      body: t('memberEvent.noChanges'),
     };
   };
 

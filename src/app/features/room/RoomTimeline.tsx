@@ -87,7 +87,6 @@ import { MessageLayout, settingsAtom } from '../../state/settings';
 import { useMatrixEventRenderer } from '../../hooks/useMatrixEventRenderer';
 import { Reactions, Message, Event, EncryptedContent } from './message';
 import { useMemberEventParser } from '../../hooks/useMemberEventParser';
-import * as customHtmlCss from '../../styles/CustomHtml.css';
 import { RoomIntro } from '../../components/room-intro';
 import {
   getIntersectionObserverEntry,
@@ -1325,8 +1324,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
               content={
                 <Box grow="No" direction="Column">
                   <Text size="T300">
-                    <b>{senderName}</b>
-                    {t('Organisms.RoomCommon.changed_room_name')}
+                    {t('room.changedRoomName', { name: senderName })}
                   </Text>
                 </Box>
               }
@@ -1367,8 +1365,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
               content={
                 <Box grow="No" direction="Column">
                   <Text size="T300">
-                    <b>{senderName}</b>
-                    {t('Organisms.RoomCommon.changed_room_topic')}
+                    {t('room.changedRoomTopic', { name: senderName })}
                   </Text>
                 </Box>
               }
@@ -1409,8 +1406,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
               content={
                 <Box grow="No" direction="Column">
                   <Text size="T300">
-                    <b>{senderName}</b>
-                    {t('Organisms.RoomCommon.changed_room_avatar')}
+                    {t('room.changedRoomAvatar', { name: senderName })}
                   </Text>
                 </Box>
               }
@@ -1459,8 +1455,9 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
               content={
                 <Box grow="No" direction="Column">
                   <Text size="T300">
-                    <b>{senderName}</b>
-                    {callJoined ? ' joined the call' : ' ended the call'}
+                    {callJoined
+                      ? t('timeline.joinedCall', { name: senderName })
+                      : t('timeline.endedCall', { name: senderName })}
                   </Text>
                 </Box>
               }
@@ -1503,10 +1500,10 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
             content={
               <Box grow="No" direction="Column">
                 <Text size="T300">
-                  <b>{senderName}</b>
-                  {' sent '}
-                  <code className={customHtmlCss.Code} style={{ opacity: 0.6 }}>{mEvent.getType()}</code>
-                  {' state event'}
+                  {t('timeline.sentStateEvent', {
+                    name: senderName,
+                    eventType: mEvent.getType(),
+                  })}
                 </Text>
               </Box>
             }
@@ -1552,10 +1549,10 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
             content={
               <Box grow="No" direction="Column">
                 <Text size="T300">
-                  <b>{senderName}</b>
-                  {' sent '}
-                  <code className={customHtmlCss.Code} style={{ opacity: 0.6 }}>{mEvent.getType()}</code>
-                  {' event'}
+                  {t('timeline.sentEvent', {
+                    name: senderName,
+                    eventType: mEvent.getType(),
+                  })}
                 </Text>
               </Box>
             }

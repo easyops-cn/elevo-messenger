@@ -155,7 +155,41 @@
     "badgeCreator": "Creator",
     "badgeOwner": "Owner",
     "badgeAdmin": "Admin",
-    "badgeModerator": "Mod"
+    "badgeModerator": "Mod",
+    "intro": "This is the beginning of conversation.",
+    "createdBy": "Created by",
+    "inviteMember": "Invite Member",
+    "openOldRoom": "Open Old Room",
+    "joinOldRoom": "Join Old Room",
+    "changedRoomName": "{{name}} changed room name",
+    "changedRoomTopic": "{{name}} changed room topic",
+    "changedRoomAvatar": "{{name}} changed room avatar"
+  },
+  "memberEvent": {
+    "brokenEvent": "Broken membership event",
+    "acceptedKnock": "{{senderName}} accepted {{userName}}'s join request {{reason}}",
+    "invited": "{{senderName}} invited {{userName}} {{reason}}",
+    "knocked": "{{userName}} requested to join room {{reason}}",
+    "joined": "{{userName}} joined the room",
+    "rejectedInvite": "{{userName}} rejected the invitation {{reason}}",
+    "rejectedKnock": "{{senderName}} rejected {{userName}}'s join request {{reason}}",
+    "revokedKnock": "{{userName}} revoked join request {{reason}}",
+    "revokedInvite": "{{senderName}} revoked {{userName}}'s invite {{reason}}",
+    "unbanned": "{{senderName}} unbanned {{userName}} {{reason}}",
+    "left": "{{userName}} left the room {{reason}}",
+    "kicked": "{{senderName}} kicked {{userName}} {{reason}}",
+    "banned": "{{senderName}} banned {{userName}} {{reason}}",
+    "changedDisplayName": "{{prevUserName}} changed display name to {{userName}}",
+    "removedDisplayName": "{{prevUserName}} removed their display name",
+    "changedAvatar": "{{userName}} changed their avatar",
+    "removedAvatar": "{{userName}} removed their avatar",
+    "noChanges": "Membership event with no changes"
+  },
+  "timeline": {
+    "joinedCall": "{{name}} joined the call",
+    "endedCall": "{{name}} ended the call",
+    "sentStateEvent": "{{name}} sent {{eventType}} state event",
+    "sentEvent": "{{name}} sent {{eventType}} event"
   },
   "home": {
     "title": "Messages",
@@ -1031,13 +1065,6 @@
     "serverUrl": "Server URL",
     "desktopOnly": "Desktop Only",
     "desktopOnlyDesc": "OAuth connection is only supported on the desktop app."
-  },
-  "Organisms": {
-    "RoomCommon": {
-      "changed_room_name": " changed room name",
-      "changed_room_topic": " changed room topic",
-      "changed_room_avatar": " changed room avatar"
-    }
   },
   "oidcLogin": {
     "title": "Login to {{provider}}",

@@ -155,7 +155,41 @@
     "badgeCreator": "创建者",
     "badgeOwner": "群主",
     "badgeAdmin": "管理员",
-    "badgeModerator": "协管员"
+    "badgeModerator": "协管员",
+    "intro": "这是对话的开始。",
+    "createdBy": "创建者",
+    "inviteMember": "邀请成员",
+    "openOldRoom": "打开旧房间",
+    "joinOldRoom": "加入旧房间",
+    "changedRoomName": "{{name}} 更改了房间名称",
+    "changedRoomTopic": "{{name}} 更改了房间话题",
+    "changedRoomAvatar": "{{name}} 更改了房间头像"
+  },
+  "memberEvent": {
+    "brokenEvent": "异常的成员事件",
+    "acceptedKnock": "{{senderName}} 接受了 {{userName}} 的加入请求 {{reason}}",
+    "invited": "{{senderName}} 邀请了 {{userName}} {{reason}}",
+    "knocked": "{{userName}} 请求加入房间 {{reason}}",
+    "joined": "{{userName}} 加入了房间",
+    "rejectedInvite": "{{userName}} 拒绝了邀请 {{reason}}",
+    "rejectedKnock": "{{senderName}} 拒绝了 {{userName}} 的加入请求 {{reason}}",
+    "revokedKnock": "{{userName}} 撤回了加入请求 {{reason}}",
+    "revokedInvite": "{{senderName}} 撤回了 {{userName}} 的邀请 {{reason}}",
+    "unbanned": "{{senderName}} 解禁了 {{userName}} {{reason}}",
+    "left": "{{userName}} 离开了房间 {{reason}}",
+    "kicked": "{{senderName}} 将 {{userName}} 踢出房间 {{reason}}",
+    "banned": "{{senderName}} 封禁了 {{userName}} {{reason}}",
+    "changedDisplayName": "{{prevUserName}} 将显示名称更改为 {{userName}}",
+    "removedDisplayName": "{{prevUserName}} 移除了显示名称",
+    "changedAvatar": "{{userName}} 更换了头像",
+    "removedAvatar": "{{userName}} 移除了头像",
+    "noChanges": "成员事件无变更"
+  },
+  "timeline": {
+    "joinedCall": "{{name}} 加入了通话",
+    "endedCall": "{{name}} 结束了通话",
+    "sentStateEvent": "{{name}} 发送了 {{eventType}} 状态事件",
+    "sentEvent": "{{name}} 发送了 {{eventType}} 事件"
   },
   "home": {
     "title": "消息",
@@ -1031,13 +1065,6 @@
     "serverUrl": "服务器地址",
     "desktopOnly": "仅支持桌面端",
     "desktopOnlyDesc": "OAuth 连接仅支持桌面端应用。"
-  },
-  "Organisms": {
-    "RoomCommon": {
-      "changed_room_name": " 更改了房间名称",
-      "changed_room_topic": " 更改了房间话题",
-      "changed_room_avatar": " 更改了房间头像"
-    }
   },
   "oidcLogin": {
     "title": "登录 {{provider}}",
