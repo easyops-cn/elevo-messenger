@@ -1,7 +1,8 @@
 import React, { forwardRef, MouseEventHandler, ReactNode, useState } from 'react';
 import FocusTrap from 'focus-trap-react';
 import { Box, config, Menu, MenuItem, PopOut, Scroll, Text, toRem, RectCords } from 'folds';
-import { getPowers, PowerLevelTags } from '../../hooks/usePowerLevelTags';
+import { useTranslation } from 'react-i18next';
+import { getPowers, POWER_TAG_KEYS, PowerLevelTags } from '../../hooks/usePowerLevelTags';
 import { stopPropagation } from '../../utils/keyboard';
 
 type PowerSelectorProps = {
@@ -10,41 +11,43 @@ type PowerSelectorProps = {
   onChange: (value: number) => void;
 };
 export const PowerSelector = forwardRef<HTMLDivElement, PowerSelectorProps>(
-  ({ powerLevelTags, value, onChange }, ref) => (
-    <Menu
-      ref={ref}
-      style={{
-        maxHeight: '75vh',
-        maxWidth: toRem(300),
-        display: 'flex',
-      }}
-    >
-      <Box grow="Yes">
-        <Scroll size="0" hideTrack visibility="Hover">
-          <div style={{ padding: config.space.S100 }}>
-            {getPowers(powerLevelTags).map((power) => {
-              const selected = value === power;
-              const tag = powerLevelTags[power];
+  ({ powerLevelTags, value, onChange }, ref) => {
+    const { t } = useTranslation();
+    return (
+      <Menu
+        ref={ref}
+        style={{
+          maxHeight: '75vh',
+          maxWidth: toRem(300),
+          display: 'flex',
+        }}
+      >
+        <Box grow="Yes">
+          <Scroll size="0" hideTrack visibility="Hover">
+            <div style={{ padding: config.space.S100 }}>
+              {getPowers(powerLevelTags).map((power) => {
+                const selected = value === power;
+                const tag = powerLevelTags[power];
 
-              return (
-                <MenuItem
-                  key={power}
-                  aria-pressed={selected}
-                  radii="300"
-                  onClick={selected ? undefined : () => onChange(power)}
-                  after={<Text size="L400">{power}</Text>}
-                >
-                  <Text style={{ flexGrow: 1 }} size="B400" truncate>
-                    {tag.name}
-                  </Text>
-                </MenuItem>
-              );
-            })}
-          </div>
-        </Scroll>
-      </Box>
-    </Menu>
-  )
+                return (
+                  <MenuItem
+                    key={power}
+                    aria-pressed={selected}
+                    radii="300"
+                    onClick={selected ? undefined : () => onChange(power)}
+                  >
+                    <Text style={{ flexGrow: 1 }} size="B400" truncate>
+                      {t(POWER_TAG_KEYS[tag.name], tag.name)}
+                    </Text>
+                  </MenuItem>
+                );
+              })}
+            </div>
+          </Scroll>
+        </Box>
+      </Menu>
+    )
+  }
 );
 
 type PowerSwitcherProps = PowerSelectorProps & {

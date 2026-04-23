@@ -25,7 +25,7 @@ import { isKeyHotkey } from 'is-hotkey';
 import { useTranslation } from 'react-i18next';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useGetMemberPowerLevel, usePowerLevels } from '../../hooks/usePowerLevels';
-import { BADGE_LABEL_KEYS, getPowers, usePowerLevelTags } from '../../hooks/usePowerLevelTags';
+import { getPowers, POWER_TAG_KEYS, usePowerLevelTags } from '../../hooks/usePowerLevelTags';
 import { stopPropagation } from '../../utils/keyboard';
 import { StateEvent } from '../../../types/matrix/room';
 import { useOpenRoomSettings } from '../../state/hooks/roomSettings';
@@ -48,6 +48,7 @@ type SelfDemoteAlertProps = {
   onChange: (power: number) => void;
 };
 function SelfDemoteAlert({ power, onCancel, onChange }: SelfDemoteAlertProps) {
+  const { t } = useTranslation();
   return (
     <Overlay open backdrop={<OverlayBackdrop />}>
       <OverlayCenter>
@@ -66,7 +67,7 @@ function SelfDemoteAlert({ power, onCancel, onChange }: SelfDemoteAlertProps) {
               size="500"
             >
               <Box grow="Yes">
-                <Text size="H4">Self Demotion</Text>
+                <Text size="H4">{t('powerChip.selfDemotion')}</Text>
               </Box>
               <IconButton size="300" onClick={onCancel} radii="300">
                 <Icon src={Icons.Cross} />
@@ -74,14 +75,11 @@ function SelfDemoteAlert({ power, onCancel, onChange }: SelfDemoteAlertProps) {
             </Header>
             <Box style={{ padding: config.space.S400, paddingTop: 0 }} direction="Column" gap="500">
               <Box direction="Column" gap="200">
-                <Text priority="400">
-                  You are about to demote yourself! You will not be able to regain this power
-                  yourself. Are you sure?
-                </Text>
+                <Text priority="400">{t('powerChip.selfDemotionDesc')}</Text>
               </Box>
               <Box direction="Column" gap="200">
                 <Button type="submit" variant="Warning" onClick={() => onChange(power)}>
-                  <Text size="B400">Demote</Text>
+                  <Text size="B400">{t('powerChip.demote')}</Text>
                 </Button>
               </Box>
             </Box>
@@ -98,6 +96,7 @@ type SharedPowerAlertProps = {
   onChange: (power: number) => void;
 };
 function SharedPowerAlert({ power, onCancel, onChange }: SharedPowerAlertProps) {
+  const { t } = useTranslation();
   return (
     <Overlay open backdrop={<OverlayBackdrop />}>
       <OverlayCenter>
@@ -116,7 +115,7 @@ function SharedPowerAlert({ power, onCancel, onChange }: SharedPowerAlertProps) 
               size="500"
             >
               <Box grow="Yes">
-                <Text size="H4">Shared Power</Text>
+                <Text size="H4">{t('powerChip.sharedPower')}</Text>
               </Box>
               <IconButton size="300" onClick={onCancel} radii="300">
                 <Icon src={Icons.Cross} />
@@ -124,14 +123,11 @@ function SharedPowerAlert({ power, onCancel, onChange }: SharedPowerAlertProps) 
             </Header>
             <Box style={{ padding: config.space.S400, paddingTop: 0 }} direction="Column" gap="500">
               <Box direction="Column" gap="200">
-                <Text priority="400">
-                  You are promoting the user to have the same power as yourself! You will not be
-                  able to change their power afterward. Are you sure?
-                </Text>
+                <Text priority="400">{t('powerChip.sharedPowerDesc')}</Text>
               </Box>
               <Box direction="Column" gap="200">
                 <Button type="submit" variant="Warning" onClick={() => onChange(power)}>
-                  <Text size="B400">Promote</Text>
+                  <Text size="B400">{t('powerChip.promote')}</Text>
                 </Button>
               </Box>
             </Box>
@@ -269,7 +265,7 @@ export function PowerChip({ userId }: { userId: string }) {
                           : undefined
                       }
                     >
-                      <Text size="B300">{powerTag.name}</Text>
+                      <Text size="B300">{t(POWER_TAG_KEYS[powerTag.name], powerTag.name)}</Text>
                     </MenuItem>
                   );
                 })}
@@ -298,7 +294,7 @@ export function PowerChip({ userId }: { userId: string }) {
                     close();
                   }}
                 >
-                  <Text size="B300">Manage Powers</Text>
+                  <Text size="B300">{t('powerChip.managePowers')}</Text>
                 </MenuItem>
               </div>
             </Menu>
@@ -313,7 +309,7 @@ export function PowerChip({ userId }: { userId: string }) {
           aria-pressed={!!cords}
         >
           <Text size="B300" truncate>
-            {t(BADGE_LABEL_KEYS[tag.name], tag.name)}
+            {t(POWER_TAG_KEYS[tag.name], tag.name)}
           </Text>
         </Chip>
       </PopOut>

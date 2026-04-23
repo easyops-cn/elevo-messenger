@@ -63,10 +63,16 @@ const DEFAULT_TAGS: PowerLevelTags = {
 };
 
 export const BADGE_LABEL_KEYS: Record<string, string> = {
-  Creator: 'room.badgeCreator',
-  Owner: 'room.badgeOwner',
-  Admin: 'room.badgeAdmin',
-  Moderator: 'room.badgeModerator',
+  Creator: 'room.powerTagCreator',
+  Owner: 'room.powerTagOwner',
+  Admin: 'room.powerTagAdmin',
+  Moderator: 'room.powerTagModerator',
+};
+
+export const POWER_TAG_KEYS:  Record<string, string> = {
+  ...BADGE_LABEL_KEYS,
+  Member: 'room.powerTagMember',
+  Muted: 'room.powerTagMuted',
 };
 
 const generateFallbackTag = (powerLevelTags: PowerLevelTags, power: number): MemberPowerTag => {

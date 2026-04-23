@@ -152,10 +152,12 @@
     "resultCount_other": "{{count}} 个结果",
     "noResultsCount": "无结果",
     "noMembersOfType": "没有 \"{{type}}\" 成员",
-    "badgeCreator": "创建者",
-    "badgeOwner": "群主",
-    "badgeAdmin": "管理员",
-    "badgeModerator": "协管员",
+    "powerTagCreator": "创建者",
+    "powerTagOwner": "群主",
+    "powerTagAdmin": "管理员",
+    "powerTagModerator": "协管员",
+    "powerTagMember": "成员",
+    "powerTagMuted": "已禁言",
     "intro": "这是对话的开始。",
     "createdBy": "创建者",
     "inviteMember": "邀请成员",
@@ -190,6 +192,15 @@
     "endedCall": "{{name}} 结束了通话",
     "sentStateEvent": "{{name}} 发送了 {{eventType}} 状态事件",
     "sentEvent": "{{name}} 发送了 {{eventType}} 事件"
+  },
+  "powerChip": {
+    "managePowers": "管理权限",
+    "selfDemotion": "自我降级",
+    "selfDemotionDesc": "您即将给自己降级！降级后您将无法自行恢复此权限。确定要继续吗？",
+    "demote": "降级",
+    "sharedPower": "权限相同",
+    "sharedPowerDesc": "您即将提升该用户至与您相同的权限等级！提升后您将无法再更改其权限。确定要继续吗？",
+    "promote": "提升"
   },
   "home": {
     "title": "消息",

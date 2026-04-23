@@ -10,7 +10,7 @@ import { useOpenRoomSettings } from '../../state/hooks/roomSettings';
 import { useOpenSpaceSettings } from '../../state/hooks/spaceSettings';
 import { SpaceSettingsPage } from '../../state/spaceSettings';
 import { RoomSettingsPage } from '../../state/roomSettings';
-import { BADGE_LABEL_KEYS } from '../../hooks/usePowerLevelTags';
+import { POWER_TAG_KEYS } from '../../hooks/usePowerLevelTags';
 
 export function CreatorChip() {
   const { t } = useTranslation();
@@ -64,7 +64,7 @@ export function CreatorChip() {
                   close();
                 }}
               >
-                <Text size="B300">Manage Powers</Text>
+                <Text size="B300">{t('powerChip.managePowers')}</Text>
               </MenuItem>
             </div>
           </Menu>
@@ -80,7 +80,7 @@ export function CreatorChip() {
         aria-pressed={!!cords}
       >
         <Text size="B300" truncate>
-          {t(BADGE_LABEL_KEYS.Creator)}
+          {t(POWER_TAG_KEYS.Creator)}
         </Text>
       </Chip>
     </PopOut>

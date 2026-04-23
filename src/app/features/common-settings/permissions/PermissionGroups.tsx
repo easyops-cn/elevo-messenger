@@ -13,7 +13,7 @@ import {
   PermissionLocation,
 } from '../../../hooks/usePowerLevels';
 import { PermissionGroup } from './types';
-import { getPowerLevelTag, getPowers, usePowerLevelTags } from '../../../hooks/usePowerLevelTags';
+import { POWER_TAG_KEYS, getPowerLevelTag, getPowers, usePowerLevelTags } from '../../../hooks/usePowerLevelTags';
 import { useRoom } from '../../../hooks/useRoom';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { StateEvent } from '../../../../types/matrix/room';
@@ -153,7 +153,7 @@ export function PermissionGroups({
                     onClick={handleOpen}
                   >
                     <Text size="B300" truncate>
-                      {tag.name}
+                      {t(POWER_TAG_KEYS[tag.name], tag.name)}
                     </Text>
                   </Chip>
                 )}
@@ -220,7 +220,7 @@ export function PermissionGroups({
                           onClick={handleOpen}
                         >
                           <Text size="B300" truncate>
-                            {tag.name}
+                            {t(POWER_TAG_KEYS[tag.name], tag.name)}
                           </Text>
                           {value < maxPower && <Text size="T200">{t('roomSettings.above')}</Text>}
                         </Chip>
