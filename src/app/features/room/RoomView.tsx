@@ -13,12 +13,9 @@ import { RoomTimeline } from './RoomTimeline';
 import { RoomViewTyping } from './RoomViewTyping';
 import { RoomTombstone } from './RoomTombstone';
 import { RoomInput } from './RoomInput';
-import { RoomViewFollowing, RoomViewFollowingPlaceholder } from './RoomViewFollowing';
 import { Page } from '../../components/page';
 import { useKeyDown } from '../../hooks/useKeyDown';
 import { editableActiveElement } from '../../utils/dom';
-import { settingsAtom } from '../../state/settings';
-import { useSetting } from '../../state/hooks/settings';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoom } from '../../hooks/useRoom';
@@ -58,8 +55,6 @@ export function RoomView({ eventId }: { eventId?: string }) {
   const roomInputRef = useRef<HTMLDivElement>(null);
   const roomViewRef = useRef<HTMLDivElement>(null);
   const timelineScrollToBottomRef = useRef<(() => void) | null>(null);
-
-  const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
 
   const room = useRoom();
   const { roomId } = room;
@@ -105,7 +100,7 @@ export function RoomView({ eventId }: { eventId?: string }) {
         <RoomViewTyping room={room} />
       </Box>
       <Box shrink="No" direction="Column">
-        <div style={{ padding: `0 ${config.space.S400}` }}>
+        <div style={{ padding: `0 ${config.space.S400} ${config.space.S400}` }}>
           {tombstoneEvent ? (
             <RoomTombstone
               roomId={roomId}
@@ -136,7 +131,6 @@ export function RoomView({ eventId }: { eventId?: string }) {
             </>
           )}
         </div>
-        {hideActivity ? <RoomViewFollowingPlaceholder /> : <RoomViewFollowing room={room} />}
       </Box>
     </Page>
   );

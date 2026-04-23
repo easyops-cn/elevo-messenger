@@ -34,10 +34,8 @@ import {
   Badge,
   Box,
   Chip,
-  ContainerColor,
   Icon,
   Icons,
-  Line,
   Scroll,
   Text,
   as,
@@ -132,12 +130,10 @@ const TimelineFloat = as<'div', css.TimelineFloatVariants>(
   )
 );
 
-const TimelineDivider = as<'div', { variant?: ContainerColor | 'Inherit' }>(
-  ({ variant, children, ...props }, ref) => (
+const TimelineDivider = as<'div'>(
+  ({ children, ...props }, ref) => (
     <Box gap="100" justifyContent="Center" alignItems="Center" {...props} ref={ref}>
-      <Line style={{ flexGrow: 1 }} variant={variant} size="300" />
       {children}
-      <Line style={{ flexGrow: 1 }} variant={variant} size="300" />
     </Box>
   )
 );
@@ -1617,7 +1613,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
     const newDividerJSX =
       newDivider && eventJSX && eventSender !== mx.getUserId() ? (
         <MessageBase space={messageSpacing}>
-          <TimelineDivider style={{ color: color.Success.Main }} variant="Inherit">
+          <TimelineDivider style={{ color: color.Success.Main }}>
             <Badge as="span" size="500" variant="Success" fill="Solid" radii="300">
               <Text size="L400">{t('room.newMessages')}</Text>
             </Badge>
@@ -1628,7 +1624,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
     const dayDividerJSX =
       dayDivider && eventJSX ? (
         <MessageBase space={messageSpacing}>
-          <TimelineDivider variant="Surface">
+          <TimelineDivider>
             <Badge as="span" size="500" variant="Secondary" fill="None" radii="300">
               <Text size="L400">
                 {(() => {

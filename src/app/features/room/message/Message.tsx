@@ -75,6 +75,18 @@ import { useRoomPinnedEvents } from '../../../hooks/useRoomPinnedEvents';
 import { StateEvent } from '../../../../types/matrix/room';
 import { Avatar } from '../../../components/avatar';
 import { EllipsisVerticalIcon } from '../../../icons/EllipsisVerticalIcon';
+import { SmilePlusIcon } from '../../../icons/SmilePlusIcon';
+import { ReplyIcon } from '../../../icons/ReplyIcon';
+import { PencilIcon } from '../../../icons/PencilIcon';
+import { MessageSquarePlusIcon } from '../../../icons/MessageSquarePlusIcon';
+import { CheckCheckIcon } from '../../../icons/CheckCheckIcon';
+import { LinkIcon } from '../../../icons/LinkIcon';
+import { PinIcon } from '../../../icons/PinIcon';
+import { Trash2Icon } from '../../../icons/Trash2Icon';
+import { UserIcon } from '../../../icons/UserIcon';
+import { SmileIcon } from '../../../icons/SmileIcon';
+import { CircleAlertIcon } from '../../../icons/CircleAlertIcon';
+import { CodeIcon } from '../../../icons/CodeIcon';
 
 export type ReactionHandler = (keyOrMxc: string, shortcode: string) => void;
 
@@ -165,7 +177,7 @@ export const MessageAllReactionItem = as<
       </Overlay>
       <MenuItem
         size="300"
-        after={<Icon size="100" src={Icons.Smile} />}
+        after={<Icon size="100" src={SmileIcon} />}
         radii="300"
         onClick={() => setOpen(true)}
         {...props}
@@ -216,7 +228,7 @@ export const MessageReadReceiptItem = as<
       </Overlay>
       <MenuItem
         size="300"
-        after={<Icon size="100" src={Icons.CheckTwice} />}
+        after={<Icon size="100" src={CheckCheckIcon} />}
         radii="300"
         onClick={() => setOpen(true)}
         {...props}
@@ -300,7 +312,7 @@ export const MessageSourceCodeItem = as<
       </Overlay>
       <MenuItem
         size="300"
-        after={<Icon size="100" src={Icons.BlockCode} />}
+        after={<Icon size="100" src={CodeIcon} />}
         radii="300"
         onClick={() => setOpen(true)}
         {...props}
@@ -335,7 +347,7 @@ export const MessageCopyLinkItem = as<
   return (
     <MenuItem
       size="300"
-      after={<Icon size="100" src={Icons.Link} />}
+      after={<Icon size="100" src={LinkIcon} />}
       radii="300"
       onClick={handleCopy}
       {...props}
@@ -376,7 +388,7 @@ export const MessagePinItem = as<
   return (
     <MenuItem
       size="300"
-      after={<Icon size="100" src={Icons.Pin} />}
+      after={<Icon size="100" src={PinIcon} />}
       radii="300"
       onClick={handlePin}
       {...props}
@@ -504,7 +516,7 @@ export const MessageDeleteItem = as<
         variant="Critical"
         fill="None"
         size="300"
-        after={<Icon size="100" src={Icons.Delete} />}
+        after={<Icon size="100" src={Trash2Icon} />}
         radii="300"
         onClick={() => setOpen(true)}
         aria-pressed={open}
@@ -638,7 +650,7 @@ export const MessageReportItem = as<
         variant="Critical"
         fill="None"
         size="300"
-        after={<Icon size="100" src={Icons.Warning} />}
+        after={<Icon size="100" src={CircleAlertIcon} />}
         radii="300"
         onClick={() => setOpen(true)}
         aria-pressed={open}
@@ -790,7 +802,7 @@ export const Message = as<'div', MessageProps>(
                 : undefined
             }
             alt={senderDisplayName}
-            renderFallback={() => <Icon size="200" src={Icons.User} filled />}
+            renderFallback={() => <Icon size="200" src={UserIcon} filled />}
           />
         </Avatar>
       </AvatarBase>
@@ -955,7 +967,7 @@ export const Message = as<'div', MessageProps>(
                       radii="300"
                       aria-pressed={!!emojiBoardAnchor}
                     >
-                      <Icon src={Icons.SmilePlus} size="100" />
+                      <Icon src={SmilePlusIcon} size="100" />
                     </IconButton>
                   </PopOut>
                 )}
@@ -966,7 +978,7 @@ export const Message = as<'div', MessageProps>(
                   size="300"
                   radii="300"
                 >
-                  <Icon src={Icons.ReplyArrow} size="100" />
+                  <Icon src={ReplyIcon} size="100" />
                 </IconButton>
                 {!isThreadedMessage && (
                   <IconButton
@@ -976,7 +988,7 @@ export const Message = as<'div', MessageProps>(
                     size="300"
                     radii="300"
                   >
-                    <Icon src={Icons.ThreadPlus} size="100" />
+                    <Icon src={MessageSquarePlusIcon} size="100" />
                   </IconButton>
                 )}
                 {canEditEvent(mx, mEvent) && onEditId && (
@@ -986,7 +998,7 @@ export const Message = as<'div', MessageProps>(
                     size="300"
                     radii="300"
                   >
-                    <Icon src={Icons.Pencil} size="100" />
+                    <Icon src={PencilIcon} size="100" />
                   </IconButton>
                 )}
                 <PopOut
@@ -1018,7 +1030,7 @@ export const Message = as<'div', MessageProps>(
                           {canSendReaction && (
                             <MenuItem
                               size="300"
-                              after={<Icon size="100" src={Icons.SmilePlus} />}
+                              after={<Icon size="100" src={SmilePlusIcon} />}
                               radii="300"
                               onClick={handleAddReactions}
                             >
@@ -1041,7 +1053,7 @@ export const Message = as<'div', MessageProps>(
                           )}
                           <MenuItem
                             size="300"
-                            after={<Icon size="100" src={Icons.ReplyArrow} />}
+                            after={<Icon size="100" src={ReplyIcon} />}
                             radii="300"
                             data-event-id={mEvent.getId()}
                             onClick={(evt: any) => {
@@ -1061,7 +1073,7 @@ export const Message = as<'div', MessageProps>(
                           {!isThreadedMessage && (
                             <MenuItem
                               size="300"
-                              after={<Icon src={Icons.ThreadPlus} size="100" />}
+                              after={<Icon src={MessageSquarePlusIcon} size="100" />}
                               radii="300"
                               data-event-id={mEvent.getId()}
                               onClick={(evt: any) => {
@@ -1082,7 +1094,7 @@ export const Message = as<'div', MessageProps>(
                           {canEditEvent(mx, mEvent) && onEditId && (
                             <MenuItem
                               size="300"
-                              after={<Icon size="100" src={Icons.Pencil} />}
+                              after={<Icon size="100" src={PencilIcon} />}
                               radii="300"
                               data-event-id={mEvent.getId()}
                               onClick={() => {
