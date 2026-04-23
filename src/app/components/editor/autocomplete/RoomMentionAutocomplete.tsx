@@ -1,6 +1,6 @@
 import React, { KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect } from 'react';
 import { Editor } from 'slate';
-import { Avatar, Icon, Icons, MenuItem, Text } from 'folds';
+import { Avatar, Icon, MenuItem, Text } from 'folds';
 import { JoinRule, MatrixClient } from 'matrix-js-sdk';
 import { useAtomValue } from 'jotai';
 
@@ -18,6 +18,7 @@ import { allRoomsAtom } from '../../../state/room-list/roomList';
 import { factoryRoomIdByActivity } from '../../../utils/sort';
 import { RoomAvatar, RoomIcon } from '../../room-avatar';
 import { getViaServers } from '../../../plugins/via-servers';
+import { HashIcon } from '../../../icons/HashIcon';
 
 type MentionAutoCompleteHandler = (roomAliasOrId: string, name: string) => void;
 
@@ -46,7 +47,7 @@ function UnknownRoomMentionItem({
       onClick={handleSelect}
       before={
         <Avatar size="200">
-          <Icon src={Icons.Hash} size="100" />
+          <Icon src={HashIcon} size="100" />
         </Avatar>
       }
     >

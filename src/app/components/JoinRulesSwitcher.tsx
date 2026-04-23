@@ -17,24 +17,24 @@ import { JoinRule } from 'matrix-js-sdk';
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 import { stopPropagation } from '../utils/keyboard';
-import { getRoomIconSrc } from '../utils/room';
+import { getAccessIconSrc } from '../utils/room';
 
 export type ExtraJoinRules = 'knock_restricted';
 export type ExtendedJoinRules = JoinRule | ExtraJoinRules;
 
 type JoinRuleIcons = Record<ExtendedJoinRules, IconSrc>;
 
-export const useJoinRuleIcons = (roomType?: string): JoinRuleIcons =>
+export const useJoinRuleIcons = (): JoinRuleIcons =>
   useMemo(
     () => ({
-      [JoinRule.Invite]: getRoomIconSrc(Icons, roomType, JoinRule.Invite),
-      [JoinRule.Knock]: getRoomIconSrc(Icons, roomType, JoinRule.Knock),
-      knock_restricted: getRoomIconSrc(Icons, roomType, JoinRule.Restricted),
-      [JoinRule.Restricted]: getRoomIconSrc(Icons, roomType, JoinRule.Restricted),
-      [JoinRule.Public]: getRoomIconSrc(Icons, roomType, JoinRule.Public),
-      [JoinRule.Private]: getRoomIconSrc(Icons, roomType, JoinRule.Private),
+      [JoinRule.Invite]: getAccessIconSrc(JoinRule.Invite),
+      [JoinRule.Knock]: getAccessIconSrc(JoinRule.Knock),
+      knock_restricted: getAccessIconSrc(JoinRule.Restricted),
+      [JoinRule.Restricted]: getAccessIconSrc(JoinRule.Restricted),
+      [JoinRule.Public]: getAccessIconSrc(JoinRule.Public),
+      [JoinRule.Private]: getAccessIconSrc(JoinRule.Private),
     }),
-    [roomType]
+    []
   );
 
 type JoinRuleLabels = Record<ExtendedJoinRules, string>;

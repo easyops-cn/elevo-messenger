@@ -76,7 +76,7 @@ export function RoomJoinRules({ permissions }: RoomJoinRulesProps) {
     return r;
   }, [allowKnockRestricted, allowRestricted, allowKnock, space]);
 
-  const icons = useJoinRuleIcons(room.getType());
+  const icons = useJoinRuleIcons();
   const labels = useRoomJoinRuleLabel();
 
   const [submitState, submit] = useAsyncCallback(

@@ -152,8 +152,8 @@ export function AdditionalCreatorInput({
 
   return (
     <SettingTile
-      title={t('create.founders')}
-      description={t('create.foundersDesc')}
+      title={t('create.creators')}
+      description={t('create.creatorsDesc')}
     >
       <Box shrink="No" direction="Column" gap="100">
         <Box gap="200" wrap="Wrap">

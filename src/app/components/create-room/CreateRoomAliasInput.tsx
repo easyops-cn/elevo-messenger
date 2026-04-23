@@ -15,6 +15,7 @@ import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { replaceSpaceWithDash } from '../../utils/common';
 import { AsyncState, AsyncStatus, useAsync } from '../../hooks/useAsyncCallback';
 import { useDebounce } from '../../hooks/useDebounce';
+import { HashIcon } from '../../icons/HashIcon';
 
 export function CreateRoomAliasInput({ disabled }: { disabled?: boolean }) {
   const { t } = useTranslation();
@@ -91,7 +92,7 @@ export function CreateRoomAliasInput({ disabled }: { disabled?: boolean }) {
           aliasAvail.status === AsyncStatus.Loading ? (
             <Spinner size="100" variant="Secondary" />
           ) : (
-            <Icon size="100" src={Icons.Hash} />
+            <Icon size="100" src={HashIcon} />
           )
         }
         after={

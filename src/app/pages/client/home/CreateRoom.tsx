@@ -14,6 +14,7 @@ import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';
 import { CreateRoomForm } from '../../../features/create-room';
 import { useRoomNavigate } from '../../../hooks/useRoomNavigate';
+import { HashIcon } from '../../../icons/HashIcon';
 
 export function HomeCreateRoom() {
   const { t } = useTranslation();
@@ -44,7 +45,7 @@ export function HomeCreateRoom() {
                 <PageHeroSection>
                   <Box direction="Column" gap="700">
                     <PageHero
-                      icon={<Icon size="600" src={Icons.Hash} />}
+                      icon={<Icon size="600" src={HashIcon} />}
                       title={t('create.createRoom')}
                       subTitle={t('create.createRoomDesc')}
                     />

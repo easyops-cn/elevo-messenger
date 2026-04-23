@@ -18,7 +18,7 @@ export function BetaNoticeBadge() {
       }
     >
       {(triggerRef) => (
-        <Badge size="500" tabIndex={0} ref={triggerRef} variant="Primary" fill="Solid">
+        <Badge size="500" tabIndex={0} ref={triggerRef} variant="Secondary" fill="Soft">
           <Text size="L400">{t('common.beta')}</Text>
         </Badge>
       )}

@@ -42,21 +42,22 @@ import {
 } from '../../components/create-room';
 import { RoomType } from '../../../types/matrix/room';
 import { CreateRoomTypeSelector } from '../../components/create-room/CreateRoomTypeSelector';
-import { getRoomIconSrc } from '../../utils/room';
+import { getAccessIconSrc } from '../../utils/room';
+import { Volume2Icon } from '../../icons/Volume2Icon';
+import { HashIcon } from '../../icons/HashIcon';
 
-const getCreateRoomAccessToIcon = (access: CreateRoomAccess, type?: CreateRoomType) => {
-  const isVoiceRoom = type === CreateRoomType.VoiceRoom;
+const getCreateRoomAccessToIcon = (access: CreateRoomAccess) => {
 
   let joinRule: JoinRule = JoinRule.Public;
   if (access === CreateRoomAccess.Restricted) joinRule = JoinRule.Restricted;
   if (access === CreateRoomAccess.Private) joinRule = JoinRule.Knock;
 
-  return getRoomIconSrc(Icons, isVoiceRoom ? RoomType.Call : undefined, joinRule);
+  return getAccessIconSrc(joinRule);
 };
 
 const getCreateRoomTypeToIcon = (type: CreateRoomType) => {
-  if (type === CreateRoomType.VoiceRoom) return Icons.VolumeHigh;
-  return Icons.Hash;
+  if (type === CreateRoomType.VoiceRoom) return Volume2Icon;
+  return HashIcon;
 };
 
 type CreateRoomFormProps = {
@@ -180,14 +181,14 @@ export function CreateRoomForm({
           onSelect={setAccess}
           canRestrict={allowRestricted}
           disabled={disabled}
-          getIcon={(roomAccess) => getCreateRoomAccessToIcon(roomAccess, type)}
+          getIcon={(roomAccess) => getCreateRoomAccessToIcon(roomAccess)}
         />
       </Box>
       <Box shrink="No" direction="Column" gap="100">
         <Text size="L400">{t('create.name')}</Text>
         <Input
           required
-          before={<Icon size="100" src={getCreateRoomAccessToIcon(access, type)} />}
+          before={<Icon size="100" src={getCreateRoomAccessToIcon(access)} />}
           name="nameInput"
           autoFocus
           size="500"

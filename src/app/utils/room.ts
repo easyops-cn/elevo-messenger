@@ -31,6 +31,9 @@ import {
 } from '../../types/matrix/room';
 import { HashIcon } from '../icons/HashIcon';
 import { Volume2Icon } from '../icons/Volume2Icon';
+import { GlobeIcon } from '../icons/GlobeIcon';
+import { LockIcon } from '../icons/LockIcon';
+import { ShieldIcon } from '../icons/ShieldIcon';
 
 export const getStateEvent = (
   room: Room,
@@ -275,6 +278,20 @@ export const getRoomIconSrc = (
 
   return HashIcon;
 };
+
+export const getAccessIconSrc = (joinRule: JoinRule) => {
+  switch (joinRule) {
+    case JoinRule.Public:
+      return GlobeIcon;
+    case JoinRule.Restricted:
+      return ShieldIcon;
+    case JoinRule.Invite:
+    case JoinRule.Knock:
+    case JoinRule.Private:
+      return LockIcon;
+  }
+  return HashIcon;
+}
 
 export const getRoomAvatarUrl = (
   mx: MatrixClient,
