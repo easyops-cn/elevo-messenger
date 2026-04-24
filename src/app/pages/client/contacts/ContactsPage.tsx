@@ -224,7 +224,7 @@ export function ContactsMemberList({ room, members, filterRole }: ContactsMember
   const virtualizer = useVirtualizer({
     count: roleGroupedItems.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 40,
+    estimateSize: () => 48,
     overscan: 10,
   });
 
