@@ -24,6 +24,7 @@ import {
 } from 'folds';
 import { useNavigate } from 'react-router-dom';
 import { Room } from 'matrix-js-sdk';
+import { useAtom } from 'jotai';
 import { useStateEvent } from '../../hooks/useStateEvent';
 import { PageHeader } from '../../components/page';
 import { UseStateProvider } from '../../components/UseStateProvider';
@@ -75,6 +76,8 @@ import { EllipsisVerticalIcon } from '../../icons/EllipsisVerticalIcon';
 import { LayoutGridIcon } from '../../icons/LayoutGridIcon';
 import { PinIcon } from '../../icons/PinIcon';
 import { SearchIcon } from '../../icons/SearchIcon';
+import { UsersIcon } from '../../icons/UsersIcon';
+import { callChatAtom } from '../../state/callEmbed';
 
 type RoomMenuProps = {
   room: Room;
@@ -303,6 +306,8 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
 
   const [peopleDrawer, setPeopleDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
 
+  const [showCallChat, setShowCallChat] = useAtom(callChatAtom);
+
   const handleSearchClick = () => {
     const searchParams: _SearchPathSearchParams = {
       rooms: room.roomId,
@@ -322,8 +327,11 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const openSettings = useOpenRoomSettings();
   const parentSpace = useSpaceOptionally();
   const handleMemberToggle = () => {
+    openSettings(room.roomId, parentSpace?.roomId, RoomSettingsPage.MembersPage);
+  };
+  const handlePanelToggle = () => {
     if (callView) {
-      openSettings(room.roomId, parentSpace?.roomId, RoomSettingsPage.MembersPage);
+      setShowCallChat((prev) => !prev);
       return;
     }
     setPeopleDrawer(!peopleDrawer);
@@ -514,6 +522,22 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
             </TooltipProvider>
           )}
 
+          {callView && <TooltipProvider
+            position="Bottom"
+            offset={4}
+            tooltip={
+              <Tooltip>
+                <Text>{t('common.members')}</Text>
+              </Tooltip>
+            }
+          >
+            {(triggerRef) => (
+              <IconButton size="300" fill="None" ref={triggerRef} onClick={handleMemberToggle}>
+                <Icon size="100" src={UsersIcon} />
+              </IconButton>
+            )}
+          </TooltipProvider>}
+
           <TooltipProvider
             position="Bottom"
             align="End"
@@ -569,7 +593,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                 tooltip={
                   <Tooltip>
                     {callView ? (
-                      <Text>{t('common.members')}</Text>
+                      <Text>{showCallChat ? 'Close Chat' : 'Open Chat'}</Text>
                     ) : (
                       <Text>{peopleDrawer ? t('room.hideMembers') : t('room.showMembers')}</Text>
                     )}
@@ -577,7 +601,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                 }
               >
                 {(triggerRef) => (
-                  <IconButton size="300" fill="None" ref={triggerRef} onClick={handleMemberToggle}>
+                  <IconButton size="300" fill="None" ref={triggerRef} onClick={handlePanelToggle}>
                     <Icon size="100" src={PanelLeftIcon} />
                   </IconButton>
                 )}

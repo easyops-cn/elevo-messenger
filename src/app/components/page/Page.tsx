@@ -91,7 +91,7 @@ export function PageNavContent({
   );
 }
 
-export function PageMain({ children }: { children: ReactNode }) {
+export function PageMain({ children, style }: { children: ReactNode; style?: React.CSSProperties }) {
   const screenSize = useScreenSizeContext();
 
   return (
@@ -99,6 +99,7 @@ export function PageMain({ children }: { children: ReactNode }) {
       grow="Yes"
       direction="Column"
       className={screenSize !== ScreenSize.Mobile ? css.PageMainFloating : undefined}
+      style={style}
     >
       {children}
     </Box>

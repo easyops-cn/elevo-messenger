@@ -529,7 +529,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
       }),
     [mx, room, linkifyOpts, spoilerClickHandler, mentionClickHandler, useAuthentication]
   );
-  const parseMemberEvent = useMemberEventParser();
+  const parseMemberEvent = useMemberEventParser(room);
 
   const [timeline, setTimeline] = useState<Timeline>(() =>
     eventId ? getEmptyTimeline() : getInitialTimeline(room)

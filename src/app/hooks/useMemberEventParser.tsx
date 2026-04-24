@@ -1,9 +1,9 @@
 import { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { MatrixEvent } from 'matrix-js-sdk';
+import { MatrixEvent, type Room } from 'matrix-js-sdk';
 import { IMemberContent, Membership } from '../../types/matrix/room';
 import { getMxIdLocalPart } from '../utils/matrix';
-import { isMembershipChanged } from '../utils/room';
+import { getMemberDisplayName, isMembershipChanged } from '../utils/room';
 
 export type ParsedResult = {
   body: ReactNode;
@@ -11,7 +11,7 @@ export type ParsedResult = {
 
 export type MemberEventParser = (mEvent: MatrixEvent) => ParsedResult;
 
-export const useMemberEventParser = (): MemberEventParser => {
+export const useMemberEventParser = (room: Room): MemberEventParser => {
   const { t } = useTranslation();
 
   const parseMemberEvent: MemberEventParser = (mEvent) => {
@@ -26,11 +26,12 @@ export const useMemberEventParser = (): MemberEventParser => {
         body: t('memberEvent.brokenEvent'),
       };
 
-    const senderName = getMxIdLocalPart(senderId);
-    const userName =
-      typeof content.displayname === 'string'
-        ? content.displayname || getMxIdLocalPart(userId)
-        : getMxIdLocalPart(userId);
+    const senderName = getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId);
+    const userName = getMemberDisplayName(room, userId) ?? (
+      typeof content.displayname === 'string' && content.displayname
+        ? content.displayname
+        : getMxIdLocalPart(userId)
+    );
 
     if (isMembershipChanged(mEvent)) {
       if (content.membership === Membership.Invite) {
@@ -105,8 +106,8 @@ export const useMemberEventParser = (): MemberEventParser => {
 
     if (content.displayname !== prevContent.displayname) {
       const prevUserName =
-        typeof prevContent.displayname === 'string'
-          ? prevContent.displayname || getMxIdLocalPart(userId)
+        typeof prevContent.displayname === 'string' && prevContent.displayname
+          ? prevContent.displayname
           : getMxIdLocalPart(userId);
 
       if (typeof content.displayname === 'string') {
