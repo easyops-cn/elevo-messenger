@@ -7,6 +7,7 @@
 
 :root {
   --tc-link: hsl(213deg 100% 45%);
+  --container-size: 1200px;
 
   /* user mxid colors */
   --mx-uc-1: hsl(208, 100%, 45%);

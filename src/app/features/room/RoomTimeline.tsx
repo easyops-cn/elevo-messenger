@@ -1682,7 +1682,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
         <Box
           direction="Column"
           justifyContent="End"
-          style={{ minHeight: '100%', padding: `${config.space.S600} 0` }}
+          style={{ minHeight: '100%', padding: `${config.space.S600} 0`, maxWidth: 'var(--container-size)', margin: '0 auto' }}
         >
           {!canPaginateBack && rangeAtStart && getItems().length > 0 && (
             <div

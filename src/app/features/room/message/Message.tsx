@@ -55,7 +55,6 @@ import {
 import { getMxIdLocalPart, mxcUrlToHttp } from '../../../utils/matrix';
 import { MessageLayout, MessageSpacing } from '../../../state/settings';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
-import { useScreenSizeContext, ScreenSize } from '../../../hooks/useScreenSize';
 import { useRecentEmoji } from '../../../hooks/useRecentEmoji';
 import * as css from './styles.css';
 import * as layoutCss from '../../../components/message/layout/layout.css';
@@ -728,8 +727,6 @@ export const Message = as<'div', MessageProps>(
     const mx = useMatrixClient();
     const { t } = useTranslation();
     const useAuthentication = useMediaAuthentication();
-    const screenSize = useScreenSizeContext();
-    const isMobile = screenSize === ScreenSize.Mobile;
     const senderId = mEvent.getSender() ?? '';
     const isOwn = senderId === mx.getUserId();
 
@@ -914,7 +911,6 @@ export const Message = as<'div', MessageProps>(
           messageLayout !== MessageLayout.Compact
             ? {
                 width: 'calc(100% - 56px)',
-                maxWidth: isMobile ? undefined : `max(50vw, ${toRem(800)})`,
                 ...(isOwn
                   ? {
                       alignSelf: 'flex-end',
