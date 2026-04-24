@@ -157,7 +157,13 @@ function SetupVerification({ onComplete }: SetupVerificationProps) {
           setupNewCrossSigning: true,
         });
 
-        await crypto.resetKeyBackup();
+        // Check if we have a key backup.
+        // If checkKeyBackupAndEnable returns null, there is no key backup.
+        const hasKeyBackup = (await crypto.checkKeyBackupAndEnable()) !== null;
+        if (!hasKeyBackup) {
+          // Create the key backup
+          await crypto.resetKeyBackup();
+        }
 
         onComplete(recoveryKeyData.encodedPrivateKey);
       },
