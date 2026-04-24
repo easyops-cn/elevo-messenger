@@ -7,7 +7,7 @@ import React, {
   useCallback,
   useState,
 } from 'react';
-import { Box, Scroll, Text } from 'folds';
+import { Box, Scroll, Text, toRem } from 'folds';
 import { Descendant, Editor, createEditor } from 'slate';
 import {
   Slate,
@@ -139,6 +139,9 @@ export const CustomEditor = forwardRef<HTMLDivElement, CustomEditorProps>(
               <Editable
                 data-editable-name={editableName}
                 className={css.EditorTextarea}
+                style={{
+                  minHeight: toRem(74),
+                }}
                 placeholder={placeholder}
                 renderPlaceholder={renderPlaceholder}
                 renderElement={renderElement}
