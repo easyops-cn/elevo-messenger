@@ -39,7 +39,6 @@ import {
   Scroll,
   Text,
   as,
-  color,
   config,
   toRem,
 } from 'folds';
@@ -783,7 +782,7 @@ export function RoomTimeline({ room, eventId, roomInputRef, editor, onRequestScr
       const evtTimeline = getEventTimeline(room, readUptoEventId);
       const absoluteIndex =
         evtTimeline && getEventIdAbsoluteIndex(linkedTimelines, evtTimeline, readUptoEventId);
-      if (absoluteIndex) {
+      if (absoluteIndex !== undefined && absoluteIndex < getTimelinesEventsCount(linkedTimelines) - 1) {
         scrollToItem(absoluteIndex, {
           behavior: 'instant',
           align: 'start',
