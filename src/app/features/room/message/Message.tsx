@@ -86,6 +86,7 @@ import { UserIcon } from '../../../icons/UserIcon';
 import { SmileIcon } from '../../../icons/SmileIcon';
 import { CircleAlertIcon } from '../../../icons/CircleAlertIcon';
 import { CodeIcon } from '../../../icons/CodeIcon';
+import { ScreenSize, useScreenSize } from '../../../hooks/useScreenSize';
 
 export type ReactionHandler = (keyOrMxc: string, shortcode: string) => void;
 
@@ -896,6 +897,10 @@ export const Message = as<'div', MessageProps>(
 
     const isThreadedMessage = mEvent.threadRootId !== undefined;
 
+    const screenSize = useScreenSize();
+    const isMobile = screenSize === ScreenSize.Mobile;
+    const padding = isMobile ? 16 : 56;
+
     return (
       <MessageBase
         className={classNames(css.MessageBase, className, {
@@ -910,14 +915,14 @@ export const Message = as<'div', MessageProps>(
         style={
           messageLayout !== MessageLayout.Compact
             ? {
-                width: 'calc(100% - 56px)',
+                width: `calc(100% - ${toRem(padding)})`,
                 ...(isOwn
                   ? {
                       alignSelf: 'flex-end',
-                      marginLeft: toRem(56),
+                      marginLeft: toRem(padding),
                     }
                   : {
-                      marginRight: toRem(56),
+                      marginRight: toRem(padding),
                     }),
               }
             : undefined
