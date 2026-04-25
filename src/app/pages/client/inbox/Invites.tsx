@@ -374,7 +374,7 @@ function InviteFilters({
         after={
           knownInvites.length > 0 && (
             <Badge variant={isKnown ? 'Success' : 'Secondary'} fill="Solid" radii="Pill">
-              <Text size="L400">{knownInvites.length}</Text>
+              <Text size="T200">{knownInvites.length}</Text>
             </Badge>
           )
         }
@@ -390,7 +390,7 @@ function InviteFilters({
         after={
           unknownInvites.length > 0 && (
             <Badge variant={isUnknown ? 'Warning' : 'Secondary'} fill="Solid" radii="Pill">
-              <Text size="L400">{unknownInvites.length}</Text>
+              <Text size="T200">{unknownInvites.length}</Text>
             </Badge>
           )
         }
@@ -406,7 +406,7 @@ function InviteFilters({
         after={
           spamInvites.length > 0 && (
             <Badge variant={isSpam ? 'Critical' : 'Secondary'} fill="Solid" radii="Pill">
-              <Text size="L400">{spamInvites.length}</Text>
+              <Text size="T200">{spamInvites.length}</Text>
             </Badge>
           )
         }

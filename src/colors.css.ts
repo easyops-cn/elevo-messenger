@@ -34,9 +34,9 @@ export const lightTheme = createTheme(color, {
     OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#E6F4FF',
     ContainerHover: '#BDE1FF',
-    ContainerActive: '#6BB3FF',
-    ContainerLine: '#C5D5F5',
-    OnContainer: '#113E95',
+    ContainerActive: '#BDE1FF',
+    ContainerLine: '#6BB3FF',
+    OnContainer: 'rgba(0, 0, 0, 0.85)',
   },
 
   Secondary: {
@@ -98,103 +98,6 @@ export const lightTheme = createTheme(color, {
   },
 });
 
-export const silverTheme = createTheme(color, {
-  Background: {
-    Container: '#DEDEDE',
-    ContainerHover: '#D3D3D3',
-    ContainerActive: '#C7C7C7',
-    ContainerLine: '#BBBBBB',
-    OnContainer: 'rgba(0, 0, 0, 0.85)',
-  },
-
-  Surface: {
-    Container: '#EAEAEA',
-    ContainerHover: '#DEDEDE',
-    ContainerActive: '#D3D3D3',
-    ContainerLine: '#C7C7C7',
-    OnContainer: 'rgba(0, 0, 0, 0.85)',
-  },
-
-  SurfaceVariant: {
-    Container: '#DEDEDE',
-    ContainerHover: '#D3D3D3',
-    ContainerActive: '#C7C7C7',
-    ContainerLine: '#BBBBBB',
-    OnContainer: 'rgba(0, 0, 0, 0.85)',
-  },
-
-  Primary: {
-    Main: '#007AFF',
-    MainHover: '#007AFF',
-    MainActive: '#007AFF',
-    MainLine: '#007AFF',
-    OnMain: 'rgba(255, 255, 255, 0.85)',
-    Container: '#E6F4FF',
-    ContainerHover: '#BDE1FF',
-    ContainerActive: '#6BB3FF',
-    ContainerLine: '#A0B5DC',
-    OnContainer: '#0D3076',
-  },
-
-  Secondary: {
-    Main: '#000000',
-    MainHover: '#171717',
-    MainActive: '#232323',
-    MainLine: '#2F2F2F',
-    OnMain: '#EAEAEA',
-    Container: '#C7C7C7',
-    ContainerHover: '#BBBBBB',
-    ContainerActive: '#AFAFAF',
-    ContainerLine: '#A4A4A4',
-    OnContainer: '#0C0C0C',
-  },
-
-  Success: {
-    Main: '#017343',
-    MainHover: '#01683C',
-    MainActive: '#016239',
-    MainLine: '#015C36',
-    OnMain: 'rgba(255, 255, 255, 0.85)',
-    Container: '#BFDCD0',
-    ContainerHover: '#B3D5C7',
-    ContainerActive: '#A6CEBD',
-    ContainerLine: '#99C7B4',
-    OnContainer: '#01512F',
-  },
-
-  Warning: {
-    Main: '#864300',
-    MainHover: '#793C00',
-    MainActive: '#723900',
-    MainLine: '#6B3600',
-    OnMain: 'rgba(255, 255, 255, 0.85)',
-    Container: '#E1D0BF',
-    ContainerHover: '#DBC7B2',
-    ContainerActive: '#D5BDA6',
-    ContainerLine: '#CFB499',
-    OnContainer: '#5E2F00',
-  },
-
-  Critical: {
-    Main: '#9D0F0F',
-    MainHover: '#8D0E0E',
-    MainActive: '#850D0D',
-    MainLine: '#7E0C0C',
-    OnMain: 'rgba(255, 255, 255, 0.85)',
-    Container: '#E7C3C3',
-    ContainerHover: '#E2B7B7',
-    ContainerActive: '#DDABAB',
-    ContainerLine: '#D89F9F',
-    OnContainer: '#6E0B0B',
-  },
-
-  Other: {
-    FocusRing: 'rgba(0 0 0 / 50%)',
-    Shadow: 'rgba(0 0 0 / 20%)',
-    Overlay: 'rgba(0 0 0 / 50%)',
-  },
-});
-
 const darkThemeData = {
   Background: {
     Container: '#323232',
@@ -228,9 +131,9 @@ const darkThemeData = {
     OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#162437',
     ContainerHover: '#142F4F',
-    ContainerActive: '#134B85',
-    ContainerLine: '#575086',
-    OnContainer: '#E3E1F7',
+    ContainerActive: '#142F4F',
+    ContainerLine: '#134B85',
+    OnContainer: 'rgba(255, 255, 255, 0.85)',
   },
 
   Secondary: {
@@ -293,43 +196,3 @@ const darkThemeData = {
 };
 
 export const darkTheme = createTheme(color, darkThemeData);
-
-export const butterTheme = createTheme(color, {
-  ...darkThemeData,
-  Background: {
-    Container: '#1A1916',
-    ContainerHover: '#262621',
-    ContainerActive: '#33322C',
-    ContainerLine: '#403F38',
-    OnContainer: 'rgba(255, 255, 255, 0.85)',
-  },
-
-  Surface: {
-    Container: '#262621',
-    ContainerHover: '#33322C',
-    ContainerActive: '#403F38',
-    ContainerLine: '#4D4B43',
-    OnContainer: 'rgba(255, 255, 255, 0.85)',
-  },
-
-  SurfaceVariant: {
-    Container: '#33322C',
-    ContainerHover: '#403F38',
-    ContainerActive: '#4D4B43',
-    ContainerLine: '#59584E',
-    OnContainer: 'rgba(255, 255, 255, 0.85)',
-  },
-
-  Secondary: {
-    Main: '#FFFBDE',
-    MainHover: '#E5E2C8',
-    MainActive: '#D9D5BD',
-    MainLine: '#CCC9B2',
-    OnMain: '#1A1916',
-    Container: '#162437',
-    ContainerHover: '#142F4F',
-    ContainerActive: '#134B85',
-    ContainerLine: '#666459',
-    OnContainer: '#F2EED3',
-  },
-});
