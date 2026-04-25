@@ -406,12 +406,10 @@
     "about": "关于",
     "appearance": {
       "title": "外观",
-      "systemTheme": "跟随系统主题",
-      "systemThemeDesc": "根据系统偏好在浅色和深色主题之间切换。",
       "theme": "主题",
-      "themeDesc": "未启用系统主题时使用的主题。",
-      "lightTheme": "浅色主题：",
-      "darkTheme": "深色主题：",
+      "themeModeSystem": "跟随系统",
+      "themeModeLight": "浅色",
+      "themeModeDark": "深色",
       "monochromeMode": "单色模式",
       "twitterEmoji": "Twitter 表情",
       "pageZoom": "页面缩放"

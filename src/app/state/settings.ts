@@ -12,6 +12,7 @@ export type DateFormat =
   | 'YYYY-MM-DD'
   | '';
 export type MessageSpacing = '0' | '100' | '200' | '300' | '400' | '500';
+export type ThemeMode = 'system' | 'light' | 'dark';
 export enum MessageLayout {
   Modern = 0,
   Compact = 1,
@@ -19,10 +20,7 @@ export enum MessageLayout {
 }
 
 export interface Settings {
-  themeId?: string;
-  useSystemTheme: boolean;
-  lightThemeId?: string;
-  darkThemeId?: string;
+  themeMode: ThemeMode;
   monochromeMode?: boolean;
   isMarkdown: boolean;
   editorToolbar: boolean;
@@ -55,10 +53,7 @@ export interface Settings {
 }
 
 const defaultSettings: Settings = {
-  themeId: undefined,
-  useSystemTheme: true,
-  lightThemeId: undefined,
-  darkThemeId: undefined,
+  themeMode: 'system',
   monochromeMode: false,
   isMarkdown: true,
   editorToolbar: false,
@@ -88,13 +83,76 @@ const defaultSettings: Settings = {
   autoUpdateCheck: true,
 };
 
+type LegacySettings = Partial<Settings> & {
+  themeId?: string;
+  useSystemTheme?: boolean;
+  lightThemeId?: string;
+  darkThemeId?: string;
+};
+
+const THEME_IDS = {
+  light: new Set<string>(['light-theme', 'silver-theme']),
+  dark: new Set<string>(['dark-theme', 'butter-theme']),
+};
+
+const isThemeMode = (value: unknown): value is ThemeMode =>
+  value === 'system' || value === 'light' || value === 'dark';
+
+const getMigratedThemeMode = (legacy: LegacySettings): ThemeMode => {
+  if (isThemeMode(legacy.themeMode)) return legacy.themeMode;
+
+  if (legacy.useSystemTheme !== false) {
+    return 'system';
+  }
+
+  if (THEME_IDS.dark.has(legacy.themeId ?? '')) {
+    return 'dark';
+  }
+
+  if (THEME_IDS.light.has(legacy.themeId ?? '')) {
+    return 'light';
+  }
+
+  return 'system';
+};
+
+const migrateSettings = (raw: LegacySettings): { settings: Settings; migrated: boolean } => {
+  const rest: Partial<Settings> & Record<string, unknown> = { ...raw };
+  delete rest.themeId;
+  delete rest.useSystemTheme;
+  delete rest.lightThemeId;
+  delete rest.darkThemeId;
+
+  const themeMode = getMigratedThemeMode(raw);
+  const migrated = !isThemeMode(raw.themeMode);
+
+  return {
+    settings: {
+      ...defaultSettings,
+      ...rest,
+      themeMode,
+    },
+    migrated,
+  };
+};
+
 export const getSettings = () => {
   const settings = localStorage.getItem(STORAGE_KEY);
   if (settings === null) return defaultSettings;
-  return {
-    ...defaultSettings,
-    ...(JSON.parse(settings) as Settings),
-  };
+
+  try {
+    const parsed = JSON.parse(settings) as LegacySettings;
+    const { settings: migratedSettings, migrated } = migrateSettings(parsed);
+
+    if (migrated) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(migratedSettings));
+      setTauriSettings(migratedSettings);
+    }
+
+    return migratedSettings;
+  } catch {
+    return defaultSettings;
+  }
 };
 
 const setSettings = (settings: Settings) => {

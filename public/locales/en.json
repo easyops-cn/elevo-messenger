@@ -406,12 +406,10 @@
     "about": "About",
     "appearance": {
       "title": "Appearance",
-      "systemTheme": "System Theme",
-      "systemThemeDesc": "Choose between light and dark theme based on system preference.",
       "theme": "Theme",
-      "themeDesc": "Theme to use when system theme is not enabled.",
-      "lightTheme": "Light Theme:",
-      "darkTheme": "Dark Theme:",
+      "themeModeSystem": "System",
+      "themeModeLight": "Light",
+      "themeModeDark": "Dark",
       "monochromeMode": "Monochrome Mode",
       "twitterEmoji": "Twitter Emoji",
       "pageZoom": "Page Zoom"
