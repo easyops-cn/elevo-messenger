@@ -37,7 +37,6 @@ import {
   MessageLayout,
   MessageSpacing,
   settingsAtom,
-  ThemeMode,
 } from '../../../state/settings';
 import { SettingTile } from '../../../components/setting-tile';
 import { KeySymbol } from '../../../utils/key-symbol';
@@ -48,31 +47,81 @@ import { useMessageSpacingItems } from '../../../hooks/useMessageSpacing';
 import { useDateFormatItems } from '../../../hooks/useDateFormat';
 import { SequenceCardStyle } from '../styles.css';
 import { isDesktopTauri } from '../../../plugins/useTauriOpener';
-import { RadioGroup, RadioGroupOption } from '../../../components/radio-group';
 
 function ThemeModeSelector() {
   const { t } = useTranslation();
   const [themeMode, setThemeMode] = useSetting(settingsAtom, 'themeMode');
+  const [menuCords, setMenuCords] = useState<RectCords>();
 
-  const options: readonly RadioGroupOption[] = [
+  const themeModeItems = [
     { value: 'system', label: t('settings.appearance.themeModeSystem') },
     { value: 'light', label: t('settings.appearance.themeModeLight') },
     { value: 'dark', label: t('settings.appearance.themeModeDark') },
-  ];
+  ] as const;
 
-  const handleThemeModeChange = (value: string) => {
-    if (value === 'system' || value === 'light' || value === 'dark') {
-      setThemeMode(value as ThemeMode);
-    }
+  const handleMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
+    setMenuCords(evt.currentTarget.getBoundingClientRect());
   };
 
+  const handleSelect = (value: (typeof themeModeItems)[number]['value']) => {
+    setThemeMode(value);
+    setMenuCords(undefined);
+  };
+
+  const currentThemeMode =
+    themeModeItems.find((item) => item.value === themeMode) ?? themeModeItems[0];
+
   return (
-    <RadioGroup
-      name={t('settings.appearance.theme')}
-      value={themeMode}
-      options={options}
-      onChange={handleThemeModeChange}
-    />
+    <>
+      <Button
+        size="300"
+        variant="Primary"
+        outlined
+        fill="Soft"
+        radii="300"
+        after={<Icon size="300" src={Icons.ChevronBottom} />}
+        onClick={handleMenu}
+      >
+        <Text size="T300">{currentThemeMode.label}</Text>
+      </Button>
+      <PopOut
+        anchor={menuCords}
+        offset={5}
+        position="Bottom"
+        align="End"
+        content={
+          <FocusTrap
+            focusTrapOptions={{
+              initialFocus: false,
+              onDeactivate: () => setMenuCords(undefined),
+              clickOutsideDeactivates: true,
+              isKeyForward: (evt: KeyboardEvent) =>
+                evt.key === 'ArrowDown' || evt.key === 'ArrowRight',
+              isKeyBackward: (evt: KeyboardEvent) =>
+                evt.key === 'ArrowUp' || evt.key === 'ArrowLeft',
+              escapeDeactivates: stopPropagation,
+            }}
+          >
+            <Menu>
+              <Box direction="Column" gap="100" style={{ padding: config.space.S100 }}>
+                {themeModeItems.map((item) => (
+                  <MenuItem
+                    key={item.value}
+                    size="300"
+                    radii="300"
+                    aria-pressed={item.value === themeMode}
+                    variant={item.value === themeMode ? 'Primary' : 'Surface'}
+                    onClick={() => handleSelect(item.value)}
+                  >
+                    <Text size="T300">{item.label}</Text>
+                  </MenuItem>
+                ))}
+              </Box>
+            </Menu>
+          </FocusTrap>
+        }
+      />
+    </>
   );
 }
 
