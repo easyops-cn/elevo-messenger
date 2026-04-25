@@ -542,7 +542,6 @@
       "blockMessages": "屏蔽消息",
       "blockMessagesMoved": "此选项已移至「账户 > 屏蔽用户」部分。",
       "specialMessages": "特殊消息",
-      "badge": "徽章：",
       "mentionUserId": "提及用户 ID（\"{{userId}}\"）",
       "containsDisplayname": "包含显示名（\"{{displayname}}\"）",
       "containsUsername": "包含用户名（\"{{username}}\"）",
