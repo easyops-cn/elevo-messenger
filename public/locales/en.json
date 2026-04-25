@@ -136,6 +136,7 @@
     "workspaces": "Workspaces",
     "toggleChat": "Toggle Chat",
     "live": "Live",
+    "typing": "Typing...",
     "sendMessage": "Send a message...",
     "dropFiles": "Drop Files in \"{{roomName}}\"",
     "dropFilesHint": "Drag and drop files here or click for selection dialog",

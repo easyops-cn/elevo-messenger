@@ -136,6 +136,7 @@
     "workspaces": "工作空间",
     "toggleChat": "切换聊天",
     "live": "直播中",
+    "typing": "正在输入...",
     "sendMessage": "发送消息...",
     "dropFiles": "将文件拖放到 \"{{roomName}}\"",
     "dropFilesHint": "将文件拖放到此处或点击选择文件",

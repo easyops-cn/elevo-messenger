@@ -21,7 +21,7 @@ import {
 import FocusTrap from 'focus-trap-react';
 import { useAtom, useAtomValue } from 'jotai';
 import { NavItem, NavItemContent, NavItemOptions, NavLink } from '../../components/nav';
-import { UnreadBadge, UnreadBadgeCenter } from '../../components/unread-badge';
+import { UnreadBadge } from '../../components/unread-badge';
 import { RoomAvatar, RoomIcon } from '../../components/room-avatar';
 import { getDirectRoomAvatarUrl, getRoomAvatarUrl, getStateEvent, getLatestMessageText } from '../../utils/room';
 import { nameInitials } from '../../utils/common';
@@ -34,7 +34,6 @@ import { markAsRead } from '../../utils/notifications';
 import { UseStateProvider } from '../../components/UseStateProvider';
 import { LeaveRoomPrompt } from '../../components/leave-room-prompt';
 import { useRoomTypingMember } from '../../hooks/useRoomTypingMembers';
-import { TypingIndicator } from '../../components/typing-indicator';
 import { stopPropagation } from '../../utils/keyboard';
 import { getMatrixToRoom } from '../../plugins/matrix-to';
 import { getCanonicalAliasOrRoomId, isRoomAlias } from '../../utils/matrix';
@@ -332,53 +331,57 @@ export function RoomNavItem({
       <NavLink to={linkPath} onClick={room.isCallRoom() ? handleStartCall : undefined}>
         <NavItemContent>
           <Box as="span" grow="Yes" alignItems="Center" gap="200" style={{ gap: 6 }}>
-            <Avatar size="300" radii="Pill">
-              {showAvatar ? (
-                <RoomAvatar
-                  roomId={room.roomId}
-                  src={
-                    direct
-                      ? getDirectRoomAvatarUrl(mx, room, 96, useAuthentication)
-                      : getRoomAvatarUrl(mx, room, 96, useAuthentication)
-                  }
-                  alt={roomName}
-                  renderFallback={() => (
-                    <Text as="span" size="T300">
-                      {nameInitials(roomName)}
-                    </Text>
-                  )}
-                />
-              ) : (
-                <RoomIcon
+            <Box as="span" shrink="No" style={{ position: 'relative' }}>
+              <Avatar size="300" radii="Pill">
+                {showAvatar ? (
+                  <RoomAvatar
+                    roomId={room.roomId}
+                    src={
+                      direct
+                        ? getDirectRoomAvatarUrl(mx, room, 96, useAuthentication)
+                        : getRoomAvatarUrl(mx, room, 96, useAuthentication)
+                    }
+                    alt={roomName}
+                    renderFallback={() => (
+                      <Text as="span" size="T300">
+                        {nameInitials(roomName)}
+                      </Text>
+                    )}
+                  />
+                ) : (
+                  <RoomIcon
+                    style={{
+                      color: color.Primary.Main,
+                    }}
+                    filled={selected}
+                    size="100"
+                    joinRule={room.getJoinRule()}
+                    roomType={room.getType()}
+                  />
+                )}
+              </Avatar>
+              {unread && (
+                <Box
+                  as="span"
                   style={{
-                    color: color.Primary.Main,
+                    position: 'absolute',
+                    top: toRem(-4),
+                    right: toRem(-4),
                   }}
-                  filled={selected}
-                  size="100"
-                  joinRule={room.getJoinRule()}
-                  roomType={room.getType()}
-                />
+                >
+                  <UnreadBadge highlight={unread.highlight > 0} count={unread.total} />
+                </Box>
               )}
-            </Avatar>
+            </Box>
             <Box as="span" grow="Yes" direction="Column" gap="0" justifyContent="Center" style={{ gap: 2}}>
               <Text as="span" size="Inherit" truncate style={{ lineHeight: toRem(17)}}>
                 {roomName}
               </Text>
               <Text as="span" size="T200" truncate style={{ color: elevoColor.Text.Muted, height: toRem(14), lineHeight: toRem(14) }}>
-                {latestMessageText}
+                {typingMember.length > 0 && !selected ? t('room.typing') : latestMessageText}
               </Text>
             </Box>
-            {!optionsVisible && !unread && !selected && typingMember.length > 0 && (
-              <Badge size="300" variant="Secondary" fill="Soft" radii="Pill" outlined>
-                <TypingIndicator size="300" disableAnimation />
-              </Badge>
-            )}
-            {!optionsVisible && unread && (
-              <UnreadBadgeCenter>
-                <UnreadBadge highlight={unread.highlight > 0} count={unread.total} />
-              </UnreadBadgeCenter>
-            )}
-            {!optionsVisible && notificationMode !== RoomNotificationMode.Unset && (
+            {notificationMode === RoomNotificationMode.Mute && (
               <Icon
                 size="50"
                 src={getRoomNotificationModeIcon(notificationMode)}

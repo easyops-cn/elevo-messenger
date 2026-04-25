@@ -273,11 +273,11 @@ const darkThemeData = {
   },
 
   Critical: {
-    Main: '#E69D9D',
-    MainHover: '#E28D8D',
-    MainActive: '#E08585',
-    MainLine: '#DE7D7D',
-    OnMain: '#401C1C',
+    Main: '#DD1A6C',
+    MainHover: '#DD1A6C',
+    MainActive: '#DD1A6C',
+    MainLine: '#DD1A6C',
+    OnMain: 'rgba(255, 255, 255, 0.85)',
     Container: '#602929',
     ContainerHover: '#6B2E2E',
     ContainerActive: '#763333',
