@@ -51,7 +51,15 @@ const shouldFocusMessageField = (evt: KeyboardEvent): boolean => {
   return true;
 };
 
-export function RoomView({ eventId }: { eventId?: string }) {
+export function RoomView({
+  eventId,
+  threadRootId,
+  showRoomIntro = true,
+}: {
+  eventId?: string;
+  threadRootId?: string;
+  showRoomIntro?: boolean;
+}) {
   const roomInputRef = useRef<HTMLDivElement>(null);
   const roomViewRef = useRef<HTMLDivElement>(null);
   const timelineScrollToBottomRef = useRef<(() => void) | null>(null);
@@ -93,6 +101,8 @@ export function RoomView({ eventId }: { eventId?: string }) {
           key={roomId}
           room={room}
           eventId={eventId}
+          threadRootId={threadRootId}
+          showRoomIntro={showRoomIntro}
           roomInputRef={roomInputRef}
           editor={editor}
           onRequestScrollToBottom={timelineScrollToBottomRef}
@@ -114,6 +124,7 @@ export function RoomView({ eventId }: { eventId?: string }) {
                   room={room}
                   editor={editor}
                   roomId={roomId}
+                  threadRootId={threadRootId}
                   fileDropContainerRef={roomViewRef}
                   ref={roomInputRef}
                   scrollToBottomRef={timelineScrollToBottomRef}

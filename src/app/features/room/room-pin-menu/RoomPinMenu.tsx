@@ -202,7 +202,6 @@ function PinnedMessage({
         <Reply
           room={room}
           replyEventId={pinnedEvent.replyEventId}
-          threadRootId={pinnedEvent.threadRootId}
           onClick={handleOpenClick}
         />
       )}

@@ -148,10 +148,11 @@ interface RoomInputProps {
   fileDropContainerRef: RefObject<HTMLElement>;
   roomId: string;
   room: Room;
+  threadRootId?: string;
   scrollToBottomRef?: React.MutableRefObject<(() => void) | null>;
 }
 export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
-  ({ editor, fileDropContainerRef, roomId, room, scrollToBottomRef }, ref) => {
+  ({ editor, fileDropContainerRef, roomId, room, threadRootId, scrollToBottomRef }, ref) => {
     const { t } = useTranslation();
     const mx = useMatrixClient();
     const useAuthentication = useMediaAuthentication();
@@ -376,6 +377,22 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     };
 
     const handleSendUpload = async (uploads: UploadSuccess[]) => {
+      const applyThreadRelation = (content: IContent) => {
+        if (!threadRootId) return content;
+
+        return {
+          ...content,
+          'm.relates_to': {
+            ...(content['m.relates_to'] ?? {}),
+            event_id: threadRootId,
+            rel_type: RelationType.Thread,
+            "m.in_reply_to": {
+              event_id: threadRootId,
+            },
+          },
+        };
+      };
+
       const contentsPromises = uploads.map(async (upload) => {
         const fileItem = selectedFiles.find((f) => f.file === upload.file);
         if (!fileItem) throw new Error('Broken upload');
@@ -393,7 +410,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       });
       handleCancelUpload(uploads);
       const contents = fulfilledPromiseSettledResult(await Promise.allSettled(contentsPromises));
-      contents.forEach((content) => mx.sendMessage(roomId, content as any));
+      contents.forEach((content) => mx.sendMessage(roomId, applyThreadRelation(content) as any));
     };
 
     const submit = useCallback(() => {
@@ -451,6 +468,18 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         body,
       };
 
+      const applyThreadRelation = () => {
+        if (!threadRootId) return;
+        content['m.relates_to'] = {
+          ...(content['m.relates_to'] ?? {}),
+          event_id: threadRootId,
+          rel_type: RelationType.Thread,
+          "m.in_reply_to": {
+            event_id: threadRootId,
+          },
+        };
+      };
+
       if (fileRef) {
         content['vip.elevo.file_reference'] = fileRef;
       }
@@ -480,9 +509,12 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         if (replyDraft.relation?.rel_type === RelationType.Thread) {
           content['m.relates_to'].event_id = replyDraft.relation.event_id;
           content['m.relates_to'].rel_type = RelationType.Thread;
-          content['m.relates_to'].is_falling_back = false;
+          content['m.relates_to'].is_falling_back = true;
         }
       }
+
+      applyThreadRelation();
+
       mx.sendMessage(roomId, content as any);
       resetEditor(editor);
       resetEditorHistory(editor);
@@ -491,6 +523,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     }, [
       mx,
       roomId,
+      threadRootId,
       editor,
       replyDraft,
       sendTypingStatus,

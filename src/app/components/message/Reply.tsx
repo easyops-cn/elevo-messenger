@@ -1,5 +1,5 @@
 import { Box, Icon, Icons, Line, Text, as, color, toRem } from 'folds';
-import { EventTimelineSet, Room } from 'matrix-js-sdk';
+import { EventTimelineSet, Room, THREAD_RELATION_TYPE } from 'matrix-js-sdk';
 import React, { MouseEventHandler, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
@@ -57,7 +57,6 @@ type ReplyProps = {
   room: Room;
   timelineSet?: EventTimelineSet | undefined;
   replyEventId: string;
-  threadRootId?: string | undefined;
   onClick?: MouseEventHandler | undefined;
 };
 
@@ -67,7 +66,6 @@ export const Reply = as<'div', ReplyProps>(
       room,
       timelineSet,
       replyEventId,
-      threadRootId,
       onClick,
       ...props
     },
@@ -79,6 +77,22 @@ export const Reply = as<'div', ReplyProps>(
       [timelineSet, replyEventId]
     );
     const replyEvent = useRoomEvent(room, replyEventId, getFromLocalTimeline);
+
+    if (replyEvent) {
+      if (replyEvent.isRedacted()) {
+        return null;
+      }
+
+      const inReplyTo = replyEvent.getWireContent()?.["m.relates_to"]?.["m.in_reply_to"];
+      if (!inReplyTo) {
+        return null;
+      }
+
+      const relation = replyEvent.getRelation();
+      if (relation?.rel_type === THREAD_RELATION_TYPE.name && relation?.is_falling_back) {
+        return null;
+      }
+    }
 
     const { body } = replyEvent?.getContent() ?? {};
     const sender = replyEvent?.getSender();
@@ -95,9 +109,6 @@ export const Reply = as<'div', ReplyProps>(
     return (
       <Box direction="Row" gap="200" alignItems="Center" {...props} ref={ref}>
         <Line size="500" variant="Primary" direction="Vertical" style={{ height: toRem(14) }} />
-        {threadRootId && (
-          <ThreadIndicator as="button" data-event-id={threadRootId} onClick={onClick} />
-        )}
         <ReplyLayout
           as="button"
           username={sender ? (getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender)) : undefined}

@@ -214,8 +214,6 @@ export function SearchResultGroup({
             event.content['m.new_content'] ?? event.content) as GetContentCallback;
 
           const replyEventId = relation?.['m.in_reply_to']?.event_id;
-          const threadRootId =
-            relation?.rel_type === RelationType.Thread ? relation.event_id : undefined;
 
           return (
             <SequenceCard
@@ -279,7 +277,6 @@ export function SearchResultGroup({
                   <Reply
                     room={room}
                     replyEventId={replyEventId}
-                    threadRootId={threadRootId}
                     onClick={handleOpenClick}
                   />
                 )}
