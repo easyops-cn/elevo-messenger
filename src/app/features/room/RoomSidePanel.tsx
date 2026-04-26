@@ -5,11 +5,9 @@ import React, {
   useRef,
 } from 'react';
 import {
-  Avatar,
   Badge,
   Box,
   Chip,
-  Header,
   Icon,
   IconButton,
   Icons,
@@ -19,8 +17,6 @@ import {
   Scroll,
   Spinner,
   Text,
-  Tooltip,
-  TooltipProvider,
   config,
 } from 'folds';
 import { MatrixClient, Room, RoomMember } from 'matrix-js-sdk';
@@ -40,9 +36,8 @@ import {
 import { TypingIndicator } from '../../components/typing-indicator';
 import { getLatestMessageText, getMemberDisplayName, getMemberSearchStr } from '../../utils/room';
 import { getMxIdLocalPart } from '../../utils/matrix';
-import { useSetSetting, useSetting } from '../../state/hooks/settings';
+import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
-import { millify } from '../../plugins/millify';
 import { ScrollTopContainer } from '../../components/scroll-top-container';
 import { UserAvatar } from '../../components/user-avatar';
 import { useRoomTypingMember } from '../../hooks/useRoomTypingMembers';
@@ -61,53 +56,7 @@ import { BADGE_LABEL_KEYS } from '../../hooks/usePowerLevelTags';
 import { MessageSquareTextIcon } from '../../icons/MessageSquareTextIcon';
 import { threadChatAtom } from '../../state/threadChat';
 import { useRoomThreads } from '../../hooks/useRoomThreads';
-
-type MemberDrawerHeaderProps = {
-  room: Room;
-};
-function MemberDrawerHeader({ room }: MemberDrawerHeaderProps) {
-  const { t } = useTranslation();
-  const setPeopleDrawer = useSetSetting(settingsAtom, 'isPeopleDrawer');
-
-  return (
-    <Header className={css.RoomSidePanelHeader} variant="Background" size="600">
-      <Box grow="Yes" alignItems="Center" gap="200">
-        <Box grow="Yes" alignItems="Center" gap="200">
-          <Text
-            title={t('room.membersCount', { count: room.getJoinedMemberCount() })}
-            size="H5"
-            truncate
-          >
-            {t('room.membersCount', { count: millify(room.getJoinedMemberCount()) })}
-          </Text>
-        </Box>
-        <Box shrink="No" alignItems="Center">
-          <TooltipProvider
-            position="Bottom"
-            align="End"
-            offset={4}
-            tooltip={
-              <Tooltip>
-                <Text>{t('common.close')}</Text>
-              </Tooltip>
-            }
-          >
-            {(triggerRef) => (
-              <IconButton
-                size="300"
-                ref={triggerRef}
-                variant="Background"
-                onClick={() => setPeopleDrawer(false)}
-              >
-                <Icon src={Icons.Cross} />
-              </IconButton>
-            )}
-          </TooltipProvider>
-        </Box>
-      </Box>
-    </Header>
-  );
-}
+import { Avatar } from '../../components/avatar';
 
 type MemberItemProps = {
   mx: MatrixClient;
@@ -152,6 +101,7 @@ function MemberItem({
       aria-pressed={pressed}
       data-user-id={member.userId}
       variant="Background"
+      size="300"
       radii="400"
       onClick={onClick}
       before={
@@ -185,7 +135,7 @@ function MemberItem({
       }
     >
       <Box grow="Yes">
-        <Text size="T400" truncate>
+        <Text size="T300" truncate>
           {name}
         </Text>
       </Box>
@@ -228,7 +178,6 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
   const [sortFilterIndex, setSortFilterIndex] = useSetting(settingsAtom, 'memberSortFilterIndex');
   const memberSort = useMemberSort(sortFilterIndex, sortFilterMenu);
   const setThreadChat = useSetAtom(threadChatAtom);
-  const [isDrawer, setPeopleDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
 
   const typingMembers = useRoomTypingMember(room.roomId);
   const isSpaceRoom = room.isSpaceRoom();
@@ -253,10 +202,11 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
 
   const processMembers = result ? result.items : filteredMembers;
 
+  const GAP = 4;
   const virtualizer = useVirtualizer({
     count: processMembers.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 40,
+    estimateSize: () => 32 + GAP, // 32 + 2
     overscan: 10,
   });
 
@@ -273,11 +223,8 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
       if (!rootId) return;
 
       setThreadChat({ open: true, threadRootId: rootId });
-      if (isDrawer) {
-        setPeopleDrawer(false);
-      }
     },
-    [setThreadChat, isDrawer, setPeopleDrawer]
+    [setThreadChat]
   );
 
   const sortedThreads = useMemo(() => {
@@ -296,12 +243,15 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
       shrink="No"
       direction="Column"
     >
-      <MemberDrawerHeader room={room} />
       <Box className={css.MemberDrawerContentBase} grow="Yes">
         <Scroll ref={scrollRef} variant="Background" size="300" visibility="Hover" hideTrack>
-          <Box className={css.MemberDrawerContent} direction="Column" gap="200">
-            <Box ref={scrollTopAnchorRef} direction="Column" gap="200">
-              <Box alignItems="Center" justifyContent="End" gap="200">
+          <Box className={css.MemberDrawerContent} direction="Column" gap="600">
+            <Box direction="Column" gap="100">
+              <Box className={css.MembersGroupLabelWithFilter} ref={scrollTopAnchorRef} alignItems="Center" justifyContent="SpaceBetween" gap="200">
+                <Text size="L400" priority="300">
+                  {`${t('common.members')} (${processMembers.length})`}
+                </Text>
+
                 <UseStateProvider initial={undefined}>
                   {(anchor: RectCords | undefined, setAnchor) => (
                     <PopOut
@@ -335,28 +285,26 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
                   )}
                 </UseStateProvider>
               </Box>
-            </Box>
 
-            <ScrollTopContainer scrollRef={scrollRef} anchorRef={scrollTopAnchorRef}>
-              <IconButton
-                onClick={() => virtualizer.scrollToOffset(0)}
-                variant="Surface"
-                radii="Pill"
-                outlined
-                size="300"
-                aria-label={t('common.scrollToTop')}
-              >
-                <Icon src={Icons.ChevronTop} size="300" />
-              </IconButton>
-            </ScrollTopContainer>
+              <ScrollTopContainer scrollRef={scrollRef} anchorRef={scrollTopAnchorRef}>
+                <IconButton
+                  onClick={() => virtualizer.scrollToOffset(0)}
+                  variant="Surface"
+                  radii="Pill"
+                  outlined
+                  size="300"
+                  aria-label={t('common.scrollToTop')}
+                >
+                  <Icon src={Icons.ChevronTop} size="300" />
+                </IconButton>
+              </ScrollTopContainer>
 
-            {!fetchingMembers && !result && processMembers.length === 0 && (
-              <Text style={{ padding: config.space.S300 }} align="Center">
-                {t('room.noMembersOfType', { type: t('room.members') })}
-              </Text>
-            )}
+              {!fetchingMembers && !result && processMembers.length === 0 && (
+                <Text style={{ padding: config.space.S300 }} align="Center">
+                  {t('room.noMembersOfType', { type: t('common.members') })}
+                </Text>
+              )}
 
-            <Box direction="Column" gap="100">
               <div
                 style={{
                   position: 'relative',
@@ -370,7 +318,7 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
                   return (
                     <div
                       style={{
-                        transform: `translateY(${vItem.start}px)`,
+                        transform: `translateY(${vItem.start + GAP * vItem.index}px)`,
                       }}
                       className={css.DrawerVirtualItem}
                       data-index={vItem.index}
@@ -395,6 +343,12 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
               </div>
             </Box>
 
+            {fetchingMembers && (
+              <Box justifyContent="Center">
+                <Spinner />
+              </Box>
+            )}
+
             {!isSpaceRoom && (
               <Box direction="Column" gap="100">
                 <Text className={css.MembersGroupLabel} size="L400" priority="300">
@@ -412,7 +366,7 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
                     <Text align="Center" size="T300" priority="300">
                       {t('room.threadsLoadFailed')}
                     </Text>
-                    <Chip as="button" variant="SurfaceVariant" size="300" radii="300" onClick={retryLoadThreads}>
+                    <Chip as="button" variant="SurfaceVariant" size="400" radii="300" onClick={retryLoadThreads}>
                       <Text size="T200">{t('common.retry')}</Text>
                     </Chip>
                   </Box>
@@ -443,7 +397,7 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
                           onClick={handleThreadClick}
                           before={<Icon size="100" src={MessageSquareTextIcon} />}
                         >
-                          <Box grow="Yes" direction="Column" gap="50">
+                          <Box grow="Yes" direction="Column" gap="100">
                             <Text size="T200" priority="300" truncate>
                               {t('message.threadReplies', { count: threadReplies })}
                             </Text>
@@ -459,11 +413,6 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
               </Box>
             )}
 
-            {fetchingMembers && (
-              <Box justifyContent="Center">
-                <Spinner />
-              </Box>
-            )}
           </Box>
         </Scroll>
       </Box>

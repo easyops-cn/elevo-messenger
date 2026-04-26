@@ -78,6 +78,7 @@ import { PinIcon } from '../../icons/PinIcon';
 import { SearchIcon } from '../../icons/SearchIcon';
 import { UsersIcon } from '../../icons/UsersIcon';
 import { callChatAtom } from '../../state/callEmbed';
+import { threadChatAtom } from '../../state/threadChat';
 
 type RoomMenuProps = {
   room: Room;
@@ -307,6 +308,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const [peopleDrawer, setPeopleDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
 
   const [showCallChat, setShowCallChat] = useAtom(callChatAtom);
+  const [threadChat, setThreadChat] = useAtom(threadChatAtom);
 
   const handleSearchClick = () => {
     const searchParams: _SearchPathSearchParams = {
@@ -334,6 +336,12 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
       setShowCallChat((prev) => !prev);
       return;
     }
+
+    if (threadChat.open) {
+      setThreadChat({ open: false, threadRootId: undefined });
+      return;
+    }
+
     setPeopleDrawer(!peopleDrawer);
   };
 
@@ -594,6 +602,8 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                   <Tooltip>
                     {callView ? (
                       <Text>{showCallChat ? 'Close Chat' : 'Open Chat'}</Text>
+                    ) : threadChat.open ? (
+                      <Text>{t('room.closeThread')}</Text>
                     ) : (
                       <Text>{peopleDrawer ? t('room.hideSidePanel') : t('room.showSidePanel')}</Text>
                     )}

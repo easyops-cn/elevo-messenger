@@ -27,7 +27,7 @@ export function Room() {
   const room = useRoom();
   const mx = useMatrixClient();
 
-  const [isDrawer, setPeopleDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
+  const [isDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
   const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
   const screenSize = useScreenSizeContext();
   const powerLevels = usePowerLevels(room);
@@ -57,12 +57,6 @@ export function Room() {
     setThreadChat({ open: false, threadRootId: undefined });
   }, [room.roomId, setThreadChat]);
 
-  useEffect(() => {
-    if (showThreadPanel && isDrawer) {
-      setPeopleDrawer(false);
-    }
-  }, [showThreadPanel, isDrawer, setPeopleDrawer]);
-
   return (
     <PowerLevelsContextProvider value={powerLevels}>
       <Box grow="Yes">
@@ -88,7 +82,7 @@ export function Room() {
         {callView && chat && (
           <CallChatView />
         )}
-        {!callView && screenSize === ScreenSize.Desktop && isDrawer && (
+        {!callView && screenSize === ScreenSize.Desktop && isDrawer && !showThreadPanel && (
           <RoomSidePanel key={room.roomId} room={room} members={members} />
         )}
       </Box>
