@@ -1,11 +1,11 @@
 import { keyframes, style } from '@vanilla-extract/css';
 import { config, toRem } from 'folds';
 
-export const MembersDrawer = style({
+export const RoomSidePanel = style({
   width: toRem(266),
 });
 
-export const MembersDrawerHeader = style({
+export const RoomSidePanelHeader = style({
   flexShrink: 0,
   padding: `0 ${config.space.S200} 0 ${config.space.S200}`,
   // borderBottomWidth: config.borderWidth.B300,

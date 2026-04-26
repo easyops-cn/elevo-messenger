@@ -1,5 +1,6 @@
 import React, {
   MouseEventHandler,
+  useCallback,
   useMemo,
   useRef,
 } from 'react';
@@ -25,9 +26,10 @@ import {
 import { MatrixClient, Room, RoomMember } from 'matrix-js-sdk';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import classNames from 'classnames';
+import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 
-import * as css from './MembersDrawer.css';
+import * as css from './RoomSidePanel.css';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { UseStateProvider } from '../../components/UseStateProvider';
 import {
@@ -36,7 +38,7 @@ import {
   useAsyncSearch,
 } from '../../hooks/useAsyncSearch';
 import { TypingIndicator } from '../../components/typing-indicator';
-import { getMemberDisplayName, getMemberSearchStr } from '../../utils/room';
+import { getLatestMessageText, getMemberDisplayName, getMemberSearchStr } from '../../utils/room';
 import { getMxIdLocalPart } from '../../utils/matrix';
 import { useSetSetting, useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
@@ -56,6 +58,9 @@ import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { MemberPowerTag } from '../../../types/matrix/room';
 import { MembershipFilter } from '../../hooks/useMemberFilter';
 import { BADGE_LABEL_KEYS } from '../../hooks/usePowerLevelTags';
+import { MessageSquareTextIcon } from '../../icons/MessageSquareTextIcon';
+import { threadChatAtom } from '../../state/threadChat';
+import { useRoomThreads } from '../../hooks/useRoomThreads';
 
 type MemberDrawerHeaderProps = {
   room: Room;
@@ -65,7 +70,7 @@ function MemberDrawerHeader({ room }: MemberDrawerHeaderProps) {
   const setPeopleDrawer = useSetSetting(settingsAtom, 'isPeopleDrawer');
 
   return (
-    <Header className={css.MembersDrawerHeader} variant="Background" size="600">
+    <Header className={css.RoomSidePanelHeader} variant="Background" size="600">
       <Box grow="Yes" alignItems="Center" gap="200">
         <Box grow="Yes" alignItems="Center" gap="200">
           <Text
@@ -199,11 +204,11 @@ const mxIdToName = (mxId: string) => getMxIdLocalPart(mxId) ?? mxId;
 const getRoomMemberStr: SearchItemStrGetter<RoomMember> = (m, query) =>
   getMemberSearchStr(m, query, mxIdToName);
 
-type MembersDrawerProps = {
+type RoomSidePanelProps = {
   room: Room;
   members: RoomMember[];
 };
-export function MembersDrawer({ room, members }: MembersDrawerProps) {
+export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
@@ -222,8 +227,17 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
   const sortFilterMenu = useMemberSortMenu();
   const [sortFilterIndex, setSortFilterIndex] = useSetting(settingsAtom, 'memberSortFilterIndex');
   const memberSort = useMemberSort(sortFilterIndex, sortFilterMenu);
+  const setThreadChat = useSetAtom(threadChatAtom);
+  const [isDrawer, setPeopleDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
 
   const typingMembers = useRoomTypingMember(room.roomId);
+  const isSpaceRoom = room.isSpaceRoom();
+  const {
+    threads,
+    loading: loadingThreads,
+    error: loadingThreadsError,
+    retry: retryLoadThreads,
+  } = useRoomThreads(room);
 
   const filteredMembers = useMemo(
     () => members.filter(MembershipFilter.filterJoined).sort(memberSort.sortFn),
@@ -253,9 +267,32 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
     openUserRoomProfile(room.roomId, space?.roomId, userId, btn.getBoundingClientRect(), 'Left');
   };
 
+  const handleThreadClick: MouseEventHandler<HTMLButtonElement> = useCallback(
+    (evt) => {
+      const rootId = evt.currentTarget.getAttribute('data-event-id');
+      if (!rootId) return;
+
+      setThreadChat({ open: true, threadRootId: rootId });
+      if (isDrawer) {
+        setPeopleDrawer(false);
+      }
+    },
+    [setThreadChat, isDrawer, setPeopleDrawer]
+  );
+
+  const sortedThreads = useMemo(() => {
+    if (isSpaceRoom) return [];
+
+    return [...threads].sort((a, b) => {
+      const aTs = a.replyToEvent?.getTs() ?? a.rootEvent?.getTs() ?? 0;
+      const bTs = b.replyToEvent?.getTs() ?? b.rootEvent?.getTs() ?? 0;
+      return bTs - aTs;
+    });
+  }, [threads, isSpaceRoom]);
+
   return (
     <Box
-      className={classNames(css.MembersDrawer, ContainerColor({ variant: 'Background' }))}
+      className={classNames(css.RoomSidePanel, ContainerColor({ variant: 'Background' }))}
       shrink="No"
       direction="Column"
     >
@@ -315,7 +352,7 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
 
             {!fetchingMembers && !result && processMembers.length === 0 && (
               <Text style={{ padding: config.space.S300 }} align="Center">
-                {t('room.noMembers')}
+                {t('room.noMembersOfType', { type: t('room.members') })}
               </Text>
             )}
 
@@ -357,6 +394,70 @@ export function MembersDrawer({ room, members }: MembersDrawerProps) {
                 })}
               </div>
             </Box>
+
+            {!isSpaceRoom && (
+              <Box direction="Column" gap="100">
+                <Text className={css.MembersGroupLabel} size="L400" priority="300">
+                  {t('room.threads')}
+                </Text>
+
+                {loadingThreads && (
+                  <Box justifyContent="Center" style={{ padding: config.space.S200 }}>
+                    <Spinner />
+                  </Box>
+                )}
+
+                {!loadingThreads && loadingThreadsError && (
+                  <Box direction="Column" alignItems="Center" gap="100" style={{ padding: config.space.S300 }}>
+                    <Text align="Center" size="T300" priority="300">
+                      {t('room.threadsLoadFailed')}
+                    </Text>
+                    <Chip as="button" variant="SurfaceVariant" size="300" radii="300" onClick={retryLoadThreads}>
+                      <Text size="T200">{t('common.retry')}</Text>
+                    </Chip>
+                  </Box>
+                )}
+
+                {!loadingThreads && !loadingThreadsError && sortedThreads.length === 0 && (
+                  <Text style={{ padding: config.space.S300 }} align="Center" size="T300" priority="300">
+                    {t('room.noThreads')}
+                  </Text>
+                )}
+
+                {!loadingThreads && !loadingThreadsError && sortedThreads.length > 0 && (
+                  <Box direction="Column" gap="100">
+                    {sortedThreads.map((thread) => {
+                      const latestEvent = thread.replyToEvent ?? thread.rootEvent;
+                      const summary = latestEvent
+                        ? getLatestMessageText(room, latestEvent, mx.getSafeUserId(), false, t)
+                        : undefined;
+                      const threadReplies = Math.max(thread.length ?? 0, 0);
+
+                      return (
+                        <MenuItem
+                          key={thread.id}
+                          data-event-id={thread.id}
+                          style={{ padding: `0 ${config.space.S200}` }}
+                          variant="Background"
+                          radii="400"
+                          onClick={handleThreadClick}
+                          before={<Icon size="100" src={MessageSquareTextIcon} />}
+                        >
+                          <Box grow="Yes" direction="Column" gap="50">
+                            <Text size="T200" priority="300" truncate>
+                              {t('message.threadReplies', { count: threadReplies })}
+                            </Text>
+                            <Text size="T300" truncate>
+                              {summary ?? t('message.threadLatestReplyFallback')}
+                            </Text>
+                          </Box>
+                        </MenuItem>
+                      );
+                    })}
+                  </Box>
+                )}
+              </Box>
+            )}
 
             {fetchingMembers && (
               <Box justifyContent="Center">

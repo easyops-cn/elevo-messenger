@@ -595,7 +595,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                     {callView ? (
                       <Text>{showCallChat ? 'Close Chat' : 'Open Chat'}</Text>
                     ) : (
-                      <Text>{peopleDrawer ? t('room.hideMembers') : t('room.showMembers')}</Text>
+                      <Text>{peopleDrawer ? t('room.hideSidePanel') : t('room.showSidePanel')}</Text>
                     )}
                   </Tooltip>
                 }

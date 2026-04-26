@@ -17,7 +17,7 @@ import {
 } from '../../hooks/useSpaceHierarchy';
 import { VirtualTile } from '../../components/virtualizer';
 import { spaceRoomsAtom } from '../../state/spaceRooms';
-import { MembersDrawer } from '../room/MembersDrawer';
+import { RoomSidePanel } from '../room/RoomSidePanel';
 import { useSetting } from '../../state/hooks/settings';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
 import { settingsAtom } from '../../state/settings';
@@ -539,7 +539,7 @@ export function Lobby() {
           </Page>
         </PageMain>
         {screenSize === ScreenSize.Desktop && isDrawer && (
-          <MembersDrawer room={space} members={members} />
+          <RoomSidePanel room={space} members={members} />
         )}
       </Box>
     </PowerLevelsContextProvider>
