@@ -74,6 +74,7 @@ import {
   decryptAllTimelineEvent,
   getEditedEvent,
   getEventReactions,
+  getLatestMessageText,
   getMemberDisplayName,
   getReactionContent,
   isMembershipChanged,
@@ -422,18 +423,6 @@ const getEmptyTimeline = () => ({
   range: { start: 0, end: 0 },
   linkedTimelines: [],
 });
-
-const getLatestReplyPreview = (event?: MatrixEvent | null) => {
-  if (!event) return undefined;
-  const content = event.getContent();
-  if (typeof content.body === 'string' && content.body.trim().length > 0) {
-    return content.body;
-  }
-  if (typeof content.formatted_body === 'string' && content.formatted_body.trim().length > 0) {
-    return content.formatted_body.replace(/<[^>]*>/g, '').trim();
-  }
-  return undefined;
-};
 
 const getRoomUnreadInfo = (room: Room, scrollTo: boolean, threadRootId?: string) => {
   if (threadRootId) return undefined;
@@ -1026,6 +1015,13 @@ export function RoomTimeline({
     [editor]
   );
   const { t } = useTranslation();
+  const getThreadSummary = useCallback(
+    (event?: MatrixEvent | null) => {
+      if (!event) return undefined;
+      return getLatestMessageText(room, event, mx.getSafeUserId(), false, t);
+    },
+    [room, mx, t]
+  );
 
   const renderMatrixEvent = useMatrixEventRenderer<
     [string, MatrixEvent, number, EventTimelineSet, boolean]
@@ -1049,7 +1045,7 @@ export function RoomTimeline({
         const threadReplyCount = mEvent.getThread()?.length;
         const showThreadReplies = !threadRootId && isThreadRoot && !!threadReplyCount;
         const threadLastReply = showThreadReplies ? mEvent.getThread()!.replyToEvent : undefined;
-        const threadSummary = getLatestReplyPreview(threadLastReply);
+        const threadSummary = getThreadSummary(threadLastReply);
 
         return (
           <Message
@@ -1149,7 +1145,7 @@ export function RoomTimeline({
         const threadReplyCount = mEvent.getThread()?.length;
         const showThreadReplies = !threadRootId && isThreadRoot && !!threadReplyCount;
         const threadLastReply = showThreadReplies ? mEvent.getThread()!.replyToEvent : undefined;
-        const threadSummary = getLatestReplyPreview(threadLastReply);
+        const threadSummary = getThreadSummary(threadLastReply);
 
         return (
           <Message
