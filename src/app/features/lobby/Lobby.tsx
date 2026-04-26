@@ -165,7 +165,7 @@ export function Lobby() {
   const heroSectionRef = useRef<HTMLDivElement>(null);
   const [heroSectionHeight, setHeroSectionHeight] = useState<number>();
   const [spaceRooms, setSpaceRooms] = useAtom(spaceRoomsAtom);
-  const [isDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
+  const [showSidePanel] = useSetting(settingsAtom, 'showRoomSidePanel');
   const screenSize = useScreenSizeContext();
   const [onTop, setOnTop] = useState(true);
   const [closedCategories, setClosedCategories] = useAtom(useClosedLobbyCategoriesAtom());
@@ -538,7 +538,7 @@ export function Lobby() {
             </Box>
           </Page>
         </PageMain>
-        {screenSize === ScreenSize.Desktop && isDrawer && (
+        {screenSize === ScreenSize.Desktop && showSidePanel && (
           <RoomSidePanel room={space} members={members} />
         )}
       </Box>

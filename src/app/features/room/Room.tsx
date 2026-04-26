@@ -27,7 +27,7 @@ export function Room() {
   const room = useRoom();
   const mx = useMatrixClient();
 
-  const [isDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
+  const [showSidePanel] = useSetting(settingsAtom, 'showRoomSidePanel');
   const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
   const screenSize = useScreenSizeContext();
   const powerLevels = usePowerLevels(room);
@@ -82,7 +82,7 @@ export function Room() {
         {callView && chat && (
           <CallChatView />
         )}
-        {!callView && screenSize === ScreenSize.Desktop && isDrawer && !showThreadPanel && (
+        {!callView && screenSize === ScreenSize.Desktop && showSidePanel && !showThreadPanel && (
           <RoomSidePanel key={room.roomId} room={room} members={members} />
         )}
       </Box>

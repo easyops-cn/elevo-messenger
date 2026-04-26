@@ -148,7 +148,7 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const space = useSpace();
-  const [peopleDrawer, setPeopleDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
+  const [showSidePanel, setShowSidePanel] = useSetting(settingsAtom, 'showRoomSidePanel');
   const [menuAnchor, setMenuAnchor] = useState<RectCords>();
   const screenSize = useScreenSizeContext();
 
@@ -270,7 +270,7 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
                 offset={4}
                 tooltip={
                   <Tooltip>
-                    <Text>{peopleDrawer ? t('room.hideSidePanel') : t('room.showSidePanel')}</Text>
+                    <Text>{showSidePanel ? t('room.hideSidePanel') : t('room.showSidePanel')}</Text>
                   </Tooltip>
                 }
               >
@@ -279,7 +279,7 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
                     size="300"
                     fill="None"
                     ref={triggerRef}
-                    onClick={() => setPeopleDrawer(!peopleDrawer)}
+                    onClick={() => setShowSidePanel(!showSidePanel)}
                   >
                     <Icon size="100" src={PanelLeftIcon} />
                   </IconButton>

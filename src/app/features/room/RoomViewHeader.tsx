@@ -305,7 +305,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const name = useRoomName(room);
   const topic = useRoomTopic(room);
 
-  const [peopleDrawer, setPeopleDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
+  const [showSidePanel, setShowSidePanel] = useSetting(settingsAtom, 'showRoomSidePanel');
 
   const [showCallChat, setShowCallChat] = useAtom(callChatAtom);
   const [threadChat, setThreadChat] = useAtom(threadChatAtom);
@@ -342,7 +342,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
       return;
     }
 
-    setPeopleDrawer(!peopleDrawer);
+    setShowSidePanel(!showSidePanel);
   };
 
   return (
@@ -605,7 +605,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                     ) : threadChat.open ? (
                       <Text>{t('room.closeThread')}</Text>
                     ) : (
-                      <Text>{peopleDrawer ? t('room.hideSidePanel') : t('room.showSidePanel')}</Text>
+                      <Text>{showSidePanel ? t('room.hideSidePanel') : t('room.showSidePanel')}</Text>
                     )}
                   </Tooltip>
                 }

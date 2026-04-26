@@ -28,7 +28,7 @@ export interface Settings {
   pageZoom: number;
   hideActivity: boolean;
 
-  isPeopleDrawer: boolean;
+  showRoomSidePanel: boolean;
   memberSortFilterIndex: number;
   enterForNewline: boolean;
   messageLayout: MessageLayout;
@@ -61,7 +61,7 @@ const defaultSettings: Settings = {
   pageZoom: 100,
   hideActivity: false,
 
-  isPeopleDrawer: false,
+  showRoomSidePanel: false,
   memberSortFilterIndex: 0,
   enterForNewline: false,
   messageLayout: 0,
