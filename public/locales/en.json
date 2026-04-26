@@ -872,6 +872,7 @@
     "replyInThread": "Reply in Thread",
     "viewThread": "View Thread",
     "threadReplies": "{{count}} replies",
+    "threadNoReplies": "No replies yet",
     "threadLatestReplyFallback": "Latest reply",
     "editMessage": "Edit Message",
     "image": "[Image]",

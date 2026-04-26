@@ -872,6 +872,7 @@
     "replyInThread": "在子话题中回复",
     "viewThread": "查看子话题",
     "threadReplies": "{{count}} 条回复",
+    "threadNoReplies": "暂无回复",
     "threadLatestReplyFallback": "最新回复",
     "editMessage": "编辑消息",
     "image": "[图片]",

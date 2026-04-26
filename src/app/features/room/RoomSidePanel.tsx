@@ -18,12 +18,14 @@ import {
   Spinner,
   Text,
   config,
+  toRem,
 } from 'folds';
 import { MatrixClient, Room, RoomMember } from 'matrix-js-sdk';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import classNames from 'classnames';
 import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
+import dayjs from 'dayjs';
 
 import * as css from './RoomSidePanel.css';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
@@ -53,7 +55,6 @@ import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { MemberPowerTag } from '../../../types/matrix/room';
 import { MembershipFilter } from '../../hooks/useMemberFilter';
 import { BADGE_LABEL_KEYS } from '../../hooks/usePowerLevelTags';
-import { MessageSquareTextIcon } from '../../icons/MessageSquareTextIcon';
 import { threadChatAtom } from '../../state/threadChat';
 import { useRoomThreads } from '../../hooks/useRoomThreads';
 import { Avatar } from '../../components/avatar';
@@ -202,12 +203,12 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
 
   const processMembers = result ? result.items : filteredMembers;
 
-  const GAP = 4;
   const virtualizer = useVirtualizer({
     count: processMembers.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 32 + GAP, // 32 + 2
+    estimateSize: () => 32,
     overscan: 10,
+    gap: 4
   });
 
   const handleMemberClick: MouseEventHandler<HTMLButtonElement> = (evt) => {
@@ -236,6 +237,8 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
       return bTs - aTs;
     });
   }, [threads, isSpaceRoom]);
+
+  const formatRelativeTime = useCallback((ts: number) => dayjs(ts).fromNow(), []);
 
   return (
     <Box
@@ -318,7 +321,7 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
                   return (
                     <div
                       style={{
-                        transform: `translateY(${vItem.start + GAP * vItem.index}px)`,
+                        transform: `translateY(${vItem.start}px)`,
                       }}
                       className={css.DrawerVirtualItem}
                       data-index={vItem.index}
@@ -381,29 +384,75 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
                 {!loadingThreads && !loadingThreadsError && sortedThreads.length > 0 && (
                   <Box direction="Column" gap="100">
                     {sortedThreads.map((thread) => {
-                      const latestEvent = thread.replyToEvent ?? thread.rootEvent;
-                      const summary = latestEvent
-                        ? getLatestMessageText(room, latestEvent, mx.getSafeUserId(), false, t)
+                      const rootSummary = thread.rootEvent
+                        ? getLatestMessageText(room, thread.rootEvent, mx.getSafeUserId(), false, t)
+                        : undefined;
+                      const latestReplyEvent = thread.replyToEvent;
+                      const latestReplySummary = latestReplyEvent
+                        ? getLatestMessageText(room, latestReplyEvent, mx.getSafeUserId(), false, t)
                         : undefined;
                       const threadReplies = Math.max(thread.length ?? 0, 0);
+                      const latestReplySenderId = latestReplyEvent?.getSender();
+                      const latestReplySenderName = latestReplySenderId
+                        ? getMemberDisplayName(room, latestReplySenderId) ??
+                          getMxIdLocalPart(latestReplySenderId) ??
+                          latestReplySenderId
+                        : undefined;
+                      const latestReplyAvatarMxcUrl = latestReplySenderId
+                        ? room.getMember(latestReplySenderId)?.getMxcAvatarUrl()
+                        : undefined;
+                      const latestReplyAvatarUrl = latestReplyAvatarMxcUrl
+                        ? mx.mxcUrlToHttp(
+                            latestReplyAvatarMxcUrl,
+                            64,
+                            64,
+                            'crop',
+                            undefined,
+                            false,
+                            useAuthentication
+                          )
+                        : undefined;
+                      const latestTs = latestReplyEvent?.getTs() ?? thread.rootEvent?.getTs();
 
                       return (
                         <MenuItem
                           key={thread.id}
                           data-event-id={thread.id}
-                          style={{ padding: `0 ${config.space.S200}` }}
+                          style={{ padding: `0 ${config.space.S200}`, height: toRem(52) }}
                           variant="Background"
                           radii="400"
                           onClick={handleThreadClick}
-                          before={<Icon size="100" src={MessageSquareTextIcon} />}
+                          after={
+                            latestTs ? (
+                              <Text size="T200" priority="300" style={{ flexShrink: 0}}>
+                                {formatRelativeTime(latestTs)}
+                              </Text>
+                            ) : undefined
+                          }
                         >
                           <Box grow="Yes" direction="Column" gap="100">
-                            <Text size="T200" priority="300" truncate>
-                              {t('message.threadReplies', { count: threadReplies })}
-                            </Text>
                             <Text size="T300" truncate>
-                              {summary ?? t('message.threadLatestReplyFallback')}
+                              {rootSummary ?? t('message.threadLatestReplyFallback')}
                             </Text>
+                            {threadReplies > 0 && latestReplySenderId ? (
+                              <Box alignItems="Center" gap="100">
+                                <Avatar size="100" radii="Pill">
+                                  <UserAvatar
+                                    userId={latestReplySenderId}
+                                    src={latestReplyAvatarUrl ?? undefined}
+                                    alt={latestReplySenderName ?? latestReplySenderId}
+                                    renderFallback={() => <Icon size="50" src={Icons.User} filled />}
+                                  />
+                                </Avatar>
+                                <Text size="T200" priority="300" truncate>
+                                  {latestReplySummary ?? t('message.threadLatestReplyFallback')}
+                                </Text>
+                              </Box>
+                            ) : (
+                              <Text size="T200" priority="300" truncate>
+                                {t('message.threadNoReplies')}
+                              </Text>
+                            )}
                           </Box>
                         </MenuItem>
                       );

@@ -573,7 +573,7 @@ export const getLatestMessageText = (
   room: Room,
   evt: MatrixEvent,
   myUserId: string,
-  direct?: boolean,
+  direct: boolean | undefined,
   t: (key: string, options?: Record<string, unknown>) => string
 ): string | undefined => {
   const content = evt.getContent();

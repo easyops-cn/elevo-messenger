@@ -118,6 +118,8 @@ import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { threadChatAtom } from '../../state/threadChat';
 import { MessageSquareTextIcon } from '../../icons/MessageSquareTextIcon';
+import { Avatar } from '../../components/avatar';
+import { UserAvatar } from '../../components/user-avatar';
 
 const TimelineFloat = as<'div', css.TimelineFloatVariants>(
   ({ position, className, ...props }, ref) => (
@@ -1042,10 +1044,30 @@ export function RoomTimeline({
           getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId;
 
         const { replyEventId, isThreadRoot } = mEvent;
-        const threadReplyCount = mEvent.getThread()?.length;
-        const showThreadReplies = !threadRootId && isThreadRoot && !!threadReplyCount;
-        const threadLastReply = showThreadReplies ? mEvent.getThread()!.replyToEvent : undefined;
+        const threadReplyCount = Math.max(mEvent.getThread()?.length ?? 0, 0);
+        const showThreadReplies = !threadRootId && isThreadRoot;
+        const threadLastReply = showThreadReplies ? mEvent.getThread()?.replyToEvent : undefined;
         const threadSummary = getThreadSummary(threadLastReply);
+        const threadLastReplySenderId = threadLastReply?.getSender();
+        const threadLastReplySenderName = threadLastReplySenderId
+          ? getMemberDisplayName(room, threadLastReplySenderId) ??
+            getMxIdLocalPart(threadLastReplySenderId) ??
+            threadLastReplySenderId
+          : undefined;
+        const threadLastReplyAvatarMxcUrl = threadLastReplySenderId
+          ? room.getMember(threadLastReplySenderId)?.getMxcAvatarUrl()
+          : undefined;
+        const threadLastReplyAvatarUrl = threadLastReplyAvatarMxcUrl
+          ? mx.mxcUrlToHttp(
+              threadLastReplyAvatarMxcUrl,
+              48,
+              48,
+              'crop',
+              undefined,
+              false,
+              useAuthentication
+            )
+          : undefined;
 
         return (
           <Message
@@ -1119,15 +1141,38 @@ export function RoomTimeline({
                     size="500"
                     radii="400"
                     data-event-id={mEventId}
-                    before={<Icon size="50" src={MessageSquareTextIcon} />}
+                    before={
+                      <>
+                        <Icon size="50" src={MessageSquareTextIcon} />
+                        <Text size="T200" style={{ flexShrink: 0}}>
+                          {t('message.threadReplies', { count: threadReplyCount })}
+                        </Text>
+                      </>
+                    }
                     onClick={handleOpenThread}
                     style={{ marginTop: config.space.S200, width: '100%', maxWidth: toRem(600) }}
                   >
-                    <Text size="L400" truncate>
-                      {t('message.threadReplies', { count: threadReplyCount })}
-                      {' - '}
-                      {threadSummary ?? t('message.threadLatestReplyFallback')}
-                    </Text>
+                    <Box alignItems="Center" gap="100" grow="Yes">
+                      {threadLastReplySenderId ? (
+                        <>
+                          <Avatar size="100" radii="Pill">
+                            <UserAvatar
+                              userId={threadLastReplySenderId}
+                              src={threadLastReplyAvatarUrl ?? undefined}
+                              alt={threadLastReplySenderName ?? threadLastReplySenderId}
+                              renderFallback={() => <Icon size="50" src={Icons.User} filled />}
+                            />
+                          </Avatar>
+                          <Text size="T200" truncate>
+                            {threadLastReplySenderName}: {threadSummary ?? t('message.threadNoReplies')}
+                          </Text>
+                        </>
+                      ) : (
+                        <Text size="T200" truncate>
+                          {t('message.threadNoReplies')}
+                        </Text>
+                      )}
+                    </Box>
                   </Chip>
                 )}
               </>
@@ -1142,10 +1187,30 @@ export function RoomTimeline({
         const highlighted = focusItem?.index === item && focusItem.highlight;
 
         const { replyEventId, isThreadRoot } = mEvent;
-        const threadReplyCount = mEvent.getThread()?.length;
-        const showThreadReplies = !threadRootId && isThreadRoot && !!threadReplyCount;
-        const threadLastReply = showThreadReplies ? mEvent.getThread()!.replyToEvent : undefined;
+        const threadReplyCount = Math.max(mEvent.getThread()?.length ?? 0, 0);
+        const showThreadReplies = !threadRootId && isThreadRoot;
+        const threadLastReply = showThreadReplies ? mEvent.getThread()?.replyToEvent : undefined;
         const threadSummary = getThreadSummary(threadLastReply);
+        const threadLastReplySenderId = threadLastReply?.getSender();
+        const threadLastReplySenderName = threadLastReplySenderId
+          ? getMemberDisplayName(room, threadLastReplySenderId) ??
+            getMxIdLocalPart(threadLastReplySenderId) ??
+            threadLastReplySenderId
+          : undefined;
+        const threadLastReplyAvatarMxcUrl = threadLastReplySenderId
+          ? room.getMember(threadLastReplySenderId)?.getMxcAvatarUrl()
+          : undefined;
+        const threadLastReplyAvatarUrl = threadLastReplyAvatarMxcUrl
+          ? mx.mxcUrlToHttp(
+              threadLastReplyAvatarMxcUrl,
+              48,
+              48,
+              'crop',
+              undefined,
+              false,
+              useAuthentication
+            )
+          : undefined;
 
         return (
           <Message
@@ -1248,11 +1313,31 @@ export function RoomTimeline({
                           onClick={handleOpenThread}
                           style={{ marginTop: config.space.S200, width: '100%', maxWidth: toRem(600) }}
                         >
-                          <Text size="L400" truncate>
-                            {t('message.threadReplies', { count: threadReplyCount })}
-                            {' - '}
-                            {threadSummary ?? t('message.threadLatestReplyFallback')}
-                          </Text>
+                          <Box alignItems="Center" gap="100" grow="Yes">
+                            <Text size="T200" style={{ flexShrink: 0}}>
+                              {t('message.threadReplies', { count: threadReplyCount })}
+                              {' - '}
+                            </Text>
+                            {threadLastReplySenderId ? (
+                              <>
+                                <Avatar size="100" radii="Pill">
+                                  <UserAvatar
+                                    userId={threadLastReplySenderId}
+                                    src={threadLastReplyAvatarUrl ?? undefined}
+                                    alt={threadLastReplySenderName ?? threadLastReplySenderId}
+                                    renderFallback={() => <Icon size="50" src={Icons.User} filled />}
+                                  />
+                                </Avatar>
+                                <Text size="T200" truncate>
+                                  {threadLastReplySenderName}: {threadSummary ?? t('message.threadNoReplies')}
+                                </Text>
+                              </>
+                            ) : (
+                              <Text size="T200" truncate>
+                                {t('message.threadNoReplies')}
+                              </Text>
+                            )}
+                          </Box>
                         </Chip>
                       )}
                     </>
