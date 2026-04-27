@@ -77,7 +77,7 @@ const HomeMenu = forwardRef<HTMLDivElement, HomeMenuProps>(({ requestClose, room
 
   const handleMarkAsRead = () => {
     if (!unread) return;
-    rooms.forEach((rId) => markAsRead(mx, rId, hideActivity));
+    rooms.forEach((rId) => markAsRead(mx, rId, hideActivity, undefined, true));
     requestClose();
   };
 

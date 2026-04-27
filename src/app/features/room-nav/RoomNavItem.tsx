@@ -85,7 +85,7 @@ const RoomNavItemMenu = forwardRef<HTMLDivElement, RoomNavItemMenuProps>(
     const [invitePrompt, setInvitePrompt] = useState(false);
 
     const handleMarkAsRead = () => {
-      markAsRead(mx, room.roomId, hideActivity);
+      markAsRead(mx, room.roomId, hideActivity, undefined, true);
       requestClose();
     };
 
