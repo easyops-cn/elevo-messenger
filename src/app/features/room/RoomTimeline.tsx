@@ -861,22 +861,6 @@ export function RoomTimeline({
     }
   }, [scrollToBottomCount]);
 
-  const debounceScrollToBottom = useDebounce(
-    useCallback(() => {
-      const scrollEl = scrollRef.current;
-      if (atBottomRef.current && scrollEl) {
-        console.log('Resizing timeline, staying at bottom');
-        scrollToBottom(scrollEl);
-      }
-    }, []),
-    { wait: 100 }
-  );
-
-  useResizeObserver(
-    debounceScrollToBottom,
-    useCallback(() => scrollContentRef.current, [])
-  );
-
   // Remove unreadInfo on mark as read
   useEffect(() => {
     if (!unread) {
