@@ -24,7 +24,7 @@ import { IImageInfo, MATRIX_BLUR_HASH_PROPERTY_NAME } from '../../../../types/ma
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import * as css from './style.css';
-import { bytesToSize } from '../../../utils/common';
+import { bytesToSize, scaleYDimension } from '../../../utils/common';
 import { FALLBACK_MIMETYPE } from '../../../utils/mimeTypes';
 import { stopPropagation } from '../../../utils/keyboard';
 import { decryptFile, downloadEncryptedMedia, downloadMedia, mxcUrlToHttp } from '../../../utils/matrix';
@@ -85,6 +85,10 @@ export const ImageContent = as<'div', ImageContentProps>(
     const [error, setError] = useState(false);
     const [viewer, setViewer] = useState(false);
     const [blurred, setBlurred] = useState(markedAsSpoiler ?? false);
+
+    const originalWidth = info?.w || 200;
+    const maxWidth = Math.min(originalWidth, 200);
+    const maxHeight = scaleYDimension(originalWidth, maxWidth, info?.h || 200);
 
     const [srcState, loadSrc] = useAsyncCallback(
       useCallback(async () => {
@@ -173,7 +177,7 @@ export const ImageContent = as<'div', ImageContentProps>(
           </Box>
         )}
         {srcState.status === AsyncStatus.Success && (
-          <Box className={classNames(css.AbsoluteContainer, blurred && css.Blur)}>
+          <Box className={classNames(blurred && css.Blur)} style={{ width: maxWidth, height: maxHeight }}>
             {renderImage({
               alt: body,
               title: body,

@@ -26,15 +26,28 @@ export const AttachmentHeader = style({
   padding: config.space.S300,
 });
 
-export const AttachmentBox = style([
-  DefaultReset,
-  {
-    maxWidth: '100%',
-    maxHeight: toRem(600),
-    width: toRem(400),
-    overflow: 'hidden',
-  },
-]);
+export const AttachmentBox = recipe({
+  base: [
+    DefaultReset,
+    {
+      maxWidth: '100%',
+      maxHeight: toRem(600),
+      width: toRem(400),
+      overflow: 'hidden',
+    },
+  ],
+  variants: {
+    image: {
+      true: {
+        backgroundColor: 'transparent',
+        width: 'initial',
+        maxHeight: 'initial',
+      },
+    },
+  }
+});
+
+export type AttachmentBoxVariants = RecipeVariants<typeof AttachmentBox>;
 
 export const AttachmentContent = style({
   padding: config.space.S300,

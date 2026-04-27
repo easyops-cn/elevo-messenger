@@ -480,34 +480,26 @@ type RenderImageContentProps = {
 type MImageProps = {
   content: IImageContent;
   renderImageContent: (props: RenderImageContentProps) => ReactNode;
-  outlined?: boolean;
 };
-export function MImage({ content, renderImageContent, outlined }: MImageProps) {
+export function MImage({ content, renderImageContent }: MImageProps) {
   const imgInfo = content?.info;
   const mxcUrl = content.file?.url ?? content.url;
   if (typeof mxcUrl !== 'string') {
     return <BrokenContent />;
   }
-  const height = scaleYDimension(imgInfo?.w || 400, 400, imgInfo?.h || 400);
 
   return (
-    <Attachment outlined={outlined}>
-      <AttachmentBox
-        style={{
-          height: toRem(height < 48 ? 48 : height),
-        }}
-      >
-        {renderImageContent({
-          body: content.body || 'Image',
-          info: imgInfo,
-          mimeType: imgInfo?.mimetype,
-          url: mxcUrl,
-          encInfo: content.file,
-          markedAsSpoiler: content[MATRIX_SPOILER_PROPERTY_NAME],
-          spoilerReason: content[MATRIX_SPOILER_REASON_PROPERTY_NAME],
-        })}
-      </AttachmentBox>
-    </Attachment>
+    <AttachmentBox image>
+      {renderImageContent({
+        body: content.body || 'Image',
+        info: imgInfo,
+        mimeType: imgInfo?.mimetype,
+        url: mxcUrl,
+        encInfo: content.file,
+        markedAsSpoiler: content[MATRIX_SPOILER_PROPERTY_NAME],
+        spoilerReason: content[MATRIX_SPOILER_REASON_PROPERTY_NAME],
+      })}
+    </AttachmentBox>
   );
 }
 
@@ -741,15 +733,9 @@ export function MSticker({ content, renderImageContent }: MStickerProps) {
   if (typeof mxcUrl !== 'string') {
     return <MessageBrokenContent />;
   }
-  const height = scaleYDimension(imgInfo?.w || 152, 152, imgInfo?.h || 152);
 
   return (
-    <AttachmentBox
-      style={{
-        height: toRem(height < 48 ? 48 : height),
-        width: toRem(152),
-      }}
-    >
+    <AttachmentBox image>
       {renderImageContent({
         body: content.body || 'Sticker',
         info: imgInfo,

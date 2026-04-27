@@ -200,7 +200,6 @@ export function RenderMessageContent({
               renderViewer={(p) => <ImageViewer {...p} />}
             />
           )}
-          outlined={outlineAttachment}
         />
         {renderCaption()}
       </>
