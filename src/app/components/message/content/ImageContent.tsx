@@ -84,7 +84,7 @@ export const ImageContent = as<'div', ImageContentProps>(
     const [blurred, setBlurred] = useState(markedAsSpoiler ?? false);
 
     const originalWidth = info?.w || 200;
-    const maxWidth = Math.min(originalWidth, 200);
+    const maxWidth = Math.min(Math.max(originalWidth, 20), 400);
     const maxHeight = scaleYDimension(originalWidth, maxWidth, info?.h || 200);
 
     const [srcState, loadSrc] = useAsyncCallback(
@@ -205,15 +205,14 @@ export const ImageContent = as<'div', ImageContentProps>(
             </TooltipProvider>
           </Box>
         )}
-        {(srcState.status === AsyncStatus.Loading || srcState.status === AsyncStatus.Success) &&
-          !load &&
+        {!error && (srcState.status === AsyncStatus.Loading || srcState.status === AsyncStatus.Idle) &&
           !blurred && (
-            <Box className={css.AbsoluteContainer} alignItems="Center" justifyContent="Center">
+            <Box alignItems="Center" justifyContent="Center" style={{ width: maxWidth, height: maxHeight }}>
               <Spinner variant="Secondary" />
             </Box>
           )}
         {(error || srcState.status === AsyncStatus.Error) && (
-          <Box className={css.AbsoluteContainer} alignItems="Center" justifyContent="Center">
+          <Box alignItems="Center" justifyContent="Center" style={{ width: maxWidth, height: maxHeight }}>
             <TooltipProvider
               tooltip={
                 <Tooltip variant="Critical">
