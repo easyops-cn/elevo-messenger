@@ -21,6 +21,7 @@ import {
 import { Editor, Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 import { IContent, IMentions, MatrixEvent, RelationType, Room } from 'matrix-js-sdk';
+import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/types';
 import { isKeyHotkey } from 'is-hotkey';
 import { useTranslation } from 'react-i18next';
 import {
@@ -156,7 +157,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
           },
         };
 
-        return mx.sendMessage(roomId, content);
+        return mx.sendMessage(roomId, content as RoomMessageEventContent);
       }, [mx, editor, roomId, mEvent, isMarkdown, getPrevBodyAndFormattedBody])
     );
 

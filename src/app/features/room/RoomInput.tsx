@@ -10,6 +10,7 @@ import React, {
 import { useAtom, useAtomValue } from 'jotai';
 import { isKeyHotkey } from 'is-hotkey';
 import { EventType, IContent, MsgType, RelationType, Room } from 'matrix-js-sdk';
+import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/types';
 import { ReactEditor } from 'slate-react';
 import { Transforms, Editor, Element as SlateElement, Path, Node, Text as SlateText } from 'slate';
 import {
@@ -372,23 +373,6 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     };
 
     const handleSendUpload = async (uploads: UploadSuccess[]) => {
-      const applyThreadRelation = (content: IContent) => {
-        if (!threadRootId) return content;
-
-        return {
-          ...content,
-          'm.relates_to': {
-            ...(content['m.relates_to'] ?? {}),
-            event_id: threadRootId,
-            rel_type: RelationType.Thread,
-            is_falling_back: true,
-            "m.in_reply_to": {
-              event_id: threadRootId,
-            },
-          },
-        };
-      };
-
       const contentsPromises = uploads.map(async (upload) => {
         const fileItem = selectedFiles.find((f) => f.file === upload.file);
         if (!fileItem) throw new Error('Broken upload');
@@ -406,7 +390,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       });
       handleCancelUpload(uploads);
       const contents = fulfilledPromiseSettledResult(await Promise.allSettled(contentsPromises));
-      contents.forEach((content) => mx.sendMessage(roomId, applyThreadRelation(content) as any));
+      contents.forEach((content) => mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent));
     };
 
     const submit = useCallback(() => {
@@ -464,18 +448,6 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         body,
       };
 
-      const applyThreadRelation = () => {
-        if (!threadRootId) return;
-        content['m.relates_to'] = {
-          event_id: threadRootId,
-          rel_type: RelationType.Thread,
-          is_falling_back: true,
-          "m.in_reply_to": {
-            event_id: threadRootId,
-          },
-        };
-      };
-
       if (fileRef) {
         content['vip.elevo.file_reference'] = fileRef;
       }
@@ -496,22 +468,15 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         content.format = 'org.matrix.custom.html';
         content.formatted_body = formattedBody;
       }
-      if (replyDraft) {
+      if (replyDraft?.relation?.rel_type === RelationType.Thread) {
         content['m.relates_to'] = {
           'm.in_reply_to': {
             event_id: replyDraft.eventId,
           },
         };
-        if (replyDraft.relation?.rel_type === RelationType.Thread) {
-          content['m.relates_to'].event_id = replyDraft.relation.event_id;
-          content['m.relates_to'].rel_type = RelationType.Thread;
-          content['m.relates_to'].is_falling_back = true;
-        }
       }
 
-      applyThreadRelation();
-
-      mx.sendMessage(roomId, content as any);
+      mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent);
       resetEditor(editor);
       resetEditorHistory(editor);
       setReplyDraft(undefined);
