@@ -386,6 +386,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
             ...(content['m.relates_to'] ?? {}),
             event_id: threadRootId,
             rel_type: RelationType.Thread,
+            is_falling_back: true,
             "m.in_reply_to": {
               event_id: threadRootId,
             },
@@ -474,6 +475,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           ...(content['m.relates_to'] ?? {}),
           event_id: threadRootId,
           rel_type: RelationType.Thread,
+          is_falling_back: true,
           "m.in_reply_to": {
             event_id: threadRootId,
           },
