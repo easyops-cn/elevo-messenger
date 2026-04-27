@@ -136,12 +136,7 @@ const makeInviteData = (mx: MatrixClient, room: Room, useAuthentication: boolean
   };
 };
 
-const hasBadWords = (invite: InviteData): boolean =>
-  testBadWords(invite.roomName) ||
-  testBadWords(invite.roomTopic ?? '') ||
-  testBadWords(invite.senderName) ||
-  testBadWords(invite.senderId) ||
-  testBadWords(invite.reason || '');
+const hasBadWords = (invite: InviteData): boolean => false;
 
 type NavigateHandler = (roomId: string, space: boolean) => void;
 
