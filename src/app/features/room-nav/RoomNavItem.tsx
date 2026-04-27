@@ -4,7 +4,6 @@ import { Room } from 'matrix-js-sdk';
 import {
   Box,
   Icon,
-  IconButton,
   Icons,
   Text,
   Menu,
@@ -19,7 +18,7 @@ import {
   color,
 } from 'folds';
 import FocusTrap from 'focus-trap-react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { NavItem, NavItemContent, NavItemOptions, NavLink } from '../../components/nav';
 import { UnreadBadge } from '../../components/unread-badge';
 import { RoomAvatar, RoomIcon } from '../../components/room-avatar';
@@ -55,7 +54,6 @@ import { useRoomName } from '../../hooks/useRoomMeta';
 import { useRoomLatestContentfulEvent } from '../../hooks/useRoomLatestContentfulEvent';
 import { useCallMembers, useCallSession } from '../../hooks/useCall';
 import { useCallEmbed, useCallStart } from '../../hooks/useCallEmbed';
-import { callChatAtom } from '../../state/callEmbed';
 import { useCallPreferencesAtom } from '../../state/hooks/callPreferences';
 import { useAutoDiscoveryInfo } from '../../hooks/useAutoDiscoveryInfo';
 import { livekitSupport } from '../../hooks/useLivekitSupport';
@@ -221,25 +219,6 @@ const RoomNavItemMenu = forwardRef<HTMLDivElement, RoomNavItemMenuProps>(
   }
 );
 
-function CallChatToggle() {
-  const { t } = useTranslation();
-  const [chat, setChat] = useAtom(callChatAtom);
-
-  return (
-    <IconButton
-      onClick={() => setChat(!chat)}
-      aria-pressed={chat}
-      aria-label={t('room.toggleChat')}
-      variant="Background"
-      fill="None"
-      size="300"
-      radii="300"
-    >
-      <Icon size="50" src={Icons.Message} filled={chat} />
-    </IconButton>
-  );
-}
-
 type RoomNavItemProps = {
   room: Room;
   selected: boolean;
@@ -378,7 +357,7 @@ export function RoomNavItem({
                 {roomName}
               </Text>
               <Text as="span" size="T200" truncate style={{ color: elevoColor.Text.Muted, height: toRem(14), lineHeight: toRem(14) }}>
-                {typingMember.length > 0 && !selected ? t('room.typing') : latestMessageText}
+                {typingMember.length > 0 && direct ? t('room.typing') : latestMessageText}
               </Text>
             </Box>
             {notificationMode === RoomNotificationMode.Mute && (
@@ -400,9 +379,6 @@ export function RoomNavItem({
       </NavLink>
       {optionsVisible && (
         <NavItemOptions>
-          {selected && (callEmbed?.roomId === room.roomId || room.isCallRoom()) && (
-            <CallChatToggle />
-          )}
           <PopOut
             id={`menu-${room.roomId}`}
             aria-expanded={!!menuAnchor}
