@@ -97,7 +97,7 @@ import { getResizeObserverEntry, useResizeObserver } from '../../hooks/useResize
 import * as css from './RoomTimeline.css';
 import { inSameDay, minuteDifference, timeDayMonthYear, today, yesterday } from '../../utils/time';
 import { createMentionElement, moveCursor } from '../../components/editor';
-import { roomIdToReplyDraftAtomFamily } from '../../state/room/roomInputDrafts';
+import { threadOrRoomIdToReplyDraftAtomFamily } from '../../state/room/roomInputDrafts';
 import { usePowerLevelsContext } from '../../hooks/usePowerLevels';
 import { GetContentCallback, MessageEvent, StateEvent } from '../../../types/matrix/room';
 import { useDocumentFocusChange } from '../../hooks/useDocumentFocusChange';
@@ -475,7 +475,8 @@ export function RoomTimeline({
   const ignoredUsersSet = useMemo(() => new Set(ignoredUsersList), [ignoredUsersList]);
   const activeTimelineSet = useMemo(() => getTimelineSet(room, threadRootId), [room, threadRootId]);
 
-  const setReplyDraft = useSetAtom(roomIdToReplyDraftAtomFamily(room.roomId));
+  const threadOrRoomId = threadRootId || room.roomId;
+  const setReplyDraft = useSetAtom(threadOrRoomIdToReplyDraftAtomFamily(threadOrRoomId));
   const [, setThreadChat] = useThreadChat(room.roomId);
   const powerLevels = usePowerLevelsContext();
   const creators = useRoomCreators(room);

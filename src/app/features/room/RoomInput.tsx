@@ -75,9 +75,9 @@ import { useFileDropZone } from '../../hooks/useFileDrop';
 import {
   TUploadItem,
   TUploadMetadata,
-  roomIdToMsgDraftAtomFamily,
-  roomIdToReplyDraftAtomFamily,
-  roomIdToUploadItemsAtomFamily,
+  threadOrRoomIdToMsgDraftAtomFamily,
+  threadOrRoomIdToReplyDraftAtomFamily,
+  threadOrRoomIdToUploadItemsAtomFamily,
   roomUploadAtomFamily,
 } from '../../state/room/roomInputDrafts';
 import { UploadCardRenderer } from '../../components/upload-card';
@@ -163,12 +163,13 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const emojiBtnRef = useRef<HTMLButtonElement>(null);
     const roomToParents = useAtomValue(roomToParentsAtom);
 
-    const [msgDraft, setMsgDraft] = useAtom(roomIdToMsgDraftAtomFamily(roomId));
-    const [replyDraft, setReplyDraft] = useAtom(roomIdToReplyDraftAtomFamily(roomId));
+    const threadOrRoomId = threadRootId || roomId;
+    const [msgDraft, setMsgDraft] = useAtom(threadOrRoomIdToMsgDraftAtomFamily(threadOrRoomId));
+    const [replyDraft, setReplyDraft] = useAtom(threadOrRoomIdToReplyDraftAtomFamily(threadOrRoomId));
 
     const [uploadBoard, setUploadBoard] = useState(true);
     const [voiceRecordingOpen, setVoiceRecordingOpen] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useAtom(roomIdToUploadItemsAtomFamily(roomId));
+    const [selectedFiles, setSelectedFiles] = useAtom(threadOrRoomIdToUploadItemsAtomFamily(threadOrRoomId));
     const uploadFamilyObserverAtom = createUploadFamilyObserverAtom(
       roomUploadAtomFamily,
       selectedFiles.map((f) => f.file)
@@ -737,7 +738,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                     <Icon src={Icons.Cross} size="50" />
                   </IconButton>
                   <Box direction="Row" gap="200" alignItems="Center">
-                    {replyDraft.relation?.rel_type === RelationType.Thread && <ThreadIndicator />}
+                    {!threadRootId && replyDraft.relation?.rel_type === RelationType.Thread && <ThreadIndicator />}
                     <ReplyLayout
                       username={
                         getMemberDisplayName(room, replyDraft.userId) ??

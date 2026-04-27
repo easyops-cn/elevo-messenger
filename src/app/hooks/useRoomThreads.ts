@@ -43,8 +43,9 @@ export const useRoomThreads = (room: Room): UseRoomThreadsResult => {
         if (!alive) return;
         setError(true);
       } finally {
-        if (!alive) return;
-        setLoading(false);
+        if (alive) {
+          setLoading(false);
+        }
       }
     };
 

@@ -23,7 +23,6 @@ import {
 import { MatrixClient, Room, RoomMember } from 'matrix-js-sdk';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import classNames from 'classnames';
-import { useSetAtom } from 'jotai';
 import { useTranslation } from 'react-i18next';
 import dayjs from 'dayjs';
 
