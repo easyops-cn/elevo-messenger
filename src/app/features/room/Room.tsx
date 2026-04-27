@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { Box } from 'folds';
 import { useParams } from 'react-router-dom';
 import { isKeyHotkey } from 'is-hotkey';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { RoomView } from './RoomView';
 import { RoomSidePanel } from './RoomSidePanel';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
@@ -19,7 +19,7 @@ import { RoomViewHeader } from './RoomViewHeader';
 import { callChatAtom } from '../../state/callEmbed';
 import { CallChatView } from './CallChatView';
 import { PageMain } from '../../components/page';
-import { threadChatAtom } from '../../state/threadChat';
+import { useThreadChat } from '../../state/threadChat';
 import { ThreadChatView } from './ThreadChatView';
 
 export function Room() {
@@ -33,8 +33,7 @@ export function Room() {
   const powerLevels = usePowerLevels(room);
   const members = useRoomMembers(mx, room.roomId);
   const chat = useAtomValue(callChatAtom);
-  const threadChat = useAtomValue(threadChatAtom);
-  const setThreadChat = useSetAtom(threadChatAtom);
+  const [threadChat] = useThreadChat(room.roomId);
 
   useKeyDown(
     window,
@@ -53,15 +52,14 @@ export function Room() {
   const showThreadPanel = !callView && threadChat.open;
   const showMainRoomView = !showThreadPanel || screenSize === ScreenSize.Desktop;
 
-  useEffect(() => {
-    setThreadChat({ open: false, threadRootId: undefined });
-  }, [room.roomId, setThreadChat]);
+  const showCallView = callView && (screenSize === ScreenSize.Desktop || !chat);
+  const showRoomView = !callView && showMainRoomView;
 
   return (
     <PowerLevelsContextProvider value={powerLevels}>
       <Box grow="Yes">
-        <PageMain>
-          {callView && (screenSize === ScreenSize.Desktop || !chat) && (
+        {(showCallView || showRoomView) && <PageMain>
+          {showCallView && (
             <Box grow="Yes" direction="Column">
               <RoomViewHeader callView />
               <Box grow="Yes">
@@ -69,7 +67,7 @@ export function Room() {
               </Box>
             </Box>
           )}
-          {!callView && showMainRoomView && (
+          {showRoomView && (
             <Box grow="Yes" direction="Column">
               <RoomViewHeader />
               <Box grow="Yes">
@@ -77,7 +75,7 @@ export function Room() {
               </Box>
             </Box>
           )}
-        </PageMain>
+        </PageMain>}
         {showThreadPanel && <ThreadChatView />}
         {callView && chat && (
           <CallChatView />

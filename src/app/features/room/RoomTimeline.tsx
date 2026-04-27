@@ -116,7 +116,7 @@ import { useOpenUserRoomProfile } from '../../state/hooks/userRoomProfile';
 import { useSpaceOptionally } from '../../hooks/useSpace';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
-import { threadChatAtom } from '../../state/threadChat';
+import { useThreadChat } from '../../state/threadChat';
 import { MessageSquareTextIcon } from '../../icons/MessageSquareTextIcon';
 import { Avatar } from '../../components/avatar';
 import { UserAvatar } from '../../components/user-avatar';
@@ -470,7 +470,7 @@ export function RoomTimeline({
   const activeTimelineSet = useMemo(() => getTimelineSet(room, threadRootId), [room, threadRootId]);
 
   const setReplyDraft = useSetAtom(roomIdToReplyDraftAtomFamily(room.roomId));
-  const setThreadChat = useSetAtom(threadChatAtom);
+  const [, setThreadChat] = useThreadChat(room.roomId);
   const powerLevels = usePowerLevelsContext();
   const creators = useRoomCreators(room);
 

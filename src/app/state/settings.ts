@@ -1,5 +1,6 @@
 import { atom } from 'jotai';
 import { setTauriSettings } from './utils/tauriStore';
+import type { ThreadChatState } from './threadChat';
 
 const STORAGE_KEY = 'settings';
 export type DateFormat =
@@ -29,6 +30,7 @@ export interface Settings {
   hideActivity: boolean;
 
   showRoomSidePanel: boolean;
+  threadChatStates: Record<string, ThreadChatState>;
   memberSortFilterIndex: number;
   enterForNewline: boolean;
   messageLayout: MessageLayout;
@@ -62,6 +64,7 @@ const defaultSettings: Settings = {
   hideActivity: false,
 
   showRoomSidePanel: false,
+  threadChatStates: {},
   memberSortFilterIndex: 0,
   enterForNewline: false,
   messageLayout: 0,

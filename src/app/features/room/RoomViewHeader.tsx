@@ -78,7 +78,7 @@ import { PinIcon } from '../../icons/PinIcon';
 import { SearchIcon } from '../../icons/SearchIcon';
 import { UsersIcon } from '../../icons/UsersIcon';
 import { callChatAtom } from '../../state/callEmbed';
-import { threadChatAtom } from '../../state/threadChat';
+import { useThreadChat } from '../../state/threadChat';
 
 type RoomMenuProps = {
   room: Room;
@@ -308,7 +308,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const [showSidePanel, setShowSidePanel] = useSetting(settingsAtom, 'showRoomSidePanel');
 
   const [showCallChat, setShowCallChat] = useAtom(callChatAtom);
-  const [threadChat, setThreadChat] = useAtom(threadChatAtom);
+  const [threadChat, setThreadChat] = useThreadChat(room.roomId);
 
   const handleSearchClick = () => {
     const searchParams: _SearchPathSearchParams = {

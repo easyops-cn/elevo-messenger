@@ -55,7 +55,7 @@ import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { MemberPowerTag } from '../../../types/matrix/room';
 import { MembershipFilter } from '../../hooks/useMemberFilter';
 import { BADGE_LABEL_KEYS } from '../../hooks/usePowerLevelTags';
-import { threadChatAtom } from '../../state/threadChat';
+import { useThreadChat } from '../../state/threadChat';
 import { useRoomThreads } from '../../hooks/useRoomThreads';
 import { Avatar } from '../../components/avatar';
 
@@ -178,7 +178,7 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
   const sortFilterMenu = useMemberSortMenu();
   const [sortFilterIndex, setSortFilterIndex] = useSetting(settingsAtom, 'memberSortFilterIndex');
   const memberSort = useMemberSort(sortFilterIndex, sortFilterMenu);
-  const setThreadChat = useSetAtom(threadChatAtom);
+  const [, setThreadChat] = useThreadChat(room.roomId);
 
   const typingMembers = useRoomTypingMember(room.roomId);
   const isSpaceRoom = room.isSpaceRoom();

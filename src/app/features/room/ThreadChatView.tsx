@@ -1,28 +1,21 @@
 import React from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
-import { Box, Text, TooltipProvider, Tooltip, Icon, Icons, IconButton, toRem } from 'folds';
+import { Box, Text, TooltipProvider, Tooltip, Icon, Icons, IconButton } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { Page, PageHeader, PageMain } from '../../components/page';
-import { threadChatAtom } from '../../state/threadChat';
+import { useThreadChat } from '../../state/threadChat';
 import { RoomView } from './RoomView';
-import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
+import { useRoom } from '../../hooks/useRoom';
 
 export function ThreadChatView() {
   const { t } = useTranslation();
-  const { threadRootId } = useAtomValue(threadChatAtom);
-  const setThreadChat = useSetAtom(threadChatAtom);
-  const screenSize = useScreenSizeContext();
+  const room = useRoom();
+  const [threadChat, setThreadChat] = useThreadChat(room.roomId);
+  const { threadRootId } = threadChat;
 
   const handleClose = () => setThreadChat({ open: false, threadRootId: undefined });
 
   return (
-    <PageMain
-      style={{
-        width: screenSize === ScreenSize.Desktop ? toRem(456) : '100%',
-        flexShrink: 0,
-        flexGrow: 0,
-      }}
-    >
+    <PageMain isSidePanel>
       <Page>
         <PageHeader>
           <Box grow="Yes" alignItems="Center" gap="200">
