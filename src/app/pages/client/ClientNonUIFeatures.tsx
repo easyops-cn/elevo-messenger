@@ -4,13 +4,10 @@ import { useAtomValue } from 'jotai';
 import React, { ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoomEvent, RoomEventHandlerMap, type EventTimelineSetHandlerMap } from 'matrix-js-sdk';
-import { roomToUnreadAtom, unreadEqual, unreadInfoToUnread } from '../../state/room/roomToUnread';
+import { unreadEqual, unreadInfoToUnread } from '../../state/room/roomToUnread';
 import LogoSVG from '../../../../public/res/apple/apple-touch-icon-144x144.png';
-import LogoUnreadSVG from '../../../../public/res/svg/cinny-unread.svg';
-import LogoHighlightSVG from '../../../../public/res/svg/cinny-highlight.svg';
 import NotificationSound from '../../../../public/sound/notification.ogg';
 import InviteSound from '../../../../public/sound/invite.ogg';
-import { setFavicon } from '../../utils/dom';
 import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 import { allInvitesAtom } from '../../state/room-list/inviteList';
@@ -55,32 +52,6 @@ function PageZoomFeature() {
   } else {
     document.documentElement.style.setProperty('font-size', `calc(1em * ${pageZoom / 100})`);
   }
-
-  return null;
-}
-
-// TODO(steve): resume favicon update
-function FaviconUpdater() {
-  const roomToUnread = useAtomValue(roomToUnreadAtom);
-
-  useEffect(() => {
-    let notification = false;
-    let highlight = false;
-    roomToUnread.forEach((unread) => {
-      if (unread.total > 0) {
-        notification = true;
-      }
-      if (unread.highlight > 0) {
-        highlight = true;
-      }
-    });
-
-    if (notification) {
-      setFavicon(highlight ? LogoHighlightSVG : LogoUnreadSVG);
-    } else {
-      setFavicon(LogoSVG);
-    }
-  }, [roomToUnread]);
 
   return null;
 }
@@ -204,6 +175,7 @@ function MessageNotifications() {
         !data.liveEvent ||
         room.isSpaceRoom() ||
         !isNotificationEvent(mEvent) ||
+        mEvent.threadRootId ||
         getNotificationType(mx, room.roomId) === NotificationType.Mute
       ) {
         return;

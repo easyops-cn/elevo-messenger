@@ -213,8 +213,8 @@ export const isNotificationEvent = (mEvent: MatrixEvent) => {
 };
 
 export const roomHaveNotification = (room: Room): boolean => {
-  const total = room.getUnreadNotificationCount(NotificationCountType.Total);
-  const highlight = room.getUnreadNotificationCount(NotificationCountType.Highlight);
+  const total = room.getRoomUnreadNotificationCount(NotificationCountType.Total);
+  const highlight = room.getRoomUnreadNotificationCount(NotificationCountType.Highlight);
 
   return total > 0 || highlight > 0;
 };
@@ -239,8 +239,8 @@ export const roomHaveUnread = (mx: MatrixClient, room: Room) => {
 };
 
 export const getUnreadInfo = (room: Room): UnreadInfo => {
-  const total = room.getUnreadNotificationCount(NotificationCountType.Total);
-  const highlight = room.getUnreadNotificationCount(NotificationCountType.Highlight);
+  const total = room.getRoomUnreadNotificationCount(NotificationCountType.Total);
+  const highlight = room.getRoomUnreadNotificationCount(NotificationCountType.Highlight);
   return {
     roomId: room.roomId,
     highlight,
