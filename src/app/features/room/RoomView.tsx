@@ -107,9 +107,9 @@ export function RoomView({
           editor={editor}
           onRequestScrollToBottom={timelineScrollToBottomRef}
         />
-        <RoomViewTyping room={room} />
       </Box>
       <Box shrink="No" direction="Column" style={{ width: '100%', maxWidth: 'var(--container-size)', margin: '0 auto'}}>
+        {!threadRootId && <RoomViewTyping room={room} />}
         <div style={{ padding: `0 ${config.space.S400} ${config.space.S400}` }}>
           {tombstoneEvent ? (
             <RoomTombstone

@@ -22,6 +22,7 @@ import {
   Room,
   RoomEvent,
   RoomEventHandlerMap,
+  type Thread,
 } from 'matrix-js-sdk';
 import { HTMLReactParserOptions } from 'html-react-parser';
 import classNames from 'classnames';
@@ -427,8 +428,13 @@ const getEmptyTimeline = () => ({
 });
 
 const getRoomUnreadInfo = (room: Room, scrollTo: boolean, threadRootId?: string) => {
-  if (threadRootId) return undefined;
-  const readUptoEventId = room.getEventReadUpTo(room.client.getUserId() ?? '');
+  let receiptStore: Room | Thread = room;
+  if (threadRootId) {
+    const thread = room.getThread(threadRootId);
+    if (!thread) return undefined;
+    receiptStore = thread;
+  }
+  const readUptoEventId = receiptStore.getEventReadUpTo(room.client.getSafeUserId());
   if (!readUptoEventId) return undefined;
   const evtTimeline = getEventTimeline(room, readUptoEventId, threadRootId);
   const latestTimeline = evtTimeline && getFirstLinkedTimeline(evtTimeline, Direction.Forward);
@@ -644,7 +650,7 @@ export function RoomTimeline({
             // Check if the document is in focus (user is actively viewing the app),
             // and either there are no unread messages or the latest message is from the current user.
             // If either condition is met, trigger the markAsRead function to send a read receipt.
-            requestAnimationFrame(() => markAsRead(mx, mEvt.getRoomId()!, hideActivity));
+            requestAnimationFrame(() => markAsRead(mx, mEvt.getRoomId()!, hideActivity, threadRootId));
           }
 
           if (!document.hasFocus() && !unreadInfo) {
@@ -737,13 +743,13 @@ export function RoomTimeline({
   const tryAutoMarkAsRead = useCallback(() => {
     const readUptoEventId = readUptoEventIdRef.current;
     if (!readUptoEventId) {
-      requestAnimationFrame(() => markAsRead(mx, room.roomId, hideActivity));
+      requestAnimationFrame(() => markAsRead(mx, room.roomId, hideActivity, threadRootId));
       return;
     }
     const evtTimeline = getEventTimeline(room, readUptoEventId, threadRootId);
     const latestTimeline = evtTimeline && getFirstLinkedTimeline(evtTimeline, Direction.Forward);
     if (latestTimeline === getLiveTimeline(room, threadRootId)) {
-      requestAnimationFrame(() => markAsRead(mx, room.roomId, hideActivity));
+      requestAnimationFrame(() => markAsRead(mx, room.roomId, hideActivity, threadRootId));
     }
   }, [mx, room, threadRootId, hideActivity]);
 
@@ -893,7 +899,7 @@ export function RoomTimeline({
   };
 
   const handleMarkAsRead = () => {
-    markAsRead(mx, room.roomId, hideActivity);
+    markAsRead(mx, room.roomId, hideActivity, threadRootId);
   };
 
   const handleOpenReply: MouseEventHandler = useCallback(
@@ -1760,7 +1766,7 @@ export function RoomTimeline({
       newDivider = prevEvent?.getId() === readUptoEventIdRef.current;
     }
     if (!dayDivider) {
-      dayDivider = prevEvent ? !inSameDay(prevEvent.getTs(), mEvent.getTs()) : false;
+      dayDivider = prevEvent ? !inSameDay(prevEvent.getTs(), mEvent.getTs()) : true;
     }
 
     const collapsed =
