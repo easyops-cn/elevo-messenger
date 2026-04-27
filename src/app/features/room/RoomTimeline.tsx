@@ -511,6 +511,7 @@ export function RoomTimeline({
   atBottomRef.current = atBottom;
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollContentRef = useRef<HTMLDivElement>(null);
   const scrollToBottomRef = useRef({
     count: 0,
     smooth: true,
@@ -860,6 +861,22 @@ export function RoomTimeline({
     }
   }, [scrollToBottomCount]);
 
+  const debounceScrollToBottom = useDebounce(
+    useCallback(() => {
+      const scrollEl = scrollRef.current;
+      if (atBottomRef.current && scrollEl) {
+        console.log('Resizing timeline, staying at bottom');
+        scrollToBottom(scrollEl);
+      }
+    }, []),
+    { wait: 100 }
+  );
+
+  useResizeObserver(
+    debounceScrollToBottom,
+    useCallback(() => scrollContentRef.current, [])
+  );
+
   // Remove unreadInfo on mark as read
   useEffect(() => {
     if (!unread) {
@@ -1103,6 +1120,7 @@ export function RoomTimeline({
                 <Reply
                   room={room}
                   timelineSet={timelineSet}
+                  eventId={mEventId}
                   replyEventId={replyEventId}
                   onClick={handleOpenReply}
                 />
@@ -1246,6 +1264,7 @@ export function RoomTimeline({
                 <Reply
                   room={room}
                   timelineSet={timelineSet}
+                  eventId={mEventId}
                   replyEventId={replyEventId}
                   onClick={handleOpenReply}
                 />
@@ -1865,6 +1884,7 @@ export function RoomTimeline({
       )}
       <Scroll ref={scrollRef} visibility="Hover" hideTrack>
         <Box
+          ref={scrollContentRef}
           direction="Column"
           justifyContent="End"
           style={{ minHeight: '100%', padding: `${config.space.S600} 0`, maxWidth: 'var(--container-size)', margin: '0 auto' }}

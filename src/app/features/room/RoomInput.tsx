@@ -109,7 +109,6 @@ import { CommandAutocomplete } from './CommandAutocomplete';
 import { VoiceRecordingBoard, VoiceRecordingBoardHandlers } from './VoiceRecordingBoard';
 import { Command, SHRUG, TABLEFLIP, UNFLIP, useCommands } from '../../hooks/useCommands';
 import { mobileOrTablet } from '../../utils/user-agent';
-import { useElementSizeObserver } from '../../hooks/useElementSizeObserver';
 import { ReplyLayout, ThreadIndicator } from '../../components/message';
 import { roomToParentsAtom } from '../../state/room/roomToParents';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
@@ -318,14 +317,9 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const pickFile = useFilePicker(handleFiles, true);
     const handlePaste = useFilePasteHandler(handleFiles);
     const dropZoneVisible = useFileDropZone(fileDropContainerRef, handleFiles);
-    const [hideStickerBtn, setHideStickerBtn] = useState(document.body.clientWidth < 500);
+    const hideStickerBtn = !!threadRootId;
 
     const isComposing = useComposingCheck();
-
-    useElementSizeObserver(
-      useCallback(() => fileDropContainerRef.current, [fileDropContainerRef]),
-      useCallback((width) => setHideStickerBtn(width < 500), [])
-    );
 
     useEffect(() => {
       Transforms.insertFragment(editor, msgDraft);
@@ -473,7 +467,6 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       const applyThreadRelation = () => {
         if (!threadRootId) return;
         content['m.relates_to'] = {
-          ...(content['m.relates_to'] ?? {}),
           event_id: threadRootId,
           rel_type: RelationType.Thread,
           is_falling_back: true,
@@ -603,6 +596,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           url: mxc,
           info,
         });
+        scrollToBottomRef?.current?.();
       } finally {
         URL.revokeObjectURL(blobUrl);
       }
@@ -801,6 +795,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                       content={
                         <EmojiBoard
                           tab={emojiBoardTab}
+                          allowSticker={!hideStickerBtn}
                           onTabChange={setEmojiBoardTab}
                           imagePackRooms={imagePackRooms}
                           returnFocusOnDeactivate={false}

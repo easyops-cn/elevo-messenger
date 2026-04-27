@@ -201,6 +201,7 @@ function PinnedMessage({
       {pinnedEvent.replyEventId && (
         <Reply
           room={room}
+          eventId={eventId}
           replyEventId={pinnedEvent.replyEventId}
           onClick={handleOpenClick}
         />

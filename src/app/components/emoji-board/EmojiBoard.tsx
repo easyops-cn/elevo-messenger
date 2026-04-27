@@ -366,6 +366,7 @@ type EmojiBoardProps = {
   onStickerSelect?: (mxc: string, shortcode: string, label: string) => void;
   allowTextCustomEmoji?: boolean;
   addToRecentEmoji?: boolean;
+  allowSticker?: boolean;
 };
 
 export function EmojiBoard({
@@ -379,6 +380,7 @@ export function EmojiBoard({
   onStickerSelect,
   allowTextCustomEmoji,
   addToRecentEmoji = true,
+  allowSticker = true,
 }: EmojiBoardProps) {
   const mx = useMatrixClient();
   const { t } = useTranslation();
@@ -510,7 +512,7 @@ export function EmojiBoard({
       <EmojiBoardLayout
         header={
           <Box direction="Column" gap="200">
-            {onTabChange && <EmojiBoardTabs tab={tab} onTabChange={onTabChange} />}
+            {onTabChange && <EmojiBoardTabs tab={tab} allowSticker={allowSticker} onTabChange={onTabChange} />}
             <SearchInput
               key={tab}
               query={result?.query}

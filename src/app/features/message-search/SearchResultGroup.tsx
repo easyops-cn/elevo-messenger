@@ -273,9 +273,10 @@ export function SearchResultGroup({
                     </Chip>
                   </Box>
                 </Box>
-                {replyEventId && (
+                {replyEventId && mainEventId && (
                   <Reply
                     room={room}
+                    eventId={mainEventId}
                     replyEventId={replyEventId}
                     onClick={handleOpenClick}
                   />
