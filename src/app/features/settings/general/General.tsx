@@ -761,7 +761,6 @@ function Messages() {
     settingsAtom,
     'hideNickAvatarEvents'
   );
-  const [mediaAutoLoad, setMediaAutoLoad] = useSetting(settingsAtom, 'mediaAutoLoad');
   const [urlPreview, setUrlPreview] = useSetting(settingsAtom, 'urlPreview');
   const [encUrlPreview, setEncUrlPreview] = useSetting(settingsAtom, 'encUrlPreview');
   const [showHiddenEvents, setShowHiddenEvents] = useSetting(settingsAtom, 'showHiddenEvents');
@@ -798,18 +797,6 @@ function Messages() {
               variant="Primary"
               value={hideNickAvatarEvents}
               onChange={setHideNickAvatarEvents}
-            />
-          }
-        />
-      </SequenceCard>
-      <SequenceCard className={SequenceCardStyle} variant="SurfaceVariant" direction="Column">
-        <SettingTile
-          title={t('settings.messages.disableMediaAutoLoad')}
-          after={
-            <Switch
-              variant="Primary"
-              value={!mediaAutoLoad}
-              onChange={(v) => setMediaAutoLoad(!v)}
             />
           }
         />

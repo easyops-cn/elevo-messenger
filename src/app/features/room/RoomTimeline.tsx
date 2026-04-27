@@ -461,7 +461,6 @@ export function RoomTimeline({
   const [messageSpacing] = useSetting(settingsAtom, 'messageSpacing');
   const [hideMembershipEvents] = useSetting(settingsAtom, 'hideMembershipEvents');
   const [hideNickAvatarEvents] = useSetting(settingsAtom, 'hideNickAvatarEvents');
-  const [mediaAutoLoad] = useSetting(settingsAtom, 'mediaAutoLoad');
   const [urlPreview] = useSetting(settingsAtom, 'urlPreview');
   const [encUrlPreview] = useSetting(settingsAtom, 'encUrlPreview');
   const showUrlPreview = room.hasEncryptionStateEvent() ? encUrlPreview : urlPreview;
@@ -1137,7 +1136,6 @@ export function RoomTimeline({
                   ts={mEvent.getTs()}
                   edited={!!editedEvent}
                   getContent={getContent}
-                  mediaAutoLoad={mediaAutoLoad}
                   urlPreview={showUrlPreview}
                   htmlReactParserOptions={htmlReactParserOptions}
                   linkifyOpts={linkifyOpts}
@@ -1281,7 +1279,6 @@ export function RoomTimeline({
                       renderImageContent={(props) => (
                         <ImageContent
                           {...props}
-                          autoPlay={mediaAutoLoad}
                           renderImage={(p) => <Image {...p} loading="lazy" />}
                           renderViewer={(p) => <ImageViewer {...p} />}
                         />
@@ -1305,7 +1302,6 @@ export function RoomTimeline({
                         ts={mEvent.getTs()}
                         edited={!!editedEvent}
                         getContent={getContent}
-                        mediaAutoLoad={mediaAutoLoad}
                         urlPreview={showUrlPreview}
                         htmlReactParserOptions={htmlReactParserOptions}
                         linkifyOpts={linkifyOpts}
@@ -1420,7 +1416,6 @@ export function RoomTimeline({
                 renderImageContent={(props) => (
                   <ImageContent
                     {...props}
-                    autoPlay={mediaAutoLoad}
                     renderImage={(p) => <Image {...p} loading="lazy" />}
                     renderViewer={(p) => <ImageViewer {...p} />}
                   />

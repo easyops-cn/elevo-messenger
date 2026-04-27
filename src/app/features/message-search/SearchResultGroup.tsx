@@ -46,7 +46,6 @@ type SearchResultGroupProps = {
   room: Room;
   highlights: string[];
   items: ResultItem[];
-  mediaAutoLoad?: boolean;
   urlPreview?: boolean;
   onOpen: (roomId: string, eventId: string) => void;
   hour24Clock: boolean;
@@ -56,7 +55,6 @@ export function SearchResultGroup({
   room,
   highlights,
   items,
-  mediaAutoLoad,
   urlPreview,
   onOpen,
   hour24Clock,
@@ -112,7 +110,6 @@ export function SearchResultGroup({
             msgType={event.content.msgtype ?? ''}
             ts={event.origin_server_ts}
             getContent={getContent}
-            mediaAutoLoad={mediaAutoLoad}
             urlPreview={urlPreview}
             htmlReactParserOptions={htmlReactParserOptions}
             linkifyOpts={linkifyOpts}
@@ -131,7 +128,6 @@ export function SearchResultGroup({
             renderImageContent={(props) => (
               <ImageContent
                 {...props}
-                autoPlay={mediaAutoLoad}
                 renderImage={(p) => <Image {...p} loading="lazy" />}
                 renderViewer={(p) => <ImageViewer {...p} />}
               />

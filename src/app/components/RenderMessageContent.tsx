@@ -38,7 +38,6 @@ type RenderMessageContentProps = {
   ts: number;
   edited?: boolean;
   getContent: <T>() => T;
-  mediaAutoLoad?: boolean;
   urlPreview?: boolean;
   highlightRegex?: RegExp;
   htmlReactParserOptions: HTMLReactParserOptions;
@@ -52,7 +51,6 @@ export function RenderMessageContent({
   ts,
   edited,
   getContent,
-  mediaAutoLoad,
   urlPreview,
   highlightRegex,
   htmlReactParserOptions,
@@ -195,7 +193,6 @@ export function RenderMessageContent({
           renderImageContent={(props) => (
             <ImageContent
               {...props}
-              autoPlay={mediaAutoLoad}
               renderImage={(p) => <Image {...p} loading="lazy" />}
               renderViewer={(p) => <ImageViewer {...p} />}
             />
@@ -217,18 +214,14 @@ export function RenderMessageContent({
               body={body}
               info={info}
               {...props}
-              renderThumbnail={
-                mediaAutoLoad
-                  ? () => (
-                      <ThumbnailContent
-                        info={info}
-                        renderImage={(src) => (
-                          <Image alt={body} title={body} src={src} loading="lazy" />
-                        )}
-                      />
-                    )
-                  : undefined
-              }
+              renderThumbnail={() => (
+                <ThumbnailContent
+                  info={info}
+                  renderImage={(src) => (
+                    <Image alt={body} title={body} src={src} loading="lazy" />
+                  )}
+                />
+              )}
               renderVideo={(p) => <Video {...p} />}
             />
           )}
