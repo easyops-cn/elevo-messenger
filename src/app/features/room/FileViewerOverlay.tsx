@@ -5,11 +5,14 @@ import FocusTrap from 'focus-trap-react';
 import { ImageViewer } from '../../components/image-viewer/ImageViewer';
 import { TextViewer } from '../../components/text-viewer/TextViewer';
 import { PdfViewer } from '../../components/Pdf-viewer/PdfViewer';
+import { VideoViewer } from '../../components/video-viewer/VideoViewer';
+import { AudioViewer } from '../../components/audio-viewer/AudioViewer';
 import { UnknownFileViewer } from '../../components/unknown-file-viewer/UnknownFileViewer';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { ModalWide } from '../../styles/Modal.css';
 import { stopPropagation } from '../../utils/keyboard';
+import type { IAudioInfo, IThumbnailContent, IVideoInfo } from '../../../types/matrix/common';
 import {
   READABLE_TEXT_MIME_TYPES,
   READABLE_EXT_TO_MIME_TYPE,
@@ -23,7 +26,7 @@ import {
   mxcUrlToHttp,
 } from '../../utils/matrix';
 
-type ViewerType = 'image' | 'text' | 'pdf';
+type ViewerType = 'image' | 'video' | 'audio' | 'text' | 'pdf';
 
 type FileViewerOverlayProps = {
   fileEvent: MatrixEvent;
@@ -32,6 +35,8 @@ type FileViewerOverlayProps = {
 
 function getFileType(mimetype: string, filename: string): ViewerType | null {
   if (mimetype.startsWith('image/')) return 'image';
+  if (mimetype.startsWith('video/')) return 'video';
+  if (mimetype.startsWith('audio/')) return 'audio';
   if (mimetype === 'application/pdf') return 'pdf';
   if (
     READABLE_TEXT_MIME_TYPES.includes(mimetype) ||
@@ -52,6 +57,11 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
   const fileSize = (content.info?.size ?? 0) as number;
   const url = (content.file?.url ?? content.url) as string | undefined;
   const encInfo = content.file;
+  const videoInfo = (content.info ?? {}) as IVideoInfo & IThumbnailContent;
+  const audioInfo = (content.info ?? {}) as IAudioInfo;
+  const audioWaveform = Array.isArray(content['org.matrix.msc1767.audio']?.waveform)
+    ? (content['org.matrix.msc1767.audio']?.waveform as number[])
+    : undefined;
   const viewerType = getFileType(mimetype, filename);
 
   const imageUrl = useMemo(() => {
@@ -123,7 +133,7 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
             <Modal
               className={ModalWide}
               size="500"
-              onContextMenu={(evt: any) => evt.stopPropagation()}
+              onContextMenu={(evt: React.MouseEvent) => evt.stopPropagation()}
             >
               <UnknownFileViewer
                 name={filename}
@@ -143,6 +153,8 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
   const showViewer =
     viewerType === 'image'
       ? !!imageUrl
+      : viewerType === 'video' || viewerType === 'audio'
+        ? !!url
       : viewerType === 'text'
         ? !!textData
         : !!pdfBlobUrl;
@@ -161,15 +173,37 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
           <Modal
             className={ModalWide}
             size="500"
-            onContextMenu={(evt: any) => evt.stopPropagation()}
+            onContextMenu={(evt: React.MouseEvent) => evt.stopPropagation()}
           >
             {viewerType === 'image' && imageUrl && (
               <ImageViewer src={imageUrl} alt={filename} requestClose={requestClose} />
+            )}
+            {viewerType === 'video' && url && (
+              <VideoViewer
+                name={filename}
+                mimeType={mimetype}
+                url={url}
+                info={videoInfo}
+                encInfo={encInfo}
+                requestClose={requestClose}
+              />
+            )}
+            {viewerType === 'audio' && url && (
+              <AudioViewer
+                name={filename}
+                mimeType={mimetype}
+                url={url}
+                info={audioInfo}
+                encInfo={encInfo}
+                waveform={audioWaveform}
+                requestClose={requestClose}
+              />
             )}
             {viewerType === 'text' && textData !== null && (
               <TextViewer
                 name={filename}
                 text={textData}
+                mimeType={mimetype}
                 langName={
                   READABLE_TEXT_MIME_TYPES.includes(mimetype)
                     ? mimeTypeToExt(mimetype)
