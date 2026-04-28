@@ -13,7 +13,6 @@ import { useRoom } from '../../hooks/useRoom';
 import { useKeyDown } from '../../hooks/useKeyDown';
 import { markAsRead } from '../../utils/notifications';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { useRoomMembers } from '../../hooks/useRoomMembers';
 import { CallView } from '../call/CallView';
 import { RoomViewHeader } from './RoomViewHeader';
 import { callChatAtom } from '../../state/callEmbed';
@@ -31,7 +30,6 @@ export function Room() {
   const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
   const screenSize = useScreenSizeContext();
   const powerLevels = usePowerLevels(room);
-  const members = useRoomMembers(mx, room.roomId);
   const chat = useAtomValue(callChatAtom);
   const [threadChat] = useThreadChat(room.roomId);
 
@@ -81,7 +79,7 @@ export function Room() {
           <CallChatView />
         )}
         {!callView && screenSize === ScreenSize.Desktop && showSidePanel && !showThreadPanel && (
-          <RoomSidePanel key={room.roomId} room={room} members={members} />
+          <RoomSidePanel key={room.roomId} room={room} />
         )}
       </Box>
     </PowerLevelsContextProvider>

@@ -5,6 +5,7 @@ import {
   Button,
   Chip,
   Icon,
+  IconButton,
   Icons,
   Spinner,
   Text,
@@ -32,6 +33,7 @@ import {
 } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { validBlurHash } from '../../../utils/blurHash';
+import { PlayIcon } from '../../../icons/PlayIcon';
 
 type RenderVideoProps = {
   title: string;
@@ -131,16 +133,15 @@ export const VideoContent = as<'div', VideoContentProps>(
         )}
         {!autoPlay && !blurred && srcState.status === AsyncStatus.Idle && (
           <Box className={css.AbsoluteContainer} alignItems="Center" justifyContent="Center">
-            <Button
+            <IconButton
               variant="Secondary"
-              fill="Solid"
-              radii="300"
-              size="300"
+              size="500"
+              radii="Pill"
+              outlined
               onClick={loadSrc}
-              before={<Icon size="Inherit" src={Icons.Play} filled />}
             >
-              <Text size="B300">Watch</Text>
-            </Button>
+              <Icon src={PlayIcon} size="200" filled />
+            </IconButton>
           </Box>
         )}
         {srcState.status === AsyncStatus.Success && (

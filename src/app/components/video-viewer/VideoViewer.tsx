@@ -74,7 +74,6 @@ export const VideoViewer = as<'div', VideoViewerProps>(
             url={url}
             info={info}
             encInfo={encInfo}
-            autoPlay
             renderThumbnail={() => (
               <ThumbnailContent
                 info={info}
