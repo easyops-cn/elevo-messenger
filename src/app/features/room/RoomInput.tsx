@@ -468,12 +468,17 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         content.format = 'org.matrix.custom.html';
         content.formatted_body = formattedBody;
       }
-      if (replyDraft?.relation?.rel_type === RelationType.Thread) {
+      if (replyDraft) {
         content['m.relates_to'] = {
           'm.in_reply_to': {
             event_id: replyDraft.eventId,
           },
         };
+        if (replyDraft?.relation?.rel_type === RelationType.Thread) {
+          content['m.relates_to'].event_id = replyDraft.relation.event_id;
+          content['m.relates_to'].rel_type = RelationType.Thread;
+          content['m.relates_to'].is_falling_back = true;
+        }
       }
 
       mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent);
