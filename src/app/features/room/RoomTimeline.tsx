@@ -1040,7 +1040,8 @@ export function RoomTimeline({
           getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId;
 
         const { replyEventId, isThreadRoot } = mEvent;
-        const showThreadSummary = !threadRootId && isThreadRoot;
+        const thread = mEvent.getThread();
+        const showThreadSummary = !threadRootId && isThreadRoot && !!thread;
 
         return (
           <Message
@@ -1108,7 +1109,7 @@ export function RoomTimeline({
                   outlineAttachment={messageLayout === MessageLayout.Bubble}
                 />
                 {showThreadSummary && (
-                  <ThreadSummary mEvent={mEvent} room={room} onOpenThread={handleOpenThread} />
+                  <ThreadSummary mEvent={mEvent} room={room} thread={thread} onOpenThread={handleOpenThread} />
                 )}
               </>
             )}
@@ -1122,7 +1123,8 @@ export function RoomTimeline({
         const highlighted = focusItem?.index === item && focusItem.highlight;
 
         const { replyEventId, isThreadRoot } = mEvent;
-        const showThreadSummary = !threadRootId && isThreadRoot;
+        const thread = mEvent.getThread();
+        const showThreadSummary = !threadRootId && isThreadRoot && !!thread;
 
         return (
           <Message
@@ -1214,7 +1216,7 @@ export function RoomTimeline({
                       />
 
                       {showThreadSummary && (
-                        <ThreadSummary mEvent={mEvent} room={room} onOpenThread={handleOpenThread} />
+                        <ThreadSummary mEvent={mEvent} room={room} thread={thread} onOpenThread={handleOpenThread} />
                       )}
                     </>
                   );

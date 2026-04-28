@@ -16,6 +16,7 @@ import {
   RelationType,
   Room,
   RoomMember,
+  type Thread,
 } from 'matrix-js-sdk';
 import { CryptoBackend } from 'matrix-js-sdk/lib/common-crypto/CryptoBackend';
 import { AccountDataEvent } from '../../types/matrix/accountData';
@@ -231,7 +232,31 @@ export const roomHaveUnread = (mx: MatrixClient, room: Room) => {
 
   for (let i = liveEvents.length - 1; i >= 0; i -= 1) {
     const event = liveEvents[i];
-    if (!event) return false;
+    if (event.getId() === readUpToId) return false;
+    if (isNotificationEvent(event)) return true;
+  }
+  return true;
+};
+
+export const threadHaveNotification = (room: Room, threadId: string): boolean => {
+  const total = room.getThreadUnreadNotificationCount(threadId, NotificationCountType.Total);
+  const highlight = room.getThreadUnreadNotificationCount(threadId, NotificationCountType.Highlight);
+
+  return total > 0 || highlight > 0;
+};
+
+export const threadHaveUnread = (mx: MatrixClient, thread: Thread) => {
+  const userId = mx.getUserId();
+  if (!userId) return false;
+  const readUpToId = thread.getEventReadUpTo(userId);
+  const liveEvents = thread.liveTimeline.getEvents();
+
+  if (liveEvents[liveEvents.length - 1]?.getSender() === userId) {
+    return false;
+  }
+
+  for (let i = liveEvents.length - 1; i >= 0; i -= 1) {
+    const event = liveEvents[i];
     if (event.getId() === readUpToId) return false;
     if (isNotificationEvent(event)) return true;
   }

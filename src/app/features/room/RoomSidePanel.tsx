@@ -18,7 +18,6 @@ import {
   Spinner,
   Text,
   config,
-  toRem,
 } from 'folds';
 import { MatrixClient, Room, RoomMember } from 'matrix-js-sdk';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -35,7 +34,7 @@ import {
   useAsyncSearch,
 } from '../../hooks/useAsyncSearch';
 import { TypingIndicator } from '../../components/typing-indicator';
-import { getLatestMessageText, getMemberDisplayName, getMemberSearchStr } from '../../utils/room';
+import { getMemberDisplayName, getMemberSearchStr } from '../../utils/room';
 import { getMxIdLocalPart } from '../../utils/matrix';
 import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
@@ -57,6 +56,7 @@ import { BADGE_LABEL_KEYS } from '../../hooks/usePowerLevelTags';
 import { useThreadChat } from '../../state/threadChat';
 import { useRoomThreads } from '../../hooks/useRoomThreads';
 import { Avatar } from '../../components/avatar';
+import { ThreadMenuItem } from './ThreadMenuItem';
 
 type MemberItemProps = {
   mx: MatrixClient;
@@ -382,80 +382,16 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
 
                 {!loadingThreads && !loadingThreadsError && sortedThreads.length > 0 && (
                   <Box direction="Column" gap="100">
-                    {sortedThreads.map((thread) => {
-                      const rootSummary = thread.rootEvent
-                        ? getLatestMessageText(room, thread.rootEvent, mx.getSafeUserId(), false, t)
-                        : undefined;
-                      const latestReplyEvent = thread.replyToEvent;
-                      const latestReplySummary = latestReplyEvent
-                        ? getLatestMessageText(room, latestReplyEvent, mx.getSafeUserId(), false, t)
-                        : undefined;
-                      const threadReplies = Math.max(thread.length ?? 0, 0);
-                      const latestReplySenderId = latestReplyEvent?.getSender();
-                      const latestReplySenderName = latestReplySenderId
-                        ? getMemberDisplayName(room, latestReplySenderId) ??
-                          getMxIdLocalPart(latestReplySenderId) ??
-                          latestReplySenderId
-                        : undefined;
-                      const latestReplyAvatarMxcUrl = latestReplySenderId
-                        ? room.getMember(latestReplySenderId)?.getMxcAvatarUrl()
-                        : undefined;
-                      const latestReplyAvatarUrl = latestReplyAvatarMxcUrl
-                        ? mx.mxcUrlToHttp(
-                            latestReplyAvatarMxcUrl,
-                            64,
-                            64,
-                            'crop',
-                            undefined,
-                            false,
-                            useAuthentication
-                          )
-                        : undefined;
-                      const latestTs = latestReplyEvent?.getTs() ?? thread.rootEvent?.getTs();
-
-                      return (
-                        <MenuItem
-                          key={thread.id}
-                          data-event-id={thread.id}
-                          style={{ padding: `0 ${config.space.S200}`, height: toRem(52) }}
-                          variant="Background"
-                          radii="400"
-                          onClick={handleThreadClick}
-                          after={
-                            latestTs ? (
-                              <Text size="T200" priority="300" style={{ flexShrink: 0}}>
-                                {formatRelativeTime(latestTs)}
-                              </Text>
-                            ) : undefined
-                          }
-                        >
-                          <Box grow="Yes" direction="Column" gap="100">
-                            <Text size="T300" truncate>
-                              {rootSummary ?? t('message.threadLatestReplyFallback')}
-                            </Text>
-                            {threadReplies > 0 && latestReplySenderId ? (
-                              <Box alignItems="Center" gap="100">
-                                <Avatar size="100" radii="Pill">
-                                  <UserAvatar
-                                    userId={latestReplySenderId}
-                                    src={latestReplyAvatarUrl ?? undefined}
-                                    alt={latestReplySenderName ?? latestReplySenderId}
-                                    renderFallback={() => <Icon size="50" src={Icons.User} filled />}
-                                  />
-                                </Avatar>
-                                <Text size="T200" priority="300" truncate>
-                                  {latestReplySummary ?? t('message.threadLatestReplyFallback')}
-                                </Text>
-                              </Box>
-                            ) : (
-                              <Text size="T200" priority="300" truncate>
-                                {t('message.threadNoReplies')}
-                              </Text>
-                            )}
-                          </Box>
-                        </MenuItem>
-                      );
-                    })}
+                    {sortedThreads.map((thread) => (
+                      <ThreadMenuItem
+                        key={thread.id}
+                        useAuthentication={useAuthentication}
+                        room={room}
+                        thread={thread}
+                        onClick={handleThreadClick}
+                        formatRelativeTime={formatRelativeTime}
+                      />
+                    ))}
                   </Box>
                 )}
               </Box>
