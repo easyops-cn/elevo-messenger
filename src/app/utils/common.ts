@@ -1,4 +1,9 @@
-import { IconName, IconSrc } from 'folds';
+import { IconSrc } from 'folds';
+import { FileImageIcon } from '../icons/FileImageIcon';
+import { FileIcon } from '../icons/FileIcon';
+import { FilmIcon } from '../icons/FilmIcon';
+import { AudioLinesIcon } from '../icons/AudioLinesIcon';
+import { FileQuestionMarkIcon } from '../icons/FileQuestionMarkIcon';
 
 export const bytesToSize = (bytes: number): string => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
@@ -33,18 +38,21 @@ export const secondsToMinutesAndSeconds = (seconds: number): string => {
   return `${mm}:${ss < 10 ? '0' : ''}${ss}`;
 };
 
-export const getFileTypeIcon = (icons: Record<IconName, IconSrc>, fileType: string): IconSrc => {
+export const getFileTypeIcon = (fileType: string, unknown?: boolean): IconSrc => {
   const type = fileType.toLowerCase();
   if (type.startsWith('audio')) {
-    return icons.Play;
+    return AudioLinesIcon;
   }
   if (type.startsWith('video')) {
-    return icons.Vlc;
+    return FilmIcon;
   }
   if (type.startsWith('image')) {
-    return icons.Photo;
+    return FileImageIcon;
   }
-  return icons.File;
+  if (unknown) {
+    return FileQuestionMarkIcon;
+  }
+  return FileIcon;
 };
 
 export const fulfilledPromiseSettledResult = <T>(prs: PromiseSettledResult<T>[]): T[] =>

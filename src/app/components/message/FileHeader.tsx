@@ -1,17 +1,9 @@
 import { Badge, Box, Icon, IconButton, Icons, Spinner, Text, as, toRem } from 'folds';
-import React, { ReactNode, useCallback } from 'react';
+import React, { ReactNode } from 'react';
 import { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
-import { saveFile } from '../../utils/file-saver';
+import { AsyncStatus } from '../../hooks/useAsyncCallback';
+import { useMediaDownload } from '../../hooks/useMediaDownload';
 import { mimeTypeToExt } from '../../utils/mimeTypes';
-import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
-import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
-import {
-  decryptFile,
-  downloadEncryptedMedia,
-  downloadMedia,
-  mxcUrlToHttp,
-} from '../../utils/matrix';
 
 const badgeStyles = { maxWidth: toRem(100) };
 
@@ -22,20 +14,7 @@ type FileDownloadButtonProps = {
   encInfo?: EncryptedAttachmentInfo;
 };
 export function FileDownloadButton({ filename, url, mimeType, encInfo }: FileDownloadButtonProps) {
-  const mx = useMatrixClient();
-  const useAuthentication = useMediaAuthentication();
-
-  const [downloadState, download] = useAsyncCallback(
-    useCallback(async () => {
-      const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
-      if (!mediaUrl) throw new Error('Invalid media URL');
-      const fileContent = encInfo
-        ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
-        : await downloadMedia(mediaUrl);
-
-      await saveFile(fileContent, filename);
-    }, [mx, url, useAuthentication, mimeType, encInfo, filename])
-  );
+  const [downloadState, download] = useMediaDownload(url, mimeType, filename, encInfo);
 
   const downloading = downloadState.status === AsyncStatus.Loading;
   const hasError = downloadState.status === AsyncStatus.Error;

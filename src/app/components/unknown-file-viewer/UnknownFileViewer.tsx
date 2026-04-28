@@ -1,19 +1,10 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import classNames from 'classnames';
 import { Box, Button, Header, Icon, IconButton, Icons, Spinner, Text, as, config } from 'folds';
 import { useTranslation } from 'react-i18next';
 import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
-import { useAsyncCallback } from '../../hooks/useAsyncCallback';
-import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
-import { bytesToSize } from '../../utils/common';
-import { saveFile } from '../../utils/file-saver';
-import {
-  decryptFile,
-  downloadEncryptedMedia,
-  downloadMedia,
-  mxcUrlToHttp,
-} from '../../utils/matrix';
+import { useMediaDownload } from '../../hooks/useMediaDownload';
+import { bytesToSize, getFileTypeIcon } from '../../utils/common';
 import * as css from './UnknownFileViewer.css';
 
 export type UnknownFileViewerProps = {
@@ -28,23 +19,7 @@ export type UnknownFileViewerProps = {
 export const UnknownFileViewer = as<'div', UnknownFileViewerProps>(
   ({ className, name, size, url, mimetype, encInfo, requestClose, ...props }, ref) => {
     const { t } = useTranslation();
-    const mx = useMatrixClient();
-    const useAuth = useMediaAuthentication();
-
-    const [downloadState, handleDownload] = useAsyncCallback(
-      useCallback(async () => {
-        const mediaUrl = mxcUrlToHttp(mx, url, useAuth);
-        if (!mediaUrl) throw new Error('Invalid media URL');
-
-        const fileContent = encInfo
-          ? await downloadEncryptedMedia(mediaUrl, (encBuf) =>
-              decryptFile(encBuf, mimetype, encInfo)
-            )
-          : await downloadMedia(mediaUrl);
-
-        await saveFile(fileContent, name);
-      }, [mx, url, useAuth, mimetype, encInfo, name])
-    );
+    const [downloadState, handleDownload] = useMediaDownload(url, mimetype, name, encInfo);
 
     const downloading = downloadState.status === 'loading';
 
@@ -61,7 +36,7 @@ export const UnknownFileViewer = as<'div', UnknownFileViewerProps>(
           </Box>
         </Header>
         <Box grow="Yes" direction="Column" alignItems="Center" justifyContent="Center" gap="200">
-          <Icon size="600" src={Icons.File} />
+          <Icon size="600" src={getFileTypeIcon(mimetype, true)} />
           <Text size="T200" priority="300" truncate>
             {name}
           </Text>

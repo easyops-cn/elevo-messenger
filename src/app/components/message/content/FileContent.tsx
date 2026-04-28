@@ -16,9 +16,9 @@ import {
 } from 'folds';
 import { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 import FocusTrap from 'focus-trap-react';
-import { saveFile } from '../../../utils/file-saver';
 import { IFileInfo } from '../../../../types/matrix/common';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
+import { useMediaDownload } from '../../../hooks/useMediaDownload';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { bytesToSize } from '../../../utils/common';
 import {
@@ -250,20 +250,7 @@ export type DownloadFileProps = {
   encInfo?: EncryptedAttachmentInfo;
 };
 export function DownloadFile({ body, mimeType, url, info, encInfo }: DownloadFileProps) {
-  const mx = useMatrixClient();
-  const useAuthentication = useMediaAuthentication();
-
-  const [downloadState, download] = useAsyncCallback(
-    useCallback(async () => {
-      const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
-      if (!mediaUrl) throw new Error('Invalid media URL');
-      const fileContent = encInfo
-        ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
-        : await downloadMedia(mediaUrl);
-
-      await saveFile(fileContent, body);
-    }, [mx, url, useAuthentication, mimeType, encInfo, body])
-  );
+  const [downloadState, download] = useMediaDownload(url, mimeType, body, encInfo);
 
   return downloadState.status === AsyncStatus.Error ? (
     renderErrorButton(download, `Retry Download (${bytesToSize(info.size ?? 0)})`)
