@@ -2,7 +2,6 @@ import { Room } from 'matrix-js-sdk';
 import {
   MatrixRTCSession,
   MatrixRTCSessionEvent,
-  slotDescriptionToId,
 } from 'matrix-js-sdk/lib/matrixrtc/MatrixRTCSession';
 import { CallMembership } from 'matrix-js-sdk/lib/matrixrtc/CallMembership';
 import { useEffect, useState } from 'react';
@@ -40,14 +39,13 @@ export const useCallMembers = (room: Room, session: MatrixRTCSession): CallMembe
   useEffect(() => {
     let disposed = false;
     let requestId = 0;
-    const slotId = slotDescriptionToId(session.slotDescription);
 
     const updateMemberships = async () => {
       requestId += 1;
       const currentRequestId = requestId;
 
       try {
-        const nextMemberships = await MatrixRTCSession.sessionMembershipsForSlot(room, slotId);
+        const nextMemberships = await MatrixRTCSession.sessionMembershipsForSlot(room, session.slotDescription);
 
         if (!disposed && currentRequestId === requestId) {
           setMemberships(nextMemberships);
