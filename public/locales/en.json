@@ -161,6 +161,7 @@
     "noResultsCount": "No Results",
     "noMembersOfType": "No \"{{type}}\" Members",
     "viewAllMembers": "View all members",
+    "viewAllThreads": "View all threads",
     "threads": "Threads",
     "noThreads": "No Threads",
     "threadsLoadFailed": "Failed to load threads",

@@ -161,6 +161,7 @@
     "noResultsCount": "无结果",
     "noMembersOfType": "没有 \"{{type}}\" 成员",
     "viewAllMembers": "查看全部成员",
+    "viewAllThreads": "查看全部子话题",
     "threads": "子话题",
     "noThreads": "暂无子话题",
     "threadsLoadFailed": "加载子话题失败",

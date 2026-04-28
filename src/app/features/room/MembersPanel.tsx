@@ -138,7 +138,6 @@ const getRoomMemberStr: SearchItemStrGetter<RoomMember> = (m, query) =>
   getMemberSearchStr(m, query, mxIdToName);
 
 const MEMBER_PREVIEW_THRESHOLD = 10;
-const MEMBER_PREVIEW_COUNT = 9;
 
 type MembersPanelProps = {
   room: Room;
@@ -175,7 +174,7 @@ export function MembersPanel({
   const processMembers = result ? result.items : filteredMembers;
   const shouldShowMembersPreview = !result && processMembers.length > MEMBER_PREVIEW_THRESHOLD;
   const displayMembers = shouldShowMembersPreview
-    ? processMembers.slice(0, MEMBER_PREVIEW_COUNT)
+    ? processMembers.slice(0, MEMBER_PREVIEW_THRESHOLD - 1)
     : processMembers;
 
   const handleMemberClick: MouseEventHandler<HTMLButtonElement> = (evt) => {
