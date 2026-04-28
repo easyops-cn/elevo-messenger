@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Filter, MatrixEvent, Room, RoomEvent } from 'matrix-js-sdk';
+import { Filter, MatrixEvent, MsgType, Room, RoomEvent } from 'matrix-js-sdk';
 import { useMatrixClient } from './useMatrixClient';
+import { MessageEvent } from '../../types/matrix/room';
 
 type UseRoomFilesResult = {
   files: MatrixEvent[];
@@ -8,6 +9,13 @@ type UseRoomFilesResult = {
   error: boolean;
   retry: () => void;
 };
+
+const ALLOWED_FILE_MSG_TYPES: Set<string> = new Set([
+  MsgType.File,
+  MsgType.Image,
+  MsgType.Audio,
+  MsgType.Video,
+]);
 
 export const useRoomFiles = (room: Room): UseRoomFilesResult => {
   const mx = useMatrixClient();
@@ -57,23 +65,34 @@ export const useRoomFiles = (room: Room): UseRoomFilesResult => {
           const syncId = syncCounter;
           const timeline = timelineSet.getLiveTimeline();
 
-          // 尝试从本地/服务器加载，直到填满一定数量或到头
+          // Try to load from local/server until we have enough or reach the end
           while (timeline.getEvents().length < 100) {
             if (syncId !== syncCounter) return;
 
-            // back-paginate 会先查本地 IndexedDB
+            // back-paginate will first check local IndexedDB
             // eslint-disable-next-line no-await-in-loop
             const hasMore = await mx.paginateEventTimeline(timeline, { 
               backwards: true, 
               limit: 50 
             });
             
-            if (!hasMore) break; // 彻底没数据了
+            if (!hasMore) break;
           }
 
           if (syncId !== syncCounter) return;
 
-          setFiles([...timeline.getEvents()].reverse());
+          const validEvents = [...timeline.getEvents()]
+            .filter((evt) => {
+              if (evt.isRedacted()) return false;
+              const eventType = evt.getType();
+              if (eventType !== MessageEvent.RoomMessage && eventType !== MessageEvent.RoomMessageEncrypted) return false;
+
+              const msgtype = evt.getContent()?.msgtype;
+              return typeof msgtype === 'string' && ALLOWED_FILE_MSG_TYPES.has(msgtype);
+            })
+            .reverse();
+
+          setFiles(validEvents);
         };
 
         await syncFiles();
