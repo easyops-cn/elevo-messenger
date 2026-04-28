@@ -386,6 +386,7 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
                         key={fileEvent.getId()}
                         fileEvent={fileEvent}
                         onClick={() => setViewingFile(fileEvent)}
+                        formatRelativeTime={formatRelativeTime}
                       />
                     ))}
                   </Box>

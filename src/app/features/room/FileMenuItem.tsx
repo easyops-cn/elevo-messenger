@@ -1,19 +1,24 @@
 import React, { MouseEventHandler } from 'react';
 import type { MatrixEvent } from 'matrix-js-sdk';
 import { Icon, MenuItem, Text, config, toRem } from 'folds';
-import { bytesToSize, getFileTypeIcon } from '../../utils/common';
+import { getFileTypeIcon } from '../../utils/common';
 
 type FileMenuItemProps = {
   fileEvent: MatrixEvent;
   onClick?: MouseEventHandler<HTMLButtonElement>;
+  formatRelativeTime: (ts: number) => string;
 };
 
-export function FileMenuItem({ fileEvent, onClick }: FileMenuItemProps) {
+export function FileMenuItem({
+  fileEvent,
+  onClick,
+  formatRelativeTime,
+}: FileMenuItemProps) {
   const content = fileEvent.getContent();
   const filename = content.filename ?? content.body ?? 'Unnamed File';
-  const size = content.info?.size;
   const mimetype = content.info?.mimetype ?? '';
   const icon = getFileTypeIcon(mimetype);
+  const eventTs = fileEvent.getTs();
 
   return (
     <MenuItem
@@ -24,9 +29,9 @@ export function FileMenuItem({ fileEvent, onClick }: FileMenuItemProps) {
       onClick={onClick}
       before={<Icon size="200" src={icon} />}
       after={
-        size ? (
+        eventTs ? (
           <Text size="T200" priority="300" style={{ flexShrink: 0 }}>
-            {bytesToSize(size)}
+            {formatRelativeTime(eventTs)}
           </Text>
         ) : undefined
       }
