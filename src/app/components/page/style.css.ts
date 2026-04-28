@@ -144,3 +144,9 @@ export const PageMainFloating = style({
   margin: config.space.S400,
   marginLeft: config.space.S0,
 });
+
+export const PageMainSidePanel = style({
+  width: toRem(456),
+  flexShrink: 0,
+  flexGrow: 0,
+});

@@ -136,12 +136,7 @@ const makeInviteData = (mx: MatrixClient, room: Room, useAuthentication: boolean
   };
 };
 
-const hasBadWords = (invite: InviteData): boolean =>
-  testBadWords(invite.roomName) ||
-  testBadWords(invite.roomTopic ?? '') ||
-  testBadWords(invite.senderName) ||
-  testBadWords(invite.senderId) ||
-  testBadWords(invite.reason || '');
+const hasBadWords = (invite: InviteData): boolean => false;
 
 type NavigateHandler = (roomId: string, space: boolean) => void;
 
@@ -374,7 +369,7 @@ function InviteFilters({
         after={
           knownInvites.length > 0 && (
             <Badge variant={isKnown ? 'Success' : 'Secondary'} fill="Solid" radii="Pill">
-              <Text size="L400">{knownInvites.length}</Text>
+              <Text size="T200">{knownInvites.length}</Text>
             </Badge>
           )
         }
@@ -390,7 +385,7 @@ function InviteFilters({
         after={
           unknownInvites.length > 0 && (
             <Badge variant={isUnknown ? 'Warning' : 'Secondary'} fill="Solid" radii="Pill">
-              <Text size="L400">{unknownInvites.length}</Text>
+              <Text size="T200">{unknownInvites.length}</Text>
             </Badge>
           )
         }
@@ -406,7 +401,7 @@ function InviteFilters({
         after={
           spamInvites.length > 0 && (
             <Badge variant={isSpam ? 'Critical' : 'Secondary'} fill="Solid" radii="Pill">
-              <Text size="L400">{spamInvites.length}</Text>
+              <Text size="T200">{spamInvites.length}</Text>
             </Badge>
           )
         }

@@ -1,5 +1,6 @@
 import { atom } from 'jotai';
 import { setTauriSettings } from './utils/tauriStore';
+import type { ThreadChatState } from './threadChat';
 
 const STORAGE_KEY = 'settings';
 export type DateFormat =
@@ -12,6 +13,7 @@ export type DateFormat =
   | 'YYYY-MM-DD'
   | '';
 export type MessageSpacing = '0' | '100' | '200' | '300' | '400' | '500';
+export type ThemeMode = 'system' | 'light' | 'dark';
 export enum MessageLayout {
   Modern = 0,
   Compact = 1,
@@ -19,10 +21,7 @@ export enum MessageLayout {
 }
 
 export interface Settings {
-  themeId?: string;
-  useSystemTheme: boolean;
-  lightThemeId?: string;
-  darkThemeId?: string;
+  themeMode: ThemeMode;
   monochromeMode?: boolean;
   isMarkdown: boolean;
   editorToolbar: boolean;
@@ -30,14 +29,14 @@ export interface Settings {
   pageZoom: number;
   hideActivity: boolean;
 
-  isPeopleDrawer: boolean;
+  showRoomSidePanel: boolean;
+  threadChatStates: Record<string, ThreadChatState>;
   memberSortFilterIndex: number;
   enterForNewline: boolean;
   messageLayout: MessageLayout;
   messageSpacing: MessageSpacing;
   hideMembershipEvents: boolean;
   hideNickAvatarEvents: boolean;
-  mediaAutoLoad: boolean;
   urlPreview: boolean;
   encUrlPreview: boolean;
   showHiddenEvents: boolean;
@@ -55,10 +54,7 @@ export interface Settings {
 }
 
 const defaultSettings: Settings = {
-  themeId: undefined,
-  useSystemTheme: true,
-  lightThemeId: undefined,
-  darkThemeId: undefined,
+  themeMode: 'system',
   monochromeMode: false,
   isMarkdown: true,
   editorToolbar: false,
@@ -66,14 +62,14 @@ const defaultSettings: Settings = {
   pageZoom: 100,
   hideActivity: false,
 
-  isPeopleDrawer: false,
+  showRoomSidePanel: false,
+  threadChatStates: {},
   memberSortFilterIndex: 0,
   enterForNewline: false,
   messageLayout: 0,
   messageSpacing: '400',
   hideMembershipEvents: false,
   hideNickAvatarEvents: true,
-  mediaAutoLoad: true,
   urlPreview: true,
   encUrlPreview: false,
   showHiddenEvents: false,

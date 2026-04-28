@@ -1,8 +1,9 @@
 /* eslint-disable no-continue */
-import { MatrixEvent, Room, RoomEvent, RoomEventHandlerMap } from 'matrix-js-sdk';
-import { useEffect, useState } from 'react';
+import { MatrixEvent, Room, RoomEvent } from 'matrix-js-sdk';
+import { useCallback, useEffect, useState } from 'react';
 import { MessageEvent } from '../../types/matrix/room';
 import { reactionOrEditEvent } from '../utils/room';
+import { useDebounce } from './useDebounce';
 
 const CONTENTFUL_EVENT_TYPES = new Set<string>([
   MessageEvent.RoomMessage,
@@ -13,31 +14,37 @@ const CONTENTFUL_EVENT_TYPES = new Set<string>([
 export const useRoomLatestContentfulEvent = (room: Room) => {
   const [latestEvent, setLatestEvent] = useState<MatrixEvent>();
 
-  useEffect(() => {
-    const getLatestEvent = (): MatrixEvent | undefined => {
-      const liveEvents = room.getLiveTimeline().getEvents();
-      for (let i = liveEvents.length - 1; i >= 0; i -= 1) {
-        const evt = liveEvents[i];
+  const debouncedUpdateLatestEvent = useDebounce(
+    useCallback(() => {
+      const getLatestEvent = (): MatrixEvent | undefined => {
+        const liveEvents = room.getLiveTimeline().getEvents();
+        for (let i = liveEvents.length - 1; i >= 0; i -= 1) {
+          const evt = liveEvents[i];
 
-        if (!evt) continue;
-        if (reactionOrEditEvent(evt)) continue;
-        if (CONTENTFUL_EVENT_TYPES.has(evt.getType())) {
-          return evt;
+          if (!evt) continue;
+          if (evt.isRedacted()) continue;
+          if (reactionOrEditEvent(evt)) continue;
+          if (CONTENTFUL_EVENT_TYPES.has(evt.getType())) {
+            return evt;
+          }
         }
-      }
-      return undefined;
-    };
-
-    const handleTimelineEvent: RoomEventHandlerMap[RoomEvent.Timeline] = () => {
+        return undefined;
+      };
       setLatestEvent(getLatestEvent());
-    };
-    setLatestEvent(getLatestEvent());
+    }, [room]),
+    { wait: 100 }
+  );
 
-    room.on(RoomEvent.Timeline, handleTimelineEvent);
+  useEffect(() => {
+    debouncedUpdateLatestEvent();
+
+    room.on(RoomEvent.Timeline, debouncedUpdateLatestEvent);
+    room.on(RoomEvent.Redaction, debouncedUpdateLatestEvent);
     return () => {
-      room.removeListener(RoomEvent.Timeline, handleTimelineEvent);
+      room.removeListener(RoomEvent.Timeline, debouncedUpdateLatestEvent);
+      room.removeListener(RoomEvent.Redaction, debouncedUpdateLatestEvent);
     };
-  }, [room]);
+  }, [room, debouncedUpdateLatestEvent]);
 
   return latestEvent;
 };

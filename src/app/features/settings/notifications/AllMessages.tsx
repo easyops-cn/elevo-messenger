@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { Badge, Box, Text } from 'folds';
+import { Box, Text } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { ConditionKind, IPushRules, PushRuleCondition, PushRuleKind, RuleId } from 'matrix-js-sdk';
 import { useAccountData } from '../../../hooks/useAccountData';
@@ -83,15 +83,7 @@ export function AllMessagesNotifications() {
 
   return (
     <Box direction="Column" gap="100">
-      <Box alignItems="Center" justifyContent="SpaceBetween" gap="200">
-        <Text size="L400">{t('settings.notificationSettings.allMessages')}</Text>
-        <Box gap="100">
-          <Text size="T200">{t('settings.notificationSettings.badge')}</Text>
-          <Badge radii="300" variant="Secondary" fill="Solid">
-            <Text size="L400">1</Text>
-          </Badge>
-        </Box>
-      </Box>
+      <Text size="L400">{t('settings.notificationSettings.allMessages')}</Text>
       <SequenceCard
         className={SequenceCardStyle}
         variant="SurfaceVariant"

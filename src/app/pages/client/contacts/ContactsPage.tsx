@@ -59,7 +59,7 @@ import {
   useUserRoomProfileState,
 } from '../../../state/hooks/userRoomProfile';
 import { useSpaceOptionally } from '../../../hooks/useSpace';
-import * as css from '../../../features/room/MembersDrawer.css';
+import * as css from '../../../features/room/RoomSidePanel.css';
 import { ContactIcon } from '../../../icons/ContactIcon';
 import { useContactsContext } from './ContactsContext';
 import { SearchIcon } from '../../../icons/SearchIcon';

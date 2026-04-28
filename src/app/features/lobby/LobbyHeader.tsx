@@ -19,7 +19,7 @@ import {
 import FocusTrap from 'focus-trap-react';
 import { useTranslation } from 'react-i18next';
 import { PageHeader } from '../../components/page';
-import { useSetSetting } from '../../state/hooks/settings';
+import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 import { useRoomAvatar, useRoomName } from '../../hooks/useRoomMeta';
 import { useSpace } from '../../hooks/useSpace';
@@ -39,8 +39,8 @@ import { useOpenSpaceSettings } from '../../state/hooks/spaceSettings';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { InviteUserPrompt } from '../../components/invite-user-prompt';
-import { UsersIcon } from '../../icons/UsersIcon';
 import { EllipsisVerticalIcon } from '../../icons/EllipsisVerticalIcon';
+import { PanelLeftIcon } from '../../icons/PanelLeftIcon';
 
 type LobbyMenuProps = {
   powerLevels: IPowerLevels;
@@ -148,7 +148,7 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const space = useSpace();
-  const setPeopleDrawer = useSetSetting(settingsAtom, 'isPeopleDrawer');
+  const [showSidePanel, setShowSidePanel] = useSetting(settingsAtom, 'showRoomSidePanel');
   const [menuAnchor, setMenuAnchor] = useState<RectCords>();
   const screenSize = useScreenSizeContext();
 
@@ -213,28 +213,6 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
           justifyContent="End"
           gap="100"
         >
-          {screenSize !== ScreenSize.Mobile && (
-            <TooltipProvider
-              position="Bottom"
-              offset={4}
-              tooltip={
-                <Tooltip>
-                  <Text>{t('lobby.members')}</Text>
-                </Tooltip>
-              }
-            >
-              {(triggerRef) => (
-                <IconButton
-                  size="300"
-                  fill="None"
-                  ref={triggerRef}
-                  onClick={() => setPeopleDrawer((drawer) => !drawer)}
-                >
-                  <Icon size="100" src={UsersIcon} />
-                </IconButton>
-              )}
-            </TooltipProvider>
-          )}
           <TooltipProvider
             position="Bottom"
             align="End"
@@ -280,6 +258,35 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
               </FocusTrap>
             }
           />
+
+          {screenSize !== ScreenSize.Mobile && (
+            <>
+              <Line direction="Vertical" size="300" style={{
+                height: toRem(16),
+                margin: `0 ${toRem(6)}`,
+              }} />
+              <TooltipProvider
+                position="Bottom"
+                offset={4}
+                tooltip={
+                  <Tooltip>
+                    <Text>{showSidePanel ? t('room.hideSidePanel') : t('room.showSidePanel')}</Text>
+                  </Tooltip>
+                }
+              >
+                {(triggerRef) => (
+                  <IconButton
+                    size="300"
+                    fill="None"
+                    ref={triggerRef}
+                    onClick={() => setShowSidePanel(!showSidePanel)}
+                  >
+                    <Icon size="100" src={PanelLeftIcon} />
+                  </IconButton>
+                )}
+              </TooltipProvider>
+            </>
+          )}
         </Box>
       </Box>
     </PageHeader>

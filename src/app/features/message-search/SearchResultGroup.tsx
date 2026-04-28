@@ -46,7 +46,6 @@ type SearchResultGroupProps = {
   room: Room;
   highlights: string[];
   items: ResultItem[];
-  mediaAutoLoad?: boolean;
   urlPreview?: boolean;
   onOpen: (roomId: string, eventId: string) => void;
   hour24Clock: boolean;
@@ -56,7 +55,6 @@ export function SearchResultGroup({
   room,
   highlights,
   items,
-  mediaAutoLoad,
   urlPreview,
   onOpen,
   hour24Clock,
@@ -112,7 +110,6 @@ export function SearchResultGroup({
             msgType={event.content.msgtype ?? ''}
             ts={event.origin_server_ts}
             getContent={getContent}
-            mediaAutoLoad={mediaAutoLoad}
             urlPreview={urlPreview}
             htmlReactParserOptions={htmlReactParserOptions}
             linkifyOpts={linkifyOpts}
@@ -131,7 +128,6 @@ export function SearchResultGroup({
             renderImageContent={(props) => (
               <ImageContent
                 {...props}
-                autoPlay={mediaAutoLoad}
                 renderImage={(p) => <Image {...p} loading="lazy" />}
                 renderViewer={(p) => <ImageViewer {...p} />}
               />
@@ -214,8 +210,6 @@ export function SearchResultGroup({
             event.content['m.new_content'] ?? event.content) as GetContentCallback;
 
           const replyEventId = relation?.['m.in_reply_to']?.event_id;
-          const threadRootId =
-            relation?.rel_type === RelationType.Thread ? relation.event_id : undefined;
 
           return (
             <SequenceCard
@@ -275,11 +269,11 @@ export function SearchResultGroup({
                     </Chip>
                   </Box>
                 </Box>
-                {replyEventId && (
+                {replyEventId && mainEventId && (
                   <Reply
                     room={room}
+                    eventId={mainEventId}
                     replyEventId={replyEventId}
-                    threadRootId={threadRootId}
                     onClick={handleOpenClick}
                   />
                 )}

@@ -5,6 +5,8 @@ import { Box, Chip, Header, Icon, IconButton, Icons, Scroll, Text, as } from 'fo
 import { ErrorBoundary } from 'react-error-boundary';
 import * as css from './TextViewer.css';
 import { copyToClipboard } from '../../utils/dom';
+import { saveFile } from '../../utils/file-saver';
+import { useTranslation } from 'react-i18next';
 
 const ReactPrism = lazy(() => import('../../plugins/react-prism/ReactPrism'));
 
@@ -35,13 +37,20 @@ export type TextViewerProps = {
   name: string;
   text: string;
   langName: string;
+  mimeType?: string;
   requestClose: () => void;
 };
 
 export const TextViewer = as<'div', TextViewerProps>(
-  ({ className, name, text, langName, requestClose, ...props }, ref) => {
+  ({ className, name, text, langName, mimeType, requestClose, ...props }, ref) => {
+    const { t } = useTranslation();
+
     const handleCopy = () => {
       copyToClipboard(text);
+    };
+
+    const handleDownload = async () => {
+      await saveFile(new Blob([text], { type: mimeType ?? 'text/plain' }), name);
     };
 
     return (
@@ -61,6 +70,14 @@ export const TextViewer = as<'div', TextViewerProps>(
             </Text>
           </Box>
           <Box shrink="No" alignItems="Center" gap="200">
+            <Chip
+              variant="Primary"
+              radii="300"
+              onClick={handleDownload}
+              before={<Icon size="50" src={Icons.Download} />}
+            >
+              <Text size="B300">{t('viewer.download')}</Text>
+            </Chip>
             <Chip variant="Primary" radii="300" onClick={handleCopy}>
               <Text size="B300">Copy All</Text>
             </Chip>

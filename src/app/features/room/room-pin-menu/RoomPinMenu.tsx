@@ -201,8 +201,8 @@ function PinnedMessage({
       {pinnedEvent.replyEventId && (
         <Reply
           room={room}
+          eventId={eventId}
           replyEventId={pinnedEvent.replyEventId}
-          threadRootId={pinnedEvent.threadRootId}
           onClick={handleOpenClick}
         />
       )}
@@ -228,7 +228,6 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(
     const pinnedEvents = useRoomPinnedEvents(room);
     const sortedPinnedEvent = useMemo(() => Array.from(pinnedEvents).reverse(), [pinnedEvents]);
     const useAuthentication = useMediaAuthentication();
-    const [mediaAutoLoad] = useSetting(settingsAtom, 'mediaAutoLoad');
     const [urlPreview] = useSetting(settingsAtom, 'urlPreview');
 
     const [hour24Clock] = useSetting(settingsAtom, 'hour24Clock');
@@ -283,7 +282,6 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(
               ts={event.getTs()}
               getContent={getContent}
               edited={!!event.replacingEvent()}
-              mediaAutoLoad={mediaAutoLoad}
               urlPreview={urlPreview}
               htmlReactParserOptions={htmlReactParserOptions}
               linkifyOpts={linkifyOpts}
@@ -319,7 +317,6 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(
                       renderImageContent={(props) => (
                         <ImageContent
                           {...props}
-                          autoPlay={mediaAutoLoad}
                           renderImage={(p) => <Image {...p} loading="lazy" />}
                           renderViewer={(p) => <ImageViewer {...p} />}
                         />
@@ -339,7 +336,6 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(
                       ts={mEvent.getTs()}
                       edited={!!editedEvent || !!mEvent.replacingEvent()}
                       getContent={getContent}
-                      mediaAutoLoad={mediaAutoLoad}
                       urlPreview={urlPreview}
                       htmlReactParserOptions={htmlReactParserOptions}
                       linkifyOpts={linkifyOpts}
@@ -373,7 +369,6 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(
               renderImageContent={(props) => (
                 <ImageContent
                   {...props}
-                  autoPlay={mediaAutoLoad}
                   renderImage={(p) => <Image {...p} loading="lazy" />}
                   renderViewer={(p) => <ImageViewer {...p} />}
                 />

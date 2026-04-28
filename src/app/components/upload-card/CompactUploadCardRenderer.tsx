@@ -49,7 +49,7 @@ export function CompactUploadCardRenderer({
       compact
       outlined
       radii="300"
-      before={<Icon src={getFileTypeIcon(Icons, file.type)} />}
+      before={<Icon src={getFileTypeIcon(file.type)} />}
       after={
         <>
           {upload.status === UploadStatus.Error && (

@@ -10,6 +10,7 @@ import React, {
 import { useAtom, useAtomValue } from 'jotai';
 import { isKeyHotkey } from 'is-hotkey';
 import { EventType, IContent, MsgType, RelationType, Room } from 'matrix-js-sdk';
+import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/types';
 import { ReactEditor } from 'slate-react';
 import { Transforms, Editor, Element as SlateElement, Path, Node, Text as SlateText } from 'slate';
 import {
@@ -75,9 +76,9 @@ import { useFileDropZone } from '../../hooks/useFileDrop';
 import {
   TUploadItem,
   TUploadMetadata,
-  roomIdToMsgDraftAtomFamily,
-  roomIdToReplyDraftAtomFamily,
-  roomIdToUploadItemsAtomFamily,
+  threadOrRoomIdToMsgDraftAtomFamily,
+  threadOrRoomIdToReplyDraftAtomFamily,
+  threadOrRoomIdToUploadItemsAtomFamily,
   roomUploadAtomFamily,
 } from '../../state/room/roomInputDrafts';
 import { UploadCardRenderer } from '../../components/upload-card';
@@ -109,7 +110,6 @@ import { CommandAutocomplete } from './CommandAutocomplete';
 import { VoiceRecordingBoard, VoiceRecordingBoardHandlers } from './VoiceRecordingBoard';
 import { Command, SHRUG, TABLEFLIP, UNFLIP, useCommands } from '../../hooks/useCommands';
 import { mobileOrTablet } from '../../utils/user-agent';
-import { useElementSizeObserver } from '../../hooks/useElementSizeObserver';
 import { ReplyLayout, ThreadIndicator } from '../../components/message';
 import { roomToParentsAtom } from '../../state/room/roomToParents';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
@@ -148,10 +148,11 @@ interface RoomInputProps {
   fileDropContainerRef: RefObject<HTMLElement>;
   roomId: string;
   room: Room;
+  threadRootId?: string;
   scrollToBottomRef?: React.MutableRefObject<(() => void) | null>;
 }
 export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
-  ({ editor, fileDropContainerRef, roomId, room, scrollToBottomRef }, ref) => {
+  ({ editor, fileDropContainerRef, roomId, room, threadRootId, scrollToBottomRef }, ref) => {
     const { t } = useTranslation();
     const mx = useMatrixClient();
     const useAuthentication = useMediaAuthentication();
@@ -162,12 +163,13 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const emojiBtnRef = useRef<HTMLButtonElement>(null);
     const roomToParents = useAtomValue(roomToParentsAtom);
 
-    const [msgDraft, setMsgDraft] = useAtom(roomIdToMsgDraftAtomFamily(roomId));
-    const [replyDraft, setReplyDraft] = useAtom(roomIdToReplyDraftAtomFamily(roomId));
+    const threadOrRoomId = threadRootId || roomId;
+    const [msgDraft, setMsgDraft] = useAtom(threadOrRoomIdToMsgDraftAtomFamily(threadOrRoomId));
+    const [replyDraft, setReplyDraft] = useAtom(threadOrRoomIdToReplyDraftAtomFamily(threadOrRoomId));
 
     const [uploadBoard, setUploadBoard] = useState(true);
     const [voiceRecordingOpen, setVoiceRecordingOpen] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useAtom(roomIdToUploadItemsAtomFamily(roomId));
+    const [selectedFiles, setSelectedFiles] = useAtom(threadOrRoomIdToUploadItemsAtomFamily(threadOrRoomId));
     const uploadFamilyObserverAtom = createUploadFamilyObserverAtom(
       roomUploadAtomFamily,
       selectedFiles.map((f) => f.file)
@@ -316,14 +318,9 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const pickFile = useFilePicker(handleFiles, true);
     const handlePaste = useFilePasteHandler(handleFiles);
     const dropZoneVisible = useFileDropZone(fileDropContainerRef, handleFiles);
-    const [hideStickerBtn, setHideStickerBtn] = useState(document.body.clientWidth < 500);
+    const hideStickerBtn = !!threadRootId;
 
     const isComposing = useComposingCheck();
-
-    useElementSizeObserver(
-      useCallback(() => fileDropContainerRef.current, [fileDropContainerRef]),
-      useCallback((width) => setHideStickerBtn(width < 500), [])
-    );
 
     useEffect(() => {
       Transforms.insertFragment(editor, msgDraft);
@@ -393,7 +390,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       });
       handleCancelUpload(uploads);
       const contents = fulfilledPromiseSettledResult(await Promise.allSettled(contentsPromises));
-      contents.forEach((content) => mx.sendMessage(roomId, content as any));
+      contents.forEach((content) => mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent));
     };
 
     const submit = useCallback(() => {
@@ -477,13 +474,14 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
             event_id: replyDraft.eventId,
           },
         };
-        if (replyDraft.relation?.rel_type === RelationType.Thread) {
+        if (replyDraft?.relation?.rel_type === RelationType.Thread) {
           content['m.relates_to'].event_id = replyDraft.relation.event_id;
           content['m.relates_to'].rel_type = RelationType.Thread;
-          content['m.relates_to'].is_falling_back = false;
+          content['m.relates_to'].is_falling_back = true;
         }
       }
-      mx.sendMessage(roomId, content as any);
+
+      mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent);
       resetEditor(editor);
       resetEditorHistory(editor);
       setReplyDraft(undefined);
@@ -491,6 +489,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     }, [
       mx,
       roomId,
+      threadRootId,
       editor,
       replyDraft,
       sendTypingStatus,
@@ -567,6 +566,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           url: mxc,
           info,
         });
+        scrollToBottomRef?.current?.();
       } finally {
         URL.revokeObjectURL(blobUrl);
       }
@@ -702,7 +702,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                     <Icon src={Icons.Cross} size="50" />
                   </IconButton>
                   <Box direction="Row" gap="200" alignItems="Center">
-                    {replyDraft.relation?.rel_type === RelationType.Thread && <ThreadIndicator />}
+                    {!threadRootId && replyDraft.relation?.rel_type === RelationType.Thread && <ThreadIndicator />}
                     <ReplyLayout
                       username={
                         getMemberDisplayName(room, replyDraft.userId) ??
@@ -765,6 +765,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                       content={
                         <EmojiBoard
                           tab={emojiBoardTab}
+                          allowSticker={!hideStickerBtn}
                           onTabChange={setEmojiBoardTab}
                           imagePackRooms={imagePackRooms}
                           returnFocusOnDeactivate={false}

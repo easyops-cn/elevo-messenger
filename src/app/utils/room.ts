@@ -16,6 +16,7 @@ import {
   RelationType,
   Room,
   RoomMember,
+  type Thread,
 } from 'matrix-js-sdk';
 import { CryptoBackend } from 'matrix-js-sdk/lib/common-crypto/CryptoBackend';
 import { AccountDataEvent } from '../../types/matrix/accountData';
@@ -213,8 +214,8 @@ export const isNotificationEvent = (mEvent: MatrixEvent) => {
 };
 
 export const roomHaveNotification = (room: Room): boolean => {
-  const total = room.getUnreadNotificationCount(NotificationCountType.Total);
-  const highlight = room.getUnreadNotificationCount(NotificationCountType.Highlight);
+  const total = room.getRoomUnreadNotificationCount(NotificationCountType.Total);
+  const highlight = room.getRoomUnreadNotificationCount(NotificationCountType.Highlight);
 
   return total > 0 || highlight > 0;
 };
@@ -231,7 +232,31 @@ export const roomHaveUnread = (mx: MatrixClient, room: Room) => {
 
   for (let i = liveEvents.length - 1; i >= 0; i -= 1) {
     const event = liveEvents[i];
-    if (!event) return false;
+    if (event.getId() === readUpToId) return false;
+    if (isNotificationEvent(event)) return true;
+  }
+  return true;
+};
+
+export const threadHaveNotification = (room: Room, threadId: string): boolean => {
+  const total = room.getThreadUnreadNotificationCount(threadId, NotificationCountType.Total);
+  const highlight = room.getThreadUnreadNotificationCount(threadId, NotificationCountType.Highlight);
+
+  return total > 0 || highlight > 0;
+};
+
+export const threadHaveUnread = (mx: MatrixClient, thread: Thread) => {
+  const userId = mx.getUserId();
+  if (!userId) return false;
+  const readUpToId = thread.getEventReadUpTo(userId);
+  const liveEvents = thread.liveTimeline.getEvents();
+
+  if (liveEvents[liveEvents.length - 1]?.getSender() === userId) {
+    return false;
+  }
+
+  for (let i = liveEvents.length - 1; i >= 0; i -= 1) {
+    const event = liveEvents[i];
     if (event.getId() === readUpToId) return false;
     if (isNotificationEvent(event)) return true;
   }
@@ -239,8 +264,8 @@ export const roomHaveUnread = (mx: MatrixClient, room: Room) => {
 };
 
 export const getUnreadInfo = (room: Room): UnreadInfo => {
-  const total = room.getUnreadNotificationCount(NotificationCountType.Total);
-  const highlight = room.getUnreadNotificationCount(NotificationCountType.Highlight);
+  const total = room.getRoomUnreadNotificationCount(NotificationCountType.Total);
+  const highlight = room.getRoomUnreadNotificationCount(NotificationCountType.Highlight);
   return {
     roomId: room.roomId,
     highlight,
@@ -573,8 +598,9 @@ export const getLatestMessageText = (
   room: Room,
   evt: MatrixEvent,
   myUserId: string,
-  direct?: boolean,
-  t: (key: string, options?: Record<string, unknown>) => string
+  direct: boolean | undefined,
+  t: (key: string, options?: Record<string, unknown>) => string,
+  showUsername = true
 ): string | undefined => {
   const content = evt.getContent();
   const sender = evt.getSender();
@@ -595,7 +621,7 @@ export const getLatestMessageText = (
     body = typeof content.body === 'string' ? content.body : '';
   }
 
-  if (direct || sender === myUserId) return body;
+  if (direct || sender === myUserId || !showUsername) return body;
   const senderName = getMemberDisplayName(room, sender) || sender;
   return `${senderName}: ${body}`;
 };

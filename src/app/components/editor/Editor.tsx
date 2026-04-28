@@ -5,6 +5,7 @@ import React, {
   ReactNode,
   forwardRef,
   useCallback,
+  useMemo,
   useState,
 } from 'react';
 import { Box, Scroll, Text, toRem } from 'folds';
@@ -23,13 +24,6 @@ import { RenderElement, RenderLeaf } from './Elements';
 import { CustomElement } from './slate';
 import * as css from './Editor.css';
 import { toggleKeyboardShortcut } from './keyboard';
-
-const initialValue: CustomElement[] = [
-  {
-    type: BlockType.Paragraph,
-    children: [{ text: '' }],
-  },
-];
 
 const withInline = (editor: Editor): Editor => {
   const { isInline } = editor;
@@ -117,6 +111,13 @@ export const CustomEditor = forwardRef<HTMLDivElement, CustomEditorProps>(
       ),
       []
     );
+
+    const initialValue = useMemo<CustomElement[]>(() => [
+      {
+        type: BlockType.Paragraph,
+        children: [{ text: '' }],
+      },
+    ], []);
 
     return (
       <div className={css.Editor} ref={ref}>

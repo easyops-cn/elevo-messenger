@@ -203,7 +203,7 @@ export const useBindRoomToUnreadAtom = (mx: MatrixClient, unreadAtom: typeof roo
       removed: boolean,
       data: IRoomTimelineData
     ) => {
-      if (!room || !data.liveEvent || room.isSpaceRoom() || !isNotificationEvent(mEvent)) return;
+      if (!room || !data.liveEvent || room.isSpaceRoom() || !isNotificationEvent(mEvent) || mEvent.threadRootId) return;
       if (getNotificationType(mx, room.roomId) === NotificationType.Mute) {
         setUnreadAtom({
           type: 'DELETE',

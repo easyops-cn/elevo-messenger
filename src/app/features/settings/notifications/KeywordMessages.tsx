@@ -1,6 +1,6 @@
 import React, { ChangeEventHandler, FormEventHandler, useCallback, useMemo, useState } from 'react';
 import { IPushRule, IPushRules, PushRuleKind } from 'matrix-js-sdk';
-import { Box, Text, Badge, Button, Input, config, IconButton, Icons, Icon, Spinner } from 'folds';
+import { Box, Text, Button, Input, config, IconButton, Icons, Icon, Spinner } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { useAccountData } from '../../../hooks/useAccountData';
 import { AccountDataEvent } from '../../../../types/matrix/accountData';
@@ -164,15 +164,7 @@ export function KeywordMessagesNotifications() {
 
   return (
     <Box direction="Column" gap="100">
-      <Box alignItems="Center" justifyContent="SpaceBetween" gap="200">
-        <Text size="L400">{t('settings.notificationSettings.keywordMessages')}</Text>
-        <Box gap="100">
-          <Text size="T200">{t('settings.notificationSettings.badge')}</Text>
-          <Badge radii="300" variant="Success" fill="Solid">
-            <Text size="L400">1</Text>
-          </Badge>
-        </Box>
-      </Box>
+      <Text size="L400">{t('settings.notificationSettings.keywordMessages')}</Text>
       <SequenceCard
         className={SequenceCardStyle}
         variant="SurfaceVariant"

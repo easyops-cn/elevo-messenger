@@ -17,7 +17,7 @@ import {
 } from '../../hooks/useSpaceHierarchy';
 import { VirtualTile } from '../../components/virtualizer';
 import { spaceRoomsAtom } from '../../state/spaceRooms';
-import { MembersDrawer } from '../room/MembersDrawer';
+import { RoomSidePanel } from '../room/RoomSidePanel';
 import { useSetting } from '../../state/hooks/settings';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
 import { settingsAtom } from '../../state/settings';
@@ -51,7 +51,6 @@ import {
 import { useOrphanSpaces } from '../../state/hooks/roomList';
 import { roomToParentsAtom } from '../../state/room/roomToParents';
 import { AccountDataEvent } from '../../../types/matrix/accountData';
-import { useRoomMembers } from '../../hooks/useRoomMembers';
 import { SpaceHierarchy } from './SpaceHierarchy';
 import { useGetRoom } from '../../hooks/useGetRoom';
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
@@ -159,13 +158,12 @@ export function Lobby() {
   const space = useSpace();
   const spacePowerLevels = usePowerLevels(space);
   const lex = useMemo(() => new ASCIILexicalTable(' '.charCodeAt(0), '~'.charCodeAt(0), 6), []);
-  const members = useRoomMembers(mx, space.roomId);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const heroSectionRef = useRef<HTMLDivElement>(null);
   const [heroSectionHeight, setHeroSectionHeight] = useState<number>();
   const [spaceRooms, setSpaceRooms] = useAtom(spaceRoomsAtom);
-  const [isDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
+  const [showSidePanel] = useSetting(settingsAtom, 'showRoomSidePanel');
   const screenSize = useScreenSizeContext();
   const [onTop, setOnTop] = useState(true);
   const [closedCategories, setClosedCategories] = useAtom(useClosedLobbyCategoriesAtom());
@@ -538,8 +536,8 @@ export function Lobby() {
             </Box>
           </Page>
         </PageMain>
-        {screenSize === ScreenSize.Desktop && isDrawer && (
-          <MembersDrawer room={space} members={members} />
+        {screenSize === ScreenSize.Desktop && showSidePanel && (
+          <RoomSidePanel room={space} />
         )}
       </Box>
     </PowerLevelsContextProvider>

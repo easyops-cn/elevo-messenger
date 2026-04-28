@@ -78,6 +78,7 @@ import { PinIcon } from '../../icons/PinIcon';
 import { SearchIcon } from '../../icons/SearchIcon';
 import { UsersIcon } from '../../icons/UsersIcon';
 import { callChatAtom } from '../../state/callEmbed';
+import { useThreadChat } from '../../state/threadChat';
 
 type RoomMenuProps = {
   room: Room;
@@ -100,7 +101,7 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
   const [invitePrompt, setInvitePrompt] = useState(false);
 
   const handleMarkAsRead = () => {
-    markAsRead(mx, room.roomId, hideActivity);
+    markAsRead(mx, room.roomId, hideActivity, undefined, true);
     requestClose();
   };
 
@@ -304,9 +305,10 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const name = useRoomName(room);
   const topic = useRoomTopic(room);
 
-  const [peopleDrawer, setPeopleDrawer] = useSetting(settingsAtom, 'isPeopleDrawer');
+  const [showSidePanel, setShowSidePanel] = useSetting(settingsAtom, 'showRoomSidePanel');
 
   const [showCallChat, setShowCallChat] = useAtom(callChatAtom);
+  const [threadChat, setThreadChat] = useThreadChat(room.roomId);
 
   const handleSearchClick = () => {
     const searchParams: _SearchPathSearchParams = {
@@ -334,7 +336,13 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
       setShowCallChat((prev) => !prev);
       return;
     }
-    setPeopleDrawer(!peopleDrawer);
+
+    if (threadChat.open) {
+      setThreadChat({ open: false, threadRootId: undefined });
+      return;
+    }
+
+    setShowSidePanel(!showSidePanel);
   };
 
   return (
@@ -594,8 +602,10 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                   <Tooltip>
                     {callView ? (
                       <Text>{showCallChat ? 'Close Chat' : 'Open Chat'}</Text>
+                    ) : threadChat.open ? (
+                      <Text>{t('room.closeThread')}</Text>
                     ) : (
-                      <Text>{peopleDrawer ? t('room.hideMembers') : t('room.showMembers')}</Text>
+                      <Text>{showSidePanel ? t('room.hideSidePanel') : t('room.showSidePanel')}</Text>
                     )}
                   </Tooltip>
                 }

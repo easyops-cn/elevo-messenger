@@ -31,7 +31,6 @@ export function MessageSearch({
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const allRooms = useAllHomeRooms();
-  const [mediaAutoLoad] = useSetting(settingsAtom, 'mediaAutoLoad');
   const [urlPreview] = useSetting(settingsAtom, 'urlPreview');
 
   const [hour24Clock] = useSetting(settingsAtom, 'hour24Clock');
@@ -248,7 +247,6 @@ export function MessageSearch({
                       room={groupRoom}
                       highlights={highlights}
                       items={group.items}
-                      mediaAutoLoad={mediaAutoLoad}
                       urlPreview={urlPreview}
                       onOpen={navigateRoom}
                       hour24Clock={hour24Clock}

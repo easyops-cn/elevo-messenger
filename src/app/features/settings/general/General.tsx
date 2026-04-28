@@ -8,10 +8,8 @@ import React, {
 } from 'react';
 import dayjs from 'dayjs';
 import {
-  as,
   Box,
   Button,
-  Chip,
   config,
   Header,
   Icon,
@@ -34,19 +32,15 @@ import { SUPPORTED_LANGUAGES } from '../../../i18n';
 import { Page, PageContent, PageHeader } from '../../../components/page';
 import { SequenceCard } from '../../../components/sequence-card';
 import { useSetting } from '../../../state/hooks/settings';
-import { DateFormat, MessageLayout, MessageSpacing, settingsAtom } from '../../../state/settings';
+import {
+  DateFormat,
+  MessageLayout,
+  MessageSpacing,
+  settingsAtom,
+} from '../../../state/settings';
 import { SettingTile } from '../../../components/setting-tile';
 import { KeySymbol } from '../../../utils/key-symbol';
 import { isMacOS } from '../../../utils/user-agent';
-import {
-  DarkTheme,
-  LightTheme,
-  Theme,
-  ThemeKind,
-  useSystemThemeKind,
-  useThemeNames,
-  useThemes,
-} from '../../../hooks/useTheme';
 import { stopPropagation } from '../../../utils/keyboard';
 import { useMessageLayoutItems } from '../../../hooks/useMessageLayout';
 import { useMessageSpacingItems } from '../../../hooks/useMessageSpacing';
@@ -54,47 +48,28 @@ import { useDateFormatItems } from '../../../hooks/useDateFormat';
 import { SequenceCardStyle } from '../styles.css';
 import { isDesktopTauri } from '../../../plugins/useTauriOpener';
 
-type ThemeSelectorProps = {
-  themeNames: Record<string, string>;
-  themes: Theme[];
-  selected: Theme;
-  onSelect: (theme: Theme) => void;
-};
-const ThemeSelector = as<'div', ThemeSelectorProps>(
-  ({ themeNames, themes, selected, onSelect, ...props }, ref) => (
-    <Menu {...props} ref={ref}>
-      <Box direction="Column" gap="100" style={{ padding: config.space.S100 }}>
-        {themes.map((theme) => (
-          <MenuItem
-            key={theme.id}
-            size="300"
-            variant={theme.id === selected.id ? 'Primary' : 'Surface'}
-            radii="300"
-            onClick={() => onSelect(theme)}
-          >
-            <Text size="T300">{themeNames[theme.id] ?? theme.id}</Text>
-          </MenuItem>
-        ))}
-      </Box>
-    </Menu>
-  )
-);
-
-function SelectTheme({ disabled }: { disabled?: boolean }) {
-  const themes = useThemes();
-  const themeNames = useThemeNames();
-  const [themeId, setThemeId] = useSetting(settingsAtom, 'themeId');
+function ThemeModeSelector() {
+  const { t } = useTranslation();
+  const [themeMode, setThemeMode] = useSetting(settingsAtom, 'themeMode');
   const [menuCords, setMenuCords] = useState<RectCords>();
-  const selectedTheme = themes.find((theme) => theme.id === themeId) ?? LightTheme;
 
-  const handleThemeMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
+  const themeModeItems = [
+    { value: 'system', label: t('settings.appearance.themeModeSystem') },
+    { value: 'light', label: t('settings.appearance.themeModeLight') },
+    { value: 'dark', label: t('settings.appearance.themeModeDark') },
+  ] as const;
+
+  const handleMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
     setMenuCords(evt.currentTarget.getBoundingClientRect());
   };
 
-  const handleThemeSelect = (theme: Theme) => {
-    setThemeId(theme.id);
+  const handleSelect = (value: (typeof themeModeItems)[number]['value']) => {
+    setThemeMode(value);
     setMenuCords(undefined);
   };
+
+  const currentThemeMode =
+    themeModeItems.find((item) => item.value === themeMode) ?? themeModeItems[0];
 
   return (
     <>
@@ -105,10 +80,9 @@ function SelectTheme({ disabled }: { disabled?: boolean }) {
         fill="Soft"
         radii="300"
         after={<Icon size="300" src={Icons.ChevronBottom} />}
-        onClick={disabled ? undefined : handleThemeMenu}
-        aria-disabled={disabled}
+        onClick={handleMenu}
       >
-        <Text size="T300">{themeNames[selectedTheme.id] ?? selectedTheme.id}</Text>
+        <Text size="T300">{currentThemeMode.label}</Text>
       </Button>
       <PopOut
         anchor={menuCords}
@@ -128,138 +102,26 @@ function SelectTheme({ disabled }: { disabled?: boolean }) {
               escapeDeactivates: stopPropagation,
             }}
           >
-            <ThemeSelector
-              themeNames={themeNames}
-              themes={themes}
-              selected={selectedTheme}
-              onSelect={handleThemeSelect}
-            />
+            <Menu>
+              <Box direction="Column" gap="100" style={{ padding: config.space.S100 }}>
+                {themeModeItems.map((item) => (
+                  <MenuItem
+                    key={item.value}
+                    size="300"
+                    radii="300"
+                    aria-pressed={item.value === themeMode}
+                    variant={item.value === themeMode ? 'Primary' : 'Surface'}
+                    onClick={() => handleSelect(item.value)}
+                  >
+                    <Text size="T300">{item.label}</Text>
+                  </MenuItem>
+                ))}
+              </Box>
+            </Menu>
           </FocusTrap>
         }
       />
     </>
-  );
-}
-
-function SystemThemePreferences() {
-  const { t } = useTranslation();
-  const themeKind = useSystemThemeKind();
-  const themeNames = useThemeNames();
-  const themes = useThemes();
-  const [lightThemeId, setLightThemeId] = useSetting(settingsAtom, 'lightThemeId');
-  const [darkThemeId, setDarkThemeId] = useSetting(settingsAtom, 'darkThemeId');
-
-  const lightThemes = themes.filter((theme) => theme.kind === ThemeKind.Light);
-  const darkThemes = themes.filter((theme) => theme.kind === ThemeKind.Dark);
-
-  const selectedLightTheme = lightThemes.find((theme) => theme.id === lightThemeId) ?? LightTheme;
-  const selectedDarkTheme = darkThemes.find((theme) => theme.id === darkThemeId) ?? DarkTheme;
-
-  const [ltCords, setLTCords] = useState<RectCords>();
-  const [dtCords, setDTCords] = useState<RectCords>();
-
-  const handleLightThemeMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
-    setLTCords(evt.currentTarget.getBoundingClientRect());
-  };
-  const handleDarkThemeMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
-    setDTCords(evt.currentTarget.getBoundingClientRect());
-  };
-
-  const handleLightThemeSelect = (theme: Theme) => {
-    setLightThemeId(theme.id);
-    setLTCords(undefined);
-  };
-
-  const handleDarkThemeSelect = (theme: Theme) => {
-    setDarkThemeId(theme.id);
-    setDTCords(undefined);
-  };
-
-  return (
-    <Box wrap="Wrap" gap="400">
-      <SettingTile
-        title={t('settings.appearance.lightTheme')}
-        after={
-          <Chip
-            variant={themeKind === ThemeKind.Light ? 'Primary' : 'Secondary'}
-            outlined={themeKind === ThemeKind.Light}
-            radii="Pill"
-            after={<Icon size="200" src={Icons.ChevronBottom} />}
-            onClick={handleLightThemeMenu}
-          >
-            <Text size="B300">{themeNames[selectedLightTheme.id] ?? selectedLightTheme.id}</Text>
-          </Chip>
-        }
-      />
-      <PopOut
-        anchor={ltCords}
-        offset={5}
-        position="Bottom"
-        align="End"
-        content={
-          <FocusTrap
-            focusTrapOptions={{
-              initialFocus: false,
-              onDeactivate: () => setLTCords(undefined),
-              clickOutsideDeactivates: true,
-              isKeyForward: (evt: KeyboardEvent) =>
-                evt.key === 'ArrowDown' || evt.key === 'ArrowRight',
-              isKeyBackward: (evt: KeyboardEvent) =>
-                evt.key === 'ArrowUp' || evt.key === 'ArrowLeft',
-              escapeDeactivates: stopPropagation,
-            }}
-          >
-            <ThemeSelector
-              themeNames={themeNames}
-              themes={lightThemes}
-              selected={selectedLightTheme}
-              onSelect={handleLightThemeSelect}
-            />
-          </FocusTrap>
-        }
-      />
-      <SettingTile
-        title={t('settings.appearance.darkTheme')}
-        after={
-          <Chip
-            variant={themeKind === ThemeKind.Dark ? 'Primary' : 'Secondary'}
-            outlined={themeKind === ThemeKind.Dark}
-            radii="Pill"
-            after={<Icon size="200" src={Icons.ChevronBottom} />}
-            onClick={handleDarkThemeMenu}
-          >
-            <Text size="B300">{themeNames[selectedDarkTheme.id] ?? selectedDarkTheme.id}</Text>
-          </Chip>
-        }
-      />
-      <PopOut
-        anchor={dtCords}
-        offset={5}
-        position="Bottom"
-        align="End"
-        content={
-          <FocusTrap
-            focusTrapOptions={{
-              initialFocus: false,
-              onDeactivate: () => setDTCords(undefined),
-              clickOutsideDeactivates: true,
-              isKeyForward: (evt: KeyboardEvent) =>
-                evt.key === 'ArrowDown' || evt.key === 'ArrowRight',
-              isKeyBackward: (evt: KeyboardEvent) =>
-                evt.key === 'ArrowUp' || evt.key === 'ArrowLeft',
-              escapeDeactivates: stopPropagation,
-            }}
-          >
-            <ThemeSelector
-              themeNames={themeNames}
-              themes={darkThemes}
-              selected={selectedDarkTheme}
-              onSelect={handleDarkThemeSelect}
-            />
-          </FocusTrap>
-        }
-      />
-    </Box>
   );
 }
 
@@ -311,7 +173,6 @@ function PageZoomInput() {
 
 function Appearance() {
   const { t } = useTranslation();
-  const [systemTheme, setSystemTheme] = useSetting(settingsAtom, 'useSystemTheme');
   const [monochromeMode, setMonochromeMode] = useSetting(settingsAtom, 'monochromeMode');
   const [twitterEmoji, setTwitterEmoji] = useSetting(settingsAtom, 'twitterEmoji');
 
@@ -324,20 +185,7 @@ function Appearance() {
         direction="Column"
         gap="400"
       >
-        <SettingTile
-          title={t('settings.appearance.systemTheme')}
-          description={t('settings.appearance.systemThemeDesc')}
-          after={<Switch variant="Primary" value={systemTheme} onChange={setSystemTheme} />}
-        />
-        {systemTheme && <SystemThemePreferences />}
-      </SequenceCard>
-
-      <SequenceCard className={SequenceCardStyle} variant="SurfaceVariant" direction="Column">
-        <SettingTile
-          title={t('settings.appearance.theme')}
-          description={t('settings.appearance.themeDesc')}
-          after={<SelectTheme disabled={systemTheme} />}
-        />
+        <SettingTile title={t('settings.appearance.theme')} after={<ThemeModeSelector />} />
       </SequenceCard>
 
       <SequenceCard className={SequenceCardStyle} variant="SurfaceVariant" direction="Column">
@@ -913,7 +761,6 @@ function Messages() {
     settingsAtom,
     'hideNickAvatarEvents'
   );
-  const [mediaAutoLoad, setMediaAutoLoad] = useSetting(settingsAtom, 'mediaAutoLoad');
   const [urlPreview, setUrlPreview] = useSetting(settingsAtom, 'urlPreview');
   const [encUrlPreview, setEncUrlPreview] = useSetting(settingsAtom, 'encUrlPreview');
   const [showHiddenEvents, setShowHiddenEvents] = useSetting(settingsAtom, 'showHiddenEvents');
@@ -950,18 +797,6 @@ function Messages() {
               variant="Primary"
               value={hideNickAvatarEvents}
               onChange={setHideNickAvatarEvents}
-            />
-          }
-        />
-      </SequenceCard>
-      <SequenceCard className={SequenceCardStyle} variant="SurfaceVariant" direction="Column">
-        <SettingTile
-          title={t('settings.messages.disableMediaAutoLoad')}
-          after={
-            <Switch
-              variant="Primary"
-              value={!mediaAutoLoad}
-              onChange={(v) => setMediaAutoLoad(!v)}
             />
           }
         />

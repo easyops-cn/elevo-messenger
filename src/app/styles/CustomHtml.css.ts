@@ -147,22 +147,12 @@ export const Mention = recipe({
   base: [
     DefaultReset,
     {
-      backgroundColor: color.SurfaceVariant.Container,
-      color: color.SurfaceVariant.OnContainer,
-      boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.SurfaceVariant.ContainerLine}`,
+      color: color.Primary.Main,
       padding: `0 ${toRem(2)}`,
-      borderRadius: config.radii.R300,
       fontWeight: config.fontWeight.W500,
     },
   ],
   variants: {
-    highlight: {
-      true: {
-        backgroundColor: color.Success.Container,
-        color: color.Success.OnContainer,
-        boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.Success.ContainerLine}`,
-      },
-    },
     focus: {
       true: {
         boxShadow: `0 0 0 ${config.borderWidth.B300} ${color.SurfaceVariant.OnContainer}`,

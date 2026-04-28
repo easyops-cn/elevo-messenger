@@ -39,7 +39,6 @@ function RenderMentionElement({
     <span
       {...attributes}
       className={css.Mention({
-        highlight: element.highlight,
         focus: selected && focused,
       })}
       contentEditable={false}

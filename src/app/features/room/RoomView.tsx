@@ -51,7 +51,15 @@ const shouldFocusMessageField = (evt: KeyboardEvent): boolean => {
   return true;
 };
 
-export function RoomView({ eventId }: { eventId?: string }) {
+export function RoomView({
+  eventId,
+  threadRootId,
+  showRoomIntro = true,
+}: {
+  eventId?: string;
+  threadRootId?: string;
+  showRoomIntro?: boolean;
+}) {
   const roomInputRef = useRef<HTMLDivElement>(null);
   const roomViewRef = useRef<HTMLDivElement>(null);
   const timelineScrollToBottomRef = useRef<(() => void) | null>(null);
@@ -93,13 +101,15 @@ export function RoomView({ eventId }: { eventId?: string }) {
           key={roomId}
           room={room}
           eventId={eventId}
+          threadRootId={threadRootId}
+          showRoomIntro={showRoomIntro}
           roomInputRef={roomInputRef}
           editor={editor}
           onRequestScrollToBottom={timelineScrollToBottomRef}
         />
-        <RoomViewTyping room={room} />
       </Box>
       <Box shrink="No" direction="Column" style={{ width: '100%', maxWidth: 'var(--container-size)', margin: '0 auto'}}>
+        {!threadRootId && <RoomViewTyping room={room} />}
         <div style={{ padding: `0 ${config.space.S400} ${config.space.S400}` }}>
           {tombstoneEvent ? (
             <RoomTombstone
@@ -114,6 +124,7 @@ export function RoomView({ eventId }: { eventId?: string }) {
                   room={room}
                   editor={editor}
                   roomId={roomId}
+                  threadRootId={threadRootId}
                   fileDropContainerRef={roomViewRef}
                   ref={roomInputRef}
                   scrollToBottomRef={timelineScrollToBottomRef}

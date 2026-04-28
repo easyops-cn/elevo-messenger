@@ -1,15 +1,8 @@
 import { keyframes, style } from '@vanilla-extract/css';
 import { config, toRem } from 'folds';
 
-export const MembersDrawer = style({
-  width: toRem(266),
-});
-
-export const MembersDrawerHeader = style({
-  flexShrink: 0,
-  padding: `0 ${config.space.S200} 0 ${config.space.S200}`,
-  // borderBottomWidth: config.borderWidth.B300,
-  marginTop: config.space.S300,
+export const RoomSidePanel = style({
+  width: toRem(234),
 });
 
 export const MemberDrawerContentBase = style({
@@ -18,7 +11,7 @@ export const MemberDrawerContentBase = style({
 });
 
 export const MemberDrawerContent = style({
-  padding: `${config.space.S200} 0`,
+  padding: `${config.space.S600} 0`,
 });
 
 const ScrollBtnAnime = keyframes({
@@ -41,11 +34,10 @@ export const DrawerScrollTop = style({
 
 export const MembersGroupLabel = style({
   padding: config.space.S200,
-  selectors: {
-    '&:not(:first-child)': {
-      paddingTop: config.space.S500,
-    },
-  },
+});
+
+export const MembersGroupLabelWithFilter = style({
+  padding: `${config.space.S100} ${config.space.S200}`,
 });
 
 export const DrawerVirtualItem = style({

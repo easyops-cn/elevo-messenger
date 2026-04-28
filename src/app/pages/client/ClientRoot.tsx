@@ -35,7 +35,6 @@ import { stopPropagation } from '../../utils/keyboard';
 import { SyncStatusBridge } from './SyncStatusBridge';
 import { SyncStatus } from './SyncStatus';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
-import { isMacOS } from '../../utils/user-agent';
 import { AuthMetadataProvider } from '../../hooks/useAuthMetadata';
 import { getFallbackSession } from '../../state/sessions';
 import { matrixReadyAtom } from '../../state/matrixReady';

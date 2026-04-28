@@ -1,5 +1,5 @@
 import { Box, Icon, Icons, Line, Text, as, color, toRem } from 'folds';
-import { EventTimelineSet, Room } from 'matrix-js-sdk';
+import { EventTimelineSet, MsgType, Room, THREAD_RELATION_TYPE } from 'matrix-js-sdk';
 import React, { MouseEventHandler, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
@@ -28,7 +28,7 @@ export const ReplyLayout = as<'div', ReplyLayoutProps>(
       >
         <Box style={{ maxWidth: toRem(200) }} alignItems="Center" shrink="No">
           <Text as="span" size="T300">
-            {`${t('common.reply')} ${username ?? ''}:`}
+            {`${t('common.replyTo', { name: username ?? '' })}:`}
           </Text>
         </Box>
         <Box grow="Yes">
@@ -56,8 +56,8 @@ export const ThreadIndicator = as<'div'>(({ ...props }, ref) => (
 type ReplyProps = {
   room: Room;
   timelineSet?: EventTimelineSet | undefined;
+  eventId: string;
   replyEventId: string;
-  threadRootId?: string | undefined;
   onClick?: MouseEventHandler | undefined;
 };
 
@@ -66,22 +66,49 @@ export const Reply = as<'div', ReplyProps>(
     {
       room,
       timelineSet,
+      eventId,
       replyEventId,
-      threadRootId,
       onClick,
       ...props
     },
     ref
   ) => {
+    const { t } = useTranslation();
     const placeholderWidth = useMemo(() => randomNumberBetween(40, 400), []);
     const getFromLocalTimeline = useCallback(
       () => timelineSet?.findEventById(replyEventId),
       [timelineSet, replyEventId]
     );
     const replyEvent = useRoomEvent(room, replyEventId, getFromLocalTimeline);
+    const mainEvent = useRoomEvent(room, eventId);
 
-    const { body } = replyEvent?.getContent() ?? {};
+    if (mainEvent) {
+      const inReplyTo = mainEvent.getWireContent()?.["m.relates_to"]?.["m.in_reply_to"];
+      if (!inReplyTo) {
+        return null;
+      }
+
+      const relation = mainEvent.getRelation();
+      if (relation?.rel_type === THREAD_RELATION_TYPE.name && relation?.is_falling_back) {
+        return null;
+      }
+    }
+
+    const content = replyEvent?.getContent() ?? {};
     const sender = replyEvent?.getSender();
+    const eventType = replyEvent?.getType();
+    const { msgtype } = content;
+    let body: string | undefined;
+    if (msgtype === MsgType.Text) {
+      body = t('message.image');
+    } else if (msgtype === MsgType.File) {
+      const filename = content.filename || content.body || '';
+      body = t('message.file', { filename });
+    } else if (eventType === 'm.sticker') {
+      body = t('message.sticker');
+    } else {
+      body = typeof content.body === 'string' ? content.body : '';
+  }
 
     const fallbackBody = replyEvent?.isRedacted() ? (
       <MessageDeletedContent />
@@ -95,9 +122,6 @@ export const Reply = as<'div', ReplyProps>(
     return (
       <Box direction="Row" gap="200" alignItems="Center" {...props} ref={ref}>
         <Line size="500" variant="Primary" direction="Vertical" style={{ height: toRem(14) }} />
-        {threadRootId && (
-          <ThreadIndicator as="button" data-event-id={threadRootId} onClick={onClick} />
-        )}
         <ReplyLayout
           as="button"
           username={sender ? (getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender)) : undefined}

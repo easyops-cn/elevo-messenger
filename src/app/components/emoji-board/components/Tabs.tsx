@@ -9,13 +9,15 @@ const styles: CSSProperties = {
 export function EmojiBoardTabs({
   tab,
   onTabChange,
+  allowSticker = true,
 }: {
   tab: EmojiBoardTab;
+  allowSticker?: boolean;
   onTabChange: (tab: EmojiBoardTab) => void;
 }) {
   return (
     <Box gap="100">
-      <Badge
+      {allowSticker && <Badge
         style={styles}
         as="button"
         variant="Secondary"
@@ -26,7 +28,7 @@ export function EmojiBoardTabs({
         <Text as="span" size="L400">
           Sticker
         </Text>
-      </Badge>
+      </Badge>}
       <Badge
         style={styles}
         as="button"

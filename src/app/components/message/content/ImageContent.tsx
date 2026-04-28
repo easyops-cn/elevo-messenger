@@ -1,6 +1,5 @@
 import React, { ReactNode, useCallback, useEffect, useState } from 'react';
 import {
-  Badge,
   Box,
   Button,
   Chip,
@@ -24,7 +23,7 @@ import { IImageInfo, MATRIX_BLUR_HASH_PROPERTY_NAME } from '../../../../types/ma
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import * as css from './style.css';
-import { bytesToSize } from '../../../utils/common';
+import { scaleYDimension } from '../../../utils/common';
 import { FALLBACK_MIMETYPE } from '../../../utils/mimeTypes';
 import { stopPropagation } from '../../../utils/keyboard';
 import { decryptFile, downloadEncryptedMedia, downloadMedia, mxcUrlToHttp } from '../../../utils/matrix';
@@ -53,7 +52,6 @@ export type ImageContentProps = {
   url: string;
   info?: IImageInfo;
   encInfo?: EncryptedAttachmentInfo;
-  autoPlay?: boolean;
   markedAsSpoiler?: boolean;
   spoilerReason?: string;
   renderViewer: (props: RenderViewerProps) => ReactNode;
@@ -68,7 +66,6 @@ export const ImageContent = as<'div', ImageContentProps>(
       url,
       info,
       encInfo,
-      autoPlay,
       markedAsSpoiler,
       spoilerReason,
       renderViewer,
@@ -85,6 +82,10 @@ export const ImageContent = as<'div', ImageContentProps>(
     const [error, setError] = useState(false);
     const [viewer, setViewer] = useState(false);
     const [blurred, setBlurred] = useState(markedAsSpoiler ?? false);
+
+    const originalWidth = info?.w || 200;
+    const maxWidth = Math.min(Math.max(originalWidth, 20), 400);
+    const maxHeight = scaleYDimension(originalWidth, maxWidth, info?.h || 200);
 
     const [srcState, loadSrc] = useAsyncCallback(
       useCallback(async () => {
@@ -118,8 +119,8 @@ export const ImageContent = as<'div', ImageContentProps>(
     };
 
     useEffect(() => {
-      if (autoPlay) loadSrc();
-    }, [autoPlay, loadSrc]);
+      loadSrc();
+    }, [loadSrc]);
 
     return (
       <Box className={classNames(css.RelativeBase, className)} {...props} ref={ref}>
@@ -158,22 +159,8 @@ export const ImageContent = as<'div', ImageContentProps>(
             punch={1}
           />
         )}
-        {!autoPlay && !markedAsSpoiler && srcState.status === AsyncStatus.Idle && (
-          <Box className={css.AbsoluteContainer} alignItems="Center" justifyContent="Center">
-            <Button
-              variant="Secondary"
-              fill="Solid"
-              radii="300"
-              size="300"
-              onClick={loadSrc}
-              before={<Icon size="Inherit" src={Icons.Photo} filled />}
-            >
-              <Text size="B300">View</Text>
-            </Button>
-          </Box>
-        )}
         {srcState.status === AsyncStatus.Success && (
-          <Box className={classNames(css.AbsoluteContainer, blurred && css.Blur)}>
+          <Box className={classNames(blurred && css.Blur)} style={{ maxWidth, maxHeight }}>
             {renderImage({
               alt: body,
               title: body,
@@ -218,15 +205,14 @@ export const ImageContent = as<'div', ImageContentProps>(
             </TooltipProvider>
           </Box>
         )}
-        {(srcState.status === AsyncStatus.Loading || srcState.status === AsyncStatus.Success) &&
-          !load &&
+        {!error && (srcState.status === AsyncStatus.Loading || srcState.status === AsyncStatus.Idle) &&
           !blurred && (
-            <Box className={css.AbsoluteContainer} alignItems="Center" justifyContent="Center">
+            <Box alignItems="Center" justifyContent="Center" style={{ width: maxWidth, height: maxHeight }}>
               <Spinner variant="Secondary" />
             </Box>
           )}
         {(error || srcState.status === AsyncStatus.Error) && (
-          <Box className={css.AbsoluteContainer} alignItems="Center" justifyContent="Center">
+          <Box alignItems="Center" justifyContent="Center" style={{ width: maxWidth, height: maxHeight }}>
             <TooltipProvider
               tooltip={
                 <Tooltip variant="Critical">
@@ -251,13 +237,6 @@ export const ImageContent = as<'div', ImageContentProps>(
                 </Button>
               )}
             </TooltipProvider>
-          </Box>
-        )}
-        {!load && typeof info?.size === 'number' && (
-          <Box className={css.AbsoluteFooter} justifyContent="End" alignContent="Center" gap="200">
-            <Badge variant="Secondary" fill="Soft">
-              <Text size="L400">{bytesToSize(info.size)}</Text>
-            </Badge>
           </Box>
         )}
       </Box>

@@ -91,14 +91,16 @@ export function PageNavContent({
   );
 }
 
-export function PageMain({ children, style }: { children: ReactNode; style?: React.CSSProperties }) {
+export function PageMain({ children, isSidePanel, style }: { children: ReactNode; isSidePanel?: boolean; style?: React.CSSProperties }) {
   const screenSize = useScreenSizeContext();
 
   return (
     <Box
       grow="Yes"
       direction="Column"
-      className={screenSize !== ScreenSize.Mobile ? css.PageMainFloating : undefined}
+      className={classNames(screenSize !== ScreenSize.Mobile ? css.PageMainFloating : undefined, {
+        [css.PageMainSidePanel]: isSidePanel && screenSize === ScreenSize.Desktop,
+      })}
       style={style}
     >
       {children}
