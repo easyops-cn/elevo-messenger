@@ -66,8 +66,12 @@ export const useRoomFiles = (room: Room): UseRoomFilesResult => {
           const timeline = timelineSet.getLiveTimeline();
 
           // Try to load from local/server until we have enough or reach the end
-          while (timeline.getEvents().length < 100) {
+          let count = 0;
+          while (timeline.getEvents().length < 10) {
             if (syncId !== syncCounter) return;
+            if (count > 5) break;
+
+            count += 1;
 
             // back-paginate will first check local IndexedDB
             // eslint-disable-next-line no-await-in-loop
