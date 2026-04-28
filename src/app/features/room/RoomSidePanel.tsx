@@ -3,6 +3,7 @@ import React, {
   useCallback,
   useMemo,
   useRef,
+  useState,
 } from 'react';
 import {
   Badge,
@@ -17,7 +18,7 @@ import {
   Text,
   config,
 } from 'folds';
-import { MatrixClient, Room, RoomMember } from 'matrix-js-sdk';
+import { MatrixClient, Room, RoomMember, MatrixEvent } from 'matrix-js-sdk';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
@@ -49,8 +50,11 @@ import { MembershipFilter } from '../../hooks/useMemberFilter';
 import { BADGE_LABEL_KEYS } from '../../hooks/usePowerLevelTags';
 import { useThreadChat } from '../../state/threadChat';
 import { useRoomThreads } from '../../hooks/useRoomThreads';
+import { useRoomFiles } from '../../hooks/useRoomFiles';
 import { Avatar } from '../../components/avatar';
 import { ThreadMenuItem } from './ThreadMenuItem';
+import { FileMenuItem } from './FileMenuItem';
+import { FileViewerOverlay } from './FileViewerOverlay';
 import { useOpenRoomSettings } from '../../state/hooks/roomSettings';
 import { RoomSettingsPage } from '../../state/roomSettings';
 
@@ -175,6 +179,8 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
   const openProfileUserId = useUserRoomProfileState()?.userId;
   const [, setThreadChat] = useThreadChat(room.roomId);
 
+  const [viewingFile, setViewingFile] = useState<MatrixEvent | null>(null);
+
   const typingMembers = useRoomTypingMember(room.roomId);
   const isSpaceRoom = room.isSpaceRoom();
   const {
@@ -183,6 +189,13 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
     error: loadingThreadsError,
     retry: retryLoadThreads,
   } = useRoomThreads(room);
+
+  const {
+    files,
+    loading: loadingFiles,
+    error: loadingFilesError,
+    retry: retryLoadFiles,
+  } = useRoomFiles(room);
 
   const filteredMembers = useMemo(
     () => members.filter(MembershipFilter.filterJoined).sort(MemberSort.Oldest),
@@ -253,7 +266,7 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
         <Scroll ref={scrollRef} variant="Background" size="300" visibility="Hover" hideTrack>
           <Box className={css.MemberDrawerContent} direction="Column" gap="600">
             <Box direction="Column" gap="100">
-              <Box className={css.MembersGroupLabelWithFilter} ref={scrollTopAnchorRef} alignItems="Center" justifyContent="SpaceBetween" gap="200">
+              <Box className={css.MembersGroupLabel} ref={scrollTopAnchorRef} alignItems="Center" justifyContent="SpaceBetween" gap="200">
                 <Text size="L400" priority="300">
                   {t('common.members')}
                 </Text>
@@ -340,6 +353,49 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
             {!isSpaceRoom && (
               <Box direction="Column" gap="100">
                 <Text className={css.MembersGroupLabel} size="L400" priority="300">
+                  {t('room.files')}
+                </Text>
+
+                {loadingFiles && (
+                  <Box justifyContent="Center" style={{ padding: config.space.S200 }}>
+                    <Spinner />
+                  </Box>
+                )}
+
+                {!loadingFiles && loadingFilesError && (
+                  <Box direction="Column" alignItems="Center" gap="100" style={{ padding: config.space.S300 }}>
+                    <Text align="Center" size="T300" priority="300">
+                      {t('room.filesLoadFailed')}
+                    </Text>
+                    <Chip as="button" variant="SurfaceVariant" size="400" radii="300" onClick={retryLoadFiles}>
+                      <Text size="T200">{t('common.retry')}</Text>
+                    </Chip>
+                  </Box>
+                )}
+
+                {!loadingFiles && !loadingFilesError && files.length === 0 && (
+                  <Text style={{ padding: config.space.S300 }} align="Center" size="T200" priority="300">
+                    {t('room.noFiles')}
+                  </Text>
+                )}
+
+                {!loadingFiles && !loadingFilesError && files.length > 0 && (
+                  <Box direction="Column" gap="100">
+                    {files.map((fileEvent) => (
+                      <FileMenuItem
+                        key={fileEvent.getId()}
+                        fileEvent={fileEvent}
+                        onClick={() => setViewingFile(fileEvent)}
+                      />
+                    ))}
+                  </Box>
+                )}
+              </Box>
+            )}
+
+            {!isSpaceRoom && (
+              <Box direction="Column" gap="100">
+                <Text className={css.MembersGroupLabel} size="L400" priority="300">
                   {t('room.threads')}
                 </Text>
 
@@ -386,6 +442,11 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
           </Box>
         </Scroll>
       </Box>
+
+      <FileViewerOverlay
+        fileEvent={viewingFile}
+        requestClose={() => setViewingFile(null)}
+      />
     </Box>
   );
 }
