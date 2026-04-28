@@ -159,6 +159,7 @@
     "resultCount_other": "{{count}} Results",
     "noResultsCount": "No Results",
     "noMembersOfType": "No \"{{type}}\" Members",
+    "viewAllMembers": "View all members",
     "threads": "Threads",
     "noThreads": "No Threads",
     "threadsLoadFailed": "Failed to load threads",

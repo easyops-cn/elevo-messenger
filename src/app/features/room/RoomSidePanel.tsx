@@ -12,8 +12,6 @@ import {
   IconButton,
   Icons,
   MenuItem,
-  PopOut,
-  RectCords,
   Scroll,
   Spinner,
   Text,
@@ -27,7 +25,6 @@ import dayjs from 'dayjs';
 
 import * as css from './RoomSidePanel.css';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { UseStateProvider } from '../../components/UseStateProvider';
 import {
   SearchItemStrGetter,
   UseAsyncSearchOptions,
@@ -36,15 +33,12 @@ import {
 import { TypingIndicator } from '../../components/typing-indicator';
 import { getMemberDisplayName, getMemberSearchStr } from '../../utils/room';
 import { getMxIdLocalPart } from '../../utils/matrix';
-import { useSetting } from '../../state/hooks/settings';
-import { settingsAtom } from '../../state/settings';
 import { ScrollTopContainer } from '../../components/scroll-top-container';
 import { UserAvatar } from '../../components/user-avatar';
 import { useRoomTypingMember } from '../../hooks/useRoomTypingMembers';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
-import { useMemberSort, useMemberSortMenu } from '../../hooks/useMemberSort';
+import { MemberSort } from '../../hooks/useMemberSort';
 import { usePowerLevelsContext } from '../../hooks/usePowerLevels';
-import { MemberSortMenu } from '../../components/MemberSortMenu';
 import { useOpenUserRoomProfile, useUserRoomProfileState } from '../../state/hooks/userRoomProfile';
 import { useSpaceOptionally } from '../../hooks/useSpace';
 import { ContainerColor } from '../../styles/ContainerColor.css';
@@ -57,6 +51,8 @@ import { useThreadChat } from '../../state/threadChat';
 import { useRoomThreads } from '../../hooks/useRoomThreads';
 import { Avatar } from '../../components/avatar';
 import { ThreadMenuItem } from './ThreadMenuItem';
+import { useOpenRoomSettings } from '../../state/hooks/roomSettings';
+import { RoomSettingsPage } from '../../state/roomSettings';
 
 type MemberItemProps = {
   mx: MatrixClient;
@@ -154,6 +150,9 @@ const mxIdToName = (mxId: string) => getMxIdLocalPart(mxId) ?? mxId;
 const getRoomMemberStr: SearchItemStrGetter<RoomMember> = (m, query) =>
   getMemberSearchStr(m, query, mxIdToName);
 
+const MEMBER_PREVIEW_THRESHOLD = 10;
+const MEMBER_PREVIEW_COUNT = 9;
+
 type RoomSidePanelProps = {
   room: Room;
   members: RoomMember[];
@@ -171,12 +170,9 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
 
   const fetchingMembers = members.length < room.getJoinedMemberCount();
   const openUserRoomProfile = useOpenUserRoomProfile();
+  const openRoomSettings = useOpenRoomSettings();
   const space = useSpaceOptionally();
   const openProfileUserId = useUserRoomProfileState()?.userId;
-
-  const sortFilterMenu = useMemberSortMenu();
-  const [sortFilterIndex, setSortFilterIndex] = useSetting(settingsAtom, 'memberSortFilterIndex');
-  const memberSort = useMemberSort(sortFilterIndex, sortFilterMenu);
   const [, setThreadChat] = useThreadChat(room.roomId);
 
   const typingMembers = useRoomTypingMember(room.roomId);
@@ -189,8 +185,8 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
   } = useRoomThreads(room);
 
   const filteredMembers = useMemo(
-    () => members.filter(MembershipFilter.filterJoined).sort(memberSort.sortFn),
-    [members, memberSort]
+    () => members.filter(MembershipFilter.filterJoined).sort(MemberSort.Oldest),
+    [members]
   );
 
   const [result, search] = useAsyncSearch(
@@ -201,9 +197,13 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
   if (!result && searchInputRef.current?.value) search(searchInputRef.current.value);
 
   const processMembers = result ? result.items : filteredMembers;
+  const shouldShowMembersPreview = !result && processMembers.length > MEMBER_PREVIEW_THRESHOLD;
+  const displayMembers = shouldShowMembersPreview
+    ? processMembers.slice(0, MEMBER_PREVIEW_COUNT)
+    : processMembers;
 
   const virtualizer = useVirtualizer({
-    count: processMembers.length,
+    count: displayMembers.length,
     getScrollElement: () => scrollRef.current,
     estimateSize: () => 32,
     overscan: 10,
@@ -226,6 +226,10 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
     },
     [setThreadChat]
   );
+
+  const handleViewAllMembers: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
+    openRoomSettings(room.roomId, space?.roomId, RoomSettingsPage.MembersPage);
+  }, [openRoomSettings, room.roomId, space?.roomId]);
 
   const sortedThreads = useMemo(() => {
     if (isSpaceRoom) return [];
@@ -251,41 +255,8 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
             <Box direction="Column" gap="100">
               <Box className={css.MembersGroupLabelWithFilter} ref={scrollTopAnchorRef} alignItems="Center" justifyContent="SpaceBetween" gap="200">
                 <Text size="L400" priority="300">
-                  {`${t('common.members')} (${processMembers.length})`}
+                  {t('common.members')}
                 </Text>
-
-                <UseStateProvider initial={undefined}>
-                  {(anchor: RectCords | undefined, setAnchor) => (
-                    <PopOut
-                      anchor={anchor}
-                      position="Bottom"
-                      align="End"
-                      offset={4}
-                      content={
-                        <MemberSortMenu
-                          selected={sortFilterIndex}
-                          onSelect={setSortFilterIndex}
-                          requestClose={() => setAnchor(undefined)}
-                        />
-                      }
-                    >
-                      <Chip
-                        onClick={
-                          ((evt) =>
-                            setAnchor(
-                              evt.currentTarget.getBoundingClientRect()
-                            )) as MouseEventHandler<HTMLButtonElement>
-                        }
-                        variant="Background"
-                        size="400"
-                        radii="300"
-                        after={<Icon src={Icons.Sort} size="50" />}
-                      >
-                        <Text size="T200">{memberSort.name}</Text>
-                      </Chip>
-                    </PopOut>
-                  )}
-                </UseStateProvider>
               </Box>
 
               <ScrollTopContainer scrollRef={scrollRef} anchorRef={scrollTopAnchorRef}>
@@ -314,7 +285,7 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
                 }}
               >
                 {virtualizer.getVirtualItems().map((vItem) => {
-                  const member = processMembers[vItem.index];
+                  const member = displayMembers[vItem.index];
                   const powerTag = getPowerTag(member.userId);
 
                   return (
@@ -343,6 +314,21 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
                   );
                 })}
               </div>
+
+              {shouldShowMembersPreview && (
+                <Box justifyContent="Center">
+                  <Chip
+                    as="button"
+                    variant="SurfaceVariant"
+                    fill="None"
+                    size="500"
+                    radii="300"
+                    onClick={handleViewAllMembers}
+                  >
+                    <Text size="T200">{`${t('room.viewAllMembers')} (${processMembers.length})`}</Text>
+                  </Chip>
+                </Box>
+              )}
             </Box>
 
             {fetchingMembers && (
@@ -375,7 +361,7 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
                 )}
 
                 {!loadingThreads && !loadingThreadsError && sortedThreads.length === 0 && (
-                  <Text style={{ padding: config.space.S300 }} align="Center" size="T300" priority="300">
+                  <Text style={{ padding: config.space.S300 }} align="Center" size="T200" priority="300">
                     {t('room.noThreads')}
                   </Text>
                 )}
