@@ -5,6 +5,7 @@ import FocusTrap from 'focus-trap-react';
 import { ImageViewer } from '../../components/image-viewer/ImageViewer';
 import { TextViewer } from '../../components/text-viewer/TextViewer';
 import { PdfViewer } from '../../components/Pdf-viewer/PdfViewer';
+import { UnknownFileViewer } from '../../components/unknown-file-viewer/UnknownFileViewer';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { ModalWide } from '../../styles/Modal.css';
@@ -25,7 +26,7 @@ import {
 type ViewerType = 'image' | 'text' | 'pdf';
 
 type FileViewerOverlayProps = {
-  fileEvent: MatrixEvent | null;
+  fileEvent: MatrixEvent;
   requestClose: () => void;
 };
 
@@ -45,9 +46,10 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
   const mx = useMatrixClient();
   const useAuth = useMediaAuthentication();
 
-  const content = fileEvent?.getContent() ?? {};
+  const content = fileEvent.getContent() ?? {};
   const filename = (content.filename ?? content.body ?? 'Unnamed File') as string;
   const mimetype = (content.info?.mimetype ?? '') as string;
+  const fileSize = (content.info?.size ?? 0) as number;
   const url = (content.file?.url ?? content.url) as string | undefined;
   const encInfo = content.file;
   const viewerType = getFileType(mimetype, filename);
@@ -64,7 +66,7 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
     setTextData(null);
     setPdfBlobUrl(null);
 
-    if (!fileEvent || !viewerType || viewerType === 'image' || !url) return;
+    if (!viewerType || viewerType === 'image' || !url) return;
 
     let alive = true;
 
@@ -105,7 +107,38 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
     }
   }, [pdfBlobUrl]);
 
-  if (!fileEvent || !viewerType) return null;
+  if (!viewerType) {
+    if (!url) return null;
+    return (
+      <Overlay open backdrop={<OverlayBackdrop />}>
+        <OverlayCenter>
+          <FocusTrap
+            focusTrapOptions={{
+              initialFocus: false,
+              onDeactivate: requestClose,
+              clickOutsideDeactivates: true,
+              escapeDeactivates: stopPropagation,
+            }}
+          >
+            <Modal
+              className={ModalWide}
+              size="500"
+              onContextMenu={(evt: any) => evt.stopPropagation()}
+            >
+              <UnknownFileViewer
+                name={filename}
+                size={fileSize}
+                url={url}
+                mimetype={mimetype}
+                encInfo={encInfo}
+                requestClose={requestClose}
+              />
+            </Modal>
+          </FocusTrap>
+        </OverlayCenter>
+      </Overlay>
+    );
+  }
 
   const showViewer =
     viewerType === 'image'

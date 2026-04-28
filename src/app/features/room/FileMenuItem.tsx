@@ -16,6 +16,10 @@ export function FileMenuItem({ fileEvent, onClick }: FileMenuItemProps) {
 
   const icon = useMemo(() => getFileTypeIcon(Icons, mimetype), [mimetype]);
 
+  if (fileEvent.isRedacted()) {
+    return null;
+  }
+
   return (
     <MenuItem
       data-event-id={fileEvent.getId()}

@@ -443,10 +443,10 @@ export function RoomSidePanel({ room, members }: RoomSidePanelProps) {
         </Scroll>
       </Box>
 
-      <FileViewerOverlay
+      {viewingFile && <FileViewerOverlay
         fileEvent={viewingFile}
         requestClose={() => setViewingFile(null)}
-      />
+      />}
     </Box>
   );
 }

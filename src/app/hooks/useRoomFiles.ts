@@ -89,15 +89,17 @@ export const useRoomFiles = (room: Room): UseRoomFilesResult => {
 
     loadFiles();
 
-    const handleTimeline = () => {
+    const trySyncFiles = () => {
       syncFiles?.();
     };
 
-    room.on(RoomEvent.Timeline, handleTimeline);
+    room.on(RoomEvent.Timeline, trySyncFiles);
+    room.on(RoomEvent.Redaction, trySyncFiles);
 
     return () => {
       alive = false;
-      room.removeListener(RoomEvent.Timeline, handleTimeline);
+      room.removeListener(RoomEvent.Timeline, trySyncFiles);
+      room.removeListener(RoomEvent.Redaction, trySyncFiles);
     };
   }, [room, mx, reloadKey]);
 

@@ -964,7 +964,8 @@
     "failedLoadPdf": "Failed to load PDF",
     "previous": "Previous",
     "jumpToPage": "Jump to Page",
-    "next": "Next"
+    "next": "Next",
+    "noPreview": "This file cannot be previewed"
   },
   "datePicker": {
     "day": "Day",
