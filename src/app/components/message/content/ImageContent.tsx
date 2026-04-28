@@ -160,7 +160,7 @@ export const ImageContent = as<'div', ImageContentProps>(
           />
         )}
         {srcState.status === AsyncStatus.Success && (
-          <Box className={classNames(blurred && css.Blur)} style={{ width: maxWidth, height: maxHeight }}>
+          <Box className={classNames(blurred && css.Blur)} style={{ maxWidth, maxHeight }}>
             {renderImage({
               alt: body,
               title: body,

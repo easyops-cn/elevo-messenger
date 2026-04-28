@@ -73,7 +73,7 @@ export function ThreadsPanel({ room }: ThreadsPanelProps) {
       )}
 
       {!loading && !error && sortedThreads.length > 0 && (
-        <Box direction="Column" gap="100">
+        <Box direction="Column" gap="200">
           {sortedThreads.map((thread) => (
             <ThreadMenuItem
               key={thread.id}

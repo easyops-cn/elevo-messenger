@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Text, TooltipProvider, Tooltip, Icon, Icons, IconButton } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { Page, PageHeader, PageMain } from '../../components/page';
@@ -11,6 +11,16 @@ export function ThreadChatView() {
   const room = useRoom();
   const [threadChat, setThreadChat] = useThreadChat(room.roomId);
   const { threadRootId } = threadChat;
+  
+  const [threadReady, setThreadReady] = useState(false);
+
+  useEffect(() => {
+    room.createThreadsTimelineSets()
+      .then(() => room.fetchRoomThreads())
+      .then(() => {
+        setThreadReady(true);
+      });
+  }, [room]);
 
   const handleClose = () => setThreadChat({ open: false, threadRootId: undefined });
 
@@ -45,7 +55,7 @@ export function ThreadChatView() {
           </Box>
         </PageHeader>
         <Box grow="Yes" direction="Column">
-          {threadRootId && (
+          {threadRootId && threadReady && (
             <RoomView key={threadRootId} threadRootId={threadRootId} showRoomIntro={false} />
           )}
         </Box>

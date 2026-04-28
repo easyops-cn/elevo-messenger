@@ -37,6 +37,7 @@ export const useRoomThreads = (room: Room): UseRoomThreadsResult => {
       setLoading(true);
       setError(false);
       try {
+        await room.createThreadsTimelineSets();
         await room.fetchRoomThreads();
         syncThreads();
       } catch {

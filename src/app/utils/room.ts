@@ -599,7 +599,8 @@ export const getLatestMessageText = (
   evt: MatrixEvent,
   myUserId: string,
   direct: boolean | undefined,
-  t: (key: string, options?: Record<string, unknown>) => string
+  t: (key: string, options?: Record<string, unknown>) => string,
+  showUsername = true
 ): string | undefined => {
   const content = evt.getContent();
   const sender = evt.getSender();
@@ -620,7 +621,7 @@ export const getLatestMessageText = (
     body = typeof content.body === 'string' ? content.body : '';
   }
 
-  if (direct || sender === myUserId) return body;
+  if (direct || sender === myUserId || !showUsername) return body;
   const senderName = getMemberDisplayName(room, sender) || sender;
   return `${senderName}: ${body}`;
 };

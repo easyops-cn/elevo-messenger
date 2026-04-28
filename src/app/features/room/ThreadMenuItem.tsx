@@ -47,7 +47,7 @@ export function ThreadMenuItem({
       ? getLatestMessageText(room, threadEvent, mx.getSafeUserId(), false, t)
       : undefined;
     const latestSummary = threadLastReply
-      ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t)
+      ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t, false)
       : undefined;
     const senderId = threadLastReply?.getSender();
     const senderName = senderId
@@ -76,48 +76,42 @@ export function ThreadMenuItem({
       variant="Background"
       radii="400"
       onClick={onClick}
-      after={
-        latestTs ? (
-          <Text size="T200" priority="300" style={{ flexShrink: 0 }}>
-            <RelativeTime ts={latestTs} />
-          </Text>
-        ) : undefined
-      }
     >
       <Box grow="Yes" direction="Column" gap="100">
         <Text size="T300" truncate>
           {rootSummary ?? t('message.threadLatestReplyFallback')}
         </Text>
-        {latestReplySenderId ? (
           <Box alignItems="Center" gap="100">
-            <Box shrink="No" style={{ position: 'relative' }}>
-              <Avatar size="100" radii="Pill">
-                <UserAvatar
-                  userId={latestReplySenderId}
-                  src={latestReplyAvatarUrl ?? undefined}
-                  alt={latestReplySenderName ?? latestReplySenderId}
-                  renderFallback={() => <Icon size="50" src={Icons.User} filled />}
-                />
-              </Avatar>
-              {hasThreadUnreadBadge && (
-                <Badge
-                  variant="Critical"
-                  fill="Solid"
-                  size="200"
-                  radii="Pill"
-                  style={{ position: 'absolute', top: toRem(-3), right: toRem(-3) }}
-                />
-              )}
-            </Box>
-            <Text size="T200" priority="300" truncate>
-              {latestReplySummary ?? t('message.threadLatestReplyFallback')}
+            {latestReplySenderId && (
+              <Box shrink="No" style={{ position: 'relative' }}>
+                <Avatar size="100" radii="Pill">
+                  <UserAvatar
+                    userId={latestReplySenderId}
+                    src={latestReplyAvatarUrl ?? undefined}
+                    alt={latestReplySenderName ?? latestReplySenderId}
+                    renderFallback={() => <Icon size="50" src={Icons.User} filled />}
+                  />
+                </Avatar>
+                {hasThreadUnreadBadge && (
+                  <Badge
+                    variant="Critical"
+                    fill="Solid"
+                    size="200"
+                    radii="Pill"
+                    style={{ position: 'absolute', top: toRem(-3), right: toRem(-3) }}
+                  />
+                )}
+              </Box>
+            )}
+            <Text size="T200" priority="300" truncate style={{ flexGrow: 1 }}>
+              {latestReplySenderId ? (latestReplySummary ?? '...'): t('message.threadNoReplies')}
             </Text>
-          </Box>
-        ) : (
-          <Text size="T200" priority="300" truncate>
-            {t('message.threadNoReplies')}
-          </Text>
-        )}
+            {latestTs && (
+              <Text size="T200" style={{ flexShrink: 0, opacity: 0.5 }}>
+                <RelativeTime ts={latestTs} />
+              </Text>
+            )}
+        </Box>
       </Box>
     </MenuItem>
   );

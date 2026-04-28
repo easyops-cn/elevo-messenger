@@ -82,7 +82,7 @@ export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSum
       data-event-id={mEventId}
       before={
         <>
-          <Box style={{ position: 'relative', display: 'inline-flex' }}>
+          <Box shrink="No" style={{ position: 'relative', display: 'inline-flex' }}>
             <Icon size="50" src={MessageSquareTextIcon} />
             {hasThreadUnreadBadge && (
               <Badge
@@ -100,7 +100,7 @@ export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSum
         </>
       }
       onClick={onOpenThread}
-      style={{ marginTop: config.space.S200, width: '100%', maxWidth: toRem(600) }}
+      style={{ marginTop: config.space.S200, width: 'fit-content', maxWidth: toRem(600) }}
     >
       <Box alignItems="Center" gap="100" grow="Yes">
         {threadLastReplySenderId ? (
