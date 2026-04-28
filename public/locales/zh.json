@@ -46,7 +46,8 @@
     "password": "密码",
     "code": "代码",
     "reset": "重置",
-    "reply": "回复"
+    "reply": "回复",
+    "replyTo": "回复 {{name}}"
   },
   "auth": {
     "login": "登录",

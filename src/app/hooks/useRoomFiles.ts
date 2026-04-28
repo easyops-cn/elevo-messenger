@@ -81,7 +81,7 @@ export const useRoomFiles = (room: Room): UseRoomFilesResult => {
 
           if (syncId !== syncCounter) return;
 
-          const validEvents = [...timeline.getEvents()]
+          const validEvents = timeline.getEvents()
             .filter((evt) => {
               if (evt.isRedacted()) return false;
               const eventType = evt.getType();

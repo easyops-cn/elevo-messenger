@@ -46,7 +46,8 @@
     "password": "Password",
     "code": "Code",
     "reset": "Reset",
-    "reply": "Reply"
+    "reply": "Reply",
+    "replyTo": "Reply to {{name}}"
   },
   "auth": {
     "login": "Login",

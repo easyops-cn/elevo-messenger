@@ -28,7 +28,7 @@ export const ReplyLayout = as<'div', ReplyLayoutProps>(
       >
         <Box style={{ maxWidth: toRem(200) }} alignItems="Center" shrink="No">
           <Text as="span" size="T300">
-            {`${t('common.reply')} ${username ?? ''}:`}
+            {`${t('common.replyTo', { name: username ?? '' })}:`}
           </Text>
         </Box>
         <Box grow="Yes">
