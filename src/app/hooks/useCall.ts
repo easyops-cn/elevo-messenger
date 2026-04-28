@@ -2,6 +2,7 @@ import { Room } from 'matrix-js-sdk';
 import {
   MatrixRTCSession,
   MatrixRTCSessionEvent,
+  slotDescriptionToId,
 } from 'matrix-js-sdk/lib/matrixrtc/MatrixRTCSession';
 import { CallMembership } from 'matrix-js-sdk/lib/matrixrtc/CallMembership';
 import { useEffect, useState } from 'react';
@@ -34,20 +35,38 @@ export const useCallSession = (room: Room): MatrixRTCSession => {
 };
 
 export const useCallMembers = (room: Room, session: MatrixRTCSession): CallMembership[] => {
-  const [memberships, setMemberships] = useState<CallMembership[]>(
-    MatrixRTCSession.sessionMembershipsForRoom(room, session.sessionDescription)
-  );
+  const [memberships, setMemberships] = useState<CallMembership[]>([]);
 
   useEffect(() => {
-    const updateMemberships = () => {
-      setMemberships(MatrixRTCSession.sessionMembershipsForRoom(room, session.sessionDescription));
+    let disposed = false;
+    let requestId = 0;
+    const slotId = slotDescriptionToId(session.slotDescription);
+
+    const updateMemberships = async () => {
+      requestId += 1;
+      const currentRequestId = requestId;
+
+      try {
+        const nextMemberships = await MatrixRTCSession.sessionMembershipsForSlot(room, slotId);
+
+        if (!disposed && currentRequestId === requestId) {
+          setMemberships(nextMemberships);
+        }
+      } catch {
+        // Keep current value when fetching memberships fails.
+      }
     };
 
-    updateMemberships();
+    updateMemberships().catch(() => undefined);
 
-    session.on(MatrixRTCSessionEvent.MembershipsChanged, updateMemberships);
+    const onMembershipsChanged = () => {
+      updateMemberships().catch(() => undefined);
+    };
+
+    session.on(MatrixRTCSessionEvent.MembershipsChanged, onMembershipsChanged);
     return () => {
-      session.removeListener(MatrixRTCSessionEvent.MembershipsChanged, updateMemberships);
+      disposed = true;
+      session.removeListener(MatrixRTCSessionEvent.MembershipsChanged, onMembershipsChanged);
     };
   }, [session, room]);
 
