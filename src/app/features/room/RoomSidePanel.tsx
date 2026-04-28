@@ -14,6 +14,7 @@ type RoomSidePanelProps = {
 };
 export function RoomSidePanel({ room }: RoomSidePanelProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isSpaceRoom = room.isSpaceRoom();
 
   return (
     <Box
@@ -26,7 +27,7 @@ export function RoomSidePanel({ room }: RoomSidePanelProps) {
           <Box className={css.MemberDrawerContent} direction="Column" gap="600">
             <MembersPanel room={room} />
             <FilesPanel room={room} />
-            <ThreadsPanel room={room} />
+            {!isSpaceRoom && <ThreadsPanel room={room} />}
           </Box>
         </Scroll>
       </Box>

@@ -8,13 +8,13 @@ import { useThreadUnreadBadge } from '../../hooks/useThreadUnreadBadge';
 import { getMxIdLocalPart } from '../../utils/matrix';
 import { getLatestMessageText, getMemberDisplayName } from '../../utils/room';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
+import { RelativeTime } from '../../components/RelativeTime';
 
 type ThreadMenuItemProps = {
   useAuthentication: boolean;
   room: Room;
   thread: Thread;
   onClick: MouseEventHandler<HTMLButtonElement>;
-  formatRelativeTime: (ts: number) => string;
 };
 
 export function ThreadMenuItem({
@@ -22,7 +22,6 @@ export function ThreadMenuItem({
   room,
   thread,
   onClick,
-  formatRelativeTime,
 }: ThreadMenuItemProps) {
   const mx = useMatrixClient();
   const { t } = useTranslation();
@@ -80,7 +79,7 @@ export function ThreadMenuItem({
       after={
         latestTs ? (
           <Text size="T200" priority="300" style={{ flexShrink: 0 }}>
-            {formatRelativeTime(latestTs)}
+            <RelativeTime ts={latestTs} />
           </Text>
         ) : undefined
       }

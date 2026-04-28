@@ -2,7 +2,6 @@ import React, { MouseEventHandler, useCallback, useMemo } from 'react';
 import { Box, Chip, Spinner, Text, config } from 'folds';
 import { Room } from 'matrix-js-sdk';
 import { useTranslation } from 'react-i18next';
-import dayjs from 'dayjs';
 
 import * as css from './RoomSidePanel.css';
 import { ThreadMenuItem } from './ThreadMenuItem';
@@ -18,19 +17,16 @@ export function ThreadsPanel({ room }: ThreadsPanelProps) {
   const { t } = useTranslation();
   const useAuthentication = useMediaAuthentication();
   const [, setThreadChat] = useThreadChat(room.roomId);
-  const isSpaceRoom = room.isSpaceRoom();
 
   const { threads, loading, error, retry } = useRoomThreads(room);
 
-  const sortedThreads = useMemo(() => {
-    if (isSpaceRoom) return [];
-
-    return [...threads].sort((a, b) => {
+  const sortedThreads = useMemo(() => (
+    [...threads].sort((a, b) => {
       const aTs = a.replyToEvent?.getTs() ?? a.rootEvent?.getTs() ?? 0;
       const bTs = b.replyToEvent?.getTs() ?? b.rootEvent?.getTs() ?? 0;
       return bTs - aTs;
-    });
-  }, [threads, isSpaceRoom]);
+    })
+  ), [threads]);
 
   const handleThreadClick: MouseEventHandler<HTMLButtonElement> = useCallback(
     (evt) => {
@@ -41,10 +37,6 @@ export function ThreadsPanel({ room }: ThreadsPanelProps) {
     },
     [setThreadChat]
   );
-
-  const formatRelativeTime = useCallback((ts: number) => dayjs(ts).fromNow(), []);
-
-  if (isSpaceRoom) return null;
 
   return (
     <Box direction="Column" gap="100">
@@ -89,7 +81,6 @@ export function ThreadsPanel({ room }: ThreadsPanelProps) {
               room={room}
               thread={thread}
               onClick={handleThreadClick}
-              formatRelativeTime={formatRelativeTime}
             />
           ))}
         </Box>

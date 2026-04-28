@@ -1,8 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { Box, Chip, Spinner, Text, config } from 'folds';
 import { MatrixEvent, Room } from 'matrix-js-sdk';
 import { useTranslation } from 'react-i18next';
-import dayjs from 'dayjs';
 
 import * as css from './RoomSidePanel.css';
 import { FileMenuItem } from './FileMenuItem';
@@ -19,8 +18,6 @@ export function FilesPanel({ room }: FilesPanelProps) {
 
   const { files, loading, error, retry } = useRoomFiles(room);
   const isSpaceRoom = room.isSpaceRoom();
-
-  const formatRelativeTime = useCallback((ts: number) => dayjs(ts).fromNow(), []);
 
   if (isSpaceRoom) return null;
 
@@ -66,7 +63,6 @@ export function FilesPanel({ room }: FilesPanelProps) {
                 key={fileEvent.getId()}
                 fileEvent={fileEvent}
                 onClick={() => setViewingFile(fileEvent)}
-                formatRelativeTime={formatRelativeTime}
               />
             ))}
           </Box>

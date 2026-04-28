@@ -2,17 +2,16 @@ import React, { MouseEventHandler } from 'react';
 import type { MatrixEvent } from 'matrix-js-sdk';
 import { Icon, MenuItem, Text, config, toRem } from 'folds';
 import { getFileTypeIcon } from '../../utils/common';
+import { RelativeTime } from '../../components/RelativeTime';
 
 type FileMenuItemProps = {
   fileEvent: MatrixEvent;
   onClick?: MouseEventHandler<HTMLButtonElement>;
-  formatRelativeTime: (ts: number) => string;
 };
 
 export function FileMenuItem({
   fileEvent,
   onClick,
-  formatRelativeTime,
 }: FileMenuItemProps) {
   const content = fileEvent.getContent();
   const filename = content.filename ?? content.body ?? 'Unnamed File';
@@ -31,7 +30,7 @@ export function FileMenuItem({
       after={
         eventTs ? (
           <Text size="T200" priority="300" style={{ flexShrink: 0 }}>
-            {formatRelativeTime(eventTs)}
+            <RelativeTime ts={eventTs} />
           </Text>
         ) : undefined
       }
