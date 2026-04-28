@@ -39,7 +39,7 @@ export function MemberGlance({ room, members, speakers, max = 6 }: MemberGlanceP
 
         return (
           <StackedAvatar
-            key={callMember.membershipID}
+            key={callMember.memberId}
             className={speakers.has(callMember.sender) ? css.SpeakerAvatarOutline : undefined}
             title={name}
             as="button"

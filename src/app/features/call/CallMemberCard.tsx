@@ -43,7 +43,7 @@ export function CallMemberCard({ member }: CallMemberCardProps) {
   return (
     <SequenceCard
       as="button"
-      key={member.membershipID}
+      key={member.memberId}
       className={css.CallMemberCard}
       variant="SurfaceVariant"
       radii="500"
@@ -92,7 +92,7 @@ export function CallMemberRenderer({
   return (
     <>
       {truncatedMembers.map((member) => (
-        <CallMemberCard key={member.membershipID} member={member} />
+        <CallMemberCard key={member.memberId} member={member} />
       ))}
       {members.length > max && (
         <SequenceCard
