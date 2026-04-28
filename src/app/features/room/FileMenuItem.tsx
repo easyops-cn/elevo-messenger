@@ -1,6 +1,6 @@
-import React, { MouseEventHandler, useMemo } from 'react';
+import React, { MouseEventHandler } from 'react';
 import type { MatrixEvent } from 'matrix-js-sdk';
-import { Icon, Icons, MenuItem, Text, config, toRem } from 'folds';
+import { Icon, MenuItem, Text, config, toRem } from 'folds';
 import { bytesToSize, getFileTypeIcon } from '../../utils/common';
 
 type FileMenuItemProps = {
@@ -13,8 +13,7 @@ export function FileMenuItem({ fileEvent, onClick }: FileMenuItemProps) {
   const filename = content.filename ?? content.body ?? 'Unnamed File';
   const size = content.info?.size;
   const mimetype = content.info?.mimetype ?? '';
-
-  const icon = useMemo(() => getFileTypeIcon(Icons, mimetype), [mimetype]);
+  const icon = getFileTypeIcon(mimetype);
 
   return (
     <MenuItem
