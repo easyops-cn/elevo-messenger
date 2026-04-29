@@ -1,4 +1,4 @@
-import React, { FormEventHandler, forwardRef, useCallback, useState } from 'react';
+import React, { FormEventHandler, forwardRef, useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Dialog,
@@ -21,11 +21,15 @@ import { PasswordInput } from './password-input';
 import { ContainerColor } from '../styles/ContainerColor.css';
 import { copyToClipboard } from '../utils/dom';
 import { AsyncStatus, useAsyncCallback } from '../hooks/useAsyncCallback';
+import { useTimeoutToggle } from '../hooks/useTimeoutToggle';
 import { clearSecretStorageKeys } from '../../client/secretStorageKeys';
 import { ActionUIA, ActionUIAFlowsLoader } from './ActionUIA';
 import { useMatrixClient } from '../hooks/useMatrixClient';
 import { useAlive } from '../hooks/useAlive';
 import { UseStateProvider } from './UseStateProvider';
+import { useAuthMetadata } from '../hooks/useAuthMetadata';
+import { withSearchParam } from '../pages/pathUtils';
+import { useAccountManagementActions } from '../hooks/useAccountManagement';
 
 type UIACallback<T> = (
   authDict: AuthDict | null
@@ -157,13 +161,7 @@ function SetupVerification({ onComplete }: SetupVerificationProps) {
           setupNewCrossSigning: true,
         });
 
-        // Check if we have a key backup.
-        // If checkKeyBackupAndEnable returns null, there is no key backup.
-        const hasKeyBackup = (await crypto.checkKeyBackupAndEnable()) !== null;
-        if (!hasKeyBackup) {
-          // Create the key backup
-          await crypto.resetKeyBackup();
-        }
+        await crypto.resetKeyBackup();
 
         onComplete(recoveryKeyData.encodedPrivateKey);
       },
@@ -237,9 +235,11 @@ type RecoveryKeyDisplayProps = {
 function RecoveryKeyDisplay({ recoveryKey }: RecoveryKeyDisplayProps) {
   const { t } = useTranslation();
   const [show, setShow] = useState(false);
+  const [copied, setCopied] = useTimeoutToggle(2000);
 
   const handleCopy = () => {
     copyToClipboard(recoveryKey);
+    setCopied();
   };
 
   const handleDownload = () => {
@@ -278,7 +278,7 @@ function RecoveryKeyDisplay({ recoveryKey }: RecoveryKeyDisplayProps) {
       </Box>
       <Box direction="Column" gap="200">
         <Button onClick={handleCopy}>
-          <Text size="B400">{t('verification.copy')}</Text>
+          <Text size="B400">{copied ? t('codeBlock.copied') : t('verification.copy')}</Text>
         </Button>
         <Button onClick={handleDownload} fill="Soft">
           <Text size="B400">{t('verification.download')}</Text>
@@ -331,6 +331,44 @@ export const DeviceVerificationReset = forwardRef<HTMLDivElement, DeviceVerifica
   ({ onCancel }, ref) => {
     const { t } = useTranslation();
     const [reset, setReset] = useState(false);
+    const authMetadata = useAuthMetadata();
+    const accountManagementActions = useAccountManagementActions();
+    const [oauthWindow, setOAuthWindow] = useState<Window | null>();
+
+    const handleReset = () => {
+      if (authMetadata) {
+        const authUrl = authMetadata.account_management_uri ?? authMetadata.issuer;
+        const newWindow = window.open(
+          withSearchParam(authUrl, {
+            action: accountManagementActions.crossSigningReset,
+          }),
+          '_blank'
+        );
+        setOAuthWindow(newWindow);
+        return;
+      }
+
+      setReset(true);
+    };
+
+    useEffect(() => {
+      const handleMessage = (evt: MessageEvent) => {
+        if (
+          oauthWindow &&
+          evt.data === 'authDone' &&
+          evt.source === oauthWindow
+        ) {
+          oauthWindow.close();
+          setOAuthWindow(undefined);
+          setReset(true);
+        }
+      };
+
+      window.addEventListener('message', handleMessage);
+      return () => {
+        window.removeEventListener('message', handleMessage);
+      };
+    }, [oauthWindow]);
 
     return (
       <Dialog ref={ref}>
@@ -370,7 +408,7 @@ export const DeviceVerificationReset = forwardRef<HTMLDivElement, DeviceVerifica
                 {t('verification.resetWarning')}
               </Text>
             </Box>
-            <Button variant="Critical" onClick={() => setReset(true)}>
+            <Button variant="Critical" onClick={handleReset}>
               <Text size="B400">{t('verification.reset')}</Text>
             </Button>
           </Box>
