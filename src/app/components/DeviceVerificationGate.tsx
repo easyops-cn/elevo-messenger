@@ -1,6 +1,6 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Box, Button, Header, Icon, Icons, Scroll, Spinner, Text, config, color } from 'folds';
+import { Box, Button, Header, Scroll, Spinner, Text, config, color } from 'folds';
 import classNames from 'classnames';
 import { IMyDevice } from 'matrix-js-sdk';
 import { useMatrixClient } from '../hooks/useMatrixClient';
@@ -187,16 +187,23 @@ export function DeviceVerificationGate({ children }: DeviceVerificationGateProps
     mx.getDeviceId() ?? undefined
   );
 
-  if (!crossSigningActive) return children;
-
-  if (verificationStatus === VerificationStatus.Unknown) return <VerificationGateLoading />;
-
-  if (
+  const shouldAllow = (
+    !crossSigningActive ||
     verificationStatus === VerificationStatus.Verified ||
     verificationStatus === VerificationStatus.Unsupported
-  ) {
-    return children;
-  }
+  );
+  const [allowed, setAllowed] = useState(shouldAllow);
+
+  // Do not show verification gate screen once allowed.
+  useEffect(() => {
+    if (shouldAllow) {
+      setAllowed(true);
+    }
+  }, [shouldAllow]);
+
+  if (allowed) return children;
+
+  if (verificationStatus === VerificationStatus.Unknown) return <VerificationGateLoading />;
 
   return <VerificationGateScreen />;
 }
