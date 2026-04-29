@@ -82,6 +82,7 @@ export function CreateRoomForm({
   const federationEnabled = elevoConfig.features.federation;
   const encryptionEnabled = elevoConfig.features.encryption;
   const callEnabled = elevoConfig.features.call;
+  const roomVersionEnabled = elevoConfig.features.roomVersion;
   const roomVersions = capabilities['m.room_versions'];
   const [selectedRoomVersion, selectRoomVersion] = useState(roomVersions?.default ?? '1');
   useEffect(() => {
@@ -108,6 +109,15 @@ export function CreateRoomForm({
   const allowKnock = access === CreateRoomAccess.Private && knockSupported(selectedRoomVersion);
   const allowKnockRestricted =
     access === CreateRoomAccess.Restricted && knockRestrictedSupported(selectedRoomVersion);
+  const advancedKnockEnabled =
+    access !== CreateRoomAccess.Public && (allowKnock || allowKnockRestricted);
+  const hasAdvancedOptions = roomVersionEnabled || advancedKnockEnabled;
+
+  useEffect(() => {
+    if (!hasAdvancedOptions) {
+      setAdvance(false);
+    }
+  }, [hasAdvancedOptions]);
 
   const handleRoomVersionChange = (version: string) => {
     if (!restrictedSupported(version)) {
@@ -220,16 +230,18 @@ export function CreateRoomForm({
       {access === CreateRoomAccess.Public && <CreateRoomAliasInput disabled={disabled} />}
 
       <Box shrink="No" direction="Column" gap="100">
-        <Box grow="Yes">
-          <Chip
-            radii="Pill"
-            before={<Icon src={advance ? Icons.ChevronTop : Icons.ChevronBottom} size="50" />}
-            onClick={() => setAdvance(!advance)}
-            type="button"
-          >
-            <Text size="T200">{t('create.advancedOptions')}</Text>
-          </Chip>
-        </Box>
+        {hasAdvancedOptions && (
+          <Box grow="Yes">
+            <Chip
+              radii="Pill"
+              before={<Icon src={advance ? Icons.ChevronTop : Icons.ChevronBottom} size="50" />}
+              onClick={() => setAdvance(!advance)}
+              type="button"
+            >
+              <Text size="T200">{t('create.advancedOptions')}</Text>
+            </Chip>
+          </Box>
+        )}
         {allowAdditionalCreators && (
           <SequenceCard
             style={{ padding: config.space.S300 }}
@@ -267,7 +279,7 @@ export function CreateRoomForm({
                 />
               </SequenceCard>
             )}
-            {advance && (allowKnock || allowKnockRestricted) && (
+            {advance && advancedKnockEnabled && (
               <SequenceCard
                 style={{ padding: config.space.S300 }}
                 variant="SurfaceVariant"
@@ -312,7 +324,7 @@ export function CreateRoomForm({
             />
           </SequenceCard>
         )}
-        {advance && (
+        {advance && roomVersionEnabled && (
           <RoomVersionSelector
             versions={roomVersions?.available ? Object.keys(roomVersions.available) : ['1']}
             value={selectedRoomVersion}

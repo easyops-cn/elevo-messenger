@@ -16,6 +16,7 @@ export type FeatureConfig = {
   deviceVerification: boolean;
   encryption: boolean;
   call: boolean;
+  roomVersion: boolean;
 };
 
 export type WorkspacesConfig = {
@@ -37,6 +38,7 @@ export const DEFAULT_ELEVO_FEATURES: FeatureConfig = {
   deviceVerification: true,
   encryption: true,
   call: true,
+  roomVersion: true,
 };
 
 export const DEFAULT_ELEVO_CONFIG: ElevoConfig = {

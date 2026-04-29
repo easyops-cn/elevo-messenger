@@ -38,6 +38,7 @@ export const fetchElevoConfig = async (baseUrl: string): Promise<ElevoConfig> =>
         deviceVerification: data.features?.device_verification ?? true,
         encryption: data.features?.encryption ?? true,
         call: data.features?.call ?? true,
+        roomVersion: data.features?.room_version ?? true,
       },
       oidcStaticClients: data.oidc_static_clients,
       elevoContactsRoomId: data.elevo_contacts_room_id,

@@ -16,16 +16,20 @@ import {
 } from '../../common-settings/general';
 import { useRoomCreators } from '../../../hooks/useRoomCreators';
 import { useRoomPermissions } from '../../../hooks/useRoomPermissions';
+import { useElevoConfig } from '../../../hooks/useElevoConfig';
 
 type GeneralProps = {
   requestClose: () => void;
 };
 export function General({ requestClose }: GeneralProps) {
   const { t } = useTranslation();
+  const elevoConfig = useElevoConfig();
   const room = useRoom();
   const powerLevels = usePowerLevels(room);
   const creators = useRoomCreators(room);
   const permissions = useRoomPermissions(creators, powerLevels);
+  const roomVersionEnabled = elevoConfig.features.roomVersion;
+  const encryptionEnabled = elevoConfig.features.encryption;
 
   return (
     <Page>
@@ -52,7 +56,7 @@ export function General({ requestClose }: GeneralProps) {
                 <Text size="L400">{t('common.options')}</Text>
                 <RoomJoinRules permissions={permissions} />
                 <RoomHistoryVisibility permissions={permissions} />
-                <RoomEncryption permissions={permissions} />
+                {encryptionEnabled && <RoomEncryption permissions={permissions} />}
                 <RoomPublish permissions={permissions} />
               </Box>
               <Box direction="Column" gap="100">
@@ -60,10 +64,12 @@ export function General({ requestClose }: GeneralProps) {
                 <RoomPublishedAddresses permissions={permissions} />
                 <RoomLocalAddresses permissions={permissions} />
               </Box>
-              <Box direction="Column" gap="100">
-                <Text size="L400">{t('common.advancedOptions')}</Text>
-                <RoomUpgrade permissions={permissions} requestClose={requestClose} />
-              </Box>
+              {roomVersionEnabled && (
+                <Box direction="Column" gap="100">
+                  <Text size="L400">{t('common.advancedOptions')}</Text>
+                  <RoomUpgrade permissions={permissions} requestClose={requestClose} />
+                </Box>
+              )}
             </Box>
           </PageContent>
         </Scroll>
