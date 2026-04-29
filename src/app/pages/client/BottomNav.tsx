@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue } from 'jotai';
 import { Badge, Icon, Tooltip, TooltipProvider } from 'folds';
 import { ContactIcon } from '../../icons/ContactIcon';
 import { useHomeSelected } from '../../hooks/router/useHomeSelected';
@@ -13,23 +13,26 @@ import { allInvitesAtom } from '../../state/room-list/inviteList';
 import { useAllHomeRooms } from './home/useAllHomeRooms';
 import { UnreadBadge } from '../../components/unread-badge';
 import { useNavToActivePathAtom } from '../../state/hooks/navToActivePath';
-import { useMeSelected } from '../../hooks/router/useMe';
 import {
   getHomePath,
   getContactsPath,
   getExplorePath,
-  getMePath,
   joinPathComponent,
 } from '../pathUtils';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
 import { Modal500 } from '../../components/Modal500';
 import { Settings, SettingsPages } from '../../features/settings';
 import { onOpenAbout, useUpdateChecker } from '../../state/update/UpdateCheckerContext';
-import { settingsModalAtom } from '../../state/settingsModal';
 import * as css from './BottomNav.css';
 import { MessageCircleIcon } from '../../icons/MessageCircleIcon';
 import { CompassIcon } from '../../icons/Compass';
-import { UserIcon } from '../../icons/UserIcon';
+import { SettingsIcon } from '../../icons/SettingsIcon';
+
+type SettingsModalState = {
+  open: boolean;
+  initialPage?: SettingsPages;
+  requestId: number;
+}
 
 export function BottomNav() {
   const { t } = useTranslation();
@@ -37,21 +40,23 @@ export function BottomNav() {
   const screenSize = useScreenSizeContext();
   const navToActivePath = useAtomValue(useNavToActivePathAtom());
   const { updateAvailable } = useUpdateChecker();
-  const settingsModal = useAtomValue(settingsModalAtom);
-  const setSettingsModal = useSetAtom(settingsModalAtom);
+  const [settingsModal, setSettingsModal] = React.useState<SettingsModalState>({
+    open: false,
+    requestId: 0,
+  });
 
   const homeSelected = useHomeSelected();
   const contactsSelected = useContactsSelected();
   const exploreSelected = useExploreSelected();
-  const meSelected = useMeSelected();
 
   // Home badge
   const homeRooms = useAllHomeRooms();
   const homeUnread = useRoomsUnread(homeRooms, roomToUnreadAtom);
-
-  // Me badge
   const allInvites = useAtomValue(allInvitesAtom);
   const inviteCount = allInvites.length;
+
+  const homeUnreadTotal = (homeUnread?.total ?? 0) + inviteCount;
+  const homeUnreadHighlight = homeUnread?.highlight ?? 0;
 
   const handleNavClick = (key: string, defaultPath: string) => {
     const activePath = navToActivePath.get(key);
@@ -65,7 +70,6 @@ export function BottomNav() {
   const handleHomeClick = () => handleNavClick('home', getHomePath());
   const handleContactsClick = () => handleNavClick('contacts', getContactsPath());
   const handleExploreClick = () => handleNavClick('explore', getExplorePath());
-  const handleMeClick = () => handleNavClick('me', getMePath());
   const closeSettings = () => setSettingsModal((prev) => ({ ...prev, open: false }));
 
   // BottomNav is persistent, so handle native "open about" requests here.
@@ -77,6 +81,15 @@ export function BottomNav() {
         requestId: prev.requestId + 1,
       }));
     }), [setSettingsModal]);
+
+  
+  const openSettings = () => {
+    setSettingsModal((prev) => ({
+      open: true,
+      initialPage: undefined,
+      requestId: prev.requestId + 1,
+    }));
+  };
 
   return (
     <>
@@ -94,9 +107,9 @@ export function BottomNav() {
               type="button"
             >
               <Icon src={MessageCircleIcon} filled={homeSelected} size="300" />
-              {homeUnread && (
+              {(homeUnread || homeUnreadTotal > 0) && (
                 <span className={css.BottomNavItemBadge()}>
-                  <UnreadBadge highlight={homeUnread.highlight > 0} count={homeUnread.total} />
+                  <UnreadBadge highlight={homeUnreadHighlight > 0} count={homeUnreadTotal} />
                 </span>
               )}
             </button>
@@ -141,18 +154,13 @@ export function BottomNav() {
           {(triggerRef) => (
             <button
               ref={triggerRef}
-              className={css.BottomNavItem({ active: meSelected })}
-              onClick={handleMeClick}
+              className={css.BottomNavItem()}
+              onClick={openSettings}
               aria-label={t('common.me')}
               type="button"
             >
-              <Icon src={UserIcon} filled={meSelected} size="300" />
-              {inviteCount > 0 && (
-                <span className={css.BottomNavItemBadge()}>
-                  <UnreadBadge highlight count={inviteCount} />
-                </span>
-              )}
-              {inviteCount === 0 && updateAvailable && (
+              <Icon src={SettingsIcon} size="300" />
+              {updateAvailable && (
                 <span className={css.BottomNavItemBadge({ dot: true })}>
                   <Badge variant="Critical" size="200" fill="Solid" radii="Pill" />
                 </span>

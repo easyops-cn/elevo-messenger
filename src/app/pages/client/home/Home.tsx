@@ -30,18 +30,21 @@ import {
   NavItem,
   NavItemContent,
 } from '../../../components/nav';
-import { getHomeCreatePath, getHomeCreateChatPath, getHomeRoomPath } from '../../pathUtils';
+import { getHomeCreatePath, getHomeCreateChatPath, getHomeInvitesPath, getHomeRoomPath } from '../../pathUtils';
 import { getCanonicalAliasOrRoomId } from '../../../utils/matrix';
 import { useSelectedRoom } from '../../../hooks/router/useSelectedRoom';
 import {
   useHomeCreateSelected,
   useHomeCreateChatSelected,
+  useHomeInvitesSelected,
 } from '../../../hooks/router/useHomeSelected';
 import { useAllHomeRooms } from './useAllHomeRooms';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { VirtualTile } from '../../../components/virtualizer';
 import { RoomNavItem } from '../../../features/room-nav';
 import { roomToUnreadAtom } from '../../../state/room/roomToUnread';
+import { allInvitesAtom } from '../../../state/room-list/inviteList';
+import { UnreadBadge } from '../../../components/unread-badge';
 import { useNavToActivePathMapper } from '../../../hooks/useNavToActivePathMapper';
 import { PageNav, PageNavHeader, PageNavContent } from '../../../components/page';
 import { useRoomsUnread } from '../../../state/hooks/unread';
@@ -59,6 +62,7 @@ import { HashIcon } from '../../../icons/HashIcon';
 import { PlusIcon } from '../../../icons/PlusIcon';
 import { SearchIcon } from '../../../icons/SearchIcon';
 import { EllipsisVerticalIcon } from '../../../icons/EllipsisVerticalIcon';
+import { MailIcon } from '../../../icons/MailIcon';
 
 type HomeHeaderProps = {
   rooms: string[];
@@ -207,6 +211,9 @@ export function Home() {
   const selectedRoomId = useSelectedRoom();
   const createRoomSelected = useHomeCreateSelected();
   const createChatSelected = useHomeCreateChatSelected();
+  const invitesSelected = useHomeInvitesSelected();
+  const allInvites = useAtomValue(allInvitesAtom);
+  const inviteCount = allInvites.length;
   const setSearchOpen = useSetAtom(searchModalAtom);
   const noRoomToDisplay = rooms.length === 0;
 
@@ -261,6 +268,25 @@ export function Home() {
                 </NavItemContent>
               </NavButton>
             </NavItem>
+            {inviteCount > 0 && (
+              <NavItem variant="Background" radii="400" highlight aria-selected={invitesSelected}>
+                <NavButton onClick={() => navigate(getHomeInvitesPath())}>
+                  <NavItemContent>
+                    <Box as="span" grow="Yes" alignItems="Center" gap="200">
+                      <Avatar size="200" radii="400">
+                        <Icon src={MailIcon} size="100" filled={invitesSelected} style={{ color: color.Primary.Main }} />
+                      </Avatar>
+                      <Box as="span" grow="Yes">
+                        <Text as="span" size="Inherit" truncate>
+                          {t('inbox.invites')}
+                        </Text>
+                      </Box>
+                      <UnreadBadge highlight count={inviteCount} />
+                    </Box>
+                  </NavItemContent>
+                </NavButton>
+              </NavItem>
+            )}
           </NavCategory>
           <Line size="300" />
           {noRoomToDisplay ? (

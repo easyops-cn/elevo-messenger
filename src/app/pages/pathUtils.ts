@@ -26,6 +26,7 @@ import {
   CONTACTS_CONTACTS_PATH,
   CONTACTS_ROLE_PATH,
   HOME_CREATE_CHAT_PATH,
+  HOME_INVITES_PATH,
   ME_INVITES_PATH,
   ME_NOTIFICATIONS_PATH,
   ME_PATH,
@@ -97,6 +98,7 @@ export const getResetPasswordPath = (server?: string): string => {
 export const getHomePath = (): string => HOME_PATH;
 export const getHomeCreatePath = (): string => HOME_CREATE_PATH;
 export const getHomeCreateChatPath = (): string => HOME_CREATE_CHAT_PATH;
+export const getHomeInvitesPath = (): string => HOME_INVITES_PATH;
 export const getHomeSearchPath = (): string => HOME_SEARCH_PATH;
 export const getHomeRoomPath = (roomIdOrAlias: string, eventId?: string): string => {
   const params = {

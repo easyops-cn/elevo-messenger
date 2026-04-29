@@ -49,6 +49,8 @@ export const _CREATE_CHAT_PATH = 'create-chat/';
 export type HomeCreateChatSearchParams = {
   userId?: string;
 };
+export const _INVITES_PATH = 'invites/';
+export const HOME_INVITES_PATH = `/home/${_INVITES_PATH}`;
 export const HOME_CREATE_CHAT_PATH = `/home/${_CREATE_CHAT_PATH}`;
 export const HOME_JOIN_PATH = `/home/${_JOIN_PATH}`;
 export const HOME_SEARCH_PATH = `/home/${_SEARCH_PATH}`;
@@ -84,7 +86,6 @@ export const _EXPLORE_SPACE_PATH = 'space/:spaceIdOrAlias/';
 export const EXPLORE_SPACE_PATH = `/explore/${_EXPLORE_SPACE_PATH}`;
 
 export const _NOTIFICATIONS_PATH = 'notifications/';
-export const _INVITES_PATH = 'invites/';
 export const INBOX_PATH = '/inbox/';
 export type InboxNotificationsPathSearchParams = {
   only?: string;

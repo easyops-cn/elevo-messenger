@@ -13,7 +13,7 @@ import { settingsAtom } from '../../state/settings';
 import { allInvitesAtom } from '../../state/room-list/inviteList';
 import { usePreviousValue } from '../../hooks/usePreviousValue';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { getMeInvitesPath } from '../pathUtils';
+import { getHomeInvitesPath } from '../pathUtils';
 import {
   getMemberDisplayName,
   getNotificationType,
@@ -75,7 +75,7 @@ function InviteNotifications() {
         body: `You have ${count} new invitation request.`,
         silent: true,
         onClick: () => {
-          if (!window.closed) navigate(getMeInvitesPath());
+          if (!window.closed) navigate(getHomeInvitesPath());
         },
       });
     },
