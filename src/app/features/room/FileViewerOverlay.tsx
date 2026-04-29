@@ -12,7 +12,7 @@ import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { ModalWide } from '../../styles/Modal.css';
 import { stopPropagation } from '../../utils/keyboard';
-import type { IAudioInfo, IThumbnailContent, IVideoInfo } from '../../../types/matrix/common';
+import type { IAudioInfo } from '../../../types/matrix/common';
 import {
   READABLE_TEXT_MIME_TYPES,
   READABLE_EXT_TO_MIME_TYPE,
@@ -57,15 +57,14 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
   const fileSize = (content.info?.size ?? 0) as number;
   const url = (content.file?.url ?? content.url) as string | undefined;
   const encInfo = content.file;
-  const videoInfo = (content.info ?? {}) as IVideoInfo & IThumbnailContent;
   const audioInfo = (content.info ?? {}) as IAudioInfo;
   const audioWaveform = Array.isArray(content['org.matrix.msc1767.audio']?.waveform)
     ? (content['org.matrix.msc1767.audio']?.waveform as number[])
     : undefined;
   const viewerType = getFileType(mimetype, filename);
 
-  const imageUrl = useMemo(() => {
-    if (viewerType !== 'image' || !url) return undefined;
+  const imageOrVideoUrl = useMemo(() => {
+    if ((viewerType !== 'image' && viewerType !== 'video') || !url) return undefined;
     return mxcUrlToHttp(mx, url, useAuth);
   }, [viewerType, url, mx, useAuth]);
 
@@ -76,7 +75,7 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
     setTextData(null);
     setPdfBlobUrl(null);
 
-    if (!viewerType || viewerType === 'image' || !url) return;
+    if ((viewerType !== 'text' && viewerType !== 'pdf') || !url) return;
 
     let alive = true;
 
@@ -89,16 +88,14 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
             decryptFile(encBuf, mimetype, encInfo)
           )
         : await downloadMedia(mediaUrl);
-      let textContent: string | null = null;
-      if (viewerType === 'text') {
-        textContent = await fileContent.text();
-      }
 
       if (!alive) return;
 
       if (viewerType === 'text') {
+        const textContent = await fileContent.text();
+        if (!alive) return;
         setTextData(textContent);
-      } else if (viewerType === 'pdf') {
+      } else {
         setPdfBlobUrl(URL.createObjectURL(fileContent));
       }
     };
@@ -151,9 +148,9 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
   }
 
   const showViewer =
-    viewerType === 'image'
-      ? !!imageUrl
-      : viewerType === 'video' || viewerType === 'audio'
+    viewerType === 'image' || viewerType === 'video'
+      ? !!imageOrVideoUrl
+      : viewerType === 'audio'
         ? !!url
       : viewerType === 'text'
         ? !!textData
@@ -175,16 +172,13 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
             size="500"
             onContextMenu={(evt: React.MouseEvent) => evt.stopPropagation()}
           >
-            {viewerType === 'image' && imageUrl && (
-              <ImageViewer src={imageUrl} alt={filename} requestClose={requestClose} />
+            {viewerType === 'image' && imageOrVideoUrl && (
+              <ImageViewer src={imageOrVideoUrl} alt={filename} requestClose={requestClose} />
             )}
-            {viewerType === 'video' && url && (
+            {viewerType === 'video' && imageOrVideoUrl && (
               <VideoViewer
                 name={filename}
-                mimeType={mimetype}
-                url={url}
-                info={videoInfo}
-                encInfo={encInfo}
+                src={imageOrVideoUrl}
                 requestClose={requestClose}
               />
             )}
