@@ -916,6 +916,7 @@ export const Message = as<'div', MessageProps>(
           messageLayout !== MessageLayout.Compact
             ? {
                 width: `calc(100% - ${toRem(padding)})`,
+                maxWidth: isMobile ? undefined : `max(50vw, ${toRem(800)})`,
                 ...(isOwn
                   ? {
                       alignSelf: 'flex-end',

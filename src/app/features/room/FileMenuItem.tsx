@@ -29,7 +29,7 @@ export function FileMenuItem({
       before={<Icon size="200" src={icon} />}
       after={
         eventTs ? (
-          <Text size="T200" priority="300" style={{ flexShrink: 0 }}>
+          <Text size="T200" priority="300" style={{ flexShrink: 0, opacity: 0.5 }}>
             <RelativeTime ts={eventTs} />
           </Text>
         ) : undefined

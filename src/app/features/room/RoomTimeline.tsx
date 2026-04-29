@@ -1680,7 +1680,7 @@ export function RoomTimeline({
         <MessageBase space={messageSpacing}>
           <TimelineDivider>
             <Badge as="span" size="500" variant="Secondary" fill="None" radii="300">
-              <Text size="L400">
+              <Text size="T200" priority="300">
                 {(() => {
                   if (today(mEvent.getTs())) return t('room.today');
                   if (yesterday(mEvent.getTs())) return t('room.yesterday');
@@ -1738,7 +1738,7 @@ export function RoomTimeline({
           ref={scrollContentRef}
           direction="Column"
           justifyContent="End"
-          style={{ minHeight: '100%', padding: `${config.space.S600} 0`, maxWidth: 'var(--container-size)', margin: '0 auto' }}
+          style={{ minHeight: '100%', padding: `${config.space.S600} 0` }}
         >
           {showRoomIntro && !canPaginateBack && rangeAtStart && getItems().length > 0 && (
             <div
