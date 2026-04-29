@@ -291,6 +291,7 @@ export const getUnreadInfos = (mx: MatrixClient): UnreadInfo[] => {
 export const getRoomIconSrc = (
   icons: Record<IconName, IconSrc>,
   roomType?: string,
+  // eslint-disable-next-line
   joinRule?: JoinRule
 ): IconSrc => {
   if (roomType === RoomType.Space) {

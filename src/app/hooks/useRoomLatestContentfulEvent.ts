@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { MessageEvent } from '../../types/matrix/room';
 import { reactionOrEditEvent } from '../utils/room';
 import { useDebounce } from './useDebounce';
+import { useMatrixClient } from './useMatrixClient';
 
 const CONTENTFUL_EVENT_TYPES = new Set<string>([
   MessageEvent.RoomMessage,
@@ -12,10 +13,11 @@ const CONTENTFUL_EVENT_TYPES = new Set<string>([
 ]);
 
 export const useRoomLatestContentfulEvent = (room: Room) => {
+  const mx = useMatrixClient();
   const [latestEvent, setLatestEvent] = useState<MatrixEvent>();
 
   const debouncedUpdateLatestEvent = useDebounce(
-    useCallback(() => {
+    useCallback(async () => {
       const getLatestEvent = (): MatrixEvent | undefined => {
         const liveEvents = room.getLiveTimeline().getEvents();
         for (let i = liveEvents.length - 1; i >= 0; i -= 1) {
@@ -30,8 +32,22 @@ export const useRoomLatestContentfulEvent = (room: Room) => {
         }
         return undefined;
       };
-      setLatestEvent(getLatestEvent());
-    }, [room]),
+
+      const latest = getLatestEvent();
+      
+      if (latest) {
+        setLatestEvent(latest);
+      } else {
+        // If no contentful event is found, try paginating to find one.
+        // This can happen in rooms with a lot of non-contentful events
+        // at the end of the timeline.
+        await mx.paginateEventTimeline(room.getLiveTimeline(), {
+          backwards: true,
+          limit: 30,
+        });
+        setLatestEvent(getLatestEvent());
+      }
+    }, [mx, room]),
     { wait: 100 }
   );
 
