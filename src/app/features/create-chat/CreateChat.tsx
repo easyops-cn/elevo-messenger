@@ -102,9 +102,9 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
           </Box>
         )}
       </Box>
-      <Box shrink="No" direction="Column" gap="100">
-        <Text size="L400">{t('create.options')}</Text>
-        {encryptionEnabled && (
+      {encryptionEnabled && (
+        <Box shrink="No" direction="Column" gap="100">
+          <Text size="L400">{t('create.options')}</Text>
           <SequenceCard
             style={{ padding: config.space.S300 }}
             variant="SurfaceVariant"
@@ -124,8 +124,8 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
               }
             />
           </SequenceCard>
-        )}
-      </Box>
+        </Box>
+      )}
       {error && (
         <Box style={{ color: color.Critical.Main }} alignItems="Center" gap="200">
           <Icon src={Icons.Warning} filled size="100" />

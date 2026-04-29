@@ -191,11 +191,9 @@ export function DeviceVerificationGate({ children }: DeviceVerificationGateProps
 
   const shouldAllow =
     !elevoConfig.features.deviceVerification ||
-    (
     !crossSigningActive ||
     verificationStatus === VerificationStatus.Verified ||
-    verificationStatus === VerificationStatus.Unsupported
-    );
+    verificationStatus === VerificationStatus.Unsupported;
   const [allowed, setAllowed] = useState(shouldAllow);
 
   // Do not show verification gate screen once allowed.

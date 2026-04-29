@@ -81,6 +81,7 @@ export function CreateRoomForm({
   const elevoConfig = useElevoConfig();
   const federationEnabled = elevoConfig.features.federation;
   const encryptionEnabled = elevoConfig.features.encryption;
+  const callEnabled = elevoConfig.features.call;
   const roomVersions = capabilities['m.room_versions'];
   const [selectedRoomVersion, selectRoomVersion] = useState(roomVersions?.default ?? '1');
   useEffect(() => {
@@ -90,7 +91,9 @@ export function CreateRoomForm({
 
   const allowRestricted = space && restrictedSupported(selectedRoomVersion);
 
-  const [type, setType] = useState(defaultType ?? CreateRoomType.TextRoom);
+  const [type, setType] = useState(
+    callEnabled ? (defaultType ?? CreateRoomType.TextRoom) : CreateRoomType.TextRoom
+  );
   const [access, setAccess] = useState(
     defaultAccess ?? (allowRestricted ? CreateRoomAccess.Restricted : CreateRoomAccess.Private)
   );
@@ -143,8 +146,9 @@ export function CreateRoomForm({
       roomKnock = knock;
     }
 
+    const effectiveType = callEnabled ? type : CreateRoomType.TextRoom;
     let roomType: RoomType | undefined;
-    if (type === CreateRoomType.VoiceRoom) roomType = RoomType.Call;
+    if (effectiveType === CreateRoomType.VoiceRoom) roomType = RoomType.Call;
 
     create({
       version: selectedRoomVersion,
@@ -167,7 +171,7 @@ export function CreateRoomForm({
 
   return (
     <Box as="form" onSubmit={handleSubmit} grow="Yes" direction="Column" gap="500">
-      {!space && (
+      {!space && callEnabled && (
         <Box direction="Column" gap="100">
           <Text size="L400">{t('create.type')}</Text>
           <CreateRoomTypeSelector
@@ -216,18 +220,15 @@ export function CreateRoomForm({
       {access === CreateRoomAccess.Public && <CreateRoomAliasInput disabled={disabled} />}
 
       <Box shrink="No" direction="Column" gap="100">
-        <Box gap="200" alignItems="End">
-          <Text size="L400">{t('create.options')}</Text>
-          <Box grow="Yes" justifyContent="End">
-            <Chip
-              radii="Pill"
-              before={<Icon src={advance ? Icons.ChevronTop : Icons.ChevronBottom} size="50" />}
-              onClick={() => setAdvance(!advance)}
-              type="button"
-            >
-              <Text size="T200">{t('create.advancedOptions')}</Text>
-            </Chip>
-          </Box>
+        <Box grow="Yes">
+          <Chip
+            radii="Pill"
+            before={<Icon src={advance ? Icons.ChevronTop : Icons.ChevronBottom} size="50" />}
+            onClick={() => setAdvance(!advance)}
+            type="button"
+          >
+            <Text size="T200">{t('create.advancedOptions')}</Text>
+          </Chip>
         </Box>
         {allowAdditionalCreators && (
           <SequenceCard

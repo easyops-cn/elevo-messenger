@@ -15,6 +15,7 @@ export type FeatureConfig = {
   federation: boolean;
   deviceVerification: boolean;
   encryption: boolean;
+  call: boolean;
 };
 
 export type WorkspacesConfig = {
@@ -35,6 +36,7 @@ export const DEFAULT_ELEVO_FEATURES: FeatureConfig = {
   federation: true,
   deviceVerification: true,
   encryption: true,
+  call: true,
 };
 
 export const DEFAULT_ELEVO_CONFIG: ElevoConfig = {
