@@ -8,6 +8,9 @@ import { JoinBeforeNavigate } from '../../../features/join-before-navigate';
 import { useAllHomeRooms } from './useAllHomeRooms';
 import { useSearchParamsViaServers } from '../../../hooks/router/useSearchParamsViaServers';
 import { mDirectAtom } from '../../../state/mDirectList';
+import { joinedRoomsInitializedAtom } from '../../../state/room-list/roomList';
+import { PaeSpinner } from '../../../components/PageSpinner';
+import { PageMain } from '../../../components/page';
 
 export function HomeRouteRoomProvider({ children }: { children: ReactNode }) {
   const mx = useMatrixClient();
@@ -18,6 +21,15 @@ export function HomeRouteRoomProvider({ children }: { children: ReactNode }) {
   const viaServers = useSearchParamsViaServers();
   const roomId = useSelectedRoom();
   const room = mx.getRoom(roomId);
+  const joinedRoomInitialized = useAtomValue(joinedRoomsInitializedAtom);
+
+  if (!joinedRoomInitialized) {
+    return (
+      <PageMain>
+        <PaeSpinner />
+      </PageMain>
+    );
+  }
 
   if (!room || !rooms.includes(room.roomId)) {
     return (

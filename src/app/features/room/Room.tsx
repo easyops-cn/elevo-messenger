@@ -75,24 +75,26 @@ export function Room() {
   return (
     <PowerLevelsContextProvider value={powerLevels}>
       <Box grow="Yes">
-        {(showCallView || showRoomView) && <PageMain>
-          {showCallView && (
-            <Box grow="Yes" direction="Column">
-              <RoomViewHeader callView />
-              <Box grow="Yes">
-                <CallView />
+        {(showCallView || showRoomView) && (
+          <PageMain>
+            {showCallView && (
+              <Box grow="Yes" direction="Column">
+                <RoomViewHeader callView />
+                <Box grow="Yes">
+                  <CallView />
+                </Box>
               </Box>
-            </Box>
-          )}
-          {showRoomView && (
-            <Box grow="Yes" direction="Column">
-              <RoomViewHeader />
-              <Box grow="Yes">
-                <RoomView eventId={mainEventId} />
+            )}
+            {showRoomView && (
+              <Box grow="Yes" direction="Column">
+                <RoomViewHeader />
+                <Box grow="Yes">
+                  <RoomView eventId={mainEventId} />
+                </Box>
               </Box>
-            </Box>
-          )}
-        </PageMain>}
+            )}
+          </PageMain>
+        )}
         {showThreadPanel && <ThreadChatView eventId={threadEventId} />}
         {callView && chat && (
           <CallChatView />

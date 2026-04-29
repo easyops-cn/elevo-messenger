@@ -16,7 +16,8 @@ export type RoomsAction =
 export const useBindRoomsWithMembershipsAtom = (
   mx: MatrixClient,
   roomsAtom: WritableAtom<string[], [RoomsAction], undefined>,
-  memberships: Membership[]
+  memberships: Membership[],
+  setInitialized?: (initialized: boolean) => void
 ) => {
   const setRoomsAtom = useSetAtom(roomsAtom);
 
@@ -30,6 +31,8 @@ export const useBindRoomsWithMembershipsAtom = (
         .filter(satisfyMembership)
         .map((room) => room.roomId),
     });
+
+    setInitialized?.(true);
 
     const handleAddRoom = (room: Room) => {
       if (satisfyMembership(room)) {
@@ -57,7 +60,7 @@ export const useBindRoomsWithMembershipsAtom = (
       mx.removeListener(RoomEvent.MyMembership, handleMembershipChange);
       mx.removeListener(ClientEvent.DeleteRoom, handleDeleteRoom);
     };
-  }, [mx, memberships, setRoomsAtom]);
+  }, [mx, memberships, setRoomsAtom, setInitialized]);
 };
 
 export const compareRoomsEqual = (a: string[], b: string[]) => {
