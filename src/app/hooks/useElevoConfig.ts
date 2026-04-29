@@ -11,6 +11,12 @@ export type OAuthConfig = {
   clientId: string;
 };
 
+export type FeatureConfig = {
+  federation: boolean;
+  deviceVerification: boolean;
+  encryption: boolean;
+};
+
 export type WorkspacesConfig = {
   apiBaseUrl?: string;
   explorerUrl?: string;
@@ -20,8 +26,19 @@ export type WorkspacesConfig = {
 
 export type ElevoConfig = {
   workspaces?: WorkspacesConfig;
+  features: FeatureConfig;
   oidcStaticClients?: Record<string, { client_id: string }>;
   elevoContactsRoomId?: string;
+};
+
+export const DEFAULT_ELEVO_FEATURES: FeatureConfig = {
+  federation: true,
+  deviceVerification: true,
+  encryption: true,
+};
+
+export const DEFAULT_ELEVO_CONFIG: ElevoConfig = {
+  features: DEFAULT_ELEVO_FEATURES,
 };
 
 const ElevoConfigContext = createContext<ElevoConfig | null>(null);

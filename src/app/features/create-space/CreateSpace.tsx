@@ -27,6 +27,7 @@ import { millisecondsToMinutes, replaceSpaceWithDash } from '../../utils/common'
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { useCapabilities } from '../../hooks/useCapabilities';
 import { useAlive } from '../../hooks/useAlive';
+import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { ErrorCode } from '../../cs-errorcode';
 import {
   AdditionalCreatorInput,
@@ -54,6 +55,8 @@ type CreateSpaceFormProps = {
 export function CreateSpaceForm({ defaultAccess, space, onCreate }: CreateSpaceFormProps) {
   const mx = useMatrixClient();
   const alive = useAlive();
+  const elevoConfig = useElevoConfig();
+  const federationEnabled = elevoConfig.features.federation;
 
   const capabilities = useCapabilities();
   const roomVersions = capabilities['m.room_versions'];
@@ -72,7 +75,7 @@ export function CreateSpaceForm({ defaultAccess, space, onCreate }: CreateSpaceF
   const allowAdditionalCreators = creatorsSupported(selectedRoomVersion);
   const { additionalCreators, addAdditionalCreator, removeAdditionalCreator } =
     useAdditionalCreators();
-  const [federation, setFederation] = useState(true);
+  const [federation, setFederation] = useState(federationEnabled);
   const [knock, setKnock] = useState(false);
   const [advance, setAdvance] = useState(false);
 
@@ -126,7 +129,7 @@ export function CreateSpaceForm({ defaultAccess, space, onCreate }: CreateSpaceF
       topic: roomTopic || undefined,
       aliasLocalPart: publicRoom ? aliasLocalPart : undefined,
       knock: roomKnock,
-      allowFederation: federation,
+      allowFederation: federationEnabled ? federation : false,
       additionalCreators: allowAdditionalCreators ? additionalCreators : undefined,
     }).then((roomId) => {
       if (alive()) {
@@ -219,25 +222,27 @@ export function CreateSpaceForm({ defaultAccess, space, onCreate }: CreateSpaceF
           </SequenceCard>
         )}
 
-        <SequenceCard
-          style={{ padding: config.space.S300 }}
-          variant="SurfaceVariant"
-          direction="Column"
-          gap="500"
-        >
-          <SettingTile
-            title="Allow Federation"
-            description="Users from other servers can join."
-            after={
-              <Switch
-                variant="Primary"
-                value={federation}
-                onChange={setFederation}
-                disabled={disabled}
-              />
-            }
-          />
-        </SequenceCard>
+        {federationEnabled && (
+          <SequenceCard
+            style={{ padding: config.space.S300 }}
+            variant="SurfaceVariant"
+            direction="Column"
+            gap="500"
+          >
+            <SettingTile
+              title="Allow Federation"
+              description="Users from other servers can join."
+              after={
+                <Switch
+                  variant="Primary"
+                  value={federation}
+                  onChange={setFederation}
+                  disabled={disabled}
+                />
+              }
+            />
+          </SequenceCard>
+        )}
         {advance && (
           <RoomVersionSelector
             versions={roomVersions?.available ? Object.keys(roomVersions.available) : ['1']}

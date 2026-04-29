@@ -13,6 +13,7 @@ import { millisecondsToMinutes } from '../../utils/common';
 import { createRoomEncryptionState } from '../../components/create-room';
 import { useAlive } from '../../hooks/useAlive';
 import { getHomeRoomPath } from '../../pages/pathUtils';
+import { useElevoConfig } from '../../hooks/useElevoConfig';
 
 type CreateChatProps = {
   defaultUserId?: string;
@@ -22,8 +23,10 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
   const mx = useMatrixClient();
   const alive = useAlive();
   const navigate = useNavigate();
+  const elevoConfig = useElevoConfig();
+  const encryptionEnabled = elevoConfig.features.encryption;
 
-  const [encryption, setEncryption] = useState(false);
+  const [encryption, setEncryption] = useState(encryptionEnabled);
   const [invalidUserId, setInvalidUserId] = useState(false);
 
   const [createState, create] = useAsyncCallback<string, Error | MatrixError, [string, boolean]>(
@@ -66,7 +69,7 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
       return;
     }
 
-    create(userId, encryption).then((roomId) => {
+    create(userId, encryptionEnabled ? encryption : false).then((roomId) => {
       if (alive()) {
         userIdInput.value = '';
         navigate(getHomeRoomPath(roomId));
@@ -101,25 +104,27 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
       </Box>
       <Box shrink="No" direction="Column" gap="100">
         <Text size="L400">{t('create.options')}</Text>
-        <SequenceCard
-          style={{ padding: config.space.S300 }}
-          variant="SurfaceVariant"
-          direction="Column"
-          gap="500"
-        >
-          <SettingTile
-            title={t('create.endToEndEncryption')}
-            description={t('create.encryptionRoomDesc')}
-            after={
-              <Switch
-                variant="Primary"
-                value={encryption}
-                onChange={setEncryption}
-                disabled={disabled}
-              />
-            }
-          />
-        </SequenceCard>
+        {encryptionEnabled && (
+          <SequenceCard
+            style={{ padding: config.space.S300 }}
+            variant="SurfaceVariant"
+            direction="Column"
+            gap="500"
+          >
+            <SettingTile
+              title={t('create.endToEndEncryption')}
+              description={t('create.encryptionRoomDesc')}
+              after={
+                <Switch
+                  variant="Primary"
+                  value={encryption}
+                  onChange={setEncryption}
+                  disabled={disabled}
+                />
+              }
+            />
+          </SequenceCard>
+        )}
       </Box>
       {error && (
         <Box style={{ color: color.Critical.Main }} alignItems="Center" gap="200">

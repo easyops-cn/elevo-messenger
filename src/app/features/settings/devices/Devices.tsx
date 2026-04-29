@@ -27,6 +27,7 @@ import {
 } from '../../../hooks/useSecretStorage';
 import { useCrossSigningActive } from '../../../hooks/useCrossSigning';
 import { BackupRestoreTile } from '../../../components/BackupRestore';
+import { useElevoConfig } from '../../../hooks/useElevoConfig';
 
 function DevicesPlaceholder() {
   return (
@@ -42,6 +43,7 @@ type DevicesProps = {
 };
 export function Devices({ requestClose }: DevicesProps) {
   const { t } = useTranslation();
+  const elevoConfig = useElevoConfig();
   const mx = useMatrixClient();
   const crypto = mx.getCrypto();
   const crossSigningActive = useCrossSigningActive();
@@ -65,6 +67,7 @@ export function Devices({ requestClose }: DevicesProps) {
   const defaultSecretStorageKeyContent = useSecretStorageKeyContent(
     defaultSecretStorageKeyId ?? ''
   );
+  const deviceVerificationEnabled = elevoConfig.features.deviceVerification;
 
   return (
     <Page>
@@ -86,34 +89,36 @@ export function Devices({ requestClose }: DevicesProps) {
         <Scroll hideTrack visibility="Hover">
           <PageContent>
             <Box direction="Column" gap="700">
-              <Box direction="Column" gap="100">
-                <Text size="L400">{t('settings.deviceSettings.security')}</Text>
-                <SequenceCard
-                  className={SequenceCardStyle}
-                  variant="SurfaceVariant"
-                  direction="Column"
-                  gap="400"
-                >
-                  <SettingTile
-                    title={t('settings.deviceSettings.deviceVerification')}
-                    description={t('settings.deviceSettings.deviceVerificationDesc')}
-                    after={
-                      <>
-                        <EnableVerification visible={!crossSigningActive} />
-                        {crossSigningActive && (
-                          <Box gap="200" alignItems="Center">
-                            <VerificationStatusBadge
-                              verificationStatus={verificationStatus}
-                              otherUnverifiedCount={unverifiedDeviceCount}
-                            />
-                            <DeviceVerificationOptions />
-                          </Box>
-                        )}
-                      </>
-                    }
-                  />
-                </SequenceCard>
-              </Box>
+              {deviceVerificationEnabled && (
+                <Box direction="Column" gap="100">
+                  <Text size="L400">{t('settings.deviceSettings.security')}</Text>
+                  <SequenceCard
+                    className={SequenceCardStyle}
+                    variant="SurfaceVariant"
+                    direction="Column"
+                    gap="400"
+                  >
+                    <SettingTile
+                      title={t('settings.deviceSettings.deviceVerification')}
+                      description={t('settings.deviceSettings.deviceVerificationDesc')}
+                      after={
+                        <>
+                          <EnableVerification visible={!crossSigningActive} />
+                          {crossSigningActive && (
+                            <Box gap="200" alignItems="Center">
+                              <VerificationStatusBadge
+                                verificationStatus={verificationStatus}
+                                otherUnverifiedCount={unverifiedDeviceCount}
+                              />
+                              <DeviceVerificationOptions />
+                            </Box>
+                          )}
+                        </>
+                      }
+                    />
+                  </SequenceCard>
+                </Box>
+              )}
               <Box direction="Column" gap="100">
                 <Text size="L400">{t('settings.deviceSettings.current')}</Text>
                 {currentDevice ? (

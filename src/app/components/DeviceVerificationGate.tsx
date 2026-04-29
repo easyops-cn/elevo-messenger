@@ -28,6 +28,7 @@ import * as authCss from '../pages/auth/styles.css';
 import * as PatternsCss from '../styles/Patterns.css';
 import ElevoLogo from '../../../public/res/apple/apple-touch-icon-144x144.png';
 import { logoutClient, clearLoginData } from '../../client/initMatrix';
+import { useElevoConfig } from '../hooks/useElevoConfig';
 
 function VerificationGateLoading() {
   return (
@@ -179,6 +180,7 @@ type DeviceVerificationGateProps = {
 };
 export function DeviceVerificationGate({ children }: DeviceVerificationGateProps) {
   const mx = useMatrixClient();
+  const elevoConfig = useElevoConfig();
   const crypto = mx.getCrypto();
   const crossSigningActive = useCrossSigningActive();
   const verificationStatus = useDeviceVerificationStatus(
@@ -187,11 +189,13 @@ export function DeviceVerificationGate({ children }: DeviceVerificationGateProps
     mx.getDeviceId() ?? undefined
   );
 
-  const shouldAllow = (
+  const shouldAllow =
+    !elevoConfig.features.deviceVerification ||
+    (
     !crossSigningActive ||
     verificationStatus === VerificationStatus.Verified ||
     verificationStatus === VerificationStatus.Unsupported
-  );
+    );
   const [allowed, setAllowed] = useState(shouldAllow);
 
   // Do not show verification gate screen once allowed.

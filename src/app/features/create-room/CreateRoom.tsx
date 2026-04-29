@@ -28,6 +28,7 @@ import { millisecondsToMinutes, replaceSpaceWithDash } from '../../utils/common'
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { useCapabilities } from '../../hooks/useCapabilities';
 import { useAlive } from '../../hooks/useAlive';
+import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { ErrorCode } from '../../cs-errorcode';
 import {
   AdditionalCreatorInput,
@@ -77,6 +78,9 @@ export function CreateRoomForm({
   const { t } = useTranslation();
 
   const capabilities = useCapabilities();
+  const elevoConfig = useElevoConfig();
+  const federationEnabled = elevoConfig.features.federation;
+  const encryptionEnabled = elevoConfig.features.encryption;
   const roomVersions = capabilities['m.room_versions'];
   const [selectedRoomVersion, selectRoomVersion] = useState(roomVersions?.default ?? '1');
   useEffect(() => {
@@ -93,8 +97,8 @@ export function CreateRoomForm({
   const allowAdditionalCreators = creatorsSupported(selectedRoomVersion);
   const { additionalCreators, addAdditionalCreator, removeAdditionalCreator } =
     useAdditionalCreators();
-  const [federation, setFederation] = useState(true);
-  const [encryption, setEncryption] = useState(false);
+  const [federation, setFederation] = useState(federationEnabled);
+  const [encryption, setEncryption] = useState(encryptionEnabled);
   const [knock, setKnock] = useState(false);
   const [advance, setAdvance] = useState(false);
 
@@ -150,9 +154,9 @@ export function CreateRoomForm({
       name: roomName,
       topic: roomTopic || undefined,
       aliasLocalPart: publicRoom ? aliasLocalPart : undefined,
-      encryption: publicRoom ? false : encryption,
+      encryption: publicRoom ? false : (encryptionEnabled ? encryption : false),
       knock: roomKnock,
-      allowFederation: federation,
+      allowFederation: federationEnabled ? federation : false,
       additionalCreators: allowAdditionalCreators ? additionalCreators : undefined,
     }).then((roomId) => {
       if (alive()) {
@@ -241,25 +245,27 @@ export function CreateRoomForm({
         )}
         {access !== CreateRoomAccess.Public && (
           <>
-            <SequenceCard
-              style={{ padding: config.space.S300 }}
-              variant="SurfaceVariant"
-              direction="Column"
-              gap="500"
-            >
-              <SettingTile
-                title={t('create.endToEndEncryption')}
-                description={t('create.encryptionRoomDesc')}
-                after={
-                  <Switch
-                    variant="Primary"
-                    value={encryption}
-                    onChange={setEncryption}
-                    disabled={disabled}
-                  />
-                }
-              />
-            </SequenceCard>
+            {encryptionEnabled && (
+              <SequenceCard
+                style={{ padding: config.space.S300 }}
+                variant="SurfaceVariant"
+                direction="Column"
+                gap="500"
+              >
+                <SettingTile
+                  title={t('create.endToEndEncryption')}
+                  description={t('create.encryptionRoomDesc')}
+                  after={
+                    <Switch
+                      variant="Primary"
+                      value={encryption}
+                      onChange={setEncryption}
+                      disabled={disabled}
+                    />
+                  }
+                />
+              </SequenceCard>
+            )}
             {advance && (allowKnock || allowKnockRestricted) && (
               <SequenceCard
                 style={{ padding: config.space.S300 }}
@@ -284,25 +290,27 @@ export function CreateRoomForm({
           </>
         )}
 
-        <SequenceCard
-          style={{ padding: config.space.S300 }}
-          variant="SurfaceVariant"
-          direction="Column"
-          gap="500"
-        >
-          <SettingTile
-            title={t('create.allowFederation')}
-            description={t('create.federationDesc')}
-            after={
-              <Switch
-                variant="Primary"
-                value={federation}
-                onChange={setFederation}
-                disabled={disabled}
-              />
-            }
-          />
-        </SequenceCard>
+        {federationEnabled && (
+          <SequenceCard
+            style={{ padding: config.space.S300 }}
+            variant="SurfaceVariant"
+            direction="Column"
+            gap="500"
+          >
+            <SettingTile
+              title={t('create.allowFederation')}
+              description={t('create.federationDesc')}
+              after={
+                <Switch
+                  variant="Primary"
+                  value={federation}
+                  onChange={setFederation}
+                  disabled={disabled}
+                />
+              }
+            />
+          </SequenceCard>
+        )}
         {advance && (
           <RoomVersionSelector
             versions={roomVersions?.available ? Object.keys(roomVersions.available) : ['1']}

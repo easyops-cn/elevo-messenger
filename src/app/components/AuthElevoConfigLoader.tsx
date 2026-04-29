@@ -1,6 +1,6 @@
 import React, { ReactNode, useEffect, useState } from 'react';
 import { fetchElevoConfig } from './ElevoConfigLoader';
-import { ElevoConfig, ElevoConfigProvider } from '../hooks/useElevoConfig';
+import { ElevoConfig, ElevoConfigProvider, DEFAULT_ELEVO_CONFIG } from '../hooks/useElevoConfig';
 
 type AuthElevoConfigLoaderProps = {
   baseUrl: string;
@@ -8,7 +8,7 @@ type AuthElevoConfigLoaderProps = {
 };
 
 export function AuthElevoConfigLoader({ baseUrl, children }: AuthElevoConfigLoaderProps) {
-  const [config, setConfig] = useState<ElevoConfig>({});
+  const [config, setConfig] = useState<ElevoConfig>(DEFAULT_ELEVO_CONFIG);
 
   useEffect(() => {
     let cancelled = false;
