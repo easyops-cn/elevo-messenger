@@ -2,7 +2,7 @@ import React, { ReactNode, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Chip, Icon, IconButton, Icons, Text, color, config, toRem } from 'folds';
 import { UploadCard, UploadCardError, UploadCardProgress } from './UploadCard';
-import { UploadStatus, UploadSuccess, useBindUploadAtom } from '../../state/upload';
+import { UploadStatus, useBindUploadAtom } from '../../state/upload';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { TUploadContent } from '../../utils/matrix';
 import { bytesToSize, getFileTypeIcon } from '../../utils/common';
@@ -105,14 +105,14 @@ type UploadCardRendererProps = {
   fileItem: TUploadItem;
   setMetadata: (fileItem: TUploadItem, metadata: TUploadMetadata) => void;
   onRemove: (file: TUploadContent) => void;
-  onComplete?: (upload: UploadSuccess) => void;
+  shouldStartUpload?: boolean;
 };
 export function UploadCardRenderer({
   isEncrypted,
   fileItem,
   setMetadata,
   onRemove,
-  onComplete,
+  shouldStartUpload,
 }: UploadCardRendererProps) {
   const mx = useMatrixClient();
   const { t } = useTranslation();
@@ -125,9 +125,11 @@ export function UploadCardRenderer({
   const { file } = upload;
   const fileSizeExceeded = file.size >= allowSize;
 
-  if (upload.status === UploadStatus.Idle && !fileSizeExceeded) {
-    startUpload();
-  }
+  useEffect(() => {
+    if (shouldStartUpload && upload.status === UploadStatus.Idle && !fileSizeExceeded) {
+      startUpload();
+    }
+  }, [shouldStartUpload, upload.status, fileSizeExceeded, startUpload]);
 
   const handleSpoiler = (marked: boolean) => {
     setMetadata(fileItem, { ...metadata, markedAsSpoiler: marked });
@@ -137,12 +139,6 @@ export function UploadCardRenderer({
     cancelUpload();
     onRemove(file);
   };
-
-  useEffect(() => {
-    if (upload.status === UploadStatus.Success) {
-      onComplete?.(upload);
-    }
-  }, [upload, onComplete]);
 
   return (
     <UploadCard
@@ -184,9 +180,6 @@ export function UploadCardRenderer({
             <MediaPreview fileItem={fileItem} onSpoiler={handleSpoiler}>
               <PreviewVideo fileItem={fileItem} />
             </MediaPreview>
-          )}
-          {upload.status === UploadStatus.Idle && !fileSizeExceeded && (
-            <UploadCardProgress sentBytes={0} totalBytes={file.size} />
           )}
           {upload.status === UploadStatus.Loading && (
             <UploadCardProgress sentBytes={upload.progress.loaded} totalBytes={file.size} />

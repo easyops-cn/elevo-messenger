@@ -962,7 +962,12 @@
     "cancel": "Cancel Upload",
     "spoiler": "Spoiler",
     "fileSizeExceeded": "File size exceeds maximum ({{maxSize}} max, {{fileSize}} file)",
-    "fileSizeExceededDetail": "The file size exceeds the limit. Maximum allowed size is {{maxSize}}, but the uploaded file is {{fileSize}}."
+    "fileSizeExceededDetail": "The file size exceeds the limit. Maximum allowed size is {{maxSize}}, but the uploaded file is {{fileSize}}.",
+    "files": "Files",
+    "send": "Send",
+    "uploadFailed": "Upload Failed",
+    "remove": "Remove",
+    "removeAll": "Remove All"
   },
   "viewer": {
     "zoomOut": "Zoom Out",

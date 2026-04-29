@@ -962,7 +962,12 @@
     "cancel": "取消上传",
     "spoiler": "剧透",
     "fileSizeExceeded": "文件大小超出限制（最大 {{maxSize}}，文件 {{fileSize}}）",
-    "fileSizeExceededDetail": "文件大小超出限制。允许的最大大小为 {{maxSize}}，但上传的文件大小为 {{fileSize}}。"
+    "fileSizeExceededDetail": "文件大小超出限制。允许的最大大小为 {{maxSize}}，但上传的文件大小为 {{fileSize}}。",
+    "files": "文件",
+    "send": "发送",
+    "uploadFailed": "上传失败",
+    "remove": "移除",
+    "removeAll": "全部移除"
   },
   "viewer": {
     "zoomOut": "缩小",

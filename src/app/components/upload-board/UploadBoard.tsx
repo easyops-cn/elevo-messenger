@@ -1,10 +1,11 @@
-import React, { MutableRefObject, ReactNode, useImperativeHandle, useRef } from 'react';
+import React, { MutableRefObject, ReactNode, useEffect, useImperativeHandle, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge, Box, Chip, Header, Icon, Icons, Spinner, Text, as, percent } from 'folds';
 import classNames from 'classnames';
 import { useAtomValue } from 'jotai';
 
 import * as css from './UploadBoard.css';
-import { TUploadFamilyObserverAtom, Upload, UploadStatus, UploadSuccess } from '../../state/upload';
+import { TUploadFamilyObserverAtom, Upload, UploadStatus } from '../../state/upload';
 
 type UploadBoardProps = {
   header: ReactNode;
@@ -24,15 +25,16 @@ export const UploadBoard = as<'div', UploadBoardProps>(({ header, children, ...p
   </Box>
 ));
 
-export type UploadBoardImperativeHandlers = { handleSend: () => Promise<void> };
+export type UploadBoardImperativeHandlers = { handleSend: () => void };
 
 type UploadBoardHeaderProps = {
   open: boolean;
   onToggle: () => void;
   uploadFamilyObserverAtom: TUploadFamilyObserverAtom;
   onCancel: (uploads: Upload[]) => void;
-  onSend: (uploads: UploadSuccess[]) => Promise<void>;
+  onSend: () => void;
   imperativeHandlerRef: MutableRefObject<UploadBoardImperativeHandlers | undefined>;
+  isSending?: boolean;
 };
 
 export function UploadBoardHeader({
@@ -42,11 +44,12 @@ export function UploadBoardHeader({
   onCancel,
   onSend,
   imperativeHandlerRef,
+  isSending,
 }: UploadBoardHeaderProps) {
+  const { t } = useTranslation();
   const sendingRef = useRef(false);
   const uploads = useAtomValue(uploadFamilyObserverAtom);
 
-  const isSuccess = uploads.every((upload) => upload.status === UploadStatus.Success);
   const isError = uploads.some((upload) => upload.status === UploadStatus.Error);
   const progress = uploads.reduce(
     (acc, upload) => {
@@ -62,13 +65,16 @@ export function UploadBoardHeader({
     { loaded: 0, total: 0 }
   );
 
-  const handleSend = async () => {
-    if (sendingRef.current) return;
+  useEffect(() => {
+    if (!isSending) {
+      sendingRef.current = false;
+    }
+  }, [isSending]);
+
+  const handleSend = () => {
+    if (sendingRef.current || isSending) return;
     sendingRef.current = true;
-    await onSend(
-      uploads.filter((upload) => upload.status === UploadStatus.Success) as UploadSuccess[]
-    );
-    sendingRef.current = false;
+    onSend();
   };
 
   useImperativeHandle(imperativeHandlerRef, () => ({
@@ -88,10 +94,10 @@ export function UploadBoardHeader({
         gap="100"
       >
         <Icon src={open ? Icons.ChevronTop : Icons.ChevronRight} size="50" />
-        <Text size="H6">Files</Text>
+        <Text size="H6">{t('upload.files')}</Text>
       </Box>
       <Box className={css.UploadBoardHeaderContent} alignItems="Center" gap="100">
-        {isSuccess && (
+        {!isSending && !isError && (
           <Chip
             as="button"
             onClick={handleSend}
@@ -100,15 +106,10 @@ export function UploadBoardHeader({
             outlined
             after={<Icon src={Icons.Send} size="50" filled />}
           >
-            <Text size="B300">Send</Text>
+            <Text size="B300">{t('upload.send')}</Text>
           </Chip>
         )}
-        {isError && !open && (
-          <Badge variant="Critical" fill="Solid" radii="300">
-            <Text size="L400">Upload Failed</Text>
-          </Badge>
-        )}
-        {!isSuccess && !isError && !open && (
+        {isSending && (
           <>
             <Badge variant="Secondary" fill="Solid" radii="Pill">
               <Text size="L400">{Math.round(percent(0, progress.total, progress.loaded))}%</Text>
@@ -116,7 +117,12 @@ export function UploadBoardHeader({
             <Spinner variant="Secondary" size="200" />
           </>
         )}
-        {!isSuccess && open && (
+        {!isSending && isError && !open && (
+          <Badge variant="Critical" fill="Solid" radii="300">
+            <Text size="L400">{t('upload.uploadFailed')}</Text>
+          </Badge>
+        )}
+        {!isSending && open && (
           <Chip
             as="button"
             onClick={handleCancel}
@@ -124,7 +130,7 @@ export function UploadBoardHeader({
             radii="Pill"
             after={<Icon src={Icons.Cross} size="50" />}
           >
-            <Text size="B300">{uploads.length === 1 ? 'Remove' : 'Remove All'}</Text>
+            <Text size="B300">{uploads.length === 1 ? t('upload.remove') : t('upload.removeAll')}</Text>
           </Chip>
         )}
       </Box>

@@ -169,13 +169,17 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
 
     const [uploadBoard, setUploadBoard] = useState(true);
     const [voiceRecordingOpen, setVoiceRecordingOpen] = useState(false);
+    const [sendingUploads, setSendingUploads] = useState(false);
     const [selectedFiles, setSelectedFiles] = useAtom(threadOrRoomIdToUploadItemsAtomFamily(threadOrRoomId));
     const uploadFamilyObserverAtom = createUploadFamilyObserverAtom(
       roomUploadAtomFamily,
       selectedFiles.map((f) => f.file)
     );
+    const observedUploads = useAtomValue(uploadFamilyObserverAtom);
     const uploadBoardHandlers = useRef<UploadBoardImperativeHandlers>();
     const voiceRecordingRef = useRef<VoiceRecordingBoardHandlers>(null);
+    const selectedFilesRef = useRef(selectedFiles);
+    selectedFilesRef.current = selectedFiles;
 
     const imagePackRooms: Room[] = useImagePackRooms(roomId, roomToParents);
 
@@ -372,9 +376,10 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       handleRemoveUpload(uploads.map((upload) => upload.file));
     };
 
-    const handleSendUpload = async (uploads: UploadSuccess[]) => {
-      const contentsPromises = uploads.map(async (upload) => {
-        const fileItem = selectedFiles.find((f) => f.file === upload.file);
+    const handleSendUpload = useCallback(async (uploadSuccesses: UploadSuccess[]) => {
+      const currentFiles = selectedFilesRef.current;
+      const contentsPromises = uploadSuccesses.map(async (upload) => {
+        const fileItem = currentFiles.find((f) => f.file === upload.file);
         if (!fileItem) throw new Error('Broken upload');
 
         if (fileItem.file.type.startsWith('image')) {
@@ -388,10 +393,25 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         }
         return getFileMsgContent(fileItem, upload.mxc);
       });
-      handleCancelUpload(uploads);
+      handleRemoveUpload(uploadSuccesses.map((u) => u.file));
       const contents = fulfilledPromiseSettledResult(await Promise.allSettled(contentsPromises));
       contents.forEach((content) => mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent));
-    };
+    }, [mx, roomId, threadRootId, handleRemoveUpload]);
+
+    useEffect(() => {
+      if (!sendingUploads) return;
+      const hasPending = observedUploads.some(
+        (u) => u.status === UploadStatus.Idle || u.status === UploadStatus.Loading
+      );
+      if (hasPending) return;
+      const successes = observedUploads.filter(
+        (u) => u.status === UploadStatus.Success
+      ) as UploadSuccess[];
+      if (successes.length > 0) {
+        handleSendUpload(successes);
+      }
+      setSendingUploads(false);
+    }, [sendingUploads, observedUploads, handleSendUpload, setSendingUploads]);
 
     const submit = useCallback(() => {
       uploadBoardHandlers.current?.handleSend();
@@ -589,9 +609,10 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                 open={uploadBoard}
                 onToggle={() => setUploadBoard(!uploadBoard)}
                 uploadFamilyObserverAtom={uploadFamilyObserverAtom}
-                onSend={handleSendUpload}
+                onSend={() => setSendingUploads(true)}
                 imperativeHandlerRef={uploadBoardHandlers}
                 onCancel={handleCancelUpload}
+                isSending={sendingUploads}
               />
             }
           >
@@ -608,6 +629,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                         fileItem={fileItem}
                         setMetadata={handleFileMetadata}
                         onRemove={handleRemoveUpload}
+                        shouldStartUpload={sendingUploads}
                       />
                     ))}
                 </UploadBoardContent>
