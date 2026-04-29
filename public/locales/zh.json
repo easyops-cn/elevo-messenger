@@ -723,6 +723,11 @@
     "subtitle": "又一个 Matrix 客户端",
     "sourceCode": "源代码"
   },
+  "notFound": {
+    "title": "未找到页面",
+    "description": "你访问的页面不存在或已被移动。",
+    "backHome": "回到首页"
+  },
   "explore": {
     "title": "探索社区",
     "addServer": "添加服务器",

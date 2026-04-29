@@ -81,6 +81,7 @@ import { getFallbackSession } from '../state/sessions';
 import { CallStatusRenderer } from './CallStatusRenderer';
 import { CallEmbedProvider } from '../components/CallEmbedProvider';
 import { UpdateCheckerProvider } from '../state/update/UpdateCheckerContext';
+import { PageNotFound } from './PageNotFound';
 
 function TauriDeepLinkHandler() {
   useTauriDeepLink();
@@ -303,7 +304,11 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           <Route path={_INVITES_PATH} element={<Invites />} />
         </Route>
       </Route>
-      <Route path="/*" element={<p>Page not found</p>} />
+      <Route path="/*" element={
+        <AuthRouteThemeManager>
+          <PageNotFound />
+        </AuthRouteThemeManager>
+      } />
     </Route>
   );
 
