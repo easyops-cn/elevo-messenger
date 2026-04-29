@@ -1097,8 +1097,7 @@
     "disconnect": "取消连接",
     "connectionFailed": "连接失败",
     "serverUrl": "服务器地址",
-    "desktopOnly": "仅支持桌面端",
-    "desktopOnlyDesc": "OAuth 连接仅支持桌面端应用。"
+    "desktopOnlyDesc": "仅支持在桌面端应用进行连接"
   },
   "oidcLogin": {
     "title": "登录 {{provider}}",

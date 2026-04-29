@@ -204,7 +204,7 @@ export function Links({ requestClose }: LinksProps) {
                               {t('links.expired')}
                             </Text>
                           </Box>
-                          {isDesktopTauri && (
+                          {isDesktopTauri ? (
                             <Button
                               size="300"
                               variant="Primary"
@@ -224,6 +224,10 @@ export function Links({ requestClose }: LinksProps) {
                             >
                               <Text size="B300">{t('links.reconnect')}</Text>
                             </Button>
+                          ) : (
+                            <Text size="T300" style={{ color: color.Warning.Main }}>
+                              {t('links.desktopOnlyDesc')}
+                            </Text>
                           )}
                         </Box>
                       ) : isDesktopTauri ? (
@@ -246,7 +250,11 @@ export function Links({ requestClose }: LinksProps) {
                         >
                           <Text size="B300">{t('links.connectWorkspace')}</Text>
                         </Button>
-                      ) : undefined
+                      ) : (
+                        <Text size="T300" style={{ color: color.Warning.Main }}>
+                          {t('links.desktopOnlyDesc')}
+                        </Text>
+                      )
                     }
                   />
                 </SequenceCard>
