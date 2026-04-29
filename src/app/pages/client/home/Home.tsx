@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, forwardRef, useMemo, useRef, useState } from 'react';
+import React, { MouseEventHandler, forwardRef, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -21,6 +21,7 @@ import {
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useAtomValue, useSetAtom } from 'jotai';
 import FocusTrap from 'focus-trap-react';
+import { RoomEvent, RoomEventHandlerMap } from 'matrix-js-sdk';
 import { factoryRoomIdByActivity } from '../../../utils/sort';
 import {
   NavButton,
@@ -216,11 +217,35 @@ export function Home() {
   const inviteCount = allInvites.length;
   const setSearchOpen = useSetAtom(searchModalAtom);
   const noRoomToDisplay = rooms.length === 0;
+  const [sortVersion, bumpSortVersion] = useReducer((v: number) => v + 1, 0);
+
+  const roomIdSet = useMemo(() => new Set(rooms), [rooms]);
+
+  useEffect(() => {
+    // Todo: memoize contentful event timestamp for each room
+    const handleTimelineEvent: RoomEventHandlerMap[RoomEvent.Timeline] = (
+      _mEvent,
+      room,
+      _toStartOfTimeline,
+      removed,
+      data
+    ) => {
+      if (!room || !data.liveEvent || removed || !roomIdSet.has(room.roomId)) return;
+      bumpSortVersion();
+    };
+
+    mx.on(RoomEvent.Timeline, handleTimelineEvent);
+    return () => {
+      mx.removeListener(RoomEvent.Timeline, handleTimelineEvent);
+    };
+  }, [mx, roomIdSet]);
 
   const sortedRooms = useMemo(() => {
     const items = Array.from(rooms).sort(factoryRoomIdByActivity(mx));
     return items;
-  }, [mx, rooms]);
+    // Intensionally add sortVersion as dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mx, rooms, sortVersion]);
 
   const virtualizer = useVirtualizer({
     count: sortedRooms.length,
