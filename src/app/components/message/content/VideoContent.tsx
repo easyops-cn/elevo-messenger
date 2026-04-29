@@ -24,7 +24,7 @@ import {
 import * as css from './style.css';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
-import { bytesToSize, millisecondsToMinutesAndSeconds } from '../../../utils/common';
+import { bytesToSize, millisecondsToMinutesAndSeconds, scaleYDimension } from '../../../utils/common';
 import {
   decryptFile,
   downloadEncryptedMedia,
@@ -81,6 +81,21 @@ export const VideoContent = as<'div', VideoContentProps>(
     const [error, setError] = useState(false);
     const [blurred, setBlurred] = useState(markedAsSpoiler ?? false);
 
+    const originalWidth = info?.w || 128;
+    const originalHeight = info?.h || 128;
+    const isLandscape = originalWidth >= originalHeight;
+    const aspectRatio = originalWidth / originalHeight;
+
+    let width: number;
+    let height: number;
+    if (isLandscape) {
+      width = Math.min(originalWidth, 320);
+      height = scaleYDimension(originalWidth, width, originalHeight);
+    } else {
+      height = Math.min(originalHeight, 320);
+      width = scaleYDimension(originalHeight, height, originalWidth);
+    }
+
     const [srcState, loadSrc] = useAsyncCallback(
       useCallback(async () => {
         const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
@@ -112,7 +127,12 @@ export const VideoContent = as<'div', VideoContentProps>(
     }, [autoPlay, loadSrc]);
 
     return (
-      <Box className={classNames(css.RelativeBase, className)} {...props} ref={ref}>
+      <Box
+        className={classNames(css.RelativeBase, className)}
+        {...props}
+        style={{ width, height: 'auto', maxWidth: '100%', aspectRatio }}
+        ref={ref}
+      >
         {typeof blurHash === 'string' && !load && (
           <BlurhashCanvas
             style={{ width: '100%', height: '100%' }}

@@ -225,7 +225,6 @@ export function RenderMessageContent({
               renderVideo={(p) => <Video {...p} />}
             />
           )}
-          outlined={outlineAttachment}
         />
         {renderCaption()}
       </>

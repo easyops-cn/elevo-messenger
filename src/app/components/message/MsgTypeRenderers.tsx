@@ -37,7 +37,7 @@ import {
   MATRIX_SPOILER_REASON_PROPERTY_NAME,
 } from '../../../types/matrix/common';
 import { FALLBACK_MIMETYPE, getBlobSafeMimeType } from '../../utils/mimeTypes';
-import { parseGeoUri, scaleYDimension } from '../../utils/common';
+import { parseGeoUri } from '../../utils/common';
 import { Attachment, AttachmentBox, AttachmentContent, AttachmentHeader } from './attachment';
 import { FileHeader, FileDownloadButton } from './FileHeader';
 import { VoiceMessage } from './content/VoiceMessage';
@@ -516,9 +516,8 @@ type MVideoProps = {
   content: IVideoContent;
   renderAsFile: () => ReactNode;
   renderVideoContent: (props: RenderVideoContentProps) => ReactNode;
-  outlined?: boolean;
 };
-export function MVideo({ content, renderAsFile, renderVideoContent, outlined }: MVideoProps) {
+export function MVideo({ content, renderAsFile, renderVideoContent }: MVideoProps) {
   const videoInfo = content?.info;
   const mxcUrl = content.file?.url ?? content.url;
   const safeMimeType = getBlobSafeMimeType(videoInfo?.mimetype ?? '');
@@ -530,42 +529,18 @@ export function MVideo({ content, renderAsFile, renderVideoContent, outlined }: 
     return <BrokenContent />;
   }
 
-  const height = scaleYDimension(videoInfo.w || 400, 400, videoInfo.h || 400);
-
-  const filename = content.filename ?? content.body ?? 'Video';
-
   return (
-    <Attachment outlined={outlined}>
-      <AttachmentHeader>
-        <FileHeader
-          body={filename}
-          mimeType={safeMimeType}
-          after={
-            <FileDownloadButton
-              filename={filename}
-              url={mxcUrl}
-              mimeType={safeMimeType}
-              encInfo={content.file}
-            />
-          }
-        />
-      </AttachmentHeader>
-      <AttachmentBox
-        style={{
-          height: toRem(height < 48 ? 48 : height),
-        }}
-      >
-        {renderVideoContent({
-          body: content.body || 'Video',
-          info: videoInfo,
-          mimeType: safeMimeType,
-          url: mxcUrl,
-          encInfo: content.file,
-          markedAsSpoiler: content[MATRIX_SPOILER_PROPERTY_NAME],
-          spoilerReason: content[MATRIX_SPOILER_REASON_PROPERTY_NAME],
-        })}
-      </AttachmentBox>
-    </Attachment>
+    <AttachmentBox image>
+      {renderVideoContent({
+        body: content.body || 'Video',
+        info: videoInfo,
+        mimeType: safeMimeType,
+        url: mxcUrl,
+        encInfo: content.file,
+        markedAsSpoiler: content[MATRIX_SPOILER_PROPERTY_NAME],
+        spoilerReason: content[MATRIX_SPOILER_REASON_PROPERTY_NAME],
+      })}
+    </AttachmentBox>
   );
 }
 
