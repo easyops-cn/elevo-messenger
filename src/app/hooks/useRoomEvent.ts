@@ -5,10 +5,12 @@ import { CryptoBackend } from 'matrix-js-sdk/lib/common-crypto/CryptoBackend';
 import { useQuery } from '@tanstack/react-query';
 import { useMatrixClient } from './useMatrixClient';
 
-const useFetchEvent = (room: Room, eventId: string) => {
+const useFetchEvent = (room: Room, eventId: string | undefined) => {
   const mx = useMatrixClient();
 
   const fetchEventCallback = useCallback(async () => {
+    if (!eventId) return;
+
     const evt = await mx.fetchRoomEvent(room.roomId, eventId);
     const mEvent = new MatrixEvent(evt);
 
@@ -36,11 +38,12 @@ const useFetchEvent = (room: Room, eventId: string) => {
  */
 export const useRoomEvent = (
   room: Room,
-  eventId: string,
+  eventId: string | undefined,
   getLocally?: () => MatrixEvent | undefined
 ) => {
   const event = useMemo(() => {
     if (getLocally) return getLocally();
+    if (!eventId) return;
     return room.findEventById(eventId);
   }, [room, eventId, getLocally]);
 

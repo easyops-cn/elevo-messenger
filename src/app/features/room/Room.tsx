@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { Box } from 'folds';
 import { useParams } from 'react-router-dom';
 import { isKeyHotkey } from 'is-hotkey';
@@ -20,6 +20,7 @@ import { CallChatView } from './CallChatView';
 import { PageMain } from '../../components/page';
 import { useThreadChat } from '../../state/threadChat';
 import { ThreadChatView } from './ThreadChatView';
+import { useRoomEvent } from '../../hooks/useRoomEvent';
 
 export function Room() {
   const { eventId } = useParams();
@@ -31,7 +32,25 @@ export function Room() {
   const screenSize = useScreenSizeContext();
   const powerLevels = usePowerLevels(room);
   const chat = useAtomValue(callChatAtom);
-  const [threadChat] = useThreadChat(room.roomId);
+  const [threadChat, setThreadChat] = useThreadChat(room.roomId);
+
+  const getLocalEvent = useCallback(() => {
+    if (!eventId) return;
+    return room.findEventById(eventId);
+  }, [eventId, room]);
+
+  const event = useRoomEvent(room, eventId, getLocalEvent);
+
+  const threadRootId = event?.threadRootId;
+  const isThreadEvent = !!threadRootId && threadRootId !== eventId;
+  const mainEventId = isThreadEvent ? undefined : eventId;
+  const threadEventId = isThreadEvent ? eventId : undefined;
+
+  useEffect(() => {
+    if (isThreadEvent && threadRootId) {
+      setThreadChat({ open: true, threadRootId });
+    }
+  }, [isThreadEvent, threadRootId, setThreadChat]);
 
   useKeyDown(
     window,
@@ -69,12 +88,12 @@ export function Room() {
             <Box grow="Yes" direction="Column">
               <RoomViewHeader />
               <Box grow="Yes">
-                <RoomView eventId={eventId} />
+                <RoomView eventId={mainEventId} />
               </Box>
             </Box>
           )}
         </PageMain>}
-        {showThreadPanel && <ThreadChatView />}
+        {showThreadPanel && <ThreadChatView eventId={threadEventId} />}
         {callView && chat && (
           <CallChatView />
         )}

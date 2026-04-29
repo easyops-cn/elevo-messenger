@@ -6,7 +6,7 @@ import { useThreadChat } from '../../state/threadChat';
 import { RoomView } from './RoomView';
 import { useRoom } from '../../hooks/useRoom';
 
-export function ThreadChatView() {
+export function ThreadChatView({ eventId }: { eventId?: string }) {
   const { t } = useTranslation();
   const room = useRoom();
   const [threadChat, setThreadChat] = useThreadChat(room.roomId);
@@ -56,7 +56,7 @@ export function ThreadChatView() {
         </PageHeader>
         <Box grow="Yes" direction="Column">
           {threadRootId && threadReady && (
-            <RoomView key={threadRootId} threadRootId={threadRootId} showRoomIntro={false} />
+            <RoomView key={threadRootId} threadRootId={threadRootId} eventId={eventId} showRoomIntro={false} />
           )}
         </Box>
       </Page>
