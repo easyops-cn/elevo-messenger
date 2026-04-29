@@ -83,9 +83,19 @@ export const ImageContent = as<'div', ImageContentProps>(
     const [viewer, setViewer] = useState(false);
     const [blurred, setBlurred] = useState(markedAsSpoiler ?? false);
 
-    const originalWidth = info?.w || 200;
-    const maxWidth = Math.min(Math.max(originalWidth, 20), 400);
-    const maxHeight = scaleYDimension(originalWidth, maxWidth, info?.h || 200);
+    const originalWidth = info?.w || 128;
+    const originalHeight = info?.h || 128;
+    const isLandscape = originalWidth >= originalHeight;
+
+    let width: number;
+    let height: number;
+    if (isLandscape) {
+      width = Math.min(originalWidth, 320);
+      height = scaleYDimension(originalWidth, width, originalHeight);
+    } else {
+      height = Math.min(originalHeight, 320);
+      width = scaleYDimension(originalHeight, height, originalWidth);
+    }
 
     const [srcState, loadSrc] = useAsyncCallback(
       useCallback(async () => {
@@ -160,7 +170,7 @@ export const ImageContent = as<'div', ImageContentProps>(
           />
         )}
         {srcState.status === AsyncStatus.Success && (
-          <Box className={classNames(blurred && css.Blur)} style={{ maxWidth, maxHeight }}>
+          <div className={classNames(blurred && css.Blur)} style={{ width, height }}>
             {renderImage({
               alt: body,
               title: body,
@@ -170,7 +180,7 @@ export const ImageContent = as<'div', ImageContentProps>(
               onClick: () => setViewer(true),
               tabIndex: 0,
             })}
-          </Box>
+          </div>
         )}
         {blurred && !error && srcState.status !== AsyncStatus.Error && (
           <Box className={css.AbsoluteContainer} alignItems="Center" justifyContent="Center">
@@ -207,12 +217,12 @@ export const ImageContent = as<'div', ImageContentProps>(
         )}
         {!error && (srcState.status === AsyncStatus.Loading || srcState.status === AsyncStatus.Idle) &&
           !blurred && (
-            <Box alignItems="Center" justifyContent="Center" style={{ width: maxWidth, height: maxHeight }}>
+            <Box alignItems="Center" justifyContent="Center" style={{ width, height }}>
               <Spinner variant="Secondary" />
             </Box>
           )}
         {(error || srcState.status === AsyncStatus.Error) && (
-          <Box alignItems="Center" justifyContent="Center" style={{ width: maxWidth, height: maxHeight }}>
+          <Box alignItems="Center" justifyContent="Center" style={{ width, height }}>
             <TooltipProvider
               tooltip={
                 <Tooltip variant="Critical">
