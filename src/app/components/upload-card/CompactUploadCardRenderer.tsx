@@ -10,12 +10,14 @@ import { useMediaConfig } from '../../hooks/useMediaConfig';
 
 type CompactUploadCardRendererProps = {
   isEncrypted?: boolean;
+  shouldStartUpload?: boolean;
   uploadAtom: TUploadAtom;
   onRemove: (file: TUploadContent) => void;
   onComplete?: (upload: UploadSuccess) => void;
 };
 export function CompactUploadCardRenderer({
   isEncrypted,
+  shouldStartUpload = true,
   uploadAtom,
   onRemove,
   onComplete,
@@ -29,9 +31,14 @@ export function CompactUploadCardRenderer({
   const { file } = upload;
   const fileSizeExceeded = file.size >= allowSize;
 
-  if (upload.status === UploadStatus.Idle && !fileSizeExceeded) {
-    startUpload();
-  }
+  const shouldUpload =
+    shouldStartUpload && upload.status === UploadStatus.Idle && !fileSizeExceeded;
+
+  useEffect(() => {
+    if (shouldUpload) {
+      startUpload();
+    }
+  }, [shouldUpload, startUpload]);
 
   const removeUpload = () => {
     cancelUpload();

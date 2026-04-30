@@ -102,6 +102,7 @@ function MediaPreview({ fileItem, onSpoiler, children }: MediaPreviewProps) {
 
 type UploadCardRendererProps = {
   isEncrypted?: boolean;
+  shouldStartUpload?: boolean;
   fileItem: TUploadItem;
   setMetadata: (fileItem: TUploadItem, metadata: TUploadMetadata) => void;
   onRemove: (file: TUploadContent) => void;
@@ -109,6 +110,7 @@ type UploadCardRendererProps = {
 };
 export function UploadCardRenderer({
   isEncrypted,
+  shouldStartUpload = true,
   fileItem,
   setMetadata,
   onRemove,
@@ -125,7 +127,7 @@ export function UploadCardRenderer({
   const { file } = upload;
   const fileSizeExceeded = file.size >= allowSize;
 
-  if (upload.status === UploadStatus.Idle && !fileSizeExceeded) {
+  if (shouldStartUpload && upload.status === UploadStatus.Idle && !fileSizeExceeded) {
     startUpload();
   }
 
@@ -199,7 +201,10 @@ export function UploadCardRenderer({
           {upload.status === UploadStatus.Idle && fileSizeExceeded && (
             <UploadCardError>
               <Text size="T200">
-                {t('upload.fileSizeExceeded', { maxSize: bytesToSize(allowSize), fileSize: bytesToSize(file.size) })}
+                {t('upload.fileSizeExceeded', {
+                  maxSize: bytesToSize(allowSize),
+                  fileSize: bytesToSize(file.size),
+                })}
               </Text>
             </UploadCardError>
           )}

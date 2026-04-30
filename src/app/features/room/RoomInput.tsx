@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useAtom, useAtomValue } from 'jotai';
+import { useAtom, useAtomValue, useStore } from 'jotai';
 import { isKeyHotkey } from 'is-hotkey';
 import { EventType, IContent, MsgType, RelationType, Room } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/types';
@@ -116,6 +116,7 @@ import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useImagePackRooms } from '../../hooks/useImagePackRooms';
 import { useComposingCheck } from '../../hooks/useComposingCheck';
 import { useSdkMessageListener, SdkMessagePayload } from '../../plugins/useTauriOpener';
+import { useMediaConfig } from '../../hooks/useMediaConfig';
 import { PlusIcon } from '../../icons/PlusIcon';
 import { StickerIcon } from '../../icons/StickerIcon';
 import { SmileIcon } from '../../icons/SmileIcon';
@@ -165,17 +166,25 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
 
     const threadOrRoomId = threadRootId || roomId;
     const [msgDraft, setMsgDraft] = useAtom(threadOrRoomIdToMsgDraftAtomFamily(threadOrRoomId));
-    const [replyDraft, setReplyDraft] = useAtom(threadOrRoomIdToReplyDraftAtomFamily(threadOrRoomId));
+    const [replyDraft, setReplyDraft] = useAtom(
+      threadOrRoomIdToReplyDraftAtomFamily(threadOrRoomId)
+    );
 
     const [uploadBoard, setUploadBoard] = useState(true);
     const [voiceRecordingOpen, setVoiceRecordingOpen] = useState(false);
-    const [selectedFiles, setSelectedFiles] = useAtom(threadOrRoomIdToUploadItemsAtomFamily(threadOrRoomId));
+    const [selectedFiles, setSelectedFiles] = useAtom(
+      threadOrRoomIdToUploadItemsAtomFamily(threadOrRoomId)
+    );
     const uploadFamilyObserverAtom = createUploadFamilyObserverAtom(
       roomUploadAtomFamily,
       selectedFiles.map((f) => f.file)
     );
+    const uploadStore = useStore();
+    const mediaConfig = useMediaConfig();
+    const allowUploadSize = mediaConfig['m.upload.size'] || Infinity;
     const uploadBoardHandlers = useRef<UploadBoardImperativeHandlers>();
     const voiceRecordingRef = useRef<VoiceRecordingBoardHandlers>(null);
+    const [shouldStartUpload, setShouldStartUpload] = useState(false);
 
     const imagePackRooms: Room[] = useImagePackRooms(roomId, roomToParents);
 
@@ -281,6 +290,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const handleFiles = useCallback(
       async (files: File[]) => {
         setUploadBoard(true);
+        setShouldStartUpload(false);
         const safeFiles = files.map(safeFile);
         const fileItems: TUploadItem[] = [];
 
@@ -372,25 +382,64 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       handleRemoveUpload(uploads.map((upload) => upload.file));
     };
 
-    const handleSendUpload = async (uploads: UploadSuccess[]) => {
-      const contentsPromises = uploads.map(async (upload) => {
-        const fileItem = selectedFiles.find((f) => f.file === upload.file);
-        if (!fileItem) throw new Error('Broken upload');
+    const handleSendUpload = async () => {
+      setShouldStartUpload(true);
 
-        if (fileItem.file.type.startsWith('image')) {
-          return getImageMsgContent(mx, fileItem, upload.mxc);
+      const waitForUploadsToSettle = () =>
+        new Promise<Upload[]>((resolve) => {
+          let interval: number;
+
+          function poll() {
+            const uploads = uploadStore.get(uploadFamilyObserverAtom);
+            const hasStartableIdleUploads = uploads.some(
+              (upload) => upload.status === UploadStatus.Idle && upload.file.size < allowUploadSize
+            );
+            const hasLoadingUploads = uploads.some(
+              (upload) => upload.status === UploadStatus.Loading
+            );
+
+            if (!hasStartableIdleUploads && !hasLoadingUploads) {
+              clearInterval(interval);
+              resolve(uploads);
+            }
+          }
+
+          interval = setInterval(poll, 120);
+        });
+
+      try {
+        const uploads = await waitForUploadsToSettle();
+
+        const successfulUploads = uploads.filter(
+          (upload): upload is UploadSuccess => upload.status === UploadStatus.Success
+        );
+        if (successfulUploads.length === 0) {
+          return;
         }
-        if (fileItem.file.type.startsWith('video')) {
-          return getVideoMsgContent(mx, fileItem, upload.mxc);
-        }
-        if (fileItem.file.type.startsWith('audio')) {
-          return getAudioMsgContent(fileItem, upload.mxc);
-        }
-        return getFileMsgContent(fileItem, upload.mxc);
-      });
-      handleCancelUpload(uploads);
-      const contents = fulfilledPromiseSettledResult(await Promise.allSettled(contentsPromises));
-      contents.forEach((content) => mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent));
+
+        const contentsPromises = successfulUploads.map(async (upload) => {
+          const fileItem = selectedFiles.find((f) => f.file === upload.file);
+          if (!fileItem) throw new Error('Broken upload');
+
+          if (fileItem.file.type.startsWith('image')) {
+            return getImageMsgContent(mx, fileItem, upload.mxc);
+          }
+          if (fileItem.file.type.startsWith('video')) {
+            return getVideoMsgContent(mx, fileItem, upload.mxc);
+          }
+          if (fileItem.file.type.startsWith('audio')) {
+            return getAudioMsgContent(fileItem, upload.mxc);
+          }
+          return getFileMsgContent(fileItem, upload.mxc);
+        });
+        const contents = fulfilledPromiseSettledResult(await Promise.allSettled(contentsPromises));
+        contents.forEach((content) =>
+          mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent)
+        );
+        handleRemoveUpload(successfulUploads.map((upload) => upload.file));
+      } finally {
+        setShouldStartUpload(false);
+      }
     };
 
     const submit = useCallback(() => {
@@ -605,6 +654,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                         // eslint-disable-next-line react/no-array-index-key
                         key={index}
                         isEncrypted={!!fileItem.encInfo}
+                        shouldStartUpload={shouldStartUpload}
                         fileItem={fileItem}
                         setMetadata={handleFileMetadata}
                         onRemove={handleRemoveUpload}
@@ -686,38 +736,40 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                 </div>
               )}
               {replyDraft && (
-              <div>
-                <Box
-                  alignItems="Center"
-                  gap="300"
-                  style={{ padding: `${config.space.S200} ${config.space.S300} 0` }}
-                >
-                  <IconButton
-                    onClick={() => setReplyDraft(undefined)}
-                    variant="Surface"
-                    size="300"
-                    radii="Pill"
-                    fill="None"
+                <div>
+                  <Box
+                    alignItems="Center"
+                    gap="300"
+                    style={{ padding: `${config.space.S200} ${config.space.S300} 0` }}
                   >
-                    <Icon src={Icons.Cross} size="50" />
-                  </IconButton>
-                  <Box direction="Row" gap="200" alignItems="Center">
-                    {!threadRootId && replyDraft.relation?.rel_type === RelationType.Thread && <ThreadIndicator />}
-                    <ReplyLayout
-                      username={
-                        getMemberDisplayName(room, replyDraft.userId) ??
-                        getMxIdLocalPart(replyDraft.userId) ??
-                        replyDraft.userId
-                      }
+                    <IconButton
+                      onClick={() => setReplyDraft(undefined)}
+                      variant="Surface"
+                      size="300"
+                      radii="Pill"
+                      fill="None"
                     >
-                      <Text size="T300" truncate>
-                        {trimReplyFromBody(replyDraft.body)}
-                      </Text>
-                    </ReplyLayout>
+                      <Icon src={Icons.Cross} size="50" />
+                    </IconButton>
+                    <Box direction="Row" gap="200" alignItems="Center">
+                      {!threadRootId && replyDraft.relation?.rel_type === RelationType.Thread && (
+                        <ThreadIndicator />
+                      )}
+                      <ReplyLayout
+                        username={
+                          getMemberDisplayName(room, replyDraft.userId) ??
+                          getMxIdLocalPart(replyDraft.userId) ??
+                          replyDraft.userId
+                        }
+                      >
+                        <Text size="T300" truncate>
+                          {trimReplyFromBody(replyDraft.body)}
+                        </Text>
+                      </ReplyLayout>
+                    </Box>
                   </Box>
-                </Box>
-              </div>
-            )}
+                </div>
+              )}
             </>
           }
           bottom={
@@ -815,9 +867,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                           size="100"
                           src={SmileIcon}
                           filled={
-                            hideStickerBtn
-                              ? !!emojiBoardTab
-                              : emojiBoardTab === EmojiBoardTab.Emoji
+                            hideStickerBtn ? !!emojiBoardTab : emojiBoardTab === EmojiBoardTab.Emoji
                           }
                         />
                       </IconButton>
@@ -846,13 +896,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                 >
                   <Icon size="100" src={MicIcon} filled={voiceRecordingOpen} />
                 </IconButton>
-                <IconButton
-                  onClick={submit}
-                  variant="Primary"
-                  size="300"
-                  radii="Pill"
-                  fill="Soft"
-                >
+                <IconButton onClick={submit} variant="Primary" size="300" radii="Pill" fill="Soft">
                   <Icon size="100" src={SendHorizontalIcon} />
                 </IconButton>
               </Box>
