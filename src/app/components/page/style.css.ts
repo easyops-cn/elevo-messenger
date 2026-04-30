@@ -22,7 +22,7 @@ export type PageNavVariants = RecipeVariants<typeof PageNav>;
 
 export const PageNavHeader = recipe({
   base: {
-    padding: `0 ${config.space.S200} 0 ${config.space.S300}`,
+    padding: `0 ${config.space.S300}`,
     marginTop: config.space.S300,
     flexShrink: 0,
     selectors: {

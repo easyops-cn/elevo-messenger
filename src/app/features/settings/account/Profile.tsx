@@ -13,7 +13,6 @@ import {
   Icon,
   Icons,
   Input,
-  Avatar,
   Button,
   Overlay,
   OverlayBackdrop,
@@ -44,6 +43,7 @@ import { ModalWide } from '../../../styles/Modal.css';
 import { createUploadAtom, UploadSuccess } from '../../../state/upload';
 import { CompactUploadCardRenderer } from '../../../components/upload-card';
 import { useCapabilities } from '../../../hooks/useCapabilities';
+import { Avatar } from '../../../components/avatar';
 
 type ProfileProps = {
   profile: UserProfile;
@@ -97,7 +97,7 @@ function ProfileAvatar({ profile, userId }: ProfileProps) {
         </Text>
       }
       after={
-        <Avatar size="500" radii="300">
+        <Avatar size="500" radii="Pill">
           <UserAvatar
             userId={userId}
             src={avatarUrl}

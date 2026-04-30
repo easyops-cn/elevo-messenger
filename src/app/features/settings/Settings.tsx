@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Avatar,
   Badge,
   Box,
   Button,
@@ -37,6 +36,7 @@ import { UseStateProvider } from '../../components/UseStateProvider';
 import { stopPropagation } from '../../utils/keyboard';
 import { LogoutDialog } from '../../components/LogoutDialog';
 import { useUpdateChecker } from '../../state/update/UpdateCheckerContext';
+import { Avatar } from '../../components/avatar';
 
 export enum SettingsPages {
   GeneralPage,
@@ -110,7 +110,7 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
-  const userId = mx.getUserId()!;
+  const userId = mx.getSafeUserId();
   const profile = useUserProfile(userId);
   const displayName = profile.displayName ?? getMxIdLocalPart(userId) ?? userId;
   const avatarUrl = profile.avatarUrl
@@ -147,7 +147,7 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
           <PageNav size="300">
             <PageNavHeader modal>
               <Box grow="Yes" gap="200">
-                <Avatar size="200" radii="300">
+                <Avatar size="200" radii="Pill">
                   <UserAvatar
                     userId={userId}
                     src={avatarUrl}

@@ -1,18 +1,12 @@
-import React, { MouseEventHandler, forwardRef, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
-  Avatar,
   Box,
   Button,
   Icon,
-  IconButton,
   Icons,
   Line,
-  Menu,
-  MenuItem,
-  PopOut,
-  RectCords,
   Text,
   color,
   config,
@@ -20,7 +14,6 @@ import {
 } from 'folds';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useAtomValue, useSetAtom } from 'jotai';
-import FocusTrap from 'focus-trap-react';
 import { RoomEvent, RoomEventHandlerMap } from 'matrix-js-sdk';
 import { factoryRoomIdByActivity } from '../../../utils/sort';
 import {
@@ -32,7 +25,7 @@ import {
   NavItemContent,
 } from '../../../components/nav';
 import { getHomeCreatePath, getHomeCreateChatPath, getHomeInvitesPath, getHomeRoomPath } from '../../pathUtils';
-import { getCanonicalAliasOrRoomId } from '../../../utils/matrix';
+import { getCanonicalAliasOrRoomId, getMxIdLocalPart, mxcUrlToHttp } from '../../../utils/matrix';
 import { useSelectedRoom } from '../../../hooks/router/useSelectedRoom';
 import {
   useHomeCreateSelected,
@@ -43,16 +36,10 @@ import { useAllHomeRooms } from './useAllHomeRooms';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { VirtualTile } from '../../../components/virtualizer';
 import { RoomNavItem } from '../../../features/room-nav';
-import { roomToUnreadAtom } from '../../../state/room/roomToUnread';
 import { allInvitesAtom } from '../../../state/room-list/inviteList';
 import { UnreadBadge } from '../../../components/unread-badge';
 import { useNavToActivePathMapper } from '../../../hooks/useNavToActivePathMapper';
 import { PageNav, PageNavHeader, PageNavContent } from '../../../components/page';
-import { useRoomsUnread } from '../../../state/hooks/unread';
-import { markAsRead } from '../../../utils/notifications';
-import { stopPropagation } from '../../../utils/keyboard';
-import { useSetting } from '../../../state/hooks/settings';
-import { settingsAtom } from '../../../state/settings';
 import {
   getRoomNotificationMode,
   useRoomsNotificationPreferencesContext,
@@ -62,116 +49,62 @@ import { searchModalAtom } from '../../../state/searchModal';
 import { HashIcon } from '../../../icons/HashIcon';
 import { PlusIcon } from '../../../icons/PlusIcon';
 import { SearchIcon } from '../../../icons/SearchIcon';
-import { EllipsisVerticalIcon } from '../../../icons/EllipsisVerticalIcon';
 import { MailIcon } from '../../../icons/MailIcon';
+import { UserAvatar } from '../../../components/user-avatar';
+import { nameInitials } from '../../../utils/common';
+import { useUserProfile } from '../../../hooks/useUserProfile';
+import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
+import { Avatar } from '../../../components/avatar';
 
 type HomeHeaderProps = {
-  rooms: string[];
   onSearchOpen: () => void;
 };
 
-type HomeMenuProps = {
-  requestClose: () => void;
-  rooms: string[];
-};
-const HomeMenu = forwardRef<HTMLDivElement, HomeMenuProps>(({ requestClose, rooms }, ref) => {
+function HomeHeader({ onSearchOpen }: HomeHeaderProps) {
   const { t } = useTranslation();
-  const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
-  const unread = useRoomsUnread(rooms, roomToUnreadAtom);
   const mx = useMatrixClient();
-
-  const handleMarkAsRead = () => {
-    if (!unread) return;
-    rooms.forEach((rId) => markAsRead(mx, rId, hideActivity, undefined, true));
-    requestClose();
-  };
-
-  return (
-    <Menu ref={ref} style={{ maxWidth: toRem(160), width: '100vw' }}>
-      <Box direction="Column" gap="100" style={{ padding: config.space.S100 }}>
-        <MenuItem
-          onClick={handleMarkAsRead}
-          size="300"
-          after={<Icon size="100" src={Icons.CheckTwice} />}
-          radii="300"
-          aria-disabled={!unread}
-        >
-          <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-            {t('room.markAsRead')}
-          </Text>
-        </MenuItem>
-      </Box>
-    </Menu>
-  );
-});
-
-function HomeHeader({ rooms, onSearchOpen }: HomeHeaderProps) {
-  const { t } = useTranslation();
-  const [menuAnchor, setMenuAnchor] = useState<RectCords>();
-
-  const handleOpenMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
-    const cords = evt.currentTarget.getBoundingClientRect();
-    setMenuAnchor((currentState) => {
-      if (currentState) return undefined;
-      return cords;
-    });
-  };
+    const useAuthentication = useMediaAuthentication();
+  const userId = mx.getSafeUserId();
+  const profile = useUserProfile(userId);
+  const displayName = profile.displayName ?? getMxIdLocalPart(userId) ?? userId;
+  const avatarUrl = profile.avatarUrl
+    ? mxcUrlToHttp(mx, profile.avatarUrl, useAuthentication, 96, 96, 'crop') ?? undefined
+    : undefined;
 
   return (
-    <>
-      <PageNavHeader>
-        <Box alignItems="Center" grow="Yes" gap="200">
-          <Box grow="Yes">
-            <Button
-              onClick={onSearchOpen}
-              size="300"
-              variant="Secondary"
-              radii="Pill"
-              fill="Soft"
-              before={<Icon size="200" src={SearchIcon} style={{ opacity: config.opacity.Placeholder }} />}
-              style={{
-                width: '100%',
-                justifyContent: 'flex-start',
-                height: toRem(28),
-                padding: `0 ${config.space.S300}`,
-                fontSize: toRem(13),
-                backgroundColor: color.Background.ContainerActive,
-              }}
-            >
-              <Text size="T300" truncate style={{ opacity: config.opacity.Placeholder }}>
-                {t('home.search')}
-              </Text>
-            </Button>
-          </Box>
-          <Box shrink="No">
-            <IconButton aria-pressed={!!menuAnchor} variant="Background" onClick={handleOpenMenu}>
-              <Icon src={EllipsisVerticalIcon} size="200" />
-            </IconButton>
-          </Box>
-        </Box>
-      </PageNavHeader>
-      <PopOut
-        anchor={menuAnchor}
-        position="Bottom"
-        align="End"
-        offset={6}
-        content={
-          <FocusTrap
-            focusTrapOptions={{
-              initialFocus: false,
-              returnFocusOnDeactivate: false,
-              onDeactivate: () => setMenuAnchor(undefined),
-              clickOutsideDeactivates: true,
-              isKeyForward: (evt: KeyboardEvent) => evt.key === 'ArrowDown',
-              isKeyBackward: (evt: KeyboardEvent) => evt.key === 'ArrowUp',
-              escapeDeactivates: stopPropagation,
+    <PageNavHeader>
+      <Box alignItems="Center" grow="Yes" gap="300">
+        <Avatar size="300" radii="Pill">
+          <UserAvatar
+            userId={userId}
+            src={avatarUrl}
+            renderFallback={() => <Text size="H6">{nameInitials(displayName)}</Text>}
+          />
+        </Avatar>
+        <Box grow="Yes">
+          <Button
+            onClick={onSearchOpen}
+            size="300"
+            variant="Secondary"
+            radii="Pill"
+            fill="Soft"
+            before={<Icon size="200" src={SearchIcon} style={{ opacity: config.opacity.Placeholder }} />}
+            style={{
+              width: '100%',
+              justifyContent: 'flex-start',
+              height: toRem(28),
+              padding: `0 ${config.space.S300}`,
+              fontSize: toRem(13),
+              backgroundColor: color.Background.ContainerActive,
             }}
           >
-            <HomeMenu requestClose={() => setMenuAnchor(undefined)} rooms={rooms} />
-          </FocusTrap>
-        }
-      />
-    </>
+            <Text size="T300" truncate style={{ opacity: config.opacity.Placeholder }}>
+              {t('home.search')}
+            </Text>
+          </Button>
+        </Box>
+      </Box>
+    </PageNavHeader>
   );
 }
 
@@ -257,7 +190,7 @@ export function Home() {
 
   return (
     <PageNav stretch>
-      <HomeHeader rooms={rooms} onSearchOpen={() => setSearchOpen(true)} />
+      <HomeHeader onSearchOpen={() => setSearchOpen(true)} />
       <PageNavContent scrollRef={scrollRef}>
         <Box direction="Column" gap="300">
           <NavCategory>
