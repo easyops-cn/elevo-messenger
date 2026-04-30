@@ -55,15 +55,13 @@ import { nameInitials } from '../../../utils/common';
 import { useUserProfile } from '../../../hooks/useUserProfile';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { Avatar } from '../../../components/avatar';
+import { isMacOS } from '../../../utils/user-agent';
+import { KeySymbol } from '../../../utils/key-symbol';
+import * as css from './Home.css';
 
-type HomeHeaderProps = {
-  onSearchOpen: () => void;
-};
-
-function HomeHeader({ onSearchOpen }: HomeHeaderProps) {
-  const { t } = useTranslation();
+function HomeHeader() {
   const mx = useMatrixClient();
-    const useAuthentication = useMediaAuthentication();
+  const useAuthentication = useMediaAuthentication();
   const userId = mx.getSafeUserId();
   const profile = useUserProfile(userId);
   const displayName = profile.displayName ?? getMxIdLocalPart(userId) ?? userId;
@@ -74,7 +72,7 @@ function HomeHeader({ onSearchOpen }: HomeHeaderProps) {
   return (
     <PageNavHeader>
       <Box alignItems="Center" grow="Yes" gap="300">
-        <Avatar size="300" radii="Pill">
+        <Avatar size="250" radii="Pill">
           <UserAvatar
             userId={userId}
             src={avatarUrl}
@@ -82,26 +80,9 @@ function HomeHeader({ onSearchOpen }: HomeHeaderProps) {
           />
         </Avatar>
         <Box grow="Yes">
-          <Button
-            onClick={onSearchOpen}
-            size="300"
-            variant="Secondary"
-            radii="Pill"
-            fill="Soft"
-            before={<Icon size="200" src={SearchIcon} style={{ opacity: config.opacity.Placeholder }} />}
-            style={{
-              width: '100%',
-              justifyContent: 'flex-start',
-              height: toRem(28),
-              padding: `0 ${config.space.S300}`,
-              fontSize: toRem(13),
-              backgroundColor: color.Background.ContainerActive,
-            }}
-          >
-            <Text size="T300" truncate style={{ opacity: config.opacity.Placeholder }}>
-              {t('home.search')}
-            </Text>
-          </Button>
+          <Text size="B400" truncate>
+            {displayName}
+          </Text>
         </Box>
       </Box>
     </PageNavHeader>
@@ -149,6 +130,7 @@ export function Home() {
   const allInvites = useAtomValue(allInvitesAtom);
   const inviteCount = allInvites.length;
   const setSearchOpen = useSetAtom(searchModalAtom);
+  const modifierKey = isMacOS() ? KeySymbol.Command : 'ctrl';
   const noRoomToDisplay = rooms.length === 0;
   const [sortVersion, bumpSortVersion] = useReducer((v: number) => v + 1, 0);
 
@@ -190,9 +172,36 @@ export function Home() {
 
   return (
     <PageNav stretch>
-      <HomeHeader onSearchOpen={() => setSearchOpen(true)} />
+      <HomeHeader />
       <PageNavContent scrollRef={scrollRef}>
         <Box direction="Column" gap="300">
+          <Button
+            onClick={() => setSearchOpen(true)}
+            size="300"
+            variant="Secondary"
+            radii="Pill"
+            fill="Soft"
+            before={<Icon size="200" src={SearchIcon} style={{ opacity: config.opacity.Placeholder }} />}
+            style={{
+              width: '100%',
+              justifyContent: 'flex-start',
+              height: toRem(28),
+              padding: `0 ${config.space.S300}`,
+              fontSize: toRem(13),
+              backgroundColor: color.Background.ContainerActive,
+            }}
+          >
+            <Box as="span" grow="Yes" alignItems="Center" justifyContent="SpaceBetween" gap="100" style={{ opacity: config.opacity.Placeholder }}>
+              <Text size="T300" truncate>
+                {t('home.search')}
+              </Text>
+              <span className={css.searchShortcutHint}>
+                <kbd className={css.searchShortcutKey}>{modifierKey}</kbd>
+                <span>+</span>
+                <kbd className={css.searchShortcutKey}>K</kbd>
+              </span>
+            </Box>
+          </Button>
           <NavCategory>
             <NavItem variant="Background" radii="400" aria-selected={createRoomSelected}>
               <NavButton onClick={() => navigate(getHomeCreatePath())}>

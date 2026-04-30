@@ -35,6 +35,11 @@ export const Avatar = recipe({
           [avatarSize]: toRem(24),
         },
       },
+      "250": {
+        vars: {
+          [avatarSize]: toRem(28),
+        },
+      },
       "300": {
         vars: {
           [avatarSize]: toRem(32),
