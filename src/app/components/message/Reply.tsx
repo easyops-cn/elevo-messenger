@@ -1,4 +1,4 @@
-import { Box, Icon, Icons, Line, Text, as, color, toRem } from 'folds';
+import { Box, Icon, Line, Text, as, color, toRem } from 'folds';
 import { EventTimelineSet, MsgType, Room, THREAD_RELATION_TYPE } from 'matrix-js-sdk';
 import React, { MouseEventHandler, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
@@ -11,6 +11,7 @@ import * as css from './Reply.css';
 import { MessageBadEncryptedContent, MessageDeletedContent, MessageFailedContent } from './content';
 import { scaleSystemEmoji } from '../../plugins/react-custom-html-parser';
 import { useRoomEvent } from '../../hooks/useRoomEvent';
+import { MessageSquareTextIcon } from '../../icons/MessageSquareTextIcon';
 
 type ReplyLayoutProps = {
   username?: string;
@@ -48,7 +49,7 @@ export const ThreadIndicator = as<'div'>(({ ...props }, ref) => (
     {...props}
     ref={ref}
   >
-    <Icon size="50" src={Icons.Thread} />
+    <Icon size="50" src={MessageSquareTextIcon} />
     <Text size="L400">Thread</Text>
   </Box>
 ));

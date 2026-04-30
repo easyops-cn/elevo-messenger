@@ -102,11 +102,9 @@ export const MessageBase = recipe({
     own: {
       true: {
         padding: `${config.space.S100} 0 ${config.space.S100} ${config.space.S200}`,
-        borderRadius: `${config.radii.R400} 0 0 ${config.radii.R400}`,
       },
       false: {
         padding: `${config.space.S100} ${config.space.S200} ${config.space.S100} ${config.space.S400}`,
-        borderRadius: `0 ${config.radii.R400} ${config.radii.R400} 0`,
       },
     },
   },

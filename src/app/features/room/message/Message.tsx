@@ -86,7 +86,6 @@ import { UserIcon } from '../../../icons/UserIcon';
 import { SmileIcon } from '../../../icons/SmileIcon';
 import { CircleAlertIcon } from '../../../icons/CircleAlertIcon';
 import { CodeIcon } from '../../../icons/CodeIcon';
-import { ScreenSize, useScreenSize } from '../../../hooks/useScreenSize';
 
 export type ReactionHandler = (keyOrMxc: string, shortcode: string) => void;
 
@@ -897,14 +896,11 @@ export const Message = as<'div', MessageProps>(
 
     const isThreadedMessage = mEvent.threadRootId !== undefined;
 
-    const screenSize = useScreenSize();
-    const isMobile = screenSize === ScreenSize.Mobile;
-    const padding = isMobile ? 16 : 56;
-
     return (
       <MessageBase
         className={classNames(css.MessageBase, className, {
           [css.MessageBaseBubbleCollapsed]: messageLayout === MessageLayout.Bubble && collapse,
+          [css.MessageBaseNonCompact({ isOwn })]: messageLayout !== MessageLayout.Compact,
         })}
         tabIndex={0}
         space={messageSpacing}
@@ -912,29 +908,14 @@ export const Message = as<'div', MessageProps>(
         highlight={highlight}
         selected={!!menuAnchor || !!emojiBoardAnchor}
         own={messageLayout === MessageLayout.Compact ? false : isOwn}
-        style={
-          messageLayout !== MessageLayout.Compact
-            ? {
-                width: `calc(100% - ${toRem(padding)})`,
-                maxWidth: isMobile ? undefined : `max(50vw, ${toRem(800)})`,
-                ...(isOwn
-                  ? {
-                      alignSelf: 'flex-end',
-                      marginLeft: toRem(padding),
-                    }
-                  : {
-                      marginRight: toRem(padding),
-                    }),
-              }
-            : undefined
-        }
+        onContextMenu={handleContextMenu}
         {...props}
         {...hoverProps}
         {...focusWithinProps}
         ref={ref}
       >
         {!edit && (hover || !!menuAnchor || !!emojiBoardAnchor) && (
-          <div className={css.MessageOptionsBase}>
+          <div className={css.MessageOptionsBase} onContextMenu={(e) => e.stopPropagation()}>
             <Menu className={css.MessageOptionsBar} variant="SurfaceVariant">
               <Box gap="100">
                 {canSendReaction && (
@@ -1174,7 +1155,7 @@ export const Message = as<'div', MessageProps>(
           </div>
         )}
         {messageLayout === MessageLayout.Compact && (
-          <CompactLayout before={headerJSX} onContextMenu={handleContextMenu}>
+          <CompactLayout before={headerJSX}>
             {msgContentJSX}
           </CompactLayout>
         )}
@@ -1185,7 +1166,6 @@ export const Message = as<'div', MessageProps>(
             header={headerJSX}
             beforeContent={reply}
             afterContent={reactions}
-            onContextMenu={handleContextMenu}
           >
             {msgBubbleContentJSX}
           </BubbleLayout>
@@ -1197,7 +1177,6 @@ export const Message = as<'div', MessageProps>(
             header={headerJSX}
             beforeContent={reply}
             afterContent={reactions}
-            onContextMenu={handleContextMenu}
           >
             {msgBubbleContentJSX}
           </ModernLayout>

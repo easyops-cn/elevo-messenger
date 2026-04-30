@@ -1,7 +1,8 @@
 import React, { ReactNode } from 'react';
 import classNames from 'classnames';
-import { Box, ContainerColor, as, color } from 'folds';
+import { Box, ContainerColor, as, color, toRem } from 'folds';
 import * as css from './layout.css';
+import { ScreenSize, useScreenSize } from '../../../hooks/useScreenSize';
 
 type BubbleArrowProps = {
   variant: ContainerColor;
@@ -56,49 +57,59 @@ type BubbleLayoutProps = {
 };
 
 export const BubbleLayout = as<'div', BubbleLayoutProps>(
-  ({ isOwn, hideBubble, before, header, beforeContent, afterContent, children, ...props }, ref) => (
-    <Box gap="300" direction={isOwn ? 'RowReverse' : 'Row'} {...props} ref={ref}>
-      <Box className={css.BubbleBefore} shrink="No">
-        {before}
-      </Box>
-      <Box grow="Yes" direction="Column">
-        {header}
-        {beforeContent && (
-          <Box alignSelf={isOwn ? 'End' : undefined} style={isOwn ? { maxWidth: '100%' } : undefined}>
-            {beforeContent}
-          </Box>
-        )}
-        {hideBubble ? (
-          children
-        ) : (
-          <Box alignSelf={isOwn ? 'End' : undefined} style={isOwn ? { maxWidth: '100%' } : undefined}>
-            <Box
-              className={
-                hideBubble
-                  ? undefined
-                  : classNames(
-                      css.BubbleContent,
-                      isOwn && css.BubbleContentOwn,
-                      before
-                        ? isOwn
-                          ? css.BubbleContentArrowRight
-                          : css.BubbleContentArrowLeft
-                        : undefined
-                    )
-              }
-              direction="Column"
-            >
-              {before ? (isOwn ? <BubbleRightArrow variant="Primary" /> : <BubbleLeftArrow variant="SurfaceVariant" />) : null}
-              {children}
+  ({ isOwn, hideBubble, before, header, beforeContent, afterContent, children, ...props }, ref) => {
+    const screenSize = useScreenSize();
+    const isMobile = screenSize === ScreenSize.Mobile;
+    const padding = isMobile ? 16 : 56;
+
+    return (
+      <Box gap="300" direction={isOwn ? 'RowReverse' : 'Row'} {...props} style={{
+        ...props.style,
+        width: `calc(100% - ${toRem(padding)})`,
+        maxWidth: isMobile ? undefined : `max(50vw, ${toRem(800)})`,
+        [isOwn ? 'marginLeft' : 'marginRight']: 'auto',
+      }} ref={ref}>
+        <Box className={css.BubbleBefore} shrink="No">
+          {before}
+        </Box>
+        <Box grow="Yes" direction="Column">
+          {header}
+          {beforeContent && (
+            <Box alignSelf={isOwn ? 'End' : undefined} style={isOwn ? { maxWidth: '100%' } : undefined}>
+              {beforeContent}
             </Box>
-          </Box>
-        )}
-        {afterContent && (
-          <Box alignSelf={isOwn ? 'End' : undefined} style={isOwn ? { maxWidth: '100%' } : undefined}>
-            {afterContent}
-          </Box>
-        )}
+          )}
+          {hideBubble ? (
+            children
+          ) : (
+            <Box alignSelf={isOwn ? 'End' : undefined} style={isOwn ? { maxWidth: '100%' } : undefined}>
+              <Box
+                className={
+                  hideBubble
+                    ? undefined
+                    : classNames(
+                        css.BubbleContent,
+                        isOwn && css.BubbleContentOwn,
+                        before
+                          ? isOwn
+                            ? css.BubbleContentArrowRight
+                            : css.BubbleContentArrowLeft
+                          : undefined
+                      )
+                }
+                direction="Column"
+              >
+                {before ? (isOwn ? <BubbleRightArrow variant="Primary" /> : <BubbleLeftArrow variant="SurfaceVariant" />) : null}
+                {children}
+              </Box>
+            </Box>
+          )}
+          {afterContent && (
+            <Box alignSelf={isOwn ? 'End' : undefined} style={isOwn ? { maxWidth: '100%' } : undefined}>
+              {afterContent}
+            </Box>
+          )}
+        </Box>
       </Box>
-    </Box>
-  )
-);
+    );
+});

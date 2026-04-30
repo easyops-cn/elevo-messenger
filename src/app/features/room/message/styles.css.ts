@@ -1,11 +1,38 @@
 import { style } from '@vanilla-extract/css';
+import { recipe } from '@vanilla-extract/recipes';
 import { DefaultReset, config, toRem } from 'folds';
+import { MOBILE_BREAKPOINT } from '../../../hooks/useScreenSize';
 
 export const MessageBase = style({
   position: 'relative',
 });
 export const MessageBaseBubbleCollapsed = style({
   paddingTop: 0,
+});
+export const MessageBaseNonCompact = recipe({
+  variants: {
+    isOwn: {
+      true: {
+        paddingLeft: 56,
+        '@media': {
+          [`(max-width: ${MOBILE_BREAKPOINT})`]: {
+            paddingLeft: 16,
+          },
+        },
+      },
+      false: {
+        paddingRight: 56,
+        '@media': {
+          [`(max-width: ${MOBILE_BREAKPOINT})`]: {
+            paddingRight: 16,
+          },
+        },
+      },
+    },
+  },
+  defaultVariants: {
+    isOwn: false,
+  }
 });
 
 export const MessageOptionsBase = style([
