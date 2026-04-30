@@ -151,7 +151,7 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
           disabled={disabled}
           before={loading && <Spinner variant="Primary" fill="Solid" size="200" />}
         >
-          <Text size="B500">{t('create.create')}</Text>
+          <Text size="B500">{t('create.go')}</Text>
         </Button>
       </Box>
     </Box>
