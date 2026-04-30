@@ -123,6 +123,7 @@ import { SmileIcon } from '../../icons/SmileIcon';
 import { MicIcon } from '../../icons/MicIcon';
 import { SendHorizontalIcon } from '../../icons/SendHorizontalIcon';
 import { CaseSensitiveIcon } from '../../icons/CaseSensitiveIcon';
+import { useThreadChat } from '../../state/threadChat';
 
 interface WorkspaceExplorerMessage {
   type: 'select-file';
@@ -169,6 +170,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const [replyDraft, setReplyDraft] = useAtom(
       threadOrRoomIdToReplyDraftAtomFamily(threadOrRoomId)
     );
+    const [, setThreadChat] = useThreadChat(roomId);
 
     const [uploadBoard, setUploadBoard] = useState(true);
     const [voiceRecordingOpen, setVoiceRecordingOpen] = useState(false);
@@ -517,6 +519,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         content.format = 'org.matrix.custom.html';
         content.formatted_body = formattedBody;
       }
+      let replyToThreadId: string | undefined;
       if (replyDraft) {
         content['m.relates_to'] = {
           'm.in_reply_to': {
@@ -527,16 +530,24 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           content['m.relates_to'].event_id = replyDraft.relation.event_id;
           content['m.relates_to'].rel_type = RelationType.Thread;
           content['m.relates_to'].is_falling_back = true;
+          replyToThreadId = replyDraft.relation.event_id;
         }
       }
 
-      mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent);
+      mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent).then(async () => {
+        // if (replyToThreadId) {
+        //   await room.createThreadsTimelineSets();
+        //   await room.fetchRoomThreads();
+        //   setThreadChat({ open: true, threadRootId: replyToThreadId });
+        // }
+      });
       resetEditor(editor);
       resetEditorHistory(editor);
       setReplyDraft(undefined);
       sendTypingStatus(false);
     }, [
       mx,
+      room,
       roomId,
       threadRootId,
       editor,
@@ -546,6 +557,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       isMarkdown,
       commands,
       scrollToBottomRef,
+      setThreadChat,
     ]);
 
     const handleKeyDown: KeyboardEventHandler = useCallback(
