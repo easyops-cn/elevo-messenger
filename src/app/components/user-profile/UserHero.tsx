@@ -56,6 +56,7 @@ export function UserHero({ userId, avatarUrl, presence }: UserHeroProps) {
             onClick={avatarUrl ? () => setViewAvatar(avatarUrl) : undefined}
             className={css.UserHeroAvatar}
             size="500"
+            radii="Pill"
           >
             <UserAvatar
               className={css.UserHeroAvatarImg}

@@ -36,6 +36,7 @@ export const UserAvatarContainer = style({
   top: 0,
   transform: 'translateY(-50%)',
   backgroundColor: color.Surface.Container,
+  borderRadius: config.radii.Pill,
 });
 export const UserHeroAvatar = style({
   outline: `${config.borderWidth.B600} solid ${color.Surface.Container}`,

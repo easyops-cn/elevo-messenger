@@ -54,7 +54,7 @@ export const RoomIntro = as<'div', RoomIntroProps>(({ room, ...props }, ref) => 
   return (
     <Box direction="Column" grow="Yes" gap="500" {...props} ref={ref}>
       <Box>
-        <Avatar size="500">
+        <Avatar size="500" radii="Pill">
           <RoomAvatar
             roomId={room.roomId}
             src={avatarHttpUrl ?? undefined}
