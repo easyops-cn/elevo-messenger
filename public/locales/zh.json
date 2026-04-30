@@ -959,6 +959,11 @@
     "error.unknown": "无法访问录音设备"
   },
   "upload": {
+    "files": "文件",
+    "send": "发送",
+    "failed": "上传失败",
+    "remove": "移除",
+    "removeAll": "全部移除",
     "retry": "重新上传",
     "cancel": "取消上传",
     "spoiler": "剧透",

@@ -959,6 +959,11 @@
     "error.unknown": "Unable to access recording device"
   },
   "upload": {
+    "files": "Files",
+    "send": "Send",
+    "failed": "Upload Failed",
+    "remove": "Remove",
+    "removeAll": "Remove All",
     "retry": "Retry Upload",
     "cancel": "Cancel Upload",
     "spoiler": "Spoiler",

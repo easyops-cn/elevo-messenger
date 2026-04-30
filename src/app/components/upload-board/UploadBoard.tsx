@@ -1,4 +1,5 @@
 import React, { MutableRefObject, ReactNode, useImperativeHandle, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Badge, Box, Chip, Header, Icon, Icons, Spinner, Text, as, percent } from 'folds';
 import classNames from 'classnames';
 import { useAtomValue } from 'jotai';
@@ -43,6 +44,7 @@ export function UploadBoardHeader({
   onSend,
   imperativeHandlerRef,
 }: UploadBoardHeaderProps) {
+  const { t } = useTranslation();
   const sendingRef = useRef(false);
   const [sending, setSending] = useState(false);
   const uploads = useAtomValue(uploadFamilyObserverAtom);
@@ -96,7 +98,7 @@ export function UploadBoardHeader({
         gap="100"
       >
         <Icon src={open ? Icons.ChevronTop : Icons.ChevronRight} size="50" />
-        <Text size="H6">Files</Text>
+        <Text size="H6">{t('upload.files')}</Text>
       </Box>
       <Box className={css.UploadBoardHeaderContent} alignItems="Center" gap="100">
         {hasUploads && hasPendingOrCompleteUploads && (
@@ -109,12 +111,12 @@ export function UploadBoardHeader({
             disabled={sending || isUploading}
             after={<Icon src={Icons.Send} size="50" filled />}
           >
-            <Text size="B300">Send</Text>
+            <Text size="B300">{t('upload.send')}</Text>
           </Chip>
         )}
         {isError && !open && (
           <Badge variant="Critical" fill="Solid" radii="300">
-            <Text size="L400">Upload Failed</Text>
+            <Text size="L400">{t('upload.failed')}</Text>
           </Badge>
         )}
         {(sending || isUploading) && !open && (
@@ -133,7 +135,9 @@ export function UploadBoardHeader({
             radii="Pill"
             after={<Icon src={Icons.Cross} size="50" />}
           >
-            <Text size="B300">{uploads.length === 1 ? 'Remove' : 'Remove All'}</Text>
+            <Text size="B300">
+              {uploads.length === 1 ? t('upload.remove') : t('upload.removeAll')}
+            </Text>
           </Chip>
         )}
       </Box>
