@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Filter, MatrixEvent, MsgType, Room, RoomEvent } from 'matrix-js-sdk';
+import { Direction, Filter, MatrixEvent, MsgType, Room, RoomEvent } from 'matrix-js-sdk';
 import { useMatrixClient } from './useMatrixClient';
 import { MessageEvent } from '../../types/matrix/room';
 
@@ -16,6 +16,19 @@ const ALLOWED_FILE_MSG_TYPES: Set<string> = new Set([
   MsgType.Audio,
   MsgType.Video,
 ]);
+
+const paginateBackwardCache = new Set<string>();
+
+function filterFileEvents(events: MatrixEvent[]): MatrixEvent[] {
+  return events.filter((evt) => {
+    if (evt.isRedacted()) return false;
+      const eventType = evt.getType();
+      if (eventType !== MessageEvent.RoomMessage && eventType !== MessageEvent.RoomMessageEncrypted) return false;
+
+      const msgtype = evt.getContent()?.msgtype;
+      return typeof msgtype === 'string' && ALLOWED_FILE_MSG_TYPES.has(msgtype);
+  });
+}
 
 export const useRoomFiles = (room: Room): UseRoomFilesResult => {
   const mx = useMatrixClient();
@@ -61,42 +74,40 @@ export const useRoomFiles = (room: Room): UseRoomFilesResult => {
         
         syncFiles = async () => {
           if (!alive) return;
+
+          const hasTriedPaginate = paginateBackwardCache.has(room.roomId);
+          paginateBackwardCache.add(room.roomId);
+
           syncCounter += 1;
           const syncId = syncCounter;
           const timeline = timelineSet.getLiveTimeline();
+          let validEvents = filterFileEvents(timeline.getEvents());
 
-          // Try to load from local/server until we have enough or reach the end
-          let count = 0;
-          while (timeline.getEvents().length < 10) {
-            if (syncId !== syncCounter) return;
-            if (count > 5) break;
+          if (!hasTriedPaginate && timeline.getPaginationToken(Direction.Backward)) {
+            // Try to load from local/server until we have enough or reach the end
+            let count = 0;
+            while (validEvents.length < 10) {
+              if (syncId !== syncCounter) return;
+              if (count > 5) break;
 
-            count += 1;
+              count += 1;
 
-            // back-paginate will first check local IndexedDB
-            // eslint-disable-next-line no-await-in-loop
-            const hasMore = await mx.paginateEventTimeline(timeline, { 
-              backwards: true, 
-              limit: 50 
-            });
-            
-            if (!hasMore) break;
+              // back-paginate will first check local IndexedDB
+              // eslint-disable-next-line no-await-in-loop
+              const hasMore = await mx.paginateEventTimeline(timeline, { 
+                backwards: true, 
+                limit: 50 
+              });
+
+              validEvents = filterFileEvents(timeline.getEvents());
+              
+              if (!hasMore) break;
+            }
           }
 
           if (syncId !== syncCounter) return;
 
-          const validEvents = timeline.getEvents()
-            .filter((evt) => {
-              if (evt.isRedacted()) return false;
-              const eventType = evt.getType();
-              if (eventType !== MessageEvent.RoomMessage && eventType !== MessageEvent.RoomMessageEncrypted) return false;
-
-              const msgtype = evt.getContent()?.msgtype;
-              return typeof msgtype === 'string' && ALLOWED_FILE_MSG_TYPES.has(msgtype);
-            })
-            .reverse();
-
-          setFiles(validEvents);
+          setFiles(validEvents.reverse());
         };
 
         await syncFiles();

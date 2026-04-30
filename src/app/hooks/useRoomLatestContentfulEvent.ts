@@ -1,5 +1,5 @@
 /* eslint-disable no-continue */
-import { MatrixEvent, Room, RoomEvent } from 'matrix-js-sdk';
+import { Direction, MatrixEvent, Room, RoomEvent } from 'matrix-js-sdk';
 import { useCallback, useEffect, useState } from 'react';
 import { MessageEvent } from '../../types/matrix/room';
 import { reactionOrEditEvent } from '../utils/room';
@@ -11,6 +11,8 @@ const CONTENTFUL_EVENT_TYPES = new Set<string>([
   MessageEvent.RoomMessageEncrypted,
   MessageEvent.Sticker,
 ]);
+
+const paginateBackwardCache = new Set<string>();
 
 export const useRoomLatestContentfulEvent = (room: Room) => {
   const mx = useMatrixClient();
@@ -34,19 +36,27 @@ export const useRoomLatestContentfulEvent = (room: Room) => {
       };
 
       const latest = getLatestEvent();
+      const hasTriedPaginate = paginateBackwardCache.has(room.roomId);
+      paginateBackwardCache.add(room.roomId);
       
       if (latest) {
         setLatestEvent(latest);
-      } else {
-        // If no contentful event is found, try paginating to find one.
-        // This can happen in rooms with a lot of non-contentful events
-        // at the end of the timeline.
-        await mx.paginateEventTimeline(room.getLiveTimeline(), {
-          backwards: true,
-          limit: 30,
-        });
-        setLatestEvent(getLatestEvent());
+        return;
       }
+
+      if (hasTriedPaginate) return;
+
+      // If no contentful event is found, try paginating to find one.
+      // This can happen in rooms with a lot of non-contentful events
+      // at the end of the timeline.
+      const timeline = room.getLiveTimeline();
+      const paginationToken = timeline.getPaginationToken(Direction.Backward);
+      if (!paginationToken) return;
+      await mx.paginateEventTimeline(timeline, {
+        backwards: true,
+        limit: 30,
+      });
+      setLatestEvent(getLatestEvent());
     }, [mx, room]),
     { wait: 100 }
   );
