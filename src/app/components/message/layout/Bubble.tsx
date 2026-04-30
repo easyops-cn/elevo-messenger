@@ -50,6 +50,7 @@ function BubbleRightArrow({ variant }: BubbleArrowProps) {
 type BubbleLayoutProps = {
   isOwn?: boolean;
   hideBubble?: boolean;
+  transparent?: boolean;
   before?: ReactNode;
   header?: ReactNode;
   beforeContent?: ReactNode;
@@ -57,7 +58,7 @@ type BubbleLayoutProps = {
 };
 
 export const BubbleLayout = as<'div', BubbleLayoutProps>(
-  ({ isOwn, hideBubble, before, header, beforeContent, afterContent, children, ...props }, ref) => {
+  ({ isOwn, hideBubble, transparent, before, header, beforeContent, afterContent, children, ...props }, ref) => {
     const screenSize = useScreenSize();
     const isMobile = screenSize === ScreenSize.Mobile;
     const padding = isMobile ? 16 : 56;
@@ -88,8 +89,7 @@ export const BubbleLayout = as<'div', BubbleLayoutProps>(
                   hideBubble
                     ? undefined
                     : classNames(
-                        css.BubbleContent,
-                        isOwn && css.BubbleContentOwn,
+                        css.BubbleContent({ transparent, isOwn }),
                         before
                           ? isOwn
                             ? css.BubbleContentArrowRight
@@ -99,7 +99,7 @@ export const BubbleLayout = as<'div', BubbleLayoutProps>(
                 }
                 direction="Column"
               >
-                {before ? (isOwn ? <BubbleRightArrow variant="Primary" /> : <BubbleLeftArrow variant="SurfaceVariant" />) : null}
+                {before && !transparent ? (isOwn ? <BubbleRightArrow variant="Primary" /> : <BubbleLeftArrow variant="SurfaceVariant" />) : null}
                 {children}
               </Box>
             </Box>

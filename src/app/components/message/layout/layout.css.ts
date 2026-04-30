@@ -138,25 +138,51 @@ export const BubbleBefore = style({
   minWidth: toRem(36),
 });
 
-export const BubbleContent = style({
-  maxWidth: toRem(800),
-  padding: config.space.S200,
-  backgroundColor: color.SurfaceVariant.Container,
-  color: color.SurfaceVariant.OnContainer,
-  borderRadius: config.radii.R500,
-  position: 'relative',
+export const BubbleContent = recipe({
+  base: {
+    maxWidth: toRem(800),
+    borderRadius: config.radii.R500,
+    position: 'relative',
+  },
+  variants: {
+    transparent: {
+      false: {
+        padding: config.space.S200,
+      },      
+    },
+    isOwn: {
+      true: {
+        backgroundColor: color.Primary.Container,
+        color: color.Primary.OnContainer,
+      },
+      false: {
+        backgroundColor: color.SurfaceVariant.Container,
+        color: color.SurfaceVariant.OnContainer,
+      },
+    },
+  },
+  defaultVariants: {
+    isOwn: false,
+    transparent: false,
+  },
 });
 
-export const BubbleContentOwn = style({
-  backgroundColor: color.Primary.Container,
-  color: color.Primary.OnContainer,
-});
-
-export const ModernOwnContent = style({
-  backgroundColor: color.Primary.Container,
-  color: color.Primary.OnContainer,
-  borderRadius: config.radii.R400,
-  padding: `${config.space.S100} ${config.space.S200}`,
+export const ModernOwnContent = recipe({
+  base: {
+    color: color.Primary.OnContainer,
+    borderRadius: config.radii.R400,
+  },
+  variants: {
+    transparent: {
+      false: {
+        backgroundColor: color.Primary.Container,
+        padding: `${config.space.S100} ${config.space.S200}`,
+      },
+    }
+  },
+  defaultVariants: {
+    transparent: false
+  },
 });
 
 export const BubbleContentArrowLeft = style({

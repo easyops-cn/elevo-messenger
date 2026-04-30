@@ -637,9 +637,8 @@ type RenderFileContentProps = {
 type MFileProps = {
   content: IFileContent;
   renderFileContent: (props: RenderFileContentProps) => ReactNode;
-  outlined?: boolean;
 };
-export function MFile({ content, renderFileContent, outlined }: MFileProps) {
+export function MFile({ content, renderFileContent }: MFileProps) {
   const fileInfo = content?.info;
   const mxcUrl = content.file?.url ?? content.url;
 
@@ -648,7 +647,7 @@ export function MFile({ content, renderFileContent, outlined }: MFileProps) {
   }
 
   return (
-    <Attachment outlined={outlined}>
+    <Attachment>
       <AttachmentHeader>
         <FileHeader
           body={content.filename ?? content.body ?? 'Unnamed File'}

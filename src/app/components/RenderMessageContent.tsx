@@ -123,7 +123,6 @@ export function RenderMessageContent({
             <DownloadFile body={body} mimeType={mimeType} url={url} encInfo={encInfo} info={info} />
           </FileContent>
         )}
-        outlined={outlineAttachment}
       />
       {renderCaption()}
     </>

@@ -33,7 +33,7 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 import { useHover, useFocusWithin } from 'react-aria';
-import { MatrixEvent, Room } from 'matrix-js-sdk';
+import { MatrixEvent, Room, MsgType } from 'matrix-js-sdk';
 import { Relations } from 'matrix-js-sdk/lib/models/relations';
 import classNames from 'classnames';
 import { RoomPinnedEventsEventContent } from 'matrix-js-sdk/lib/types';
@@ -740,6 +740,9 @@ export const Message = as<'div', MessageProps>(
       getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId;
     const senderAvatarMxc = getMemberAvatarMxc(room, senderId);
 
+    const msgType = mEvent.getContent()?.msgtype;
+    const transparent = msgType === MsgType.Audio || msgType === MsgType.Video || msgType === MsgType.Image || msgType === MsgType.File;
+
     const headerJSX = !collapse && (
       <Box
         gap="300"
@@ -835,7 +838,9 @@ export const Message = as<'div', MessageProps>(
       <Box
         direction="Column"
         className={
-          isOwn && messageLayout === MessageLayout.Modern ? layoutCss.ModernOwnContent : undefined
+          isOwn && messageLayout === MessageLayout.Modern ? layoutCss.ModernOwnContent({
+            transparent
+          }) : undefined
         }
         style={{ maxWidth: '100%' }}
       >
@@ -1162,6 +1167,7 @@ export const Message = as<'div', MessageProps>(
         {messageLayout === MessageLayout.Bubble && (
           <BubbleLayout
             isOwn={isOwn}
+            transparent={transparent}
             before={avatarJSX}
             header={headerJSX}
             beforeContent={reply}

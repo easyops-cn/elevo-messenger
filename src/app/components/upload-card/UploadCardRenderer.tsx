@@ -71,7 +71,7 @@ function MediaPreview({ fileItem, onSpoiler, children }: MediaPreviewProps) {
       style={{
         borderRadius: config.radii.R300,
         overflow: 'hidden',
-        backgroundColor: 'black',
+        backgroundColor: '#FFFFFF',
         position: 'relative',
       }}
     >
