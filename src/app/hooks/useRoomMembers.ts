@@ -1,7 +1,7 @@
 import { MatrixClient, MatrixEvent, RoomMember, RoomMemberEvent } from 'matrix-js-sdk';
 import { useEffect, useState } from 'react';
 
-export const useRoomMembers = (mx: MatrixClient, roomId: string): RoomMember[] => {
+export const useRoomMembers = (mx: MatrixClient, roomId: string | undefined): RoomMember[] => {
   const [members, setMembers] = useState<RoomMember[]>([]);
 
   useEffect(() => {
@@ -22,6 +22,8 @@ export const useRoomMembers = (mx: MatrixClient, roomId: string): RoomMember[] =
         if (disposed) return;
         updateMemberList();
       });
+    } else {
+      setMembers(prev => prev.length === 0 ? prev : []);
     }
 
     mx.on(RoomMemberEvent.Membership, updateMemberList);

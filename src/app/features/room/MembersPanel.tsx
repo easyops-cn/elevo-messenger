@@ -1,4 +1,4 @@
-import React, { MouseEventHandler, useCallback, useMemo, useRef } from 'react';
+import React, { MouseEventHandler, useCallback, useMemo, useRef, useState } from 'react';
 import {
   Badge,
   Box,
@@ -42,6 +42,9 @@ import { RoomSettingsPage } from '../../state/roomSettings';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useRoomMembers } from '../../hooks/useRoomMembers';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
+import { useRoomPermissions } from '../../hooks/useRoomPermissions';
+import { InviteUserPrompt } from '../../components/invite-user-prompt';
+import { UserPlusIcon } from '../../icons/UserPlusIcon';
 
 type MemberItemProps = {
   useAuthentication: boolean;
@@ -153,6 +156,9 @@ export function MembersPanel({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const powerLevels = usePowerLevelsContext();
   const creators = useRoomCreators(room);
+  const permissions = useRoomPermissions(creators, powerLevels);
+  const canInvite = permissions.action('invite', mx.getSafeUserId());
+  const [invitePrompt, setInvitePrompt] = useState(false);
   const getPowerTag = useGetMemberPowerTag(room, creators, powerLevels);
 
   const fetchingMembers = members.length < room.getJoinedMemberCount();
@@ -188,8 +194,15 @@ export function MembersPanel({
     openRoomSettings(room.roomId, space?.roomId, RoomSettingsPage.MembersPage);
   }, [openRoomSettings, room.roomId, space?.roomId]);
 
+  const handleInviteClick: MouseEventHandler<HTMLButtonElement> = useCallback(() => {
+    setInvitePrompt(true);
+  }, []);
+
   return (
     <Box direction="Column" gap="100">
+      {invitePrompt && (
+        <InviteUserPrompt room={room} requestClose={() => setInvitePrompt(false)} />
+      )}
       <Box
         className={css.MembersGroupLabel}
         alignItems="Center"
@@ -199,6 +212,21 @@ export function MembersPanel({
         <Text size="L400" priority="300">
           {t('common.members')}
         </Text>
+        {canInvite && (
+          <Chip
+            as="button"
+            variant="Secondary"
+            fill="None"
+            outlined
+            size="400"
+            radii="Pill"
+            style={{ borderWidth: 1 }}
+            onClick={handleInviteClick}
+          >
+            <Icon size="50" src={UserPlusIcon} />
+            <Text size="T200">{t('room.invite')}</Text>
+          </Chip>
+        )}
       </Box>
 
       {!fetchingMembers && !result && processMembers.length === 0 && (

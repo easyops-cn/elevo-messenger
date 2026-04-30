@@ -44,6 +44,7 @@ import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { BreakWord } from '../../styles/Text.css';
 import { useAlive } from '../../hooks/useAlive';
 import { useElevoConfig } from '../../hooks/useElevoConfig';
+import { useRoomMembers } from '../../hooks/useRoomMembers';
 
 const SEARCH_OPTIONS: UseAsyncSearchOptions = {
   limit: 1000,
@@ -66,32 +67,27 @@ export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
   const directUsers = useDirectUsers();
   const [validUserId, setValidUserId] = useState<string>();
 
-  const contactsMembers = useMemo(() => {
-    const map = new Map<string, string>();
-    if (!elevoContactsRoomId) return map;
-    const contactsRoom = mx.getRoom(elevoContactsRoomId);
-    if (!contactsRoom) return map;
-    contactsRoom.getJoinedMembers().forEach((m) => {
-      map.set(m.userId, m.name);
-    });
-    return map;
-  }, [mx, elevoContactsRoomId]);
+  const contactsMembers = useRoomMembers(mx, elevoContactsRoomId);
+
+  const contactsMembersMap = useMemo(() => new Map(
+    contactsMembers.map((m) => [m.userId, m.name])
+  ), [contactsMembers]);
 
   const filteredUsers = useMemo(() => {
-    const merged = [...new Set([...directUsers, ...contactsMembers.keys()])];
+    const merged = [...new Set([...directUsers, ...contactsMembersMap.keys()])];
     return merged.filter((userId) => {
       const membership = room.getMember(userId)?.membership;
       return membership !== Membership.Join;
     });
-  }, [directUsers, contactsMembers, room]);
+  }, [directUsers, contactsMembersMap, room]);
 
   const getSearchStr = useCallback(
     (userId: string) => {
       const localPart = getMxIdLocalPart(userId) ?? userId;
-      const displayName = contactsMembers.get(userId);
+      const displayName = contactsMembersMap.get(userId);
       return displayName ? [localPart, displayName] : localPart;
     },
-    [contactsMembers]
+    [contactsMembersMap]
   );
 
   const [result, search, resetSearch] = useAsyncSearch(
@@ -237,7 +233,7 @@ export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
                                 {result.items.map((userId) => {
                                   const username = `${getMxIdLocalPart(userId)}`;
                                   const userServer = getMxIdServer(userId);
-                                  const displayName = contactsMembers.get(userId);
+                                  const displayName = contactsMembersMap.get(userId);
 
                                   return (
                                     <MenuItem
