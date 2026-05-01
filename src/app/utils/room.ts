@@ -235,7 +235,7 @@ export const roomHaveUnread = (mx: MatrixClient, room: Room) => {
     if (event.getId() === readUpToId) return false;
     if (isNotificationEvent(event)) return true;
   }
-  return true;
+  return liveEvents.length > 0;
 };
 
 export const threadHaveNotification = (room: Room, threadId: string): boolean => {
