@@ -1,26 +1,59 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Text, TooltipProvider, Tooltip, Icon, Icons, IconButton } from 'folds';
 import { useTranslation } from 'react-i18next';
+import { RoomEvent, type RoomEventHandlerMap, type Thread } from 'matrix-js-sdk';
 import { Page, PageHeader, PageMain } from '../../components/page';
 import { useThreadChat } from '../../state/threadChat';
 import { RoomView } from './RoomView';
 import { useRoom } from '../../hooks/useRoom';
+import { useMatrixClient } from '../../hooks/useMatrixClient';
+import { PageSpinner } from '../../components/PageSpinner';
 
 export function ThreadChatView({ eventId }: { eventId?: string }) {
   const { t } = useTranslation();
+  const mx = useMatrixClient();
   const room = useRoom();
   const [threadChat, setThreadChat] = useThreadChat(room.roomId);
   const { threadRootId } = threadChat;
-  
-  const [threadReady, setThreadReady] = useState(false);
+  const [thread, setThread] = useState<Thread | null>(null);
+  const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (!threadRootId) return;
+    setThread(null);
+    setReady(false);
     room.createThreadsTimelineSets()
       .then(() => room.fetchRoomThreads())
-      .then(() => {
-        setThreadReady(true);
+      .then(async () => {
+        const newThread = room.getThread(threadRootId);
+        setThread(newThread);
       });
-  }, [room]);
+  }, [room, threadRootId]);
+
+  useEffect(() => {
+    if (!thread) return;
+
+    if (thread.events.length > 0) {
+      setReady(true);
+      return;
+    }
+
+    const handleTimelineReset: RoomEventHandlerMap[RoomEvent.TimelineReset] = async (_room, timelineSet) => {
+      if (timelineSet !== thread.timelineSet) return;
+      if (thread.events.length === 0) {
+        await mx.paginateEventTimeline(thread.liveTimeline, {
+          backwards: true,
+        });
+      }
+      setReady(true);
+    };
+
+    thread.on(RoomEvent.TimelineReset, handleTimelineReset);
+
+    return () => {
+      thread.off(RoomEvent.TimelineReset, handleTimelineReset);
+    };
+  }, [mx, thread]);
 
   const handleClose = () => setThreadChat({ open: false, threadRootId: undefined });
 
@@ -55,9 +88,9 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
           </Box>
         </PageHeader>
         <Box grow="Yes" direction="Column">
-          {threadRootId && threadReady && (
-            <RoomView key={threadRootId} threadRootId={threadRootId} eventId={eventId} showRoomIntro={false} />
-          )}
+          {thread && ready ? (
+            <RoomView key={thread.id} thread={thread} eventId={eventId} />
+          ) : <PageSpinner />}
         </Box>
       </Page>
     </PageMain>

@@ -9,7 +9,7 @@ import { useAllHomeRooms } from './useAllHomeRooms';
 import { useSearchParamsViaServers } from '../../../hooks/router/useSearchParamsViaServers';
 import { mDirectAtom } from '../../../state/mDirectList';
 import { joinedRoomsInitializedAtom } from '../../../state/room-list/roomList';
-import { PaeSpinner } from '../../../components/PageSpinner';
+import { PageSpinner } from '../../../components/PageSpinner';
 import { PageMain } from '../../../components/page';
 
 export function HomeRouteRoomProvider({ children }: { children: ReactNode }) {
@@ -26,7 +26,7 @@ export function HomeRouteRoomProvider({ children }: { children: ReactNode }) {
   if (!joinedRoomInitialized) {
     return (
       <PageMain>
-        <PaeSpinner />
+        <PageSpinner />
       </PageMain>
     );
   }

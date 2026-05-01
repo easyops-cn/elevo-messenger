@@ -1,6 +1,6 @@
 import React, { useCallback, useRef } from 'react';
 import { Box, Text, config } from 'folds';
-import { EventType } from 'matrix-js-sdk';
+import { EventType, type Thread } from 'matrix-js-sdk';
 import { ReactEditor } from 'slate-react';
 import { isKeyHotkey } from 'is-hotkey';
 import { useStateEvent } from '../../hooks/useStateEvent';
@@ -53,12 +53,10 @@ const shouldFocusMessageField = (evt: KeyboardEvent): boolean => {
 
 export function RoomView({
   eventId,
-  threadRootId,
-  showRoomIntro = true,
+  thread,
 }: {
   eventId?: string;
-  threadRootId?: string;
-  showRoomIntro?: boolean;
+  thread?: Thread;
 }) {
   const roomInputRef = useRef<HTMLDivElement>(null);
   const roomViewRef = useRef<HTMLDivElement>(null);
@@ -101,15 +99,14 @@ export function RoomView({
           key={roomId}
           room={room}
           eventId={eventId}
-          threadRootId={threadRootId}
-          showRoomIntro={showRoomIntro}
+          thread={thread}
           roomInputRef={roomInputRef}
           editor={editor}
           onRequestScrollToBottom={timelineScrollToBottomRef}
         />
       </Box>
       <Box shrink="No" direction="Column">
-        {!threadRootId && <RoomViewTyping room={room} />}
+        {!thread && <RoomViewTyping room={room} />}
         <div style={{ padding: `0 ${config.space.S400} ${config.space.S400}` }}>
           {tombstoneEvent ? (
             <RoomTombstone
@@ -124,7 +121,7 @@ export function RoomView({
                   room={room}
                   editor={editor}
                   roomId={roomId}
-                  threadRootId={threadRootId}
+                  threadRootId={thread?.id}
                   fileDropContainerRef={roomViewRef}
                   ref={roomInputRef}
                   scrollToBottomRef={timelineScrollToBottomRef}

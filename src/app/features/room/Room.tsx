@@ -18,7 +18,7 @@ import { RoomViewHeader } from './RoomViewHeader';
 import { callChatAtom } from '../../state/callEmbed';
 import { CallChatView } from './CallChatView';
 import { PageMain } from '../../components/page';
-import { useThreadChat } from '../../state/threadChat';
+import { useThreadChat, type ThreadChatState } from '../../state/threadChat';
 import { ThreadChatView } from './ThreadChatView';
 import { useRoomEvent } from '../../hooks/useRoomEvent';
 
