@@ -71,7 +71,7 @@ import { getMatrixToRoomEvent } from '../../../plugins/matrix-to';
 import { getViaServers } from '../../../plugins/via-servers';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { useRoomPinnedEvents } from '../../../hooks/useRoomPinnedEvents';
-import { StateEvent } from '../../../../types/matrix/room';
+import { MessageEvent, StateEvent } from '../../../../types/matrix/room';
 import { Avatar } from '../../../components/avatar';
 import { EllipsisVerticalIcon } from '../../../icons/EllipsisVerticalIcon';
 import { SmilePlusIcon } from '../../../icons/SmilePlusIcon';
@@ -741,7 +741,7 @@ export const Message = as<'div', MessageProps>(
     const senderAvatarMxc = getMemberAvatarMxc(room, senderId);
 
     const msgType = mEvent.getContent()?.msgtype;
-    const transparent = msgType === MsgType.Audio || msgType === MsgType.Video || msgType === MsgType.Image || msgType === MsgType.File;
+    const transparent = mEvent.getType() === MessageEvent.Sticker || msgType === MsgType.Audio || msgType === MsgType.Video || msgType === MsgType.Image || msgType === MsgType.File;
 
     const headerJSX = !collapse && (
       <Box
