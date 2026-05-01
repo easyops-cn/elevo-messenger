@@ -58,6 +58,7 @@ import { Avatar } from '../../../components/avatar';
 import { isMacOS } from '../../../utils/user-agent';
 import { KeySymbol } from '../../../utils/key-symbol';
 import * as css from './Home.css';
+import { elevoColor } from '../../../../config.css';
 
 function HomeHeader() {
   const mx = useMatrixClient();
@@ -70,8 +71,8 @@ function HomeHeader() {
     : undefined;
 
   return (
-    <PageNavHeader>
-      <Box alignItems="Center" grow="Yes" gap="300">
+    <PageNavHeader style={{ height: toRem(50) }}>
+      <Box alignItems="Center" grow="Yes" gap="300" style={{ paddingLeft: config.space.S200 }}>
         <Avatar size="250" radii="Pill">
           <UserAvatar
             userId={userId}
@@ -186,7 +187,7 @@ export function Home() {
               height: toRem(28),
               padding: `0 ${config.space.S300}`,
               fontSize: toRem(13),
-              backgroundColor: color.Background.ContainerActive,
+              backgroundColor: elevoColor.Background.SearchBar,
             }}
           >
             <Box as="span" grow="Yes" alignItems="Center" justifyContent="SpaceBetween" gap="100" style={{ opacity: config.opacity.Placeholder }}>
@@ -194,9 +195,7 @@ export function Home() {
                 {t('home.search')}
               </Text>
               <span className={css.searchShortcutHint}>
-                <kbd className={css.searchShortcutKey}>{modifierKey}</kbd>
-                <span>+</span>
-                <kbd className={css.searchShortcutKey}>K</kbd>
+                {`${modifierKey} + K`}
               </span>
             </Box>
           </Button>

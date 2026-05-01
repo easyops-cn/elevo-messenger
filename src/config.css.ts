@@ -158,6 +158,7 @@ export const [elevoLight, elevoColor] = createTheme({
   Background: {
     NavBar: 'linear-gradient(0deg, #F7F7F7 0%, #F7F7F7 100%), rgba(255, 255, 255, 0.50)',
     Page: 'rgba(255, 255, 255, 0.75)',
+    SearchBar: 'rgba(0, 0, 0, 0.06)',
   },
   Border: {
     ExtremeLight: 'rgba(0, 0, 0, 0.04)',
@@ -181,6 +182,7 @@ export const elevoDark = createTheme(elevoColor, {
   Background: {
     NavBar: 'rgba(0,0,0,0.2)',
     Page: '#1E1E1E',
+    SearchBar: 'rgba(255, 255, 255, 0.1)',
   },
   Border: {
     ExtremeLight: 'rgba(255, 255, 255, 0.04)',
