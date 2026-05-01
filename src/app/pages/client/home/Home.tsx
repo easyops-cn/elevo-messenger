@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useReducer, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import {
@@ -15,7 +15,7 @@ import {
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { RoomEvent, RoomEventHandlerMap } from 'matrix-js-sdk';
-import { factoryRoomIdByActivity } from '../../../utils/sort';
+import { sortRoomIdsByActivity } from '../../../utils/sort';
 import {
   NavButton,
   NavCategory,
@@ -132,12 +132,11 @@ export function Home() {
   const setSearchOpen = useSetAtom(searchModalAtom);
   const modifierKey = isMacOS() ? KeySymbol.Command : 'ctrl';
   const noRoomToDisplay = rooms.length === 0;
-  const [sortVersion, bumpSortVersion] = useReducer((v: number) => v + 1, 0);
-
+  const [tick, setTick] = useState(0);
+  const bumpTick = useCallback(() => setTick((v) => v + 1), []);
   const roomIdSet = useMemo(() => new Set(rooms), [rooms]);
 
   useEffect(() => {
-    // Todo: memoize contentful event timestamp for each room
     const handleTimelineEvent: RoomEventHandlerMap[RoomEvent.Timeline] = (
       _mEvent,
       room,
@@ -146,21 +145,20 @@ export function Home() {
       data
     ) => {
       if (!room || !data.liveEvent || removed || !roomIdSet.has(room.roomId)) return;
-      bumpSortVersion();
+      bumpTick();
     };
 
     mx.on(RoomEvent.Timeline, handleTimelineEvent);
     return () => {
       mx.removeListener(RoomEvent.Timeline, handleTimelineEvent);
     };
-  }, [mx, roomIdSet]);
+  }, [mx, roomIdSet, bumpTick]);
 
-  const sortedRooms = useMemo(() => {
-    const items = Array.from(rooms).sort(factoryRoomIdByActivity(mx));
-    return items;
-    // Intensionally add sortVersion as dependency
+  const sortedRooms = useMemo(
+    () => sortRoomIdsByActivity(rooms, (id) => mx.getRoom(id) ?? undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mx, rooms, sortVersion]);
+    [mx, rooms, tick]
+  );
 
   const virtualizer = useVirtualizer({
     count: sortedRooms.length,
