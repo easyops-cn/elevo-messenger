@@ -285,7 +285,6 @@ export function Home() {
                           notificationPreferences,
                           room.roomId
                         )}
-                        showAvatar={isDirect}
                         direct={isDirect}
                       />
                     </VirtualTile>

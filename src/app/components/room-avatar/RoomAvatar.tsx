@@ -13,9 +13,10 @@ type RoomAvatarProps = {
   roomId: string;
   src?: string;
   alt?: string;
+  fallbackAsIcon?: ReactNode;
   renderFallback: () => ReactNode;
 };
-export function RoomAvatar({ roomId, src, alt, renderFallback }: RoomAvatarProps) {
+export function RoomAvatar({ roomId, src, alt, fallbackAsIcon, renderFallback }: RoomAvatarProps) {
   const mx = useMatrixClient();
   const mDirects = useAtomValue(mDirectAtom);
   const room = mx.getRoom(roomId);
@@ -39,6 +40,9 @@ export function RoomAvatar({ roomId, src, alt, renderFallback }: RoomAvatarProps
   };
 
   if (!authSrc || error) {
+    if (fallbackAsIcon) {
+      return fallbackAsIcon;
+    }
     return (
       <AvatarFallback
         style={{ backgroundColor: colorMXID(colorId ?? ''), color: color.Surface.Container }}

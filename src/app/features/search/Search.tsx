@@ -358,31 +358,34 @@ export function Search({ requestClose }: SearchProps) {
                           }
                           before={
                             <Avatar size="200" radii="Pill">
-                              {dm || room.isSpaceRoom() ? (
-                                <RoomAvatar
-                                  roomId={room.roomId}
-                                  src={
-                                    dm
-                                      ? getDirectRoomAvatarUrl(mx, room, 32, useAuthentication)
-                                      : getRoomAvatarUrl(mx, room, 32, useAuthentication)
-                                  }
-                                  alt={room.name}
-                                  renderFallback={() => (
-                                    <Text as="span" size="T300">
-                                      {nameInitials(room.name)}
-                                    </Text>
-                                  )}
-                                />
-                              ) : (
-                                <RoomIcon
-                                  style={{
-                                    color: color.Primary.Main,
-                                  }}
-                                  size="50"
-                                  joinRule={room.getJoinRule()}
-                                  roomType={room.getType()}
-                                />
-                              )}
+                              <RoomAvatar
+                                roomId={room.roomId}
+                                src={
+                                  dm
+                                    ? getDirectRoomAvatarUrl(mx, room, 32, useAuthentication)
+                                    : getRoomAvatarUrl(mx, room, 32, useAuthentication)
+                                }
+                                alt={room.name}
+                                fallbackAsIcon={
+                                  dm || room.isSpaceRoom()
+                                    ? undefined
+                                    : (
+                                        <RoomIcon
+                                          style={{
+                                            color: color.Primary.Main,
+                                          }}
+                                          size="50"
+                                          joinRule={room.getJoinRule()}
+                                          roomType={room.getType()}
+                                        />
+                                      )
+                                }
+                                renderFallback={() => (
+                                  <Text as="span" size="T300">
+                                    {nameInitials(room.name)}
+                                  </Text>
+                                )}
+                              />
                             </Avatar>
                           }
                         >

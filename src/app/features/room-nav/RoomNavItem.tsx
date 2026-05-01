@@ -224,13 +224,11 @@ type RoomNavItemProps = {
   selected: boolean;
   linkPath: string;
   notificationMode?: RoomNotificationMode;
-  showAvatar?: boolean;
   direct?: boolean;
 };
 export function RoomNavItem({
   room,
   selected,
-  showAvatar,
   direct,
   notificationMode,
   linkPath,
@@ -312,32 +310,33 @@ export function RoomNavItem({
           <Box as="span" grow="Yes" alignItems="Center" gap="200" style={{ gap: 6 }}>
             <Box as="span" shrink="No" style={{ position: 'relative' }}>
               <Avatar size="300" radii="Pill">
-                {showAvatar ? (
-                  <RoomAvatar
-                    roomId={room.roomId}
-                    src={
-                      direct
-                        ? getDirectRoomAvatarUrl(mx, room, 96, useAuthentication)
-                        : getRoomAvatarUrl(mx, room, 96, useAuthentication)
-                    }
-                    alt={roomName}
-                    renderFallback={() => (
-                      <Text as="span" size="T300">
-                        {nameInitials(roomName)}
-                      </Text>
-                    )}
-                  />
-                ) : (
-                  <RoomIcon
-                    style={{
-                      color: color.Primary.Main,
-                    }}
-                    filled={selected}
-                    size="100"
-                    joinRule={room.getJoinRule()}
-                    roomType={room.getType()}
-                  />
-                )}
+                <RoomAvatar
+                  roomId={room.roomId}
+                  src={
+                    direct
+                      ? getDirectRoomAvatarUrl(mx, room, 96, useAuthentication)
+                      : getRoomAvatarUrl(mx, room, 96, useAuthentication)
+                  }
+                  alt={roomName}
+                  fallbackAsIcon={
+                    direct ? undefined : (
+                      <RoomIcon
+                        style={{
+                          color: color.Primary.Main,
+                        }}
+                        filled={selected}
+                        size="100"
+                        joinRule={room.getJoinRule()}
+                        roomType={room.getType()}
+                      />
+                    )
+                  }
+                  renderFallback={() => (
+                    <Text as="span" size="T300">
+                      {nameInitials(roomName)}
+                    </Text>
+                  )}
+                />
               </Avatar>
               {unread && (
                 <Box

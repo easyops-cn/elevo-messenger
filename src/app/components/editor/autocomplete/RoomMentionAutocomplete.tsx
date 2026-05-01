@@ -5,7 +5,7 @@ import { JoinRule, MatrixClient } from 'matrix-js-sdk';
 import { useAtomValue } from 'jotai';
 
 import { createMentionElement, moveCursor, replaceWithElement } from '../utils';
-import { getDirectRoomAvatarUrl } from '../../../utils/room';
+import { getDirectRoomAvatarUrl, getRoomAvatarUrl } from '../../../utils/room';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { AutocompleteQuery } from './autocompleteQuery';
 import { AutocompleteMenu } from './AutocompleteMenu';
@@ -161,23 +161,34 @@ export function RoomMentionAutocomplete({
               }
               before={
                 <Avatar size="200">
-                  {dm ? (
-                    <RoomAvatar
-                      roomId={room.roomId}
-                      src={getDirectRoomAvatarUrl(mx, room)}
-                      alt={room.name}
-                      renderFallback={() => (
-                        <RoomIcon
-                          size="50"
-                          joinRule={room.getJoinRule() ?? JoinRule.Restricted}
-                          roomType={room.getType()}
-                          filled
-                        />
-                      )}
-                    />
-                  ) : (
-                    <RoomIcon size="100" joinRule={room.getJoinRule()} roomType={room.getType()} />
-                  )}
+                  <RoomAvatar
+                    roomId={room.roomId}
+                    src={
+                      dm
+                        ? getDirectRoomAvatarUrl(mx, room)
+                        : getRoomAvatarUrl(mx, room, 96)
+                    }
+                    alt={room.name}
+                    fallbackAsIcon={
+                      dm
+                        ? undefined
+                        : (
+                            <RoomIcon
+                              size="100"
+                              joinRule={room.getJoinRule()}
+                              roomType={room.getType()}
+                            />
+                          )
+                    }
+                    renderFallback={() => (
+                      <RoomIcon
+                        size="50"
+                        joinRule={room.getJoinRule() ?? JoinRule.Restricted}
+                        roomType={room.getType()}
+                        filled
+                      />
+                    )}
+                  />
                 </Avatar>
               }
             >
