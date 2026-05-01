@@ -1130,6 +1130,11 @@ export function RoomTimeline({
                 />
               )
             }
+            threadSummary={
+              showThreadSummary && (
+                <ThreadSummary mEvent={mEvent} room={room} thread={replyToThread} onOpenThread={handleOpenThread} />
+              )
+            }
             hideReadReceipts={hideActivity}
             showDeveloperTools={showDeveloperTools}
             hour24Clock={hour24Clock}
@@ -1138,22 +1143,17 @@ export function RoomTimeline({
             {mEvent.isRedacted() ? (
               <RedactedContent reason={mEvent.getUnsigned().redacted_because?.content.reason} />
             ) : (
-              <>
-                <RenderMessageContent
-                  displayName={senderDisplayName}
-                  msgType={mEvent.getContent().msgtype ?? ''}
-                  ts={mEvent.getTs()}
-                  edited={!!editedEvent}
-                  getContent={getContent}
-                  urlPreview={showUrlPreview}
-                  htmlReactParserOptions={htmlReactParserOptions}
-                  linkifyOpts={linkifyOpts}
-                  outlineAttachment={messageLayout === MessageLayout.Bubble}
-                />
-                {showThreadSummary && (
-                  <ThreadSummary mEvent={mEvent} room={room} thread={replyToThread} onOpenThread={handleOpenThread} />
-                )}
-              </>
+              <RenderMessageContent
+                displayName={senderDisplayName}
+                msgType={mEvent.getContent().msgtype ?? ''}
+                ts={mEvent.getTs()}
+                edited={!!editedEvent}
+                getContent={getContent}
+                urlPreview={showUrlPreview}
+                htmlReactParserOptions={htmlReactParserOptions}
+                linkifyOpts={linkifyOpts}
+                outlineAttachment={messageLayout === MessageLayout.Bubble}
+              />
             )}
           </Message>
         );
@@ -1213,6 +1213,11 @@ export function RoomTimeline({
                 />
               )
             }
+            threadSummary={
+              showThreadSummary && (
+                <ThreadSummary mEvent={mEvent} room={room} thread={replyToThread} onOpenThread={handleOpenThread} />
+              )
+            }
             hideReadReceipts={hideActivity}
             showDeveloperTools={showDeveloperTools}
             hour24Clock={hour24Clock}
@@ -1244,23 +1249,17 @@ export function RoomTimeline({
                   const senderDisplayName =
                     getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId;
                   return (
-                    <>
-                      <RenderMessageContent
-                        displayName={senderDisplayName}
-                        msgType={mEvent.getContent().msgtype ?? ''}
-                        ts={mEvent.getTs()}
-                        edited={!!editedEvent}
-                        getContent={getContent}
-                        urlPreview={showUrlPreview}
-                        htmlReactParserOptions={htmlReactParserOptions}
-                        linkifyOpts={linkifyOpts}
-                        outlineAttachment={messageLayout === MessageLayout.Bubble}
-                      />
-
-                      {showThreadSummary && (
-                        <ThreadSummary mEvent={mEvent} room={room} thread={replyToThread} onOpenThread={handleOpenThread} />
-                      )}
-                    </>
+                    <RenderMessageContent
+                      displayName={senderDisplayName}
+                      msgType={mEvent.getContent().msgtype ?? ''}
+                      ts={mEvent.getTs()}
+                      edited={!!editedEvent}
+                      getContent={getContent}
+                      urlPreview={showUrlPreview}
+                      htmlReactParserOptions={htmlReactParserOptions}
+                      linkifyOpts={linkifyOpts}
+                      outlineAttachment={messageLayout === MessageLayout.Bubble}
+                    />
                   );
                 }
                 if (mEvent.getType() === MessageEvent.RoomMessageEncrypted)

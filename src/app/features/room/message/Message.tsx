@@ -687,6 +687,7 @@ export type MessageProps = {
   onReactionToggle: (targetEventId: string, key: string, shortcode?: string) => void;
   reply?: ReactNode;
   reactions?: ReactNode;
+  threadSummary?: ReactNode;
   hideReadReceipts?: boolean;
   showDeveloperTools?: boolean;
   hour24Clock: boolean;
@@ -715,6 +716,7 @@ export const Message = as<'div', MessageProps>(
       onEditId,
       reply,
       reactions,
+      threadSummary,
       hideReadReceipts,
       showDeveloperTools,
       hour24Clock,
@@ -808,7 +810,7 @@ export const Message = as<'div', MessageProps>(
       </AvatarBase>
     );
 
-    const msgContentJSX = (
+    const msgCompactContentJSX = (
       <Box
         direction="Column"
         alignSelf={isOwn && messageLayout !== MessageLayout.Compact ? 'End' : 'Start'}
@@ -831,6 +833,7 @@ export const Message = as<'div', MessageProps>(
           children
         )}
         {reactions}
+        {threadSummary}
       </Box>
     );
 
@@ -861,6 +864,13 @@ export const Message = as<'div', MessageProps>(
         )}
       </Box>
     );
+
+    const bubbleAfterContentJSX = (
+      <Box direction="Column" gap="0" alignItems={isOwn ? "End" : "Start"}>
+        {reactions}
+        {threadSummary}
+      </Box>
+    )
 
     const handleContextMenu: MouseEventHandler<HTMLDivElement> = (evt) => {
       if (evt.altKey || !window.getSelection()?.isCollapsed || edit) return;
@@ -1161,7 +1171,7 @@ export const Message = as<'div', MessageProps>(
         )}
         {messageLayout === MessageLayout.Compact && (
           <CompactLayout before={headerJSX}>
-            {msgContentJSX}
+            {msgCompactContentJSX}
           </CompactLayout>
         )}
         {messageLayout === MessageLayout.Bubble && (
@@ -1171,7 +1181,7 @@ export const Message = as<'div', MessageProps>(
             before={avatarJSX}
             header={headerJSX}
             beforeContent={reply}
-            afterContent={reactions}
+            afterContent={bubbleAfterContentJSX}
           >
             {msgBubbleContentJSX}
           </BubbleLayout>
@@ -1182,7 +1192,7 @@ export const Message = as<'div', MessageProps>(
             before={avatarJSX}
             header={headerJSX}
             beforeContent={reply}
-            afterContent={reactions}
+            afterContent={bubbleAfterContentJSX}
           >
             {msgBubbleContentJSX}
           </ModernLayout>

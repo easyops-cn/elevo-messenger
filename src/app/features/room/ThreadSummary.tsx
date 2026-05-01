@@ -100,7 +100,7 @@ export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSum
         </>
       }
       onClick={onOpenThread}
-      style={{ marginTop: config.space.S200, width: 'fit-content', maxWidth: toRem(600) }}
+      style={{ marginTop: config.space.S200, width: 'fit-content', maxWidth: `min(${toRem(600)}, 100%)` }}
     >
       <Box alignItems="Center" gap="100" grow="Yes">
         {threadLastReplySenderId ? (
