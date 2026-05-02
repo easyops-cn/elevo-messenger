@@ -62,6 +62,7 @@ import * as css from './Home.css';
 import { elevoColor } from '../../../../config.css';
 import { useHomeRooms } from './useHomeRooms';
 import { useDirectRooms } from '../direct/useDirectRooms';
+import { useClientConfig } from '../../../hooks/useClientConfig';
 
 function HomeHeader() {
   const mx = useMatrixClient();
@@ -169,6 +170,7 @@ export function Home() {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const mDirects = useAtomValue(mDirectAtom);
+  const clientConfig = useClientConfig();
   useNavToActivePathMapper('home');
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -312,7 +314,9 @@ export function Home() {
             )}
           </NavCategory>
           <Line size="300" />
-          <HomeFilterChips activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+          {clientConfig.roomListFilter && (
+            <HomeFilterChips activeFilter={activeFilter} onFilterChange={setActiveFilter} />
+          )}
           {noRoomToDisplay ? (
             <HomeEmpty activeFilter={activeFilter} />
           ) : (

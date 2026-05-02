@@ -18,6 +18,8 @@ export type ClientConfig = {
   };
 
   hashRouter?: HashRouterConfig;
+
+  roomListFilter?: boolean;
 };
 
 const ClientConfigContext = createContext<ClientConfig | null>(null);
