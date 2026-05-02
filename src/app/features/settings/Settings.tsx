@@ -37,6 +37,7 @@ import { stopPropagation } from '../../utils/keyboard';
 import { LogoutDialog } from '../../components/LogoutDialog';
 import { useUpdateChecker } from '../../state/update/UpdateCheckerContext';
 import { Avatar } from '../../components/avatar';
+import { useElevoConfig } from '../../hooks/useElevoConfig';
 
 export enum SettingsPages {
   GeneralPage,
@@ -55,7 +56,7 @@ type SettingsMenuItem = {
   icon: IconSrc;
 };
 
-const useSettingsMenuItems = (): SettingsMenuItem[] =>
+const useSettingsMenuItems = (showLinks: boolean): SettingsMenuItem[] =>
   useMemo(
     () => [
       {
@@ -88,18 +89,22 @@ const useSettingsMenuItems = (): SettingsMenuItem[] =>
         nameKey: 'settings.developerTools',
         icon: Icons.Terminal,
       },
-      {
-        page: SettingsPages.LinksPage,
-        nameKey: 'settings.links',
-        icon: Icons.Link,
-      },
+      ...(showLinks
+        ? [
+            {
+              page: SettingsPages.LinksPage,
+              nameKey: 'settings.links',
+              icon: Icons.Link,
+            },
+          ]
+        : []),
       {
         page: SettingsPages.AboutPage,
         nameKey: 'settings.about',
         icon: Icons.Info,
       },
     ],
-    []
+    [showLinks]
   );
 
 type SettingsProps = {
@@ -119,11 +124,13 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
 
   const screenSize = useScreenSizeContext();
   const { updateAvailable } = useUpdateChecker();
+  const { workspaces } = useElevoConfig();
+  const showLinks = !!workspaces?.apiBaseUrl;
   const [activePage, setActivePage] = useState<SettingsPages | undefined>(() => {
     if (initialPage) return initialPage;
     return screenSize === ScreenSize.Mobile ? undefined : SettingsPages.GeneralPage;
   });
-  const menuItems = useSettingsMenuItems();
+  const menuItems = useSettingsMenuItems(showLinks);
 
   useEffect(() => {
     if (initialPage !== undefined) {

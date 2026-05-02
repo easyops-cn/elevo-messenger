@@ -13,6 +13,7 @@ import { allInvitesAtom } from '../../state/room-list/inviteList';
 import { useAllHomeRooms } from './home/useAllHomeRooms';
 import { UnreadBadge } from '../../components/unread-badge';
 import { useNavToActivePathAtom } from '../../state/hooks/navToActivePath';
+import { useElevoConfig } from '../../hooks/useElevoConfig';
 import {
   getHomePath,
   getContactsPath,
@@ -44,6 +45,9 @@ export function BottomNav() {
     open: false,
     requestId: 0,
   });
+
+  const { elevoContactsRoomId } = useElevoConfig();
+  const showContacts = !!elevoContactsRoomId;
 
   const homeSelected = useHomeSelected();
   const contactsSelected = useContactsSelected();
@@ -115,6 +119,7 @@ export function BottomNav() {
             </button>
           )}
         </TooltipProvider>
+        {showContacts && (
         <TooltipProvider
           position="Top"
           tooltip={<Tooltip>{t('contacts.title')}</Tooltip>}
@@ -131,6 +136,7 @@ export function BottomNav() {
             </button>
           )}
         </TooltipProvider>
+        )}
         <TooltipProvider
           position="Top"
           tooltip={<Tooltip>{t('explore.title')}</Tooltip>}
