@@ -19,11 +19,9 @@ import {
   UseAsyncSearchOptions,
   useAsyncSearch,
 } from '../../hooks/useAsyncSearch';
-import { TypingIndicator } from '../../components/typing-indicator';
 import { getMemberDisplayName, getMemberSearchStr } from '../../utils/room';
 import { getMxIdLocalPart } from '../../utils/matrix';
 import { UserAvatar } from '../../components/user-avatar';
-import { useRoomTypingMember } from '../../hooks/useRoomTypingMembers';
 import { MemberSort } from '../../hooks/useMemberSort';
 import { usePowerLevelsContext } from '../../hooks/usePowerLevels';
 import {
@@ -53,7 +51,6 @@ type MemberItemProps = {
   powerTag?: MemberPowerTag;
   onClick: MouseEventHandler<HTMLButtonElement>;
   pressed?: boolean;
-  typing?: boolean;
 };
 
 function MemberItem({
@@ -63,7 +60,6 @@ function MemberItem({
   powerTag,
   onClick,
   pressed,
-  typing,
 }: MemberItemProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
@@ -110,11 +106,6 @@ function MemberItem({
           {badge && (
             <Badge variant={badge.variant} fill="Soft" radii="300" outlined>
               <Text size="T200">{badge.label}</Text>
-            </Badge>
-          )}
-          {typing && (
-            <Badge size="300" variant="Secondary" fill="Soft" radii="Pill" outlined>
-              <TypingIndicator size="300" />
             </Badge>
           )}
         </Box>
@@ -166,8 +157,6 @@ export function MembersPanel({
   const openRoomSettings = useOpenRoomSettings();
   const space = useSpaceOptionally();
   const openProfileUserId = useUserRoomProfileState()?.userId;
-
-  const typingMembers = useRoomTypingMember(room.roomId);
 
   const filteredMembers = useMemo(
     () => members.filter(MembershipFilter.filterJoined).sort(MemberSort.Oldest),
@@ -248,7 +237,6 @@ export function MembersPanel({
                 powerTag={powerTag}
                 onClick={handleMemberClick}
                 pressed={openProfileUserId === member.userId}
-                typing={typingMembers.some((receipt) => receipt.userId === member.userId)}
               />
             </div>
           );
