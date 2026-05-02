@@ -22,7 +22,7 @@ import { ICreateRoomStateEvent, MatrixError, Preset, Visibility } from 'matrix-j
 import { useNavigate } from 'react-router-dom';
 import { SettingTile } from '../../components/setting-tile';
 import { SequenceCard } from '../../components/sequence-card';
-import { addRoomIdToMDirect, getMxIdLocalPart, getMxIdServer, isUserId } from '../../utils/matrix';
+import { addRoomIdToMDirect, getDMRoomFor, getMxIdLocalPart, getMxIdServer, isUserId } from '../../utils/matrix';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { ErrorCode } from '../../cs-errorcode';
@@ -36,6 +36,7 @@ import { useAsyncSearch, UseAsyncSearchOptions } from '../../hooks/useAsyncSearc
 import { highlightText, makeHighlightRegex } from '../../plugins/react-custom-html-parser';
 import { stopPropagation } from '../../utils/keyboard';
 import { useRoomMembers } from '../../hooks/useRoomMembers';
+import { useDirectRooms } from '../../pages/client/direct/useDirectRooms';
 
 const SEARCH_OPTIONS: UseAsyncSearchOptions = {
   limit: 1000,
@@ -60,6 +61,7 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
 
   const inputRef = useRef<HTMLInputElement>(null);
   const directUsers = useDirectUsers();
+  const directs = useDirectRooms();
   const { elevoContactsRoomId } = elevoConfig;
 
   const contactsMembers = useRoomMembers(mx, elevoContactsRoomId);
@@ -165,6 +167,14 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
     if (!userIdInput || !userId) return;
     if (!isUserId(userId)) {
       setInvalidUserId(true);
+      return;
+    }
+
+    // 检查是否已有 DM room，如有则直接跳转
+    const existingRoom = getDMRoomFor(mx, userId);
+    if (existingRoom?.roomId && directs.includes(existingRoom.roomId)) {
+      userIdInput.value = '';
+      navigate(getHomeRoomPath(existingRoom.roomId));
       return;
     }
 
