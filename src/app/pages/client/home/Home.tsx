@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import {
   Box,
   Button,
+  Chip,
   Icon,
   Icons,
   Line,
@@ -59,6 +60,8 @@ import { isMacOS } from '../../../utils/user-agent';
 import { KeySymbol } from '../../../utils/key-symbol';
 import * as css from './Home.css';
 import { elevoColor } from '../../../../config.css';
+import { useHomeRooms } from './useHomeRooms';
+import { useDirectRooms } from '../direct/useDirectRooms';
 
 function HomeHeader() {
   const mx = useMatrixClient();
@@ -89,22 +92,72 @@ function HomeHeader() {
     </PageNavHeader>
   );
 }
+type HomeRoomFilter = 'people' | 'rooms';
 
-function HomeEmpty() {
+function HomeFilterChips({
+  activeFilter,
+  onFilterChange,
+}: {
+  activeFilter: HomeRoomFilter | null;
+  onFilterChange: (filter: HomeRoomFilter | null) => void;
+}) {
   const { t } = useTranslation();
+
+  const handleFilterClick = (filter: HomeRoomFilter) => {
+    onFilterChange(activeFilter === filter ? null : filter);
+  };
+
+  return (
+    <Box gap="100" wrap="Wrap">
+      <Chip
+        variant={activeFilter === 'people' ? 'Success' : 'SurfaceVariant'}
+        outlined
+        radii="Pill"
+        aria-pressed={activeFilter === 'people'}
+        onClick={() => handleFilterClick('people')}
+      >
+        <Text size="T200" priority={activeFilter === 'people' ? '500' : '300'}>
+          {t('home.filter.people')}
+        </Text>
+      </Chip>
+      <Chip
+        variant={activeFilter === 'rooms' ? 'Success' : 'SurfaceVariant'}
+        outlined
+        radii="Pill"
+        aria-pressed={activeFilter === 'rooms'}
+        onClick={() => handleFilterClick('rooms')}
+      >
+        <Text size="T200" priority={activeFilter === 'rooms' ? '500' : '300'}>
+          {t('home.filter.rooms')}
+        </Text>
+      </Chip>
+      {activeFilter && (
+        <Chip variant="SurfaceVariant" outlined radii="Pill" onClick={() => onFilterChange(null)}>
+          <Box alignItems="Center">
+            <Icon src={Icons.Cross} size="100" />
+          </Box>
+        </Chip>
+      )}
+    </Box>
+  );
+}
+
+function HomeEmpty({ activeFilter }: { activeFilter: HomeRoomFilter | null }) {
+  const { t } = useTranslation();
+  const isPeople = activeFilter === 'people';
   
   return (
     <NavEmptyCenter>
       <NavEmptyLayout
-        icon={<Icon size="600" src={HashIcon} />}
+        icon={<Icon size="600" src={isPeople ? Icons.Mention : HashIcon} />}
         title={
           <Text size="H5" align="Center">
-            {t('home.noRooms')}
+            {isPeople ? t('home.noDirectMessages') : t('home.noRooms')}
           </Text>
         }
         content={
           <Text size="T300" align="Center">
-            {t('home.noRoomsDesc')}
+            {isPeople ? t('home.noDirectMessagesDesc') : t('home.noRoomsDesc')}
           </Text>
         }
       />
@@ -119,7 +172,13 @@ export function Home() {
   useNavToActivePathMapper('home');
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const rooms = useAllHomeRooms();
+  const [activeFilter, setActiveFilter] = useState<HomeRoomFilter | null>(null);
+
+  const allRooms = useAllHomeRooms();
+  const groupRooms = useHomeRooms();
+  const directRooms = useDirectRooms();
+  const rooms =
+    activeFilter === 'people' ? directRooms : activeFilter === 'rooms' ? groupRooms : allRooms;
 
   const notificationPreferences = useRoomsNotificationPreferencesContext();
   const navigate = useNavigate();
@@ -253,8 +312,9 @@ export function Home() {
             )}
           </NavCategory>
           <Line size="300" />
+          <HomeFilterChips activeFilter={activeFilter} onFilterChange={setActiveFilter} />
           {noRoomToDisplay ? (
-            <HomeEmpty />
+            <HomeEmpty activeFilter={activeFilter} />
           ) : (
             <NavCategory>
               <div
