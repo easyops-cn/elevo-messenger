@@ -1,7 +1,7 @@
 import React, { useEffect, KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { Editor } from 'slate';
 import { Avatar, Icon, Icons, MenuItem, Text } from 'folds';
-import { MatrixClient, Room, RoomMember } from 'matrix-js-sdk';
+import { Room, RoomMember } from 'matrix-js-sdk';
 
 import { AutocompleteQuery } from './autocompleteQuery';
 import { AutocompleteMenu } from './AutocompleteMenu';
@@ -15,7 +15,7 @@ import {
 import { onTabPress } from '../../../utils/keyboard';
 import { createMentionElement, moveCursor, replaceWithElement } from '../utils';
 import { useKeyDown } from '../../../hooks/useKeyDown';
-import { getMxIdLocalPart, getMxIdServer, isUserId } from '../../../utils/matrix';
+import { getMxIdLocalPart } from '../../../utils/matrix';
 import { getMemberDisplayName, getMemberSearchStr } from '../../../utils/room';
 import { UserAvatar } from '../../user-avatar';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
@@ -23,10 +23,6 @@ import { Membership } from '../../../../types/matrix/room';
 
 type MentionAutoCompleteHandler = (userId: string, name: string) => void;
 
-const userIdFromQueryText = (mx: MatrixClient, text: string) =>
-  isUserId(`@${text}`)
-    ? `@${text}`
-    : `@${text}${text.endsWith(':') ? '' : ':'}${getMxIdServer(mx.getUserId() ?? '')}`;
 
 function UnknownMentionItem({
   userId,
@@ -97,8 +93,9 @@ export function UserMentionAutocomplete({
   const members = useRoomMembers(mx, roomId);
 
   const [result, search, resetSearch] = useAsyncSearch(members, getRoomMemberStr, SEARCH_OPTIONS);
+  const currentUserId = mx.getUserId();
   const autoCompleteMembers = (result ? result.items.slice(0, 20) : members.slice(0, 20)).filter(
-    withAllowedMembership
+    (m) => withAllowedMembership(m) && m.userId !== currentUserId
   );
 
   useEffect(() => {
@@ -123,18 +120,21 @@ export function UserMentionAutocomplete({
         handleAutocomplete(roomAliasOrId, '@room');
         return;
       }
-      if (autoCompleteMembers.length === 0) {
-        const userId = userIdFromQueryText(mx, query.text);
-        handleAutocomplete(userId, userId);
-        return;
+      if (autoCompleteMembers.length > 0) {
+        const roomMember = autoCompleteMembers[0];
+        handleAutocomplete(roomMember.userId, roomMember.name);
       }
-      const roomMember = autoCompleteMembers[0];
-      handleAutocomplete(roomMember.userId, roomMember.name);
     });
   });
 
   const getName = (member: RoomMember) =>
     getMemberDisplayName(room, member.userId) ?? getMxIdLocalPart(member.userId) ?? member.userId;
+
+
+  // TODO: support @room
+  if (autoCompleteMembers.length === 0) {
+    return null;
+  }
 
   return (
     <AutocompleteMenu headerContent={<Text size="L400">Mentions</Text>} requestClose={requestClose}>
@@ -145,14 +145,7 @@ export function UserMentionAutocomplete({
           handleAutocomplete={handleAutocomplete}
         />
       )}
-      {autoCompleteMembers.length === 0 ? (
-        <UnknownMentionItem
-          userId={userIdFromQueryText(mx, query.text)}
-          name={userIdFromQueryText(mx, query.text)}
-          handleAutocomplete={handleAutocomplete}
-        />
-      ) : (
-        autoCompleteMembers.map((roomMember) => {
+      {autoCompleteMembers.map((roomMember) => {
           const avatarMxcUrl = roomMember.getMxcAvatarUrl();
           const avatarUrl = avatarMxcUrl
             ? mx.mxcUrlToHttp(avatarMxcUrl, 32, 32, 'crop', undefined, false, useAuthentication)
@@ -188,7 +181,7 @@ export function UserMentionAutocomplete({
             </MenuItem>
           );
         })
-      )}
+      }
     </AutocompleteMenu>
   );
 }
