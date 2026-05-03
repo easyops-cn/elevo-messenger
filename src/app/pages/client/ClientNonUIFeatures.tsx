@@ -4,7 +4,7 @@ import { useAtomValue } from 'jotai';
 import React, { ReactNode, useCallback, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { RoomEvent, RoomEventHandlerMap, type EventTimelineSetHandlerMap } from 'matrix-js-sdk';
-import { unreadEqual, unreadInfoToUnread } from '../../state/room/roomToUnread';
+import { unreadEqual, unreadInfoToUnread, roomToUnreadAtom } from '../../state/room/roomToUnread';
 import LogoSVG from '../../../../public/res/apple/apple-touch-icon-144x144.png';
 import NotificationSound from '../../../../public/sound/notification.ogg';
 import InviteSound from '../../../../public/sound/invite.ogg';
@@ -27,6 +27,8 @@ import { useInboxNotificationsSelected } from '../../hooks/router/useInbox';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useSdkMessageListener, isDesktopTauri, type SdkMessagePayload } from '../../plugins/useTauriOpener';
 import { useRoomNavigate } from '../../hooks/useRoomNavigate';
+import { useRoomsUnread } from '../../state/hooks/unread';
+import { useAllHomeRooms } from './home/useAllHomeRooms';
 import {
   sendSystemNotification,
   type SystemNotificationHandle,
@@ -345,12 +347,30 @@ function ClientToolSdkHandler() {
   return null;
 }
 
+function TrayBadgeFeature() {
+  const homeRooms = useAllHomeRooms();
+  const homeUnread = useRoomsUnread(homeRooms, roomToUnreadAtom);
+  const allInvites = useAtomValue(allInvitesAtom);
+  const inviteCount = allInvites.length;
+  const totalUnread = (homeUnread?.total ?? 0) + inviteCount;
+
+  useEffect(() => {
+    if (!isDesktopTauri) return;
+    invoke('update_tray_badge', { count: totalUnread }).catch(() => {
+      // Ignore errors from tray badge update (e.g. tray not yet initialized).
+    });
+  }, [totalUnread]);
+
+  return null;
+}
+
 export function ClientNonUIFeatures({ children }: ClientNonUIFeaturesProps) {
   return (
     <>
       <SystemEmojiFeature />
       <PageZoomFeature />
       {/* <FaviconUpdater /> */}
+      <TrayBadgeFeature />
       <InviteNotifications />
       <MessageNotifications />
       <ClientToolSdkHandler />
