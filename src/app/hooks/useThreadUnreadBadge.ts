@@ -39,6 +39,8 @@ export function useThreadUnreadBadge({
       updateHasUnreadBadge();
     };
 
+    updateHasUnreadBadge();
+
     room.on(RoomEvent.UnreadNotifications, handleUnreadNotifications);
     room.on(RoomEvent.Timeline, handleTimelineEvent);
     room.on(RoomEvent.Receipt, updateHasUnreadBadge);
