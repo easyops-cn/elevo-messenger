@@ -2,7 +2,7 @@
 import { Direction, MatrixEvent, Room, RoomEvent } from 'matrix-js-sdk';
 import { useCallback, useEffect, useState } from 'react';
 import { MessageEvent } from '../../types/matrix/room';
-import { reactionOrEditEvent } from '../utils/room';
+import { getEditedEvent, reactionOrEditEvent } from '../utils/room';
 import { useDebounce } from './useDebounce';
 import { useMatrixClient } from './useMatrixClient';
 
@@ -17,6 +17,7 @@ const paginateBackwardCache = new Set<string>();
 export const useRoomLatestContentfulEvent = (room: Room) => {
   const mx = useMatrixClient();
   const [latestEvent, setLatestEvent] = useState<MatrixEvent>();
+  const [latestEditedEvent, setLatestEditedEvent] = useState<MatrixEvent>();
 
   const debouncedUpdateLatestEvent = useDebounce(
     useCallback(async () => {
@@ -40,7 +41,9 @@ export const useRoomLatestContentfulEvent = (room: Room) => {
       paginateBackwardCache.add(room.roomId);
       
       if (latest) {
+        const latestEdited = getEditedEvent(latest.getId()!, latest, room.getUnfilteredTimelineSet());
         setLatestEvent(latest);
+        setLatestEditedEvent(latestEdited);
         return;
       }
 
@@ -72,5 +75,5 @@ export const useRoomLatestContentfulEvent = (room: Room) => {
     };
   }, [room, debouncedUpdateLatestEvent]);
 
-  return latestEvent;
+  return [latestEvent, latestEditedEvent];
 };

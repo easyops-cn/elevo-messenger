@@ -118,6 +118,7 @@ import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { useThreadChat } from '../../state/threadChat';
 import { ThreadSummary } from './ThreadSummary';
+import { useRoomScrollToBottom } from './RoomScrollToBottomContext';
 
 const TimelineFloat = as<'div', css.TimelineFloatVariants>(
   ({ position, className, ...props }, ref) => (
@@ -231,7 +232,6 @@ type RoomTimelineProps = {
   thread?: Thread;
   roomInputRef: RefObject<HTMLElement>;
   editor: Editor;
-  onRequestScrollToBottom?: React.MutableRefObject<(() => void) | null>;
 };
 
 const PAGINATION_LIMIT = 80;
@@ -454,7 +454,6 @@ export function RoomTimeline({
   // threadRootId,
   roomInputRef,
   editor,
-  onRequestScrollToBottom,
 }: RoomTimelineProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
@@ -468,6 +467,7 @@ export function RoomTimeline({
   const showUrlPreview = room.hasEncryptionStateEvent() ? encUrlPreview : urlPreview;
   const [showHiddenEvents] = useSetting(settingsAtom, 'showHiddenEvents');
   const [showDeveloperTools] = useSetting(settingsAtom, 'developerTools');
+  const { listenScrollToBottomRequest } = useRoomScrollToBottom();
 
   const [hour24Clock] = useSetting(settingsAtom, 'hour24Clock');
   const [dateFormatString] = useSetting(settingsAtom, 'dateFormatString');
@@ -518,26 +518,23 @@ export function RoomTimeline({
     smooth: true,
   });
 
-  // Expose scrollToBottom for external callers (e.g. RoomInput on submit)
   useEffect(() => {
-    if (onRequestScrollToBottom) {
-      // eslint-disable-next-line no-param-reassign
-      onRequestScrollToBottom.current = () => {
-        scrollToBottomRef.current.count += 1;
-        scrollToBottomRef.current.smooth = false;
-        const scrollEl = scrollRef.current;
-        if (scrollEl) {
-          scrollToBottom(scrollEl);
+    const unsubscribe = listenScrollToBottomRequest(({ force }) => {
+      if (!force && !atBottomRef.current) return;
+
+      scrollToBottomRef.current.count += 1;
+      scrollToBottomRef.current.smooth = false;
+      const scrollEl = scrollRef.current;
+      if (scrollEl) {
+        scrollToBottom(scrollEl);
+        if (force) {
           setAtBottom(true);
         }
-      };
+      }
+    });
 
-      return () => {
-        // eslint-disable-next-line no-param-reassign
-        onRequestScrollToBottom.current = null;
-      };
-    }
-  }, [onRequestScrollToBottom]);
+    return unsubscribe;
+  }, [listenScrollToBottomRequest]);
 
   const [focusItem, setFocusItem] = useState<
     | {

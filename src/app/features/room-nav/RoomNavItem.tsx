@@ -243,12 +243,13 @@ export function RoomNavItem({
   );
 
   const roomName = useRoomName(room);
-  const latestEvent = useRoomLatestContentfulEvent(room);
+  const [latestEvent, latestEditedEvent] = useRoomLatestContentfulEvent(room);
 
   const latestMessageText = useMemo(() => {
     if (!latestEvent) return undefined;
     return getLatestMessageText(room, latestEvent, mx.getSafeUserId(), direct, t);
-  }, [room, latestEvent, direct, mx, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, latestEvent, latestEditedEvent, direct, mx, t]);
 
   const handleContextMenu: MouseEventHandler<HTMLElement> = (evt) => {
     evt.preventDefault();

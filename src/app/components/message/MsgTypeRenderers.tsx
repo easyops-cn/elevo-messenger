@@ -43,6 +43,7 @@ import { parseGeoUri, trimTrailingSlash } from '../../utils/common';
 import { Attachment, AttachmentBox, AttachmentContent, AttachmentHeader } from './attachment';
 import { FileHeader, FileDownloadButton } from './FileHeader';
 import { VoiceMessage } from './content/VoiceMessage';
+import { useRoomScrollToBottom } from '../../features/room/RoomScrollToBottomContext';
 
 export function MBadEncrypted() {
   return (
@@ -284,6 +285,7 @@ type SseMarkdownBodyProps = Pick<MTextProps, "renderBody" | "renderUrlsPreview">
 function SseMarkdownBody({ sseData, renderBody, renderUrlsPreview, style }: SseMarkdownBodyProps) {
   const mx = useMatrixClient();
   const homeserverBaseUrl = mx.getHomeserverUrl();
+  const { emitScrollToBottomRequest } = useRoomScrollToBottom();
   const [streamedBody, setStreamedBody] = useState('');
   const [streamError, setStreamError] = useState(false);
 
@@ -342,6 +344,7 @@ function SseMarkdownBody({ sseData, renderBody, renderUrlsPreview, style }: SseM
                 typeof payload.delta === 'string'
               ) {
                 setStreamedBody((prev) => prev + payload.delta);
+                emitScrollToBottomRequest({ force: false });
               }
             } catch {
               // Ignore malformed SSE payload chunks and continue consuming stream.
@@ -366,9 +369,9 @@ function SseMarkdownBody({ sseData, renderBody, renderUrlsPreview, style }: SseM
     return () => {
       abortController.abort();
     };
-  }, [homeserverBaseUrl, sseData.bridgeId, sseData.stepId]);
+  }, [homeserverBaseUrl, sseData.bridgeId, sseData.stepId, emitScrollToBottomRequest]);
 
-  const markdownBody = !streamError ? streamedBody : 'Error loading content';
+  const markdownBody = !streamError ? streamedBody : 'Error loading streaming content';
   const trimmedBody = trimReplyFromBody(markdownBody);
 
   const sanitizedHtml = useMemo(() => {

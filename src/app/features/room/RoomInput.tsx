@@ -123,6 +123,7 @@ import { SmileIcon } from '../../icons/SmileIcon';
 import { MicIcon } from '../../icons/MicIcon';
 import { SendHorizontalIcon } from '../../icons/SendHorizontalIcon';
 import { CaseSensitiveIcon } from '../../icons/CaseSensitiveIcon';
+import { useRoomScrollToBottom } from './RoomScrollToBottomContext';
 
 interface WorkspaceExplorerMessage {
   type: 'select-file';
@@ -150,10 +151,9 @@ interface RoomInputProps {
   roomId: string;
   room: Room;
   threadRootId?: string;
-  scrollToBottomRef?: React.MutableRefObject<(() => void) | null>;
 }
 export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
-  ({ editor, fileDropContainerRef, roomId, room, threadRootId, scrollToBottomRef }, ref) => {
+  ({ editor, fileDropContainerRef, roomId, room, threadRootId }, ref) => {
     const { t } = useTranslation();
     const mx = useMatrixClient();
     const useAuthentication = useMediaAuthentication();
@@ -163,6 +163,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const commands = useCommands(mx, room);
     const emojiBtnRef = useRef<HTMLButtonElement>(null);
     const roomToParents = useAtomValue(roomToParentsAtom);
+    const { emitScrollToBottomRequest } = useRoomScrollToBottom();
 
     const threadOrRoomId = threadRootId || roomId;
     const [msgDraft, setMsgDraft] = useAtom(threadOrRoomIdToMsgDraftAtomFamily(threadOrRoomId));
@@ -444,7 +445,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
 
     const submit = useCallback(() => {
       uploadBoardHandlers.current?.handleSend();
-      scrollToBottomRef?.current?.();
+      emitScrollToBottomRequest({ force: true });
 
       const commandName = getBeginCommand(editor);
       let plainText = toPlainText(editor.children, isMarkdown).trim();
@@ -545,7 +546,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       setReplyDraft,
       isMarkdown,
       commands,
-      scrollToBottomRef,
+      emitScrollToBottomRequest,
     ]);
 
     const handleKeyDown: KeyboardEventHandler = useCallback(
@@ -615,7 +616,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           url: mxc,
           info,
         });
-        scrollToBottomRef?.current?.();
+        emitScrollToBottomRequest({ force: true });
       } finally {
         URL.revokeObjectURL(blobUrl);
       }
