@@ -1,9 +1,12 @@
-import React, { CSSProperties, ReactNode, useState } from 'react';
+import React, { CSSProperties, ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod/v4';
 import { Box, Chip, Icon, Icons, Text, color, config, toRem } from 'folds';
 import { IContent } from 'matrix-js-sdk';
 import { invoke } from '@tauri-apps/api/core';
+import DOMPurify from 'dompurify';
+import parse from 'html-react-parser';
+import { marked } from 'marked';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import {
@@ -37,7 +40,7 @@ import {
   MATRIX_SPOILER_REASON_PROPERTY_NAME,
 } from '../../../types/matrix/common';
 import { FALLBACK_MIMETYPE, getBlobSafeMimeType } from '../../utils/mimeTypes';
-import { parseGeoUri } from '../../utils/common';
+import { parseGeoUri, trimTrailingSlash } from '../../utils/common';
 import { Attachment, AttachmentBox, AttachmentContent, AttachmentHeader } from './attachment';
 import { FileHeader, FileDownloadButton } from './FileHeader';
 import { VoiceMessage } from './content/VoiceMessage';
@@ -96,8 +99,21 @@ const OidcLoginSchema = z.object({
 
 type OidcLoginData = z.infer<typeof OidcLoginSchema>;
 
+const SseRenderSchema = z.object({
+  bridgeId: z.string().regex(/^[a-zA-Z0-9_-]+$/, 'bridgeId must be a valid identifier'),
+  stepId: z.string(),
+  streaming: z.boolean(),
+});
+
+type SseRenderData = z.infer<typeof SseRenderSchema>;
+
 function parseToolCall(content: Record<string, unknown>): ToolCallData | undefined {
   const result = ToolCallSchema.safeParse(content['vip.elevo.tool_call']);
+  return result.success ? result.data : undefined;
+}
+
+function parseSseRender(content: Record<string, unknown>): SseRenderData | undefined {
+  const result = SseRenderSchema.safeParse(content['vip.elevo.sse']);
   return result.success ? result.data : undefined;
 }
 
@@ -261,6 +277,113 @@ const oidcLinkStyles: CSSProperties = {
   maxWidth: toRem(400),
 };
 
+type SseMarkdownBodyProps = {
+  sseData: SseRenderData;
+  style?: CSSProperties;
+};
+
+function SseMarkdownBody({ sseData, style }: SseMarkdownBodyProps) {
+  const mx = useMatrixClient();
+  const homeserverBaseUrl = mx.getHomeserverUrl();
+  const [streamedBody, setStreamedBody] = useState('');
+  const [streamError, setStreamError] = useState(false);
+
+  useEffect(() => {
+    setStreamedBody('');
+    setStreamError(false);
+
+    const abortController = new AbortController();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    const readSse = async () => {
+      try {
+        const response = await fetch(
+          `${trimTrailingSlash(homeserverBaseUrl)}/${sseData.bridgeId}-bridge/sse/step/${encodeURIComponent(sseData.stepId)}`,
+          {
+            method: 'GET',
+            headers: {
+              Accept: 'text/event-stream',
+            },
+            signal: abortController.signal,
+          }
+        );
+
+        if (!response.ok || !response.body) {
+          throw new Error(`SSE request failed with status: ${response.status}`);
+        }
+
+        const reader = response.body.getReader();
+
+        const readNextChunk = async (): Promise<void> => {
+          const { done, value } = await reader.read();
+          if (done) return;
+
+          buffer += decoder.decode(value, { stream: true });
+          const events = buffer.split(/\r?\n\r?\n/);
+          buffer = events.pop() ?? '';
+
+          events.forEach((eventBlock) => {
+            const dataLines = eventBlock
+              .split(/\r?\n/)
+              .filter((line) => line.startsWith('data:'))
+              .map((line) => line.slice(5).trimStart());
+
+            if (dataLines.length === 0) return;
+
+            const dataText = dataLines.join('\n');
+            try {
+              const payload: unknown = JSON.parse(dataText);
+              if (
+                typeof payload === 'object' &&
+                payload !== null &&
+                'type' in payload &&
+                'delta' in payload &&
+                payload.type === 'text-delta' &&
+                typeof payload.delta === 'string'
+              ) {
+                setStreamedBody((prev) => prev + payload.delta);
+              }
+            } catch {
+              // Ignore malformed SSE payload chunks and continue consuming stream.
+            }
+          });
+
+          await readNextChunk();
+        };
+
+        await readNextChunk();
+      } catch (error) {
+        if (!abortController.signal.aborted) {
+          setStreamError(true);
+          // eslint-disable-next-line no-console
+          console.error('Failed to consume step SSE stream:', error);
+        }
+      }
+    };
+
+    readSse();
+
+    return () => {
+      abortController.abort();
+    };
+  }, [homeserverBaseUrl, sseData.stepId]);
+
+  const markdownBody = !streamError ? streamedBody : 'Error loading content';
+  const trimmedBody = trimReplyFromBody(markdownBody);
+
+  const sanitizedHtml = useMemo(() => {
+    const parsed = marked.parse(trimmedBody, { gfm: true, breaks: true }) as string;
+    return DOMPurify.sanitize(typeof parsed === 'string' ? parsed : '');
+  }, [trimmedBody]);
+
+  return (
+    <MessageTextBody style={style}>
+      {parse(sanitizedHtml)}
+    </MessageTextBody>
+  );
+}
+
 export function MText({ edited, content, renderBody, renderUrlsPreview, style, readOnly }: MTextProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
@@ -345,6 +468,16 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
     return <AskUserQuestionCard data={askUserQuestion} style={style} readOnly={readOnly} />;
   }
 
+  const sseRender = parseSseRender(content);
+  if (sseRender?.streaming) {
+    return (
+      <SseMarkdownBody
+        sseData={sseRender}
+        style={style}
+      />
+    );
+  }
+
   const questionAnswered = parseQuestionAnswered(content);
   if (questionAnswered) {
     return <QuestionAnsweredCard data={questionAnswered} style={style} />;
@@ -388,7 +521,7 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
           body: trimmedBody,
           customBody: typeof customBody === 'string' ? customBody : undefined,
         })}
-        {edited && <MessageEditedContent />}
+        {edited && !sseRender && <MessageEditedContent />}
       </MessageTextBody>
       {renderUrlsPreview && urls && urls.length > 0 && renderUrlsPreview(urls)}
     </>
