@@ -106,8 +106,8 @@ export const unreadEqual = (u1: Unread, u2: Unread): boolean => {
   if (f1.size !== f2.size) return false;
 
   let fromEqual = true;
-  f1?.forEach((item) => {
-    if (!f2?.has(item)) {
+  f1.forEach((item) => {
+    if (!f2.has(item)) {
       fromEqual = false;
     }
   });

@@ -26,8 +26,7 @@ export function useThreadUnreadBadge({
     };
 
     const handleTimelineEvent: RoomEventHandlerMap[RoomEvent.Timeline] = (timelineEvent) => {
-      const eventId = timelineEvent.getId();
-      if (timelineEvent.threadRootId !== threadId && eventId !== threadId) {
+      if (timelineEvent.threadRootId !== threadId && timelineEvent.getId() !== threadId) {
         return;
       }
       updateHasUnreadBadge();
