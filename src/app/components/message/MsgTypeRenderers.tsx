@@ -5,7 +5,6 @@ import { Box, Chip, Icon, Icons, Text, color, config, toRem } from 'folds';
 import { IContent } from 'matrix-js-sdk';
 import { invoke } from '@tauri-apps/api/core';
 import DOMPurify from 'dompurify';
-import parse from 'html-react-parser';
 import { marked } from 'marked';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
@@ -277,12 +276,12 @@ const oidcLinkStyles: CSSProperties = {
   maxWidth: toRem(400),
 };
 
-type SseMarkdownBodyProps = {
+type SseMarkdownBodyProps = Pick<MTextProps, "renderBody" | "renderUrlsPreview"> & {
   sseData: SseRenderData;
   style?: CSSProperties;
 };
 
-function SseMarkdownBody({ sseData, style }: SseMarkdownBodyProps) {
+function SseMarkdownBody({ sseData, renderBody, renderUrlsPreview, style }: SseMarkdownBodyProps) {
   const mx = useMatrixClient();
   const homeserverBaseUrl = mx.getHomeserverUrl();
   const [streamedBody, setStreamedBody] = useState('');
@@ -367,7 +366,7 @@ function SseMarkdownBody({ sseData, style }: SseMarkdownBodyProps) {
     return () => {
       abortController.abort();
     };
-  }, [homeserverBaseUrl, sseData.stepId]);
+  }, [homeserverBaseUrl, sseData.bridgeId, sseData.stepId]);
 
   const markdownBody = !streamError ? streamedBody : 'Error loading content';
   const trimmedBody = trimReplyFromBody(markdownBody);
@@ -377,10 +376,19 @@ function SseMarkdownBody({ sseData, style }: SseMarkdownBodyProps) {
     return DOMPurify.sanitize(typeof parsed === 'string' ? parsed : '');
   }, [trimmedBody]);
 
+  const content = useMemo(() => ({
+    body: markdownBody,
+    formatted_body: sanitizedHtml,
+  }), [markdownBody, sanitizedHtml]);
+
   return (
-    <MessageTextBody style={style}>
-      {parse(sanitizedHtml)}
-    </MessageTextBody>
+    // eslint-disable-next-line no-use-before-define
+    <MText
+      content={content}
+      renderBody={renderBody}
+      renderUrlsPreview={renderUrlsPreview}
+      style={style}
+    />
   );
 }
 
@@ -473,6 +481,8 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
     return (
       <SseMarkdownBody
         sseData={sseRender}
+        renderBody={renderBody}
+        renderUrlsPreview={renderUrlsPreview}
         style={style}
       />
     );
