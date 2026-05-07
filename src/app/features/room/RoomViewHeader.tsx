@@ -79,6 +79,7 @@ import { SearchIcon } from '../../icons/SearchIcon';
 import { UsersIcon } from '../../icons/UsersIcon';
 import { callChatAtom } from '../../state/callEmbed';
 import { useThreadChat } from '../../state/threadChat';
+import { useRoomMembers } from '../../hooks/useRoomMembers';
 
 type RoomMenuProps = {
   room: Room;
@@ -92,8 +93,10 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
   const powerLevels = usePowerLevelsContext();
   const creators = useRoomCreators(room);
 
+  const members = useRoomMembers(mx, room.roomId);
+  const direct = useIsDirectRoom();
   const permissions = useRoomPermissions(creators, powerLevels);
-  const canInvite = permissions.action('invite', mx.getSafeUserId());
+  const canInvite = !(direct && members.length >= 2) && permissions.action('invite', mx.getSafeUserId());
   const notificationPreferences = useRoomsNotificationPreferencesContext();
   const notificationMode = getRoomNotificationMode(notificationPreferences, room.roomId);
   const { navigateRoom } = useRoomNavigate();
@@ -170,7 +173,7 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
       </Box>
       <Line variant="Surface" size="300" />
       <Box direction="Column" gap="100" style={{ padding: config.space.S100 }}>
-        <MenuItem
+        {canInvite && <MenuItem
           onClick={handleInvite}
           variant="Primary"
           fill="None"
@@ -178,12 +181,11 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
           after={<Icon size="100" src={Icons.UserPlus} />}
           radii="300"
           aria-pressed={invitePrompt}
-          disabled={!canInvite}
         >
           <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
             {t('room.invite')}
           </Text>
-        </MenuItem>
+        </MenuItem>}
         <MenuItem
           onClick={handleCopyLink}
           size="300"

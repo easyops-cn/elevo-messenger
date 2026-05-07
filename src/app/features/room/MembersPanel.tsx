@@ -44,6 +44,7 @@ import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { InviteUserPrompt } from '../../components/invite-user-prompt';
 import { UserPlusIcon } from '../../icons/UserPlusIcon';
 import { ShieldUserIcon } from '../../icons/ShieldUserIcon';
+import { useIsDirectRoom } from '../../hooks/useRoom';
 
 type MemberItemProps = {
   useAuthentication: boolean;
@@ -145,7 +146,8 @@ export function MembersPanel({
   const powerLevels = usePowerLevelsContext();
   const creators = useRoomCreators(room);
   const permissions = useRoomPermissions(creators, powerLevels);
-  const canInvite = permissions.action('invite', mx.getSafeUserId());
+  const direct = useIsDirectRoom();
+  const canInvite = !(direct && members.length >= 2) && permissions.action('invite', mx.getSafeUserId());
   const [invitePrompt, setInvitePrompt] = useState(false);
   const getPowerTag = useGetMemberPowerTag(room, creators, powerLevels);
 
