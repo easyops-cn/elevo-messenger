@@ -46,6 +46,8 @@ export function ThreadsPanel({ room }: ThreadsPanelProps) {
     [setThreadChat]
   );
 
+  if (!loading && !error && sortedThreads.length === 0) return null;
+
   return (
     <Box direction="Column" gap="100">
       <Text className={css.MembersGroupLabel} size="L400" priority="300">
@@ -72,12 +74,6 @@ export function ThreadsPanel({ room }: ThreadsPanelProps) {
             <Text size="T200">{t('common.retry')}</Text>
           </Chip>
         </Box>
-      )}
-
-      {!loading && !error && sortedThreads.length === 0 && (
-        <Text style={{ padding: config.space.S300 }} align="Center" size="T200" priority="300">
-          {t('room.noThreads')}
-        </Text>
       )}
 
       {!loading && !error && sortedThreads.length > 0 && (

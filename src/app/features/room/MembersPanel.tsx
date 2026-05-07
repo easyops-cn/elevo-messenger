@@ -204,12 +204,10 @@ export function MembersPanel({
         {canInvite && (
           <Chip
             as="button"
-            variant="Secondary"
+            variant="SurfaceVariant"
             fill="None"
-            outlined
             size="400"
             radii="Pill"
-            style={{ borderWidth: 1 }}
             onClick={handleInviteClick}
           >
             <Icon size="50" src={UserPlusIcon} />

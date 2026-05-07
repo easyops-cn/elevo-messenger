@@ -21,6 +21,8 @@ export function FilesPanel({ room }: FilesPanelProps) {
 
   if (isSpaceRoom) return null;
 
+  if (!loading && !error && files.length === 0) return null;
+
   return (
     <>
       <Box direction="Column" gap="100">
@@ -48,12 +50,6 @@ export function FilesPanel({ room }: FilesPanelProps) {
               <Text size="T200">{t('common.retry')}</Text>
             </Chip>
           </Box>
-        )}
-
-        {!loading && !error && files.length === 0 && (
-          <Text style={{ padding: config.space.S300 }} align="Center" size="T200" priority="300">
-            {t('room.noFiles')}
-          </Text>
         )}
 
         {!loading && !error && files.length > 0 && (
