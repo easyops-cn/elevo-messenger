@@ -1,6 +1,5 @@
 import React, { MouseEventHandler, useCallback, useMemo, useRef, useState } from 'react';
 import {
-  Badge,
   Box,
   Chip,
   Icon,
@@ -8,6 +7,7 @@ import {
   MenuItem,
   Spinner,
   Text,
+  color,
   config,
 } from 'folds';
 import { Room, RoomMember } from 'matrix-js-sdk';
@@ -43,6 +43,7 @@ import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { InviteUserPrompt } from '../../components/invite-user-prompt';
 import { UserPlusIcon } from '../../icons/UserPlusIcon';
+import { ShieldUserIcon } from '../../icons/ShieldUserIcon';
 
 type MemberItemProps = {
   useAuthentication: boolean;
@@ -102,12 +103,8 @@ function MemberItem({
         </Avatar>
       }
       after={
-        <Box alignItems="Center" gap="100" shrink="No">
-          {badge && (
-            <Badge variant={badge.variant} fill="Soft" radii="300" outlined>
-              <Text size="T200">{badge.label}</Text>
-            </Badge>
-          )}
+        badge && <Box alignItems="Center" gap="100" shrink="No" title={badge.label}>
+          <Icon size="100" src={ShieldUserIcon} style={{ color: color[badge.variant].Main }} />
         </Box>
       }
     >
