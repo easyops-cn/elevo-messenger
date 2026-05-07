@@ -74,6 +74,7 @@ import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import { ContainerColor } from '../../../styles/ContainerColor.css';
 import { useRoomCreators } from '../../../hooks/useRoomCreators';
 import { useRoomPermissions } from '../../../hooks/useRoomPermissions';
+import { PinIcon } from '../../../icons/PinIcon';
 
 type PinnedMessageProps = {
   room: Room;
@@ -163,6 +164,7 @@ function PinnedMessage({
 
   return (
     <ModernLayout
+      inTimeline={false}
       before={
         <AvatarBase>
           <Avatar size="300">
@@ -465,7 +467,7 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(
                     justifyContent="Center"
                     alignItems="Center"
                   >
-                    <Icon src={Icons.Pin} size="600" />
+                    <Icon src={PinIcon} size="600" />
                     <Box
                       style={{ maxWidth: toRem(300) }}
                       direction="Column"

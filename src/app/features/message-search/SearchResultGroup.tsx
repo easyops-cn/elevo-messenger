@@ -219,6 +219,7 @@ export function SearchResultGroup({
               direction="Column"
             >
               <ModernLayout
+                inTimeline={false}
                 before={
                   <AvatarBase>
                     <Avatar size="300" radii="Pill">

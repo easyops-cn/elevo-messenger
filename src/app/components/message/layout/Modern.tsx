@@ -9,20 +9,21 @@ type ModernLayoutProps = {
   header?: ReactNode;
   beforeContent?: ReactNode;
   afterContent?: ReactNode;
+  inTimeline?: boolean;
 };
 
-export const ModernLayout = as<'div', ModernLayoutProps>(({ isOwn, before, header, beforeContent, afterContent, children, ...props }, ref) => {
+export const ModernLayout = as<'div', ModernLayoutProps>(({ isOwn, before, header, beforeContent, afterContent, inTimeline = true, children, ...props }, ref) => {
   const screenSize = useScreenSize();
   const isMobile = screenSize === ScreenSize.Mobile;
   const padding = isMobile ? 16 : 56;
   
   return (
-    <Box gap="300" direction={isOwn ? 'RowReverse' : 'Row'} {...props} style={{
+    <Box gap="300" direction={isOwn ? 'RowReverse' : 'Row'} {...props} style={inTimeline ? {
       ...props.style,
       width: `calc(100% - ${toRem(padding)})`,
       maxWidth: isMobile ? undefined : `max(50vw, ${toRem(800)})`,
       [isOwn ? 'marginLeft' : 'marginRight']: 'auto',
-    }} ref={ref}>
+    } : props.style} ref={ref}>
       <Box className={css.ModernBefore} shrink="No">
         {before}
       </Box>

@@ -449,15 +449,15 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                   <Badge
                     style={{
                       position: 'absolute',
-                      left: toRem(3),
-                      top: toRem(3),
+                      right: toRem(-2),
+                      top: toRem(-2),
                     }}
                     variant="Secondary"
                     size="300"
                     fill="Solid"
                     radii="Pill"
                   >
-                    <Text as="span" size="L400">
+                    <Text as="span" size="T200">
                       {pinnedEvents.length}
                     </Text>
                   </Badge>
