@@ -86,6 +86,7 @@ import { UserIcon } from '../../../icons/UserIcon';
 import { SmileIcon } from '../../../icons/SmileIcon';
 import { CircleAlertIcon } from '../../../icons/CircleAlertIcon';
 import { CodeIcon } from '../../../icons/CodeIcon';
+import { useRoomThread } from '../RoomThreadContext';
 
 export type ReactionHandler = (keyOrMxc: string, shortcode: string) => void;
 
@@ -411,12 +412,14 @@ export const MessageDeleteItem = as<
   const mx = useMatrixClient();
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const thread = useRoomThread();
+  const threadId = thread?.id ?? null;
 
   const [deleteState, deleteMessage] = useAsyncCallback(
     useCallback(
       (eventId: string, reason?: string) =>
-        mx.redactEvent(room.roomId, eventId, undefined, reason ? { reason } : undefined),
-      [mx, room]
+        mx.redactEvent(room.roomId, threadId, eventId, undefined, reason ? { reason } : undefined),
+      [mx, room, threadId]
     )
   );
 

@@ -850,7 +850,7 @@
   },
   "message": {
     "deleted": "Message deleted",
-    "deletedWithReason": "Message deleted:",
+    "deletedWithReason": "Message deleted: {{reason}}",
     "edited": "edited",
     "unsupported": "Unsupported message",
     "failedLoad": "Failed to load message",

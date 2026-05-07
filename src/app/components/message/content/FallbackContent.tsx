@@ -1,20 +1,20 @@
 import { Box, Icon, Icons, Text, as, color, config } from 'folds';
-import React from 'react';
+import React, { type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 
-const warningStyle = { color: color.Warning.Main, opacity: config.opacity.P300 };
-const criticalStyle = { color: color.Critical.Main, opacity: config.opacity.P300 };
+const warningStyle = { color: color.Warning.Main, opacity: config.opacity.P400 };
+const criticalStyle = { color: color.Critical.Main, opacity: config.opacity.P400 };
 
-export const MessageDeletedContent = as<'div', { children?: never; reason?: string }>(
-  ({ reason, ...props }, ref) => {
+export const MessageDeletedContent = as<'div', { children?: never; reason?: string; before?: ReactNode; }>(
+  ({ reason, before, ...props }, ref) => {
     const { t } = useTranslation();
     return (
-      <Box as="span" alignItems="Center" gap="100" style={warningStyle} {...props} ref={ref}>
-        <Icon size="50" src={Icons.Delete} />
+      <Box as="span" alignItems="Center" gap="100" {...props} ref={ref}>
+        {before}
         {reason ? (
-          <i>{t('message.deletedWithReason')} {reason}</i>
+          <i style={warningStyle}>{t('message.deletedWithReason', { reason })}</i>
         ) : (
-          <i>{t('message.deleted')}</i>
+          <i style={warningStyle}>{t('message.deleted')}</i>
         )}
       </Box>
     );

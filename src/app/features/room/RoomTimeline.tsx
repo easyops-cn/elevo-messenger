@@ -1666,9 +1666,6 @@ export function RoomTimeline({
     if (eventSender && ignoredUsersSet.has(eventSender)) {
       return null;
     }
-    if (mEvent.isRedacted() && !showHiddenEvents) {
-      return null;
-    }
 
     if (!newDivider && readUptoEventIdRef.current) {
       newDivider = prevEvent?.getId() === readUptoEventIdRef.current;

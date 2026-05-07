@@ -35,6 +35,7 @@ import { Volume2Icon } from '../icons/Volume2Icon';
 import { GlobeIcon } from '../icons/GlobeIcon';
 import { LockIcon } from '../icons/LockIcon';
 import { ShieldIcon } from '../icons/ShieldIcon';
+import { getMxIdLocalPart } from './matrix';
 
 export const getStateEvent = (
   room: Room,
@@ -601,7 +602,8 @@ export const getLatestMessageText = (
   myUserId: string,
   direct: boolean | undefined,
   t: (key: string, options?: Record<string, unknown>) => string,
-  showUsername = true
+  showUsername = true,
+  showSelfName = false
 ): string | undefined => {
   const content = evt.getContent();
   const sender = evt.getSender();
@@ -622,7 +624,7 @@ export const getLatestMessageText = (
     body = typeof content.body === 'string' ? content.body : '';
   }
 
-  if (direct || sender === myUserId || !showUsername) return body;
-  const senderName = getMemberDisplayName(room, sender) || sender;
+  if (direct || (!showSelfName && sender === myUserId) || !showUsername) return body;
+  const senderName = getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender) ?? sender;
   return `${senderName}: ${body}`;
 };

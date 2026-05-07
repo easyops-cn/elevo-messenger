@@ -9,6 +9,7 @@ import { getMxIdLocalPart } from '../../utils/matrix';
 import { getLatestMessageText, getMemberDisplayName } from '../../utils/room';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { RelativeTime } from '../../components/RelativeTime';
+import { MessageDeletedContent } from '../../components/message';
 
 type ThreadMenuItemProps = {
   useAuthentication: boolean;
@@ -37,6 +38,8 @@ export function ThreadMenuItem({
 
   const {
     rootSummary,
+    rootIsRedacted,
+    rootSenderName,
     latestReplySummary,
     latestReplySenderId,
     latestReplySenderName,
@@ -44,8 +47,11 @@ export function ThreadMenuItem({
     latestTs,
   } = useMemo(() => {
     const root = threadEvent
-      ? getLatestMessageText(room, threadEvent, mx.getSafeUserId(), false, t)
+      ? getLatestMessageText(room, threadEvent, mx.getSafeUserId(), false, t, true, true)
       : undefined;
+    const rIsRedacted = threadEvent?.isRedacted() ?? false;
+    const rSenderId = rIsRedacted ? threadEvent?.getSender() : undefined;
+    const rSenderName = rSenderId ? getMemberDisplayName(room, rSenderId) ?? getMxIdLocalPart(rSenderId) ?? rSenderId : undefined;
     const latestSummary = threadLastReply
       ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t, false)
       : undefined;
@@ -61,6 +67,8 @@ export function ThreadMenuItem({
 
     return {
       rootSummary: root,
+      rootIsRedacted: rIsRedacted,
+      rootSenderName: rSenderName,
       latestReplySummary: latestSummary,
       latestReplySenderId: senderId,
       latestReplySenderName: senderName,
@@ -79,7 +87,9 @@ export function ThreadMenuItem({
     >
       <Box grow="Yes" direction="Column" gap="100">
         <Text size="T300" truncate>
-          {rootSummary ?? t('message.threadLatestReplyFallback')}
+          {rootIsRedacted
+            ? <MessageDeletedContent before={`${rootSenderName}: `} />
+            : (rootSummary ?? t('message.threadLatestReplyFallback'))}
         </Text>
           <Box alignItems="Center" gap="100">
             {latestReplySenderId && (
