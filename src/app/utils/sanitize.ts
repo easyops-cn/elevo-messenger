@@ -57,7 +57,6 @@ const permittedTagToAttributes = {
     'data-mx-pill',
     'data-mx-ping',
     'data-md',
-    'data-tool-call',
     'data-task-ref',
     'data-task-status',
     'status',

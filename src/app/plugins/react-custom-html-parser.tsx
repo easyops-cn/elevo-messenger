@@ -547,28 +547,6 @@ export const getReactCustomHtmlParser = (
           );
         }
 
-        if (name === 'span' && 'data-tool-call' in props) {
-          const toolName = props['data-name'] ?? props.name;
-          const toolTitle = props['data-title'] ?? props.title;
-          return (
-            <span className={css.ToolCall()}>
-              <span className={css.ToolCallIcon}>
-                <Icon size="50" src={Icons.Terminal} />
-              </span>
-              {toolName ? (
-                <>
-                  {toolName}
-                  {toolTitle && (
-                    <span className={css.ToolCallTitle}>{toolTitle}</span>
-                  )}
-                </>
-              ) : (
-                domToReact(children, opts)
-              )}
-            </span>
-          );
-        }
-
         if (name === 'img') {
           const htmlSrc = mxcUrlToHttp(mx, props.src, params.useAuthentication);
           if (htmlSrc && props.src.startsWith('mxc://') === false) {

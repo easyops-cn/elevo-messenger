@@ -85,7 +85,8 @@ const ToolCallSchema = z.object({
   title: z.string().optional(),
   input: z.unknown(),
   output: z.unknown().optional(),
-  status: z.enum(['inprogress', 'completed']),
+  error: z.unknown().optional(),
+  status: z.enum(['inprogress', 'completed', 'failed']),
 });
 
 type ToolCallData = z.infer<typeof ToolCallSchema>;
@@ -162,7 +163,7 @@ const toolCallBodyStyles: CSSProperties = {
 type ToolCallCardProps = { data: ToolCallData; style?: CSSProperties };
 function ToolCallCard({ data, style }: ToolCallCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const iconColor = data.status === 'completed' ? color.Success.Main : color.Secondary.Main;
+  const iconColor = data.status === 'completed' ? color.Success.Main : data.status === 'failed' ? color.Critical.Main : color.Secondary.Main;
   const formatValue = (val: unknown) =>
     typeof val === 'string' ? val : JSON.stringify(val, null, 2);
   const preStyles: CSSProperties = {
@@ -207,7 +208,7 @@ function ToolCallCard({ data, style }: ToolCallCardProps) {
             Input
           </Text>
           <pre style={preStyles}>{formatValue(data.input)}</pre>
-          {data.output !== undefined && (
+          {data.status === "completed" && data.output !== undefined && (
             <>
               <div style={dividerStyles} />
               <Text
@@ -218,6 +219,19 @@ function ToolCallCard({ data, style }: ToolCallCardProps) {
                 Output
               </Text>
               <pre style={preStyles}>{formatValue(data.output)}</pre>
+            </>
+          )}
+          {data.status === "failed" && data.error !== undefined && (
+            <>
+              <div style={dividerStyles} />
+              <Text
+                size="T200"
+                priority="300"
+                style={{ fontWeight: 500, marginBottom: config.space.S100 }}
+              >
+                Error
+              </Text>
+              <pre style={{...preStyles, color: color.Critical.Main}}>{formatValue(data.error)}</pre>
             </>
           )}
         </div>
