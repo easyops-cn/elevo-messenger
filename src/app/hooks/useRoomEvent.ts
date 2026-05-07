@@ -9,7 +9,7 @@ const useFetchEvent = (room: Room, eventId: string | undefined) => {
   const mx = useMatrixClient();
 
   const fetchEventCallback = useCallback(async () => {
-    if (!eventId) return;
+    if (!eventId) return null;
 
     const evt = await mx.fetchRoomEvent(room.roomId, eventId);
     const mEvent = new MatrixEvent(evt);
