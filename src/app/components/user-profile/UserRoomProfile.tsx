@@ -22,6 +22,7 @@ import { useMemberPowerCompare } from '../../hooks/useMemberPowerCompare';
 import { CreatorChip } from './CreatorChip';
 import { getHomeCreateChatPath, withSearchParam } from '../../pages/pathUtils';
 import { HomeCreateChatSearchParams } from '../../pages/paths';
+import { useCloseRoomSettings } from '../../state/hooks/roomSettings';
 
 type UserRoomProfileProps = {
   userId: string;
@@ -58,9 +59,11 @@ export function UserRoomProfile({ userId }: UserRoomProfileProps) {
   const avatarUrl = (avatarMxc && mxcUrlToHttp(mx, avatarMxc, useAuthentication)) ?? undefined;
 
   const presence = useUserPresence(userId);
+  const closeRoomSettings = useCloseRoomSettings();
 
   const handleMessage = () => {
     closeUserRoomProfile();
+    closeRoomSettings();
     const chatSearchParam: HomeCreateChatSearchParams = {
       userId,
     };
