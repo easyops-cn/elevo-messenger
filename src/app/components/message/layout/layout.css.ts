@@ -153,7 +153,7 @@ export const BubbleContent = recipe({
     isOwn: {
       true: {
         backgroundColor: color.Primary.Container,
-        color: color.Primary.OnContainer,
+        color: color.Background.OnContainer,
       },
       false: {
         backgroundColor: color.SurfaceVariant.Container,
@@ -169,7 +169,7 @@ export const BubbleContent = recipe({
 
 export const ModernOwnContent = recipe({
   base: {
-    color: color.Primary.OnContainer,
+    color: color.Background.OnContainer,
     borderRadius: config.radii.R400,
   },
   variants: {

@@ -36,7 +36,7 @@ export const lightTheme = createTheme(color, {
     ContainerHover: '#E6F4FF',
     ContainerActive: '#E6F4FF',
     ContainerLine: '#BDE1FF',
-    OnContainer: 'rgba(0, 0, 0, 0.85)',
+    OnContainer: '#007AFF',
   },
 
   Secondary: {
@@ -62,7 +62,7 @@ export const lightTheme = createTheme(color, {
     ContainerHover: '#E6FFE7',
     ContainerActive: '#E6FFE7',
     ContainerLine: '#A5F2AC',
-    OnContainer: 'rgba(0, 0, 0, 0.85)',
+    OnContainer: '#29CC49',
   },
 
   Warning: {
@@ -75,7 +75,7 @@ export const lightTheme = createTheme(color, {
     ContainerHover: '#F2E5D9',
     ContainerActive: '#EEDDCC',
     ContainerLine: '#E9D4BF',
-    OnContainer: 'rgba(0, 0, 0, 0.85)',
+    OnContainer: '#F0A22E',
   },
 
   Critical: {
@@ -88,7 +88,7 @@ export const lightTheme = createTheme(color, {
     ContainerHover: '#FFF8E6',
     ContainerActive: '#FFF8E6',
     ContainerLine: '#FFE6AB',
-    OnContainer: 'rgba(0, 0, 0, 0.85)',
+    OnContainer: '#F24C25',
   },
 
   Other: {
@@ -133,7 +133,7 @@ const darkThemeData = {
     ContainerHover: '#162437',
     ContainerActive: '#162437',
     ContainerLine: '#142F4F',
-    OnContainer: 'rgba(255, 255, 255, 0.85)',
+    OnContainer: '#0A84FF',
   },
 
   Secondary: {
@@ -159,7 +159,7 @@ const darkThemeData = {
     ContainerHover: '#162A21',
     ContainerActive: '#162A21',
     ContainerLine: '#143C23',
-    OnContainer: 'rgba(255, 255, 255, 0.85)',
+    OnContainer: '#0BA730',
   },
 
   Warning: {
@@ -172,7 +172,7 @@ const darkThemeData = {
     ContainerHover: '#2D241C',
     ContainerActive: '#2D241C',
     ContainerLine: '#432F19',
-    OnContainer: 'rgba(255, 255, 255, 0.85)',
+    OnContainer: '#C5740A',
   },
 
   Critical: {
@@ -185,7 +185,7 @@ const darkThemeData = {
     ContainerHover: '#2F1D1D',
     ContainerActive: '#2F1D1D',
     ContainerLine: '#47221E',
-    OnContainer: 'rgba(255, 255, 255, 0.85)',
+    OnContainer: '#D24524',
   },
 
   Other: {
