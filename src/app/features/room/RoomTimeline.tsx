@@ -119,6 +119,7 @@ import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { useThreadChat } from '../../state/threadChat';
 import { ThreadSummary } from './ThreadSummary';
 import { useRoomScrollToBottom } from './RoomScrollToBottomContext';
+import { useRoomThread } from './RoomThreadContext';
 
 const TimelineFloat = as<'div', css.TimelineFloatVariants>(
   ({ position, className, ...props }, ref) => (
@@ -229,7 +230,6 @@ const getEventIdAbsoluteIndex = (
 type RoomTimelineProps = {
   room: Room;
   eventId?: string;
-  thread?: Thread;
   roomInputRef: RefObject<HTMLElement>;
   editor: Editor;
 };
@@ -450,11 +450,10 @@ const getRoomUnreadInfo = (room: Room, scrollTo: boolean, thread: Thread | undef
 export function RoomTimeline({
   room,
   eventId,
-  thread,
-  // threadRootId,
   roomInputRef,
   editor,
 }: RoomTimelineProps) {
+  const thread = useRoomThread();
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const [hideActivity] = useSetting(settingsAtom, 'hideActivity');

@@ -20,6 +20,7 @@ import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoom } from '../../hooks/useRoom';
 import { RoomScrollToBottomProvider } from './RoomScrollToBottomContext';
+import { RoomThreadProvider } from './RoomThreadContext';
 
 const FN_KEYS_REGEX = /^F\d+$/;
 const shouldFocusMessageField = (evt: KeyboardEvent): boolean => {
@@ -94,52 +95,52 @@ export function RoomView({
 
   return (
     <RoomScrollToBottomProvider>
-      <Page ref={roomViewRef}>
-        <Box grow="Yes" direction="Column">
-          <RoomTimeline
-            key={roomId}
-            room={room}
-            eventId={eventId}
-            thread={thread}
-            roomInputRef={roomInputRef}
-            editor={editor}
-          />
-        </Box>
-        <Box shrink="No" direction="Column">
-          {!thread && <RoomViewTyping room={room} />}
-          <div style={{ padding: `0 ${config.space.S400} ${config.space.S400}` }}>
-            {tombstoneEvent ? (
-              <RoomTombstone
-                roomId={roomId}
-                body={tombstoneEvent.getContent().body}
-                replacementRoomId={tombstoneEvent.getContent().replacement_room}
-              />
-            ) : (
-              <>
-                {canMessage && (
-                  <RoomInput
-                    room={room}
-                    editor={editor}
-                    roomId={roomId}
-                    threadRootId={thread?.id}
-                    fileDropContainerRef={roomViewRef}
-                    ref={roomInputRef}
-                  />
-                )}
-                {!canMessage && (
-                  <RoomInputPlaceholder
-                    style={{ padding: config.space.S200 }}
-                    alignItems="Center"
-                    justifyContent="Center"
-                  >
-                    <Text align="Center">You do not have permission to post in this room</Text>
-                  </RoomInputPlaceholder>
-                )}
-              </>
-            )}
-          </div>
-        </Box>
-      </Page>
+      <RoomThreadProvider thread={thread}>
+        <Page ref={roomViewRef}>
+          <Box grow="Yes" direction="Column">
+            <RoomTimeline
+              key={roomId}
+              room={room}
+              eventId={eventId}
+              roomInputRef={roomInputRef}
+              editor={editor}
+            />
+          </Box>
+          <Box shrink="No" direction="Column">
+            {!thread && <RoomViewTyping room={room} />}
+            <div style={{ padding: `0 ${config.space.S400} ${config.space.S400}` }}>
+              {tombstoneEvent ? (
+                <RoomTombstone
+                  roomId={roomId}
+                  body={tombstoneEvent.getContent().body}
+                  replacementRoomId={tombstoneEvent.getContent().replacement_room}
+                />
+              ) : (
+                <>
+                  {canMessage && (
+                    <RoomInput
+                      room={room}
+                      editor={editor}
+                      roomId={roomId}
+                      fileDropContainerRef={roomViewRef}
+                      ref={roomInputRef}
+                    />
+                  )}
+                  {!canMessage && (
+                    <RoomInputPlaceholder
+                      style={{ padding: config.space.S200 }}
+                      alignItems="Center"
+                      justifyContent="Center"
+                    >
+                      <Text align="Center">You do not have permission to post in this room</Text>
+                    </RoomInputPlaceholder>
+                  )}
+                </>
+              )}
+            </div>
+          </Box>
+        </Page>
+      </RoomThreadProvider>
     </RoomScrollToBottomProvider>
   );
 }

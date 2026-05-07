@@ -124,6 +124,7 @@ import { MicIcon } from '../../icons/MicIcon';
 import { SendHorizontalIcon } from '../../icons/SendHorizontalIcon';
 import { CaseSensitiveIcon } from '../../icons/CaseSensitiveIcon';
 import { useRoomScrollToBottom } from './RoomScrollToBottomContext';
+import { useRoomThread } from './RoomThreadContext';
 
 interface WorkspaceExplorerMessage {
   type: 'select-file';
@@ -150,10 +151,11 @@ interface RoomInputProps {
   fileDropContainerRef: RefObject<HTMLElement>;
   roomId: string;
   room: Room;
-  threadRootId?: string;
 }
 export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
-  ({ editor, fileDropContainerRef, roomId, room, threadRootId }, ref) => {
+  ({ editor, fileDropContainerRef, roomId, room }, ref) => {
+    const thread = useRoomThread();
+    const threadRootId = thread?.id;
     const { t } = useTranslation();
     const mx = useMatrixClient();
     const useAuthentication = useMediaAuthentication();
