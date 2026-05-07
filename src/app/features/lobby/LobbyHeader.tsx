@@ -40,7 +40,7 @@ import { useRoomCreators } from '../../hooks/useRoomCreators';
 import { useRoomPermissions } from '../../hooks/useRoomPermissions';
 import { InviteUserPrompt } from '../../components/invite-user-prompt';
 import { EllipsisVerticalIcon } from '../../icons/EllipsisVerticalIcon';
-import { PanelLeftIcon } from '../../icons/PanelLeftIcon';
+import { PanelRightIcon } from '../../icons/PanelRightIcon';
 
 type LobbyMenuProps = {
   powerLevels: IPowerLevels;
@@ -281,7 +281,7 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
                     ref={triggerRef}
                     onClick={() => setShowSidePanel(!showSidePanel)}
                   >
-                    <Icon size="100" src={PanelLeftIcon} />
+                    <Icon size="100" src={PanelRightIcon} />
                   </IconButton>
                 )}
               </TooltipProvider>

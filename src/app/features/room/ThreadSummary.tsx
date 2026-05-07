@@ -41,7 +41,7 @@ export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSum
     threadLastReplyAvatarUrl,
   } = useMemo(() => {
     const summary = threadLastReply
-      ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t)
+      ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t, false)
       : undefined;
 
     const lastReplySenderId = threadLastReply?.getSender();

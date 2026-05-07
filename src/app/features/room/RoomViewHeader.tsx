@@ -71,7 +71,7 @@ import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
 import { openWorkspacePanel, openTasksPanel, isDesktopTauri } from '../../plugins/useTauriOpener';
 import { ListTodoIcon } from '../../icons/ListTodoIcon';
-import { PanelLeftIcon } from '../../icons/PanelLeftIcon';
+import { PanelRightIcon } from '../../icons/PanelRightIcon';
 import { EllipsisVerticalIcon } from '../../icons/EllipsisVerticalIcon';
 import { LayoutGridIcon } from '../../icons/LayoutGridIcon';
 import { PinIcon } from '../../icons/PinIcon';
@@ -612,7 +612,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
               >
                 {(triggerRef) => (
                   <IconButton size="300" fill="None" ref={triggerRef} onClick={handlePanelToggle}>
-                    <Icon size="100" src={PanelLeftIcon} />
+                    <Icon size="100" src={PanelRightIcon} />
                   </IconButton>
                 )}
               </TooltipProvider>
