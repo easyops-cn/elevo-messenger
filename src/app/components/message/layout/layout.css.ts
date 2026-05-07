@@ -148,7 +148,7 @@ export const BubbleContent = recipe({
     transparent: {
       false: {
         padding: config.space.S200,
-      },      
+      },
     },
     isOwn: {
       true: {
