@@ -1,11 +1,6 @@
-import React, { CSSProperties, ReactNode, useEffect, useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
-import { z } from 'zod/v4';
-import { Box, Chip, Icon, Icons, Text, color, config, toRem } from 'folds';
+import React, { CSSProperties, ReactNode } from 'react';
+import { Box, Chip, Icon, Icons, Text, color, config } from 'folds';
 import { IContent } from 'matrix-js-sdk';
-import { invoke } from '@tauri-apps/api/core';
-import DOMPurify from 'dompurify';
-import { marked } from 'marked';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import {
@@ -14,7 +9,10 @@ import {
   parseAskUserQuestion,
   parseQuestionAnswered,
 } from './elevo/AskUser';
-import { isDesktopTauri } from '../../plugins/useTauriOpener';
+import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
+import { ReasoningCard } from './elevo/ReasoningCard';
+import { SseMarkdownBody, parseSseRender } from './elevo/SseMarkdownBody';
+import { OidcLoginCard, parseOidcLogin } from './elevo/OidcLoginCard';
 import { trimReplyFromBody } from '../../utils/room';
 import { MessageTextBody } from './layout';
 import {
@@ -39,11 +37,10 @@ import {
   MATRIX_SPOILER_REASON_PROPERTY_NAME,
 } from '../../../types/matrix/common';
 import { FALLBACK_MIMETYPE, getBlobSafeMimeType } from '../../utils/mimeTypes';
-import { parseGeoUri, trimTrailingSlash } from '../../utils/common';
+import { parseGeoUri } from '../../utils/common';
 import { Attachment, AttachmentBox, AttachmentContent, AttachmentHeader } from './attachment';
 import { FileHeader, FileDownloadButton } from './FileHeader';
 import { VoiceMessage } from './content/VoiceMessage';
-import { useRoomScrollToBottom } from '../../features/room/RoomScrollToBottomContext';
 
 export function MBadEncrypted() {
   return (
@@ -80,44 +77,6 @@ export function BrokenContent() {
   );
 }
 
-const ToolCallSchema = z.object({
-  name: z.string(),
-  title: z.string().optional(),
-  input: z.unknown(),
-  output: z.unknown().optional(),
-  error: z.unknown().optional(),
-  status: z.enum(['inprogress', 'completed', 'failed']),
-});
-
-type ToolCallData = z.infer<typeof ToolCallSchema>;
-
-const OidcLoginSchema = z.object({
-  provider: z.string(),
-  url: z.string().optional(),
-  done: z.boolean().optional(),
-  userId: z.string().optional(),
-});
-
-type OidcLoginData = z.infer<typeof OidcLoginSchema>;
-
-const SseRenderSchema = z.object({
-  bridgeId: z.string().regex(/^[a-zA-Z0-9_-]+$/, 'bridgeId must be a valid identifier'),
-  stepId: z.string(),
-  streaming: z.boolean(),
-});
-
-type SseRenderData = z.infer<typeof SseRenderSchema>;
-
-function parseToolCall(content: Record<string, unknown>): ToolCallData | undefined {
-  const result = ToolCallSchema.safeParse(content['vip.elevo.tool_call']);
-  return result.success ? result.data : undefined;
-}
-
-function parseSseRender(content: Record<string, unknown>): SseRenderData | undefined {
-  const result = SseRenderSchema.safeParse(content['vip.elevo.sse']);
-  return result.success ? result.data : undefined;
-}
-
 type RenderBodyProps = {
   body: string;
   customBody?: string;
@@ -131,286 +90,7 @@ type MTextProps = {
   readOnly?: boolean;
 };
 
-function parseOidcLogin(content: Record<string, unknown>): OidcLoginData | undefined {
-  const result = OidcLoginSchema.safeParse(content['vip.elevo.oidc_login']);
-  if (!result.success) return undefined;
-  const { done, url } = result.data;
-  if (done === true || url) return result.data;
-  return undefined;
-}
-
-const toolCallHeaderStyles: CSSProperties = {
-  backgroundColor: color.SurfaceVariant.Container,
-  color: color.SurfaceVariant.OnContainer,
-  border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
-  borderRadius: config.radii.R300,
-  padding: `${config.space.S100} ${config.space.S200}`,
-  display: 'flex',
-  alignItems: 'center',
-  gap: config.space.S200,
-  cursor: 'pointer',
-  width: 'fit-content',
-};
-
-const toolCallBodyStyles: CSSProperties = {
-  backgroundColor: color.SurfaceVariant.Container,
-  border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
-  borderRadius: config.radii.R300,
-  padding: `${config.space.S200} ${config.space.S300}`,
-  maxWidth: toRem(600),
-};
-
-type ToolCallCardProps = { data: ToolCallData; style?: CSSProperties };
-function ToolCallCard({ data, style }: ToolCallCardProps) {
-  const [expanded, setExpanded] = useState(false);
-  const iconColor = data.status === 'completed' ? color.Success.Main : data.status === 'failed' ? color.Critical.Main : color.Secondary.Main;
-  const formatValue = (val: unknown) =>
-    typeof val === 'string' ? val : JSON.stringify(val, null, 2);
-  const preStyles: CSSProperties = {
-    fontFamily: 'monospace',
-    fontSize: toRem(12),
-    whiteSpace: 'pre-wrap',
-    wordBreak: 'break-word',
-    margin: 0,
-  };
-  const dividerStyles: CSSProperties = {
-    borderTop: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
-    margin: `${config.space.S200} 0`,
-  };
-
-  return (
-    <Box style={style} direction="Column" gap="100">
-      <div
-        style={toolCallHeaderStyles}
-        onClick={() => setExpanded((v) => !v)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setExpanded((v) => !v);
-          }
-        }}
-        role="button"
-        tabIndex={0}
-      >
-        <Icon src={Icons.Terminal} size="100" style={{ color: iconColor }} />
-        <Text size="T200" priority="300">
-          {data.title || data.name}
-        </Text>
-        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="100" />
-      </div>
-      {expanded && (
-        <div style={toolCallBodyStyles}>
-          <Text
-            size="T200"
-            priority="300"
-            style={{ fontWeight: 500, marginBottom: config.space.S100 }}
-          >
-            Input
-          </Text>
-          <pre style={preStyles}>{formatValue(data.input)}</pre>
-          {data.status === "completed" && data.output !== undefined && (
-            <>
-              <div style={dividerStyles} />
-              <Text
-                size="T200"
-                priority="300"
-                style={{ fontWeight: 500, marginBottom: config.space.S100 }}
-              >
-                Output
-              </Text>
-              <pre style={preStyles}>{formatValue(data.output)}</pre>
-            </>
-          )}
-          {data.status === "failed" && data.error !== undefined && (
-            <>
-              <div style={dividerStyles} />
-              <Text
-                size="T200"
-                priority="300"
-                style={{ fontWeight: 500, marginBottom: config.space.S100 }}
-              >
-                Error
-              </Text>
-              <pre style={{...preStyles, color: color.Critical.Main}}>{formatValue(data.error)}</pre>
-            </>
-          )}
-        </div>
-      )}
-    </Box>
-  );
-}
-
-type ReasoningCardProps = { style?: CSSProperties; children: ReactNode };
-function ReasoningCard({ style, children }: ReasoningCardProps) {
-  const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
-
-  return (
-    <Box
-      style={{ ...style, opacity: 0.7, fontSize: config.fontSize.T300 }}
-      direction="Column"
-      gap="100"
-    >
-      <div
-        style={{
-          cursor: 'pointer',
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: config.space.S100,
-        }}
-        onClick={() => setExpanded((v) => !v)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setExpanded((v) => !v);
-          }
-        }}
-        role="button"
-        tabIndex={0}
-      >
-        <Text priority="300" size="T300">{t('message.thinking')}</Text>
-        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="100" />
-      </div>
-      {expanded && children}
-    </Box>
-  );
-}
-
-const oidcLinkStyles: CSSProperties = {
-  backgroundColor: color.SurfaceVariant.Container,
-  color: color.SurfaceVariant.OnContainer,
-  border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
-  borderRadius: config.radii.R300,
-  padding: config.space.S300,
-  display: 'flex',
-  alignItems: 'center',
-  gap: config.space.S200,
-  textDecoration: 'none',
-  cursor: 'default',
-  transition: 'background-color 0.15s ease',
-  maxWidth: toRem(400),
-};
-
-type SseMarkdownBodyProps = Pick<MTextProps, "renderBody" | "renderUrlsPreview"> & {
-  sseData: SseRenderData;
-  style?: CSSProperties;
-};
-
-function SseMarkdownBody({ sseData, renderBody, renderUrlsPreview, style }: SseMarkdownBodyProps) {
-  const mx = useMatrixClient();
-  const homeserverBaseUrl = mx.getHomeserverUrl();
-  const { emitScrollToBottomRequest } = useRoomScrollToBottom();
-  const [streamedBody, setStreamedBody] = useState('');
-  const [streamError, setStreamError] = useState(false);
-
-  useEffect(() => {
-    setStreamedBody('');
-    setStreamError(false);
-
-    const abortController = new AbortController();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
-    const readSse = async () => {
-      try {
-        const response = await fetch(
-          `${trimTrailingSlash(homeserverBaseUrl)}/${sseData.bridgeId}-bridge/sse/step/${encodeURIComponent(sseData.stepId)}`,
-          {
-            method: 'GET',
-            headers: {
-              Accept: 'text/event-stream',
-            },
-            signal: abortController.signal,
-          }
-        );
-
-        if (!response.ok || !response.body) {
-          throw new Error(`SSE request failed with status: ${response.status}`);
-        }
-
-        const reader = response.body.getReader();
-
-        const readNextChunk = async (): Promise<void> => {
-          const { done, value } = await reader.read();
-          if (done) return;
-
-          buffer += decoder.decode(value, { stream: true });
-          const events = buffer.split(/\r?\n\r?\n/);
-          buffer = events.pop() ?? '';
-
-          events.forEach((eventBlock) => {
-            const dataLines = eventBlock
-              .split(/\r?\n/)
-              .filter((line) => line.startsWith('data:'))
-              .map((line) => line.slice(5).trimStart());
-
-            if (dataLines.length === 0) return;
-
-            const dataText = dataLines.join('\n');
-            try {
-              const payload: unknown = JSON.parse(dataText);
-              if (
-                typeof payload === 'object' &&
-                payload !== null &&
-                'type' in payload &&
-                'delta' in payload &&
-                payload.type === 'text-delta' &&
-                typeof payload.delta === 'string'
-              ) {
-                setStreamedBody((prev) => prev + payload.delta);
-                emitScrollToBottomRequest({ force: false });
-              }
-            } catch {
-              // Ignore malformed SSE payload chunks and continue consuming stream.
-            }
-          });
-
-          await readNextChunk();
-        };
-
-        await readNextChunk();
-      } catch (error) {
-        if (!abortController.signal.aborted) {
-          setStreamError(true);
-          // eslint-disable-next-line no-console
-          console.error('Failed to consume step SSE stream:', error);
-        }
-      }
-    };
-
-    readSse();
-
-    return () => {
-      abortController.abort();
-    };
-  }, [homeserverBaseUrl, sseData.bridgeId, sseData.stepId, emitScrollToBottomRequest]);
-
-  const markdownBody = !streamError ? streamedBody : 'Error loading streaming content';
-  const trimmedBody = trimReplyFromBody(markdownBody);
-
-  const sanitizedHtml = useMemo(() => {
-    const parsed = marked.parse(trimmedBody, { gfm: true, breaks: true }) as string;
-    return DOMPurify.sanitize(typeof parsed === 'string' ? parsed : '');
-  }, [trimmedBody]);
-
-  const content = useMemo(() => ({
-    body: markdownBody,
-    formatted_body: sanitizedHtml,
-  }), [markdownBody, sanitizedHtml]);
-
-  return (
-    // eslint-disable-next-line no-use-before-define
-    <MText
-      content={content}
-      renderBody={renderBody}
-      renderUrlsPreview={renderUrlsPreview}
-      style={style}
-    />
-  );
-}
-
 export function MText({ edited, content, renderBody, renderUrlsPreview, style, readOnly }: MTextProps) {
-  const { t } = useTranslation();
   const mx = useMatrixClient();
   const { body, formatted_body: customBody } = content;
 
@@ -418,74 +98,7 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
 
   const oidcLogin = parseOidcLogin(content);
   if (oidcLogin && (!oidcLogin.userId || oidcLogin.userId === mx.getUserId())) {
-    const cardContent = (
-      <>
-        <Icon src={Icons.ShieldUser} size="300" />
-        <Box grow="Yes" direction="Column" gap="100">
-          <Text size="T300" priority="400">
-            <b>{t('oidcLogin.title', { provider: oidcLogin.provider })}</b>
-          </Text>
-          <Text size="T200" priority="300">
-            {t(oidcLogin.done ? 'oidcLogin.doneDescription' : 'oidcLogin.description', {
-              provider: oidcLogin.provider,
-            })}
-          </Text>
-        </Box>
-        <Icon
-          src={oidcLogin.done ? Icons.Check : Icons.ArrowRight}
-          size="200"
-          style={oidcLogin.done ? { color: color.Success.Main } : undefined}
-        />
-      </>
-    );
-
-    const handleOidcClick = () => {
-      if (isDesktopTauri && oidcLogin.url) {
-        invoke('open_oauth_window', { authUrl: oidcLogin.url, label: 'oauth-elevo-bridge' }).catch(
-          (err) => {
-            // eslint-disable-next-line no-console
-            console.error('Failed to open OAuth window, falling back to browser:', err);
-            window.open(oidcLogin.url, '_blank', 'noopener,noreferrer');
-          }
-        );
-      }
-    };
-
-    const renderOidcCard = () => {
-      if (oidcLogin.done) {
-        return <div style={oidcLinkStyles}>{cardContent}</div>;
-      }
-      if (isDesktopTauri) {
-        return (
-          <div
-            role="button"
-            tabIndex={0}
-            style={{ ...oidcLinkStyles, cursor: 'pointer' }}
-            onClick={handleOidcClick}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                handleOidcClick();
-              }
-            }}
-          >
-            {cardContent}
-          </div>
-        );
-      }
-      return (
-        <a
-          href={oidcLogin.url}
-          target="_blank"
-          rel="noreferrer noopener"
-          style={{ ...oidcLinkStyles, cursor: 'pointer' }}
-        >
-          {cardContent}
-        </a>
-      );
-    };
-
-    return <Box style={style}>{renderOidcCard()}</Box>;
+    return <OidcLoginCard data={oidcLogin} style={style} />;
   }
 
   const askUserQuestion = parseAskUserQuestion(content);
