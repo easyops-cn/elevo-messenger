@@ -15,6 +15,7 @@ import { useCompositionEndTracking } from '../hooks/useComposingCheck';
 import { TitleBar } from '../components/titlebar/TitleBar';
 import { useTauriSettingsSync } from '../hooks/useTauriSettingsSync';
 import './App.css';
+import { UpdateCheckerProvider } from '../state/update/UpdateCheckerContext';
 
 const queryClient = new QueryClient();
 
@@ -30,35 +31,37 @@ function App() {
   const portalContainer = document.getElementById('portalContainer') ?? undefined;
 
   return (
-    <TooltipContainerProvider value={portalContainer}>
-      <PopOutContainerProvider value={portalContainer}>
-        <OverlayContainerProvider value={portalContainer}>
-          <ScreenSizeProvider value={screenSize}>
-            <FeatureCheck>
-              <ClientConfigLoader
-                fallback={() => <ConfigConfigLoading />}
-                error={(err, retry, ignore) => (
-                  <ConfigConfigError error={err} retry={retry} ignore={ignore} />
-                )}
-              >
-                {(clientConfig) => (
-                  <ClientConfigProvider value={clientConfig}>
-                    <QueryClientProvider client={queryClient}>
-                      <JotaiProvider>
-                        <TauriSettingsSync />
-                        <TitleBar />
-                        <RouterProvider router={createRouter(clientConfig, screenSize)} />
-                      </JotaiProvider>
-                      <ReactQueryDevtools initialIsOpen={false} />
-                    </QueryClientProvider>
-                  </ClientConfigProvider>
-                )}
-              </ClientConfigLoader>
-            </FeatureCheck>
-          </ScreenSizeProvider>
-        </OverlayContainerProvider>
-      </PopOutContainerProvider>
-    </TooltipContainerProvider>
+    <UpdateCheckerProvider>
+      <TooltipContainerProvider value={portalContainer}>
+        <PopOutContainerProvider value={portalContainer}>
+          <OverlayContainerProvider value={portalContainer}>
+            <ScreenSizeProvider value={screenSize}>
+              <FeatureCheck>
+                <ClientConfigLoader
+                  fallback={() => <ConfigConfigLoading />}
+                  error={(err, retry, ignore) => (
+                    <ConfigConfigError error={err} retry={retry} ignore={ignore} />
+                  )}
+                >
+                  {(clientConfig) => (
+                    <ClientConfigProvider value={clientConfig}>
+                      <QueryClientProvider client={queryClient}>
+                        <JotaiProvider>
+                          <TauriSettingsSync />
+                          <TitleBar />
+                          <RouterProvider router={createRouter(clientConfig, screenSize)} />
+                        </JotaiProvider>
+                        <ReactQueryDevtools initialIsOpen={false} />
+                      </QueryClientProvider>
+                    </ClientConfigProvider>
+                  )}
+                </ClientConfigLoader>
+              </FeatureCheck>
+            </ScreenSizeProvider>
+          </OverlayContainerProvider>
+        </PopOutContainerProvider>
+      </TooltipContainerProvider>
+    </UpdateCheckerProvider>
   );
 }
 

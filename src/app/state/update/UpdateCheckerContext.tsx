@@ -1,4 +1,5 @@
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { check } from '@tauri-apps/plugin-updater';
@@ -217,7 +218,22 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
     return () => clearTimeout(timer);
   }, [checkAndPrepare, autoUpdateCheck]);
 
-  // Listen for "check-for-updates" event from Rust (menu click).
+  // Sync update menu state with Tauri when state changes.
+  useEffect(() => {
+    if (!isDesktopTauri) return;
+
+    const ready = state.updateDownloaded
+      || (state.updateAvailable && !state.downloading && !state.error);
+    const disabled = state.checking || state.downloading;
+    console.log('[menu] invoke update_menu_state', { ready, downloaded: state.updateDownloaded, disabled });
+    invoke('update_menu_state', {
+      apply: ready,
+      downloaded: state.updateDownloaded,
+      disabled,
+    }).catch((e) => console.error('[menu] invoke failed:', e));
+  }, [state.checking, state.downloading, state.updateAvailable, state.updateDownloaded, state.error]);
+
+  // Listen for "check-for-updates" / "apply-update" events from Rust (menu click).
   useEffect(() => {
     if (!isDesktopTauri) return;
 
@@ -230,13 +246,24 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
       checkAndPrepare();
     });
 
+    const unlistenApplyPromise = listen<{ openSettings: boolean }>('apply-update', (event) => {
+      if (cancelled) return;
+      if (event.payload.openSettings) {
+        emitOpenAbout();
+      }
+      applyUpdate();
+    });
+
     return () => {
       cancelled = true;
       unlistenPromise.then((unlisten) => {
         if (cancelled) unlisten();
       });
+      unlistenApplyPromise.then((unlisten) => {
+        if (cancelled) unlisten();
+      });
     };
-  }, [checkAndPrepare]);
+  }, [checkAndPrepare, applyUpdate]);
 
   const value = useMemo<UpdateCheckerContextValue>(
     () => ({

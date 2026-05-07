@@ -161,7 +161,7 @@ export function About({ requestClose }: AboutProps) {
                                   rel="noreferrer noopener"
                                   target="_blank"
                                 >
-                                  {t('settings.aboutPage.viewReleaseNotes', { defaultValue: 'View Release Notes' })}
+                                  {t('settings.aboutPage.viewReleaseNotes')}
                                 </a>
                               </>
                             )}
@@ -186,7 +186,7 @@ export function About({ requestClose }: AboutProps) {
                               size="300"
                               radii="300"
                             >
-                              <Text size="B300">{t('settings.aboutPage.updateAndRestart', { defaultValue: 'Update and Restart' })}</Text>
+                              <Text size="B300">{t('settings.aboutPage.updateAndRestart')}</Text>
                             </Button>
                           ) : (
                             <Button

@@ -79,7 +79,6 @@ import { SearchModalRenderer } from '../features/search';
 import { getFallbackSession } from '../state/sessions';
 import { CallStatusRenderer } from './CallStatusRenderer';
 import { CallEmbedProvider } from '../components/CallEmbedProvider';
-import { UpdateCheckerProvider } from '../state/update/UpdateCheckerContext';
 import { PageNotFound } from './PageNotFound';
 
 function TauriDeepLinkHandler() {
@@ -143,22 +142,20 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
                 <ClientRoomsNotificationPreferences>
                   <ClientBindAtoms>
                     <ClientNonUIFeatures>
-                      <UpdateCheckerProvider>
-                        <CallEmbedProvider>
-                          <ClientLayout>
-                            <Outlet />
-                          </ClientLayout>
-                          <CallStatusRenderer />
-                        </CallEmbedProvider>
-                        <SearchModalRenderer />
-                        <UserRoomProfileRenderer />
-                        <CreateRoomModalRenderer />
-                        <CreateSpaceModalRenderer />
-                        <RoomSettingsRenderer />
-                        <SpaceSettingsRenderer />
-                        <ReceiveSelfDeviceVerification />
-                        <AutoRestoreBackupOnVerification />
-                      </UpdateCheckerProvider>
+                      <CallEmbedProvider>
+                        <ClientLayout>
+                          <Outlet />
+                        </ClientLayout>
+                        <CallStatusRenderer />
+                      </CallEmbedProvider>
+                      <SearchModalRenderer />
+                      <UserRoomProfileRenderer />
+                      <CreateRoomModalRenderer />
+                      <CreateSpaceModalRenderer />
+                      <RoomSettingsRenderer />
+                      <SpaceSettingsRenderer />
+                      <ReceiveSelfDeviceVerification />
+                      <AutoRestoreBackupOnVerification />
                     </ClientNonUIFeatures>
                   </ClientBindAtoms>
                 </ClientRoomsNotificationPreferences>
