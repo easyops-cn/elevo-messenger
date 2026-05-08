@@ -3,6 +3,7 @@ import classNames from 'classnames';
 import { Box, ContainerColor, as, color, toRem } from 'folds';
 import * as css from './layout.css';
 import { ScreenSize, useScreenSize } from '../../../hooks/useScreenSize';
+import { useRoomThread } from '../../../features/room/RoomThreadContext';
 
 type BubbleArrowProps = {
   variant: ContainerColor;
@@ -62,14 +63,16 @@ export const BubbleLayout = as<'div', BubbleLayoutProps>(
     const screenSize = useScreenSize();
     const isMobile = screenSize === ScreenSize.Mobile;
     const padding = isMobile ? 16 : 56;
+    const thread = useRoomThread();
+    const inMainTimeline = !thread;
 
     return (
-      <Box gap="300" direction={isOwn ? 'RowReverse' : 'Row'} {...props} style={{
+      <Box gap="300" direction={isOwn ? 'RowReverse' : 'Row'} {...props} style={inMainTimeline ? {
         ...props.style,
         width: `calc(100% - ${toRem(padding)})`,
         maxWidth: isMobile ? undefined : `max(50vw, ${toRem(800)})`,
         [isOwn ? 'marginLeft' : 'marginRight']: 'auto',
-      }} ref={ref}>
+      } : props.style} ref={ref}>
         <Box className={css.BubbleBefore} shrink="No">
           {before}
         </Box>
