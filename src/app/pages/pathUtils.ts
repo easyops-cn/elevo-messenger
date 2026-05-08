@@ -31,6 +31,7 @@ import {
   ME_NOTIFICATIONS_PATH,
   ME_PATH,
   OIDC_CALLBACK_PATH,
+  TODOS_PATH,
 } from './paths';
 import { trimLeadingSlash, trimTrailingSlash } from '../utils/common';
 import { HashRouterConfig } from '../hooks/useClientConfig';
@@ -182,3 +183,5 @@ export const getOidcCallbackPath = (): string => OIDC_CALLBACK_PATH;
 export const getMePath = (): string => ME_PATH;
 export const getMeNotificationsPath = (): string => ME_NOTIFICATIONS_PATH;
 export const getMeInvitesPath = (): string => ME_INVITES_PATH;
+
+export const getTodosPath = (): string => TODOS_PATH;

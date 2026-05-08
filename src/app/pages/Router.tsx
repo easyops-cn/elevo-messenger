@@ -7,8 +7,8 @@ import {
   createRoutesFromElements,
   redirect,
 } from 'react-router-dom';
-import { useTauriDeepLink } from '../plugins/useTauriDeepLink';
 
+import { useTauriDeepLink } from '../plugins/useTauriDeepLink';
 import { ClientConfig } from '../hooks/useClientConfig';
 import { AuthLayout, Login, Register, ResetPassword } from './auth';
 import { OidcCallback } from './auth/oidc/OidcCallback';
@@ -36,6 +36,7 @@ import {
   INBOX_INVITES_PATH,
   ME_INVITES_PATH,
   ME_NOTIFICATIONS_PATH,
+  TODOS_PATH,
 } from './paths';
 import {
   getAppPathFromHref,
@@ -53,6 +54,7 @@ import { ClientBindAtoms, ClientLayout, ClientRoot } from './client';
 import { Home, HomeRouteRoomProvider, HomeSearch } from './client/home';
 import { Explore, FeaturedRooms, PublicRooms } from './client/explore';
 import { ExploreSpaceProvider } from './client/explore/ExploreSpaceProvider';
+import { TodosNav, TodosList } from './client/todos';
 import { Invites } from './client/inbox';
 import { Contacts, ContactsPage, ContactsProvider, ContactsRolePage } from './client/contacts';
 import { setAfterLoginRedirectPath } from './afterLoginRedirectPath';
@@ -246,6 +248,20 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             }
           />
         </Route>
+        <Route
+          path={TODOS_PATH}
+          element={
+            <PageRoot
+              nav={
+                <MobileFriendlyPageNav path={TODOS_PATH}>
+                  <TodosNav />
+                </MobileFriendlyPageNav>
+              }
+            >
+              <TodosList />
+            </PageRoot>
+          }
+        />
         <Route path={INBOX_PATH} loader={() => redirect(getMePath())} />
         <Route path={INBOX_NOTIFICATIONS_PATH} loader={() => redirect(getMePath())} />
         <Route path={INBOX_INVITES_PATH} loader={() => redirect(getHomeInvitesPath())} />

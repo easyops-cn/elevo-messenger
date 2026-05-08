@@ -756,6 +756,11 @@
     "noFeaturedRooms": "No rooms or spaces featured by client provider.",
     "spaces": "Spaces"
   },
+  "todos": {
+    "title": "Todos",
+    "empty": "No pending todos",
+    "emptySubtitle": "All caught up!"
+  },
   "inbox": {
     "invites": "Invites",
     "filter": "Filter",

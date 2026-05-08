@@ -141,10 +141,12 @@ export function AskUserQuestionCard({
   data,
   style,
   readOnly,
+  onSubmit,
 }: {
   data: AskUserQuestionData;
   style?: CSSProperties;
   readOnly?: boolean;
+  onSubmit?: () => void;
 }) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
@@ -232,13 +234,14 @@ export function AskUserQuestionCard({
         },
       } as unknown as RoomMessageEventContent);
       setSubmitted(true);
+      onSubmit?.();
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Failed to submit question answers:', err);
     } finally {
       setSubmitting(false);
     }
-  }, [submitting, canSubmit, data, selections, otherTexts, mx, room.roomId]);
+  }, [submitting, canSubmit, data, selections, otherTexts, mx, room.roomId, onSubmit]);
 
   const currentQuestion = data.questions[activeTab];
   const currentSel = selections[activeTab] ?? [];

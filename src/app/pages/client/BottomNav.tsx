@@ -7,6 +7,7 @@ import { ContactIcon } from '../../icons/ContactIcon';
 import { useHomeSelected } from '../../hooks/router/useHomeSelected';
 import { useContactsSelected } from '../../hooks/router/useContacts';
 import { useExploreSelected } from '../../hooks/router/useExploreSelected';
+import { useTodosSelected } from '../../hooks/router/useTodosSelected';
 import { useRoomsUnread } from '../../state/hooks/unread';
 import { roomToUnreadAtom } from '../../state/room/roomToUnread';
 import { allInvitesAtom } from '../../state/room-list/inviteList';
@@ -18,6 +19,7 @@ import {
   getHomePath,
   getContactsPath,
   getExplorePath,
+  getTodosPath,
   joinPathComponent,
 } from '../pathUtils';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
@@ -27,6 +29,7 @@ import { onOpenAbout, useUpdateChecker } from '../../state/update/UpdateCheckerC
 import * as css from './BottomNav.css';
 import { MessageCircleIcon } from '../../icons/MessageCircleIcon';
 import { CompassIcon } from '../../icons/Compass';
+import { ListTodoIcon } from '../../icons/ListTodoIcon';
 import { SettingsIcon } from '../../icons/SettingsIcon';
 
 type SettingsModalState = {
@@ -46,12 +49,14 @@ export function BottomNav() {
     requestId: 0,
   });
 
-  const { elevoContactsRoomId } = useElevoConfig();
+  const { elevoContactsRoomId, todos } = useElevoConfig();
   const showContacts = !!elevoContactsRoomId;
+  const showTodos = !!todos?.api;
 
   const homeSelected = useHomeSelected();
   const contactsSelected = useContactsSelected();
   const exploreSelected = useExploreSelected();
+  const todosSelected = useTodosSelected();
 
   // Home badge
   const homeRooms = useAllHomeRooms();
@@ -74,6 +79,7 @@ export function BottomNav() {
   const handleHomeClick = () => handleNavClick('home', getHomePath());
   const handleContactsClick = () => handleNavClick('contacts', getContactsPath());
   const handleExploreClick = () => handleNavClick('explore', getExplorePath());
+  const handleTodosClick = () => handleNavClick('todos', getTodosPath());
   const closeSettings = () => setSettingsModal((prev) => ({ ...prev, open: false }));
 
   // BottomNav is persistent, so handle native "open about" requests here.
@@ -86,7 +92,6 @@ export function BottomNav() {
       }));
     }), [setSettingsModal]);
 
-  
   const openSettings = () => {
     setSettingsModal((prev) => ({
       open: true,
@@ -139,17 +144,21 @@ export function BottomNav() {
         )}
         <TooltipProvider
           position="Top"
-          tooltip={<Tooltip>{t('explore.title')}</Tooltip>}
+          tooltip={<Tooltip>{showTodos ? t('todos.title') : t('explore.title')}</Tooltip>}
         >
           {(triggerRef) => (
             <button
               ref={triggerRef}
-              className={css.BottomNavItem({ active: exploreSelected })}
-              onClick={handleExploreClick}
-              aria-label={t('explore.title')}
+              className={css.BottomNavItem({ active: showTodos ? todosSelected : exploreSelected })}
+              onClick={showTodos ? handleTodosClick : handleExploreClick}
+              aria-label={showTodos ? t('todos.title') : t('explore.title')}
               type="button"
             >
-              <Icon src={CompassIcon} filled={exploreSelected} size="300" />
+              {showTodos ? (
+                <Icon src={ListTodoIcon} filled={todosSelected} size="300" />
+              ) : (
+                <Icon src={CompassIcon} filled={exploreSelected} size="300" />
+              )}
             </button>
           )}
         </TooltipProvider>

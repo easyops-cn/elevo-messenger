@@ -1,6 +1,6 @@
 import React from 'react';
 
-export function ListTodoIcon(filled?: boolean) {
+export function ListTodoIcon() {
   // https://lucide.dev/icons/list-todo
   return (
     <g
@@ -8,7 +8,6 @@ export function ListTodoIcon(filled?: boolean) {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      fill={filled ? 'currentColor' : 'none'}
     >
       <path d="M13 5h8" />
       <path d="M13 12h8" />

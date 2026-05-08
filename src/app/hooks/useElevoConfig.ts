@@ -31,6 +31,9 @@ export type ElevoConfig = {
   features: FeatureConfig;
   oidcStaticClients?: Record<string, { client_id: string }>;
   elevoContactsRoomId?: string;
+  todos?: {
+    api: string;
+  };
 };
 
 export const DEFAULT_ELEVO_FEATURES: FeatureConfig = {

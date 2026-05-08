@@ -756,6 +756,11 @@
     "noFeaturedRooms": "没有客户端提供商推荐的房间或空间。",
     "spaces": "空间"
   },
+  "todos": {
+    "title": "待办事项",
+    "empty": "没有待办事项",
+    "emptySubtitle": "全部完成！"
+  },
   "inbox": {
     "invites": "邀请",
     "filter": "筛选",
