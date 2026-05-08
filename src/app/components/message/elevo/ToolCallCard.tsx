@@ -1,4 +1,4 @@
-import React, { CSSProperties, useState } from 'react';
+import React, { CSSProperties, useMemo, useState } from 'react';
 import { z } from 'zod/v4';
 import { Box, Icon, Icons, Text, color } from 'folds';
 import * as css from './ToolCallCard.css';
@@ -19,12 +19,23 @@ export function parseToolCall(content: Record<string, unknown>): ToolCallData | 
   return result.success ? result.data : undefined;
 }
 
+function tryJsonPrettier(val: unknown): string {
+  if (typeof val !== 'string') return JSON.stringify(val, null, 2);
+  try {
+    const data = JSON.parse(val);
+    return JSON.stringify(data, null, 2);
+  } catch {
+    return val;
+  }
+}
+
 type ToolCallCardProps = { data: ToolCallData; style?: CSSProperties };
 export function ToolCallCard({ data, style }: ToolCallCardProps) {
   const [expanded, setExpanded] = useState(false);
   const iconColor = data.status === 'completed' ? color.Success.Main : data.status === 'failed' ? color.Critical.Main : color.Secondary.Main;
-  const formatValue = (val: unknown) =>
-    typeof val === 'string' ? val : JSON.stringify(val, null, 2);
+
+  const prettierInput = useMemo(() => tryJsonPrettier(data.input), [data.input]);
+  const prettierOutput = useMemo(() => tryJsonPrettier(data.output), [data.output]);
 
   return (
     <Box style={style} direction="Column" gap="100">
@@ -51,14 +62,14 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
           <Text size="T200" priority="300" className={css.Label}>
             Input
           </Text>
-          <pre className={css.Preformatted}>{formatValue(data.input)}</pre>
+          <pre className={css.Preformatted}>{prettierInput}</pre>
           {data.status === "completed" && data.output !== undefined && (
             <>
               <div className={css.Divider} />
               <Text size="T200" priority="300" className={css.Label}>
                 Output
               </Text>
-              <pre className={css.Preformatted}>{formatValue(data.output)}</pre>
+              <pre className={css.Preformatted}>{prettierOutput}</pre>
             </>
           )}
           {data.status === "failed" && data.error !== undefined && (
@@ -67,7 +78,7 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
               <Text size="T200" priority="300" className={css.Label}>
                 Error
               </Text>
-              <pre className={css.ErrorPre}>{formatValue(data.error)}</pre>
+              <pre className={css.ErrorPre}>{String(data.error)}</pre>
             </>
           )}
         </div>
