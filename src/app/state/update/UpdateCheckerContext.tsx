@@ -207,7 +207,7 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
     await relaunch();
   }, []);
 
-  // Auto-check for updates after a short delay on startup.
+  // Auto-check for updates on startup and every 4 hours.
   useEffect(() => {
     if (!isDesktopTauri || !autoUpdateCheck) return;
 
@@ -215,7 +215,14 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
       checkAndPrepare();
     }, 5000);
 
-    return () => clearTimeout(timer);
+    const interval = setInterval(() => {
+      checkAndPrepare();
+    }, 4 * 60 * 60 * 1000);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, [checkAndPrepare, autoUpdateCheck]);
 
   // Sync update menu state with Tauri when state changes.
@@ -225,12 +232,11 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
     const ready = state.updateDownloaded
       || (state.updateAvailable && !state.downloading && !state.error);
     const disabled = state.checking || state.downloading;
-    console.log('[menu] invoke update_menu_state', { ready, downloaded: state.updateDownloaded, disabled });
     invoke('update_menu_state', {
       apply: ready,
       downloaded: state.updateDownloaded,
       disabled,
-    }).catch((e) => console.error('[menu] invoke failed:', e));
+    });
   }, [state.checking, state.downloading, state.updateAvailable, state.updateDownloaded, state.error]);
 
   // Listen for "check-for-updates" / "apply-update" events from Rust (menu click).
