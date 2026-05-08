@@ -33,6 +33,7 @@ import {
   sendSystemNotification,
   type SystemNotificationHandle,
 } from '../../utils/notification';
+import { TodosSyncFeature } from './todos/TodosSyncFeature';
 
 function SystemEmojiFeature() {
   const [twitterEmoji] = useSetting(settingsAtom, 'twitterEmoji');
@@ -374,6 +375,7 @@ export function ClientNonUIFeatures({ children }: ClientNonUIFeaturesProps) {
       <InviteNotifications />
       <MessageNotifications />
       <ClientToolSdkHandler />
+      <TodosSyncFeature />
       {children}
     </>
   );

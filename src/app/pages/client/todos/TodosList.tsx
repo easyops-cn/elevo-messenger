@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useQueryClient } from '@tanstack/react-query';
+import { useAtomValue, useSetAtom } from 'jotai';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Box, Icon, Icons, IconButton, Scroll, Spinner, Text, config } from 'folds';
 import { Page, PageContent, PageContentCenter, PageHeader, PageHero, PageHeroEmpty, PageHeroSection, PageMain } from '../../../components/page';
@@ -11,46 +11,38 @@ import { ContainerColor } from '../../../styles/ContainerColor.css';
 import { useSetting } from '../../../state/hooks/settings';
 import { settingsAtom } from '../../../state/settings';
 import { useRoomNavigate } from '../../../hooks/useRoomNavigate';
-import { useTodosApi, type TodoItem } from './useTodosApi';
 import { TodoItemCard } from './TodoItemCard';
 import { PageSpinner } from '../../../components/PageSpinner';
 import { ListTodoIcon } from '../../../icons/ListTodoIcon';
-
-type TodosPageData = {
-  todos: TodoItem[];
-  next_cursor: string | null;
-  prev_cursor: string | null;
-};
+import { todosAtom } from '../../../state/todos/todosAtom';
+import { useFetchTodosNextPage } from './TodosSyncFeature';
 
 export function TodosList() {
   const { t } = useTranslation();
   const screenSize = useScreenSizeContext();
   const scrollRef = useRef<HTMLDivElement>(null);
-  const queryClient = useQueryClient();
   const [hour24Clock] = useSetting(settingsAtom, 'hour24Clock');
   const [dateFormatString] = useSetting(settingsAtom, 'dateFormatString');
   const { navigateRoom } = useRoomNavigate();
 
-  const { status, data, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useTodosApi();
+  const todosState = useAtomValue(todosAtom);
+  const setTodos = useSetAtom(todosAtom);
+  const fetchNextPage = useFetchTodosNextPage();
 
-  const allItems = useMemo(() => data?.pages.flatMap((page) => page.todos) ?? [], [data]);
+  const allItems = useMemo(
+    () => [...todosState.liveItems, ...todosState.apiItems],
+    [todosState.liveItems, todosState.apiItems]
+  );
+
+  const hasNextPage = !!todosState.nextCursor;
+  const isFetchingNextPage = todosState.isFetching && todosState.initialized;
+  const status = !todosState.initialized ? 'pending' : todosState.error ? 'error' : 'success';
 
   const handleItemSubmit = useCallback(
     (roomId: string, eventId: string) => {
-      queryClient.setQueryData(['todos'], (oldData: { pages: TodosPageData[] } | undefined) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) => ({
-            ...page,
-            todos: page.todos.filter(
-              (item: TodoItem) => !(item.room_id === roomId && item.question_event_id === eventId)
-            ),
-          })),
-        };
-      });
+      setTodos({ type: 'REMOVE_BY_EVENT', roomId, eventId });
     },
-    [queryClient]
+    [setTodos]
   );
 
   const virtualizer = useVirtualizer({
@@ -153,7 +145,7 @@ export function TodosList() {
                     )}
                   </Box>
 
-                  {error && (
+                  {status === 'error' && todosState.error && (
                     <Box
                       className={ContainerColor({ variant: 'Critical' })}
                       style={{
@@ -163,8 +155,8 @@ export function TodosList() {
                       direction="Column"
                       gap="200"
                     >
-                      <Text size="L400">{error.name}</Text>
-                      <Text size="T300">{error.message}</Text>
+                      <Text size="L400">{todosState.error.name}</Text>
+                      <Text size="T300">{todosState.error.message}</Text>
                     </Box>
                   )}
                 </Box>

@@ -7,6 +7,7 @@ export type TodoItem = {
   sender: string;
   assignee: string;
   question: {
+    userId?: string;
     question_id: string;
     questions: Array<{
       question: string;
