@@ -55,7 +55,7 @@ type RedactedContentProps = {
 };
 export function RedactedContent({ reason }: RedactedContentProps) {
   return (
-    <Text>
+    <Text size="T300">
       <MessageDeletedContent reason={reason} />
     </Text>
   );
@@ -63,7 +63,7 @@ export function RedactedContent({ reason }: RedactedContentProps) {
 
 export function UnsupportedContent() {
   return (
-    <Text>
+    <Text size="T300">
       <MessageUnsupportedContent />
     </Text>
   );
@@ -71,7 +71,7 @@ export function UnsupportedContent() {
 
 export function BrokenContent() {
   return (
-    <Text>
+    <Text size="T300">
       <MessageBrokenContent />
     </Text>
   );

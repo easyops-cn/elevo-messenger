@@ -2,6 +2,7 @@ import React, { CSSProperties, ReactNode, useEffect, useMemo, useState } from 'r
 import { z } from 'zod/v4';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
+import { color } from 'folds';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useRoomScrollToBottom } from '../../../features/room/RoomScrollToBottomContext';
 import { trimReplyFromBody } from '../../../utils/room';
@@ -122,7 +123,7 @@ export function SseMarkdownBody({ sseData, renderBody, renderUrlsPreview, style 
     };
   }, [homeserverBaseUrl, sseData.bridgeId, sseData.stepId, emitScrollToBottomRequest]);
 
-  const markdownBody = !streamError ? streamedBody : 'Error loading streaming content';
+  const markdownBody = !streamError ? streamedBody : 'Error loading streaming content.';
   
   const sanitizedHtml = useMemo(() => {
     const trimmedBody = trimReplyFromBody(markdownBody);
@@ -135,5 +136,12 @@ export function SseMarkdownBody({ sseData, renderBody, renderUrlsPreview, style 
     formatted_body: sanitizedHtml,
   }), [markdownBody, sanitizedHtml]);
 
-  return <MText content={content} renderBody={renderBody} renderUrlsPreview={renderUrlsPreview} style={style} />;
+  return (
+    <MText
+      content={content}
+      renderBody={renderBody}
+      renderUrlsPreview={renderUrlsPreview}
+      style={streamError ? {...style, color: color.Critical.Main, fontStyle: 'italic' } : style}
+    />
+  );
 }
