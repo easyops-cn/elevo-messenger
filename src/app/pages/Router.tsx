@@ -233,7 +233,6 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             <Route
               index
               loader={() => redirect(getExploreFeaturedPath())}
-              element={<WelcomePage />}
             />
           )}
           <Route path={_FEATURED_PATH} element={<FeaturedRooms />} />
@@ -272,7 +271,6 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             <Route
               index
               loader={() => redirect(getContactsContactsPath())}
-              element={<WelcomePage />}
             />
           )}
           <Route path={_CONTACTS_CONTACTS_PATH} element={<ContactsPage />} />

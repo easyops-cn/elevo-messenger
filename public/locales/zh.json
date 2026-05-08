@@ -582,7 +582,6 @@
       "notifyLoud": "声音通知"
     },
     "aboutPage": {
-      "tagline": "又一个 Matrix 客户端。",
       "sourceCode": "源代码",
       "clearCache": "清除缓存并重新加载",
       "clearCacheDesc": "清除所有本地存储的数据并从服务器重新加载。",
@@ -720,9 +719,7 @@
     "failedLoadConfig": "加载客户端配置文件失败。"
   },
   "welcome": {
-    "title": "欢迎使用 Elevo Messenger",
-    "subtitle": "又一个 Matrix 客户端",
-    "sourceCode": "源代码"
+    "title": "欢迎使用 Elevo Messenger"
   },
   "notFound": {
     "title": "未找到页面",

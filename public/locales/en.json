@@ -582,7 +582,6 @@
       "notifyLoud": "Notify Loud"
     },
     "aboutPage": {
-      "tagline": "Yet another matrix client.",
       "sourceCode": "Source Code",
       "clearCache": "Clear Cache & Reload",
       "clearCacheDesc": "Clear all your locally stored data and reload from server.",
@@ -720,9 +719,7 @@
     "failedLoadConfig": "Failed to load client configuration file."
   },
   "welcome": {
-    "title": "Welcome to Elevo Messenger",
-    "subtitle": "Yet another matrix client",
-    "sourceCode": "Source Code"
+    "title": "Welcome to Elevo Messenger"
   },
   "notFound": {
     "title": "Page Not Found",

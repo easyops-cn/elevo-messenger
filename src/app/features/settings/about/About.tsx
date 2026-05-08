@@ -64,11 +64,8 @@ export function About({ requestClose }: AboutProps) {
                 </Box>
                 <Box direction="Column" gap="300">
                   <Box direction="Column" gap="100">
-                    <Box gap="100" alignItems="End">
-                      <Text size="H3">Elevo Messenger</Text>
-                      <Text size="T200">{`v${__APP_VERSION__}`}</Text>
-                    </Box>
-                    <Text>{t('settings.aboutPage.tagline')}</Text>
+                    <Text size="H3">Elevo Messenger</Text>
+                    <Text size="T300">{`v${__APP_VERSION__}`}</Text>
                   </Box>
 
                   <Box gap="200" wrap="Wrap">
