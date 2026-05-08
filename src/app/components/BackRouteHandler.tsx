@@ -4,9 +4,8 @@ import {
   getExplorePath,
   getHomePath,
   getInboxPath,
-  getSpacePath,
 } from '../pages/pathUtils';
-import { EXPLORE_PATH, HOME_PATH, INBOX_PATH, SPACE_PATH } from '../pages/paths';
+import { EXPLORE_PATH, HOME_PATH, INBOX_PATH, TODOS_PATH } from '../pages/paths';
 
 type BackRouteHandlerProps = {
   children: (onBack: () => void) => ReactNode;
@@ -27,22 +26,6 @@ export function BackRouteHandler({ children }: BackRouteHandlerProps) {
       )
     ) {
       navigate(getHomePath());
-      return;
-    }
-    const spaceMatch = matchPath(
-      {
-        path: SPACE_PATH,
-        caseSensitive: true,
-        end: false,
-      },
-      location.pathname
-    );
-    const encodedSpaceIdOrAlias = spaceMatch?.params.spaceIdOrAlias;
-    const decodedSpaceIdOrAlias =
-      encodedSpaceIdOrAlias && decodeURIComponent(encodedSpaceIdOrAlias);
-
-    if (decodedSpaceIdOrAlias) {
-      navigate(getSpacePath(decodedSpaceIdOrAlias));
       return;
     }
     if (
@@ -69,6 +52,19 @@ export function BackRouteHandler({ children }: BackRouteHandlerProps) {
       )
     ) {
       navigate(getInboxPath());
+      return;
+    }
+    if (
+      matchPath(
+        {
+          path: TODOS_PATH,
+          caseSensitive: true,
+          end: false,
+        },
+        location.pathname
+      )
+    ) {
+      navigate(getHomePath());
     }
   }, [navigate, location]);
 

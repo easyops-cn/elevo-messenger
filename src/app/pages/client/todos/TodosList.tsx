@@ -2,15 +2,19 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Box, Icon, Icons, Scroll, Spinner, Text, config } from 'folds';
-import { Page, PageContent, PageContentCenter, PageHero, PageHeroEmpty, PageHeroSection, PageMain } from '../../../components/page';
+import { Box, Icon, Icons, IconButton, Scroll, Spinner, Text, config } from 'folds';
+import { Page, PageContent, PageContentCenter, PageHeader, PageHero, PageHeroEmpty, PageHeroSection, PageMain } from '../../../components/page';
+import { BackRouteHandler } from '../../../components/BackRouteHandler';
+import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { VirtualTile } from '../../../components/virtualizer';
 import { ContainerColor } from '../../../styles/ContainerColor.css';
 import { useSetting } from '../../../state/hooks/settings';
 import { settingsAtom } from '../../../state/settings';
+import { useRoomNavigate } from '../../../hooks/useRoomNavigate';
 import { useTodosApi, type TodoItem } from './useTodosApi';
 import { TodoItemCard } from './TodoItemCard';
 import { PageSpinner } from '../../../components/PageSpinner';
+import { ListTodoIcon } from '../../../icons/ListTodoIcon';
 
 type TodosPageData = {
   todos: TodoItem[];
@@ -20,10 +24,12 @@ type TodosPageData = {
 
 export function TodosList() {
   const { t } = useTranslation();
+  const screenSize = useScreenSizeContext();
   const scrollRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const [hour24Clock] = useSetting(settingsAtom, 'hour24Clock');
   const [dateFormatString] = useSetting(settingsAtom, 'dateFormatString');
+  const { navigateRoom } = useRoomNavigate();
 
   const { status, data, error, fetchNextPage, hasNextPage, isFetchingNextPage } = useTodosApi();
 
@@ -52,6 +58,7 @@ export function TodosList() {
     getScrollElement: () => scrollRef.current,
     estimateSize: () => 100,
     overscan: 2,
+    gap: 20,
   });
 
   const vItems = virtualizer.getVirtualItems();
@@ -69,23 +76,34 @@ export function TodosList() {
   return (
     <PageMain>
       <Page>
+        <PageHeader balance>
+          <Box grow="Yes" gap="200">
+            <Box grow="Yes" basis="No">
+              {screenSize === ScreenSize.Mobile && (
+                <BackRouteHandler>
+                  {(onBack) => (
+                    <IconButton size="300" fill="None" onClick={onBack}>
+                      <Icon size="100" src={Icons.ArrowLeft} />
+                    </IconButton>
+                  )}
+                </BackRouteHandler>
+              )}
+            </Box>
+            <Box alignItems="Center" gap="200">
+              <Icon size="300" src={ListTodoIcon} />
+              <Text size="H5" truncate>
+                {t('todos.title')}
+              </Text>
+            </Box>
+            <Box grow="Yes" basis="No" />
+          </Box>
+        </PageHeader>
+
         <Box style={{ position: 'relative' }} grow="Yes">
           <Scroll ref={scrollRef} hideTrack visibility="Hover">
             <PageContent>
               <PageContentCenter>
                 <Box direction="Column" gap="200">
-                  {!allItems.length && status === 'pending' && (
-                    <PageHeroEmpty>
-                      <PageHeroSection>
-                        <PageHero
-                          icon={<Icon size="600" src={Icons.Message} />}
-                          title={t('todos.title')}
-                          subTitle=""
-                        />
-                      </PageHeroSection>
-                    </PageHeroEmpty>
-                  )}
-
                   {allItems.length === 0 && status === 'success' && (
                     <PageHeroEmpty>
                       <PageHeroSection>
@@ -114,7 +132,6 @@ export function TodosList() {
                         return (
                           <VirtualTile
                             virtualItem={vItem}
-                            style={{ paddingBottom: config.space.S500 }}
                             ref={virtualizer.measureElement}
                             key={`${item.room_id}-${item.question_event_id}`}
                           >
@@ -123,6 +140,7 @@ export function TodosList() {
                               hour24Clock={hour24Clock}
                               dateFormatString={dateFormatString}
                               onSubmit={handleItemSubmit}
+                              onOpen={navigateRoom}
                             />
                           </VirtualTile>
                         );

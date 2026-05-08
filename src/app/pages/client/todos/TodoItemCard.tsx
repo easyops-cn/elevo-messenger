@@ -1,5 +1,5 @@
-import React, { useCallback } from 'react';
-import { Avatar, Box, Icon, Icons, Text, config } from 'folds';
+import React, { useCallback, MouseEventHandler } from 'react';
+import { Avatar, Box, Chip, Icon, Icons, Text, config } from 'folds';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { RoomProvider } from '../../../hooks/useRoom';
 import { AskUserQuestionCard } from '../../../components/message/elevo/AskUser';
@@ -16,15 +16,20 @@ type TodoItemCardProps = {
   hour24Clock: boolean;
   dateFormatString: string;
   onSubmit: (roomId: string, eventId: string) => void;
+  onOpen: (roomId: string, eventId: string) => void;
 };
 
-export function TodoItemCard({ item, hour24Clock, dateFormatString, onSubmit }: TodoItemCardProps) {
+export function TodoItemCard({ item, hour24Clock, dateFormatString, onSubmit, onOpen }: TodoItemCardProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
 
   const handleSubmit = useCallback(() => {
     onSubmit(item.room_id, item.question_event_id);
   }, [onSubmit, item.room_id, item.question_event_id]);
+
+  const handleOpenClick: MouseEventHandler = () => {
+    onOpen(item.room_id, item.question_event_id);
+  };
 
   const room = mx.getRoom(item.room_id);
   if (!room) {
@@ -79,6 +84,9 @@ export function TodoItemCard({ item, hour24Clock, dateFormatString, onSubmit }: 
               </Box>
               <Time ts={item.created_at * 1000} hour24Clock={hour24Clock} dateFormatString={dateFormatString} />
             </Box>
+            <Chip onClick={handleOpenClick} variant="Secondary" radii="400">
+              <Text size="T200">Open</Text>
+            </Chip>
           </Box>
           <Box grow="Yes" direction="Column" gap="200">
             <AskUserQuestionCard data={item.question} onSubmit={handleSubmit} />
