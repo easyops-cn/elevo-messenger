@@ -2,12 +2,14 @@ import React, { CSSProperties, ReactNode, useEffect, useMemo, useState } from 'r
 import { z } from 'zod/v4';
 import DOMPurify from 'dompurify';
 import { marked } from 'marked';
-import { color } from 'folds';
+import { color, config } from 'folds';
+import { useTranslation } from 'react-i18next';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useRoomScrollToBottom } from '../../../features/room/RoomScrollToBottomContext';
 import { trimReplyFromBody } from '../../../utils/room';
 import { trimTrailingSlash } from '../../../utils/common';
 import { MText } from '../MsgTypeRenderers';
+import { MessageTextBody } from '../layout';
 
 const SseRenderSchema = z.object({
   bridgeId: z.string().regex(/^[a-zA-Z0-9_-]+$/, 'bridgeId must be a valid identifier'),
@@ -29,21 +31,25 @@ type RenderBodyProps = {
 
 export type SseMarkdownBodyProps = {
   sseData: SseRenderData;
+  reasoning?: boolean;
   renderBody: (props: RenderBodyProps) => ReactNode;
   renderUrlsPreview?: (urls: string[]) => ReactNode;
   style?: CSSProperties;
 };
 
-export function SseMarkdownBody({ sseData, renderBody, renderUrlsPreview, style }: SseMarkdownBodyProps) {
+export function SseMarkdownBody({ sseData, reasoning, renderBody, renderUrlsPreview, style }: SseMarkdownBodyProps) {
+  const { t } = useTranslation();
   const mx = useMatrixClient();
   const homeserverBaseUrl = mx.getHomeserverUrl();
   const { emitScrollToBottomRequest } = useRoomScrollToBottom();
   const [streamedBody, setStreamedBody] = useState('');
   const [streamError, setStreamError] = useState(false);
+  const [streamDone, setStreamDone] = useState(false);
 
   useEffect(() => {
     setStreamedBody('');
     setStreamError(false);
+    setStreamDone(false);
 
     const abortController = new AbortController();
     const decoder = new TextDecoder();
@@ -113,6 +119,8 @@ export function SseMarkdownBody({ sseData, renderBody, renderUrlsPreview, style 
           // eslint-disable-next-line no-console
           console.error('Failed to consume step SSE stream:', error);
         }
+      } finally {
+        setStreamDone(true);
       }
     };
 
@@ -134,7 +142,16 @@ export function SseMarkdownBody({ sseData, renderBody, renderUrlsPreview, style 
   const content = useMemo(() => ({
     body: markdownBody,
     formatted_body: sanitizedHtml,
-  }), [markdownBody, sanitizedHtml]);
+    ...(reasoning ? { 'vip.elevo.reasoning': true } : null),
+  }), [markdownBody, sanitizedHtml, reasoning]);
+
+  if (!markdownBody && !streamDone) {
+    return (
+      <MessageTextBody style={{...style, fontStyle: 'italic', opacity: config.opacity.P300 }}>
+        {t('room.typing')}
+      </MessageTextBody>
+    );
+  }
 
   return (
     <MText

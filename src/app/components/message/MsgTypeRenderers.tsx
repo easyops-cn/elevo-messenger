@@ -107,10 +107,12 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
   }
 
   const sseRender = parseSseRender(content);
+  const reasoning = content['vip.elevo.reasoning'] === true;
   if (sseRender?.streaming) {
     return (
       <SseMarkdownBody
         sseData={sseRender}
+        reasoning={reasoning}
         renderBody={renderBody}
         renderUrlsPreview={renderUrlsPreview}
         style={style}
@@ -128,7 +130,7 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
     return <ToolCallCard data={toolCall} style={style} />;
   }
 
-  if (content['vip.elevo.reasoning'] === true) {
+  if (reasoning) {
     const trimmedBody = trimReplyFromBody(body);
     return (
       <ReasoningCard style={style}>
@@ -140,7 +142,6 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
             body: trimmedBody,
             customBody: typeof customBody === 'string' ? customBody : undefined,
           })}
-          {edited && <MessageEditedContent />}
         </MessageTextBody>
       </ReasoningCard>
     );
