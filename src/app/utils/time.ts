@@ -47,12 +47,11 @@ export const inSameDay = (ts1: number, ts2: number): boolean => {
   );
 };
 
-export const minuteDifference = (ts1: number, ts2: number): number => {
+export const secondDifference = (ts1: number, ts2: number): number => {
   const dt1 = new Date(ts1);
   const dt2 = new Date(ts2);
 
-  let diff = (dt2.getTime() - dt1.getTime()) / 1000;
-  diff /= 60;
+  const diff = (dt2.getTime() - dt1.getTime()) / 1000;
   return Math.abs(Math.round(diff));
 };
 

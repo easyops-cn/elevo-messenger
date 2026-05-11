@@ -94,7 +94,7 @@ import { markAsRead } from '../../utils/notifications';
 import { useDebounce } from '../../hooks/useDebounce';
 import { getResizeObserverEntry, useResizeObserver } from '../../hooks/useResizeObserver';
 import * as css from './RoomTimeline.css';
-import { inSameDay, minuteDifference, timeDayMonthYear, today, yesterday } from '../../utils/time';
+import { inSameDay, secondDifference, timeDayMonthYear, today, yesterday } from '../../utils/time';
 import { createMentionElement, moveCursor } from '../../components/editor';
 import { threadOrRoomIdToReplyDraftAtomFamily } from '../../state/room/roomInputDrafts';
 import { usePowerLevelsContext } from '../../hooks/usePowerLevels';
@@ -1650,7 +1650,7 @@ export function RoomTimeline({
   );
 
   let prevEvent: MatrixEvent | undefined;
-  let isPrevRendered = false;
+  let prevRenderedEvent: MatrixEvent | undefined;
   let newDivider = false;
   let dayDivider = false;
   const eventRenderer = (item: number) => {
@@ -1675,13 +1675,12 @@ export function RoomTimeline({
     }
 
     const collapsed =
-      isPrevRendered &&
       !dayDivider &&
       (!newDivider || eventSender === mx.getUserId()) &&
-      prevEvent !== undefined &&
-      prevEvent.getSender() === eventSender &&
-      prevEvent.getType() === mEvent.getType() &&
-      minuteDifference(prevEvent.getTs(), mEvent.getTs()) < 2;
+      prevRenderedEvent !== undefined &&
+      prevRenderedEvent.getSender() === eventSender &&
+      prevRenderedEvent.getType() === mEvent.getType() &&
+      secondDifference(prevRenderedEvent.getTs(), mEvent.getTs()) <= 30;
 
     const eventJSX =
       reactionOrEditEvent(mEvent) || isUserAnswerEvent(mEvent)
@@ -1696,7 +1695,9 @@ export function RoomTimeline({
             collapsed
           );
     prevEvent = mEvent;
-    isPrevRendered = !!eventJSX;
+    if (eventJSX) {
+      prevRenderedEvent = mEvent;
+    }
 
     const newDividerJSX =
       newDivider && eventJSX && eventSender !== mx.getUserId() ? (
