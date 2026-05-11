@@ -23,6 +23,7 @@ function tryJsonPrettier(val: unknown): string {
   if (typeof val !== 'string') return JSON.stringify(val, null, 2);
   try {
     const data = JSON.parse(val);
+    if (typeof data === 'string') return data;
     return JSON.stringify(data, null, 2);
   } catch {
     return val;
