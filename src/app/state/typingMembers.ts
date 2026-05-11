@@ -58,20 +58,6 @@ const deleteTypingMember = (
   return roomToMembers;
 };
 
-const timeoutReceipt = (
-  roomToMembers: IRoomIdToTypingMembers,
-  roomId: string,
-  userId: string,
-  timeout: number
-): boolean | undefined => {
-  const typingMembers = roomToMembers.get(roomId) ?? [];
-
-  const target = typingMembers.find((receipt) => receipt.userId === userId);
-  if (!target) return undefined;
-
-  return Date.now() - target.ts >= timeout;
-};
-
 export const roomIdToTypingMembersAtom = atom<
   IRoomIdToTypingMembers,
   [IRoomIdToTypingMembersAction],
@@ -86,30 +72,6 @@ export const roomIdToTypingMembersAtom = atom<
         baseRoomIdToTypingMembersAtom,
         produce(rToTyping, (draft) => putTypingMember(draft, action))
       );
-
-      // remove typing receipt after some timeout
-      // to prevent stuck typing members
-      setTimeout(() => {
-        const { roomId, userId } = action;
-        const timeout = timeoutReceipt(
-          get(baseRoomIdToTypingMembersAtom),
-          roomId,
-          userId,
-          TYPING_TIMEOUT_MS
-        );
-        if (timeout) {
-          set(
-            baseRoomIdToTypingMembersAtom,
-            produce(get(baseRoomIdToTypingMembersAtom), (draft) =>
-              deleteTypingMember(draft, {
-                type: 'DELETE',
-                roomId,
-                userId,
-              })
-            )
-          );
-        }
-      }, TYPING_TIMEOUT_MS);
     }
 
     if (
