@@ -1126,7 +1126,8 @@
   },
   "toolCall": {
     "inprogressDescription": "执行中...",
-    "completedDescription": "已完成"
+    "completedDescription": "已完成",
+    "updateTodos": "更新待办"
   },
   "verification_gate": {
     "title": "验证此设备",

@@ -1126,7 +1126,8 @@
   },
   "toolCall": {
     "inprogressDescription": "Running...",
-    "completedDescription": "Completed"
+    "completedDescription": "Completed",
+    "updateTodos": "Update Todos"
   },
   "verification_gate": {
     "title": "Verify This Device",

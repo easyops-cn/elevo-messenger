@@ -21,6 +21,7 @@ export const ToolCallBody = style({
   border: cardBorder,
   borderRadius: config.radii.R300,
   padding: `${config.space.S200} ${config.space.S300}`,
+  width: 'fit-content',
   maxWidth: toRem(600),
 });
 
@@ -49,4 +50,34 @@ export const ErrorPre = style({
 export const Divider = style({
   borderTop: cardBorder,
   margin: `${config.space.S200} 0`,
+});
+
+export const TodoHeader = style({
+  fontSize: toRem(13),
+  marginBottom: config.space.S200,
+});
+
+export const TodoList = style({
+  margin: 0,
+  paddingLeft: 0,
+  listStyle: 'none',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: config.space.S100,
+});
+
+export const TodoItem = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: config.space.S100,
+});
+
+export const TodoText = style({
+  wordBreak: 'break-word',
+});
+
+export const TodoTextCompleted = style({
+  wordBreak: 'break-word',
+  textDecoration: 'line-through',
+  opacity: 0.45,
 });

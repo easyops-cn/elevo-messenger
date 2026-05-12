@@ -1,7 +1,10 @@
 import React, { CSSProperties, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod/v4';
-import { Box, Icon, Icons, Text, color } from 'folds';
+import { Box, Icon, Icons, Text, color, toRem } from 'folds';
 import * as css from './ToolCallCard.css';
+import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
+import { SquareAsteriskIcon } from '../../../icons/SquareAsteriskIcon';
 
 const ToolCallSchema = z.object({
   name: z.string(),
@@ -13,6 +16,20 @@ const ToolCallSchema = z.object({
 });
 
 export type ToolCallData = z.infer<typeof ToolCallSchema>;
+
+const TodoItemSchema = z.object({
+  content: z.string(),
+  priority: z.string().optional(),
+  status: z.enum(['completed', 'in_progress', 'pending']),
+});
+
+const TodoListSchema = z.array(TodoItemSchema);
+
+const TodoPayloadSchema = z.object({
+  todos: TodoListSchema,
+});
+
+type TodoItem = z.infer<typeof TodoItemSchema>;
 
 export function parseToolCall(content: Record<string, unknown>): ToolCallData | undefined {
   const result = ToolCallSchema.safeParse(content['vip.elevo.tool_call']);
@@ -30,13 +47,72 @@ function tryJsonPrettier(val: unknown): string {
   }
 }
 
+function tryParseJson(val: unknown): unknown {
+  if (typeof val !== 'string') return val;
+  try {
+    return JSON.parse(val);
+  } catch {
+    return val;
+  }
+}
+
+function getTodosForRender(data: ToolCallData): TodoItem[] | undefined {
+  if (data.name !== 'todowrite') return undefined;
+
+  if (data.status === 'completed') {
+    const parsedOutput = tryParseJson(data.output);
+    const todoList = TodoListSchema.safeParse(parsedOutput);
+    if (todoList.success) return todoList.data;
+  }
+
+  if (data.status === 'inprogress') {
+    const parsedInput = tryParseJson(data.input);
+    const todoPayload = TodoPayloadSchema.safeParse(parsedInput);
+    if (todoPayload.success) return todoPayload.data.todos;
+  }
+
+  return undefined;
+}
+
 type ToolCallCardProps = { data: ToolCallData; style?: CSSProperties };
 export function ToolCallCard({ data, style }: ToolCallCardProps) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const iconColor = data.status === 'completed' ? color.Success.Main : data.status === 'failed' ? color.Critical.Main : color.Secondary.Main;
 
   const prettierInput = useMemo(() => tryJsonPrettier(data.input), [data.input]);
   const prettierOutput = useMemo(() => tryJsonPrettier(data.output), [data.output]);
+  const todos = useMemo(() => getTodosForRender(data), [data]);
+
+  if (todos) {
+    return (
+      <Box style={style} direction="Column" gap="100">
+        <div className={css.ToolCallBody}>
+          <Text size="B300" priority="400" className={css.TodoHeader}>
+            {t('toolCall.updateTodos')}
+          </Text>
+          <ul className={css.TodoList}>
+            {todos.map((todo) => {
+              const checked = todo.status === 'completed';
+              return (
+                <li key={`${todo.content}-${todo.priority ?? 'none'}-${todo.status}`} className={css.TodoItem}>
+                  <Icon
+                    src={checked ? DisabledCheckboxIcon : todo.status === 'in_progress' ? SquareAsteriskIcon : DisabledCheckboxIcon}
+                    filled={checked}
+                    size="50"
+                    style={{ opacity: checked ? 0.45 : 0.75, marginTop: toRem(2) }}
+                  />
+                  <Text size="T200" priority="300" className={checked ? css.TodoTextCompleted : css.TodoText}>
+                    {todo.content}
+                  </Text>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </Box>
+    );
+  }
 
   return (
     <Box style={style} direction="Column" gap="100">
@@ -54,7 +130,14 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
       >
         <Icon src={Icons.Terminal} size="100" style={{ color: iconColor }} />
         <Text size="T200" priority="300">
-          {data.title || data.name}
+          {data.title ? (
+            <>
+              <Text size="L400" as="span">
+                {data.name.charAt(0).toUpperCase() + data.name.slice(1).replace(/_([a-z])?/g, (_, c) => (` ${c ? c.toUpperCase() : ''}`))}
+              </Text>
+              {` ${data.title}`}
+            </>
+          ) : data.name}
         </Text>
         <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="100" />
       </div>
@@ -64,7 +147,7 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
             Input
           </Text>
           <pre className={css.Preformatted}>{prettierInput}</pre>
-          {data.status === "completed" && data.output !== undefined && (
+          {data.status === 'completed' && data.output !== undefined && (
             <>
               <div className={css.Divider} />
               <Text size="T200" priority="300" className={css.Label}>
@@ -73,7 +156,7 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
               <pre className={css.Preformatted}>{prettierOutput}</pre>
             </>
           )}
-          {data.status === "failed" && data.error !== undefined && (
+          {data.status === 'failed' && data.error !== undefined && (
             <>
               <div className={css.Divider} />
               <Text size="T200" priority="300" className={css.Label}>
