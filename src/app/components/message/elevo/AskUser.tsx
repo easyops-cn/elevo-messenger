@@ -148,6 +148,7 @@ export function AskUserQuestionCard({
   answerEventType = 'vip.elevo.ask_user_question_answers',
   answerIdField = 'question_id',
   answerIdValue,
+  initialHumanSender,
 }: {
   data: AskUserQuestionCardData;
   style?: CSSProperties;
@@ -156,6 +157,7 @@ export function AskUserQuestionCard({
   answerEventType?: 'vip.elevo.ask_user_question_answers' | 'vip.elevo.question_answers';
   answerIdField?: 'question_id' | 'question_event_id';
   answerIdValue?: string;
+  initialHumanSender?: string;
 }) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
@@ -167,10 +169,11 @@ export function AskUserQuestionCard({
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
-  const isAssignedUser = !data.userId || mx.getUserId() === data.userId;
+  const assignedUserId = data.userId ?? initialHumanSender;
+  const isAssignedUser = !!assignedUserId && mx.getUserId() === assignedUserId;
   const isDisabled = !isAssignedUser || submitted || readOnly;
-  const assignedDisplayName = data.userId
-    ? getMemberDisplayName(room, data.userId) ?? getMxIdLocalPart(data.userId) ?? data.userId
+  const assignedDisplayName = assignedUserId
+    ? getMemberDisplayName(room, assignedUserId) ?? getMxIdLocalPart(assignedUserId) ?? assignedUserId
     : undefined;
 
   const answerId = answerIdValue ?? data.question_id;

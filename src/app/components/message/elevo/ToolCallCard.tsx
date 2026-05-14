@@ -108,8 +108,13 @@ function getQuestionForRender(data: ToolCallData): AskUserQuestionCardData | und
   };
 }
 
-type ToolCallCardProps = { data: ToolCallData; style?: CSSProperties; eventId?: string };
-export function ToolCallCard({ data, style, eventId }: ToolCallCardProps) {
+type ToolCallCardProps = {
+  data: ToolCallData;
+  style?: CSSProperties;
+  eventId?: string;
+  initialHumanSender?: string;
+};
+export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolCallCardProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const iconColor = data.status === 'completed' ? color.Success.Main : data.status === 'failed' ? color.Critical.Main : color.Secondary.Main;
@@ -162,6 +167,7 @@ export function ToolCallCard({ data, style, eventId }: ToolCallCardProps) {
         answerEventType="vip.elevo.question_answers"
         answerIdField="question_event_id"
         answerIdValue={eventId}
+        initialHumanSender={initialHumanSender}
       />
     );
   }

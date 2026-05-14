@@ -94,6 +94,10 @@ type MTextProps = {
 export function MText({ edited, content, renderBody, renderUrlsPreview, style, readOnly, eventId }: MTextProps) {
   const mx = useMatrixClient();
   const { body, formatted_body: customBody } = content;
+  const initialHumanSender =
+    typeof content['vip.elevo.initial_human_sender'] === 'string'
+      ? content['vip.elevo.initial_human_sender']
+      : undefined;
 
   if (typeof body !== 'string') return <BrokenContent />;
 
@@ -104,7 +108,14 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
 
   const askUserQuestion = parseAskUserQuestion(content);
   if (askUserQuestion) {
-    return <AskUserQuestionCard data={askUserQuestion} style={style} readOnly={readOnly} />;
+    return (
+      <AskUserQuestionCard
+        data={askUserQuestion}
+        style={style}
+        readOnly={readOnly}
+        initialHumanSender={initialHumanSender}
+      />
+    );
   }
 
   const sseRender = parseSseRender(content);
@@ -128,7 +139,14 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
 
   const toolCall = parseToolCall(content);
   if (toolCall) {
-    return <ToolCallCard data={toolCall} style={style} eventId={eventId} />;
+    return (
+      <ToolCallCard
+        data={toolCall}
+        style={style}
+        eventId={eventId}
+        initialHumanSender={initialHumanSender}
+      />
+    );
   }
 
   if (reasoning) {
