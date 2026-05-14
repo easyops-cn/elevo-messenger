@@ -100,7 +100,7 @@ export const Reply = as<'div', ReplyProps>(
     const eventType = replyEvent?.getType();
     const { msgtype } = content;
     let body: string | undefined;
-    if (msgtype === MsgType.Text) {
+    if (msgtype === MsgType.Image) {
       body = t('message.image');
     } else if (msgtype === MsgType.File) {
       const filename = content.filename || content.body || '';

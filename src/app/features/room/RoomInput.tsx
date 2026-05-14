@@ -529,7 +529,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         if (replyDraft?.relation?.rel_type === RelationType.Thread) {
           content['m.relates_to'].event_id = replyDraft.relation.event_id;
           content['m.relates_to'].rel_type = RelationType.Thread;
-          content['m.relates_to'].is_falling_back = true;
+          content['m.relates_to'].is_falling_back = replyDraft.eventId === replyDraft.relation.event_id;
         }
       }
 
