@@ -7,6 +7,7 @@ import {
   AskUserQuestionCard,
   QuestionAnsweredCard,
   parseAskUserQuestion,
+  parseQuestionAnswers,
   parseQuestionAnswered,
 } from './elevo/AskUser';
 import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
@@ -100,6 +101,11 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
       : undefined;
 
   if (typeof body !== 'string') return <BrokenContent />;
+
+  const questionAnswers = parseQuestionAnswers(content);
+  if (questionAnswers) {
+    return <QuestionAnsweredCard data={questionAnswers} style={style} />;
+  }
 
   const oidcLogin = parseOidcLogin(content);
   if (oidcLogin && (!oidcLogin.userId || oidcLogin.userId === mx.getUserId())) {

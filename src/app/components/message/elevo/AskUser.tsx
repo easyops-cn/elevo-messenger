@@ -62,6 +62,14 @@ const QuestionAnsweredSchema = z.object({
 
 type QuestionAnsweredData = z.infer<typeof QuestionAnsweredSchema>;
 
+const QuestionAnswersSchema = z.object({
+  question_event_id: z.string(),
+  answers: z.record(z.string(), z.array(z.string())),
+});
+
+type QuestionAnswersData = z.infer<typeof QuestionAnswersSchema>;
+type QuestionAnsweredCardData = QuestionAnsweredData | QuestionAnswersData;
+
 export function isUserAnswerEvent(mEvent: MatrixEvent) {
   return (
     mEvent.getType() === MessageEvent.RoomMessage &&
@@ -98,6 +106,19 @@ export function parseQuestionAnswered(
   console.error('Failed to parse question answered content:', result.error);
 }
 
+export function parseQuestionAnswers(
+  content: Record<string, unknown>
+): QuestionAnswersData | undefined {
+  const answeredContent = content['vip.elevo.question_answers'];
+  if (!answeredContent) return undefined;
+  const result = QuestionAnswersSchema.safeParse(answeredContent);
+  if (result.success) {
+    return result.data;
+  }
+  // eslint-disable-next-line no-console
+  console.error('Failed to parse question answers content:', result.error);
+}
+
 // Types
 
 type QuestionSelections = Record<number, string[]>;
@@ -108,7 +129,7 @@ export function QuestionAnsweredCard({
   data,
   style,
 }: {
-  data: QuestionAnsweredData;
+  data: QuestionAnsweredCardData;
   style?: CSSProperties;
 }) {
   const { t } = useTranslation();
