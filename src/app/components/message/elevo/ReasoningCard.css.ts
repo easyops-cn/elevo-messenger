@@ -11,4 +11,5 @@ export const ReasoningToggle = style({
   display: 'inline-flex',
   alignItems: 'center',
   gap: config.space.S100,
+  width: 'fit-content',
 });

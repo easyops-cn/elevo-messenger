@@ -84,6 +84,11 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
   const prettierOutput = useMemo(() => tryJsonPrettier(data.output), [data.output]);
   const todos = useMemo(() => getTodosForRender(data), [data]);
 
+  const prettierToolName = useMemo(() =>
+    data.name.charAt(0).toUpperCase() + data.name.slice(1).replace(/_([a-z])?/g, (_, c) => (` ${c ? c.toUpperCase() : ''}`)),
+    [data.name]
+  );
+
   if (todos) {
     return (
       <Box style={style} direction="Column" gap="100">
@@ -129,15 +134,15 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
         tabIndex={0}
       >
         <Icon src={Icons.Terminal} size="100" style={{ color: iconColor }} />
-        <Text size="T200" priority="300">
+        <Text size="L400" priority="300">
           {data.title ? (
             <>
-              <Text size="L400" as="span">
-                {data.name.charAt(0).toUpperCase() + data.name.slice(1).replace(/_([a-z])?/g, (_, c) => (` ${c ? c.toUpperCase() : ''}`))}
+              {prettierToolName}
+              <Text size="T200" as="span">
+                {` ${data.title}`}
               </Text>
-              {` ${data.title}`}
             </>
-          ) : data.name}
+          ) : prettierToolName}
         </Text>
         <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="100" />
       </div>
