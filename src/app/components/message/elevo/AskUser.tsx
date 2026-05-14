@@ -50,7 +50,10 @@ const AskUserQuestionSchema = z.object({
   questions: z.array(AskUserQuestionItemSchema).min(1),
 });
 
-type AskUserQuestionData = z.infer<typeof AskUserQuestionSchema>;
+export type AskUserQuestionData = z.infer<typeof AskUserQuestionSchema>;
+export type AskUserQuestionCardData = Omit<AskUserQuestionData, 'question_id'> & {
+  question_id?: string;
+};
 
 const QuestionAnsweredSchema = z.object({
   question_id: z.string(),
@@ -142,11 +145,17 @@ export function AskUserQuestionCard({
   style,
   readOnly,
   onSubmit,
+  answerEventType = 'vip.elevo.ask_user_question_answers',
+  answerIdField = 'question_id',
+  answerIdValue,
 }: {
-  data: AskUserQuestionData;
+  data: AskUserQuestionCardData;
   style?: CSSProperties;
   readOnly?: boolean;
   onSubmit?: () => void;
+  answerEventType?: 'vip.elevo.ask_user_question_answers' | 'vip.elevo.question_answers';
+  answerIdField?: 'question_id' | 'question_event_id';
+  answerIdValue?: string;
 }) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
@@ -164,7 +173,10 @@ export function AskUserQuestionCard({
     ? getMemberDisplayName(room, data.userId) ?? getMxIdLocalPart(data.userId) ?? data.userId
     : undefined;
 
+  const answerId = answerIdValue ?? data.question_id;
+
   const canSubmit = useMemo(() => {
+    if (!answerId) return false;
     if (submitted) return false;
     for (let i = 0; i < data.questions.length; i += 1) {
       const sel = selections[i] ?? [];
@@ -172,7 +184,7 @@ export function AskUserQuestionCard({
       if (sel.some((s) => s === 'Other:') && !otherTexts[String(i)]?.trim()) return false;
     }
     return true;
-  }, [data.questions.length, selections, otherTexts, submitted]);
+  }, [answerId, data.questions.length, selections, otherTexts, submitted]);
 
   const handleOptionToggle = useCallback(
     (qIndex: number, label: string, isOther: boolean) => {
@@ -228,8 +240,8 @@ export function AskUserQuestionCard({
       await mx.sendMessage(room.roomId, {
         msgtype: 'm.text',
         body: bodyLines.join('\n'),
-        'vip.elevo.ask_user_question_answers': {
-          question_id: data.question_id,
+        [answerEventType]: {
+          [answerIdField]: answerId,
           answers,
         },
       } as unknown as RoomMessageEventContent);
@@ -241,7 +253,19 @@ export function AskUserQuestionCard({
     } finally {
       setSubmitting(false);
     }
-  }, [submitting, canSubmit, data, selections, otherTexts, mx, room.roomId, onSubmit]);
+  }, [
+    submitting,
+    canSubmit,
+    data,
+    selections,
+    otherTexts,
+    mx,
+    room.roomId,
+    onSubmit,
+    answerEventType,
+    answerIdField,
+    answerId,
+  ]);
 
   const currentQuestion = data.questions[activeTab];
   const currentSel = selections[activeTab] ?? [];

@@ -88,9 +88,10 @@ type MTextProps = {
   renderUrlsPreview?: (urls: string[]) => ReactNode;
   style?: CSSProperties;
   readOnly?: boolean;
+  eventId?: string;
 };
 
-export function MText({ edited, content, renderBody, renderUrlsPreview, style, readOnly }: MTextProps) {
+export function MText({ edited, content, renderBody, renderUrlsPreview, style, readOnly, eventId }: MTextProps) {
   const mx = useMatrixClient();
   const { body, formatted_body: customBody } = content;
 
@@ -127,7 +128,7 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
 
   const toolCall = parseToolCall(content);
   if (toolCall) {
-    return <ToolCallCard data={toolCall} style={style} />;
+    return <ToolCallCard data={toolCall} style={style} eventId={eventId} />;
   }
 
   if (reasoning) {

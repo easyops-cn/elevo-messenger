@@ -1143,6 +1143,7 @@ export function RoomTimeline({
                 displayName={senderDisplayName}
                 msgType={mEvent.getContent().msgtype ?? ''}
                 ts={mEvent.getTs()}
+                eventId={mEventId}
                 edited={!!editedEvent}
                 getContent={getContent}
                 urlPreview={showUrlPreview}
@@ -1249,6 +1250,7 @@ export function RoomTimeline({
                       displayName={senderDisplayName}
                       msgType={mEvent.getContent().msgtype ?? ''}
                       ts={mEvent.getTs()}
+                      eventId={mEventId}
                       edited={!!editedEvent}
                       getContent={getContent}
                       urlPreview={showUrlPreview}

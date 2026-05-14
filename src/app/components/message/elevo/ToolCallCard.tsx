@@ -5,6 +5,7 @@ import { Box, Icon, Icons, Text, color, toRem } from 'folds';
 import * as css from './ToolCallCard.css';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { SquareAsteriskIcon } from '../../../icons/SquareAsteriskIcon';
+import { AskUserQuestionCard, type AskUserQuestionCardData } from './AskUser';
 
 const ToolCallSchema = z.object({
   name: z.string(),
@@ -27,6 +28,22 @@ const TodoListSchema = z.array(TodoItemSchema);
 
 const TodoPayloadSchema = z.object({
   todos: TodoListSchema,
+});
+
+const QuestionToolInputSchema = z.object({
+  questions: z.array(
+    z.object({
+      question: z.string(),
+      header: z.string(),
+      options: z.array(
+        z.object({
+          label: z.string(),
+          description: z.string(),
+        })
+      ),
+      multiple: z.boolean().optional(),
+    })
+  ),
 });
 
 type TodoItem = z.infer<typeof TodoItemSchema>;
@@ -74,8 +91,25 @@ function getTodosForRender(data: ToolCallData): TodoItem[] | undefined {
   return undefined;
 }
 
-type ToolCallCardProps = { data: ToolCallData; style?: CSSProperties };
-export function ToolCallCard({ data, style }: ToolCallCardProps) {
+function getQuestionForRender(data: ToolCallData): AskUserQuestionCardData | undefined {
+  if (data.name !== 'question') return undefined;
+
+  const parsedInput = tryParseJson(data.input);
+  const result = QuestionToolInputSchema.safeParse(parsedInput);
+  if (!result.success) return undefined;
+
+  return {
+    questions: result.data.questions.map((question) => ({
+      question: question.question,
+      header: question.header,
+      options: question.options,
+      multiSelect: question.multiple ?? false,
+    })),
+  };
+}
+
+type ToolCallCardProps = { data: ToolCallData; style?: CSSProperties; eventId?: string };
+export function ToolCallCard({ data, style, eventId }: ToolCallCardProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const iconColor = data.status === 'completed' ? color.Success.Main : data.status === 'failed' ? color.Critical.Main : color.Secondary.Main;
@@ -83,6 +117,7 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
   const prettierInput = useMemo(() => tryJsonPrettier(data.input), [data.input]);
   const prettierOutput = useMemo(() => tryJsonPrettier(data.output), [data.output]);
   const todos = useMemo(() => getTodosForRender(data), [data]);
+  const question = useMemo(() => getQuestionForRender(data), [data]);
 
   const prettierToolName = useMemo(() =>
     data.name.charAt(0).toUpperCase() + data.name.slice(1).replace(/_([a-z])?/g, (_, c) => (` ${c ? c.toUpperCase() : ''}`)),
@@ -116,6 +151,18 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
           </ul>
         </div>
       </Box>
+    );
+  }
+
+  if (question && eventId) {
+    return (
+      <AskUserQuestionCard
+        data={question}
+        style={style}
+        answerEventType="vip.elevo.question_answers"
+        answerIdField="question_event_id"
+        answerIdValue={eventId}
+      />
     );
   }
 
