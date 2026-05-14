@@ -14,6 +14,7 @@ const ToolCallSchema = z.object({
   output: z.unknown().optional(),
   error: z.unknown().optional(),
   status: z.enum(['inprogress', 'completed', 'failed']),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type ToolCallData = z.infer<typeof ToolCallSchema>;
@@ -164,9 +165,11 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
       <AskUserQuestionCard
         data={question}
         style={style}
+        readOnly={data.status !== 'completed'}
         answerEventType="vip.elevo.question_answers"
         answerIdField="question_event_id"
         answerIdValue={eventId}
+        agentMode={data.metadata?.agent_mode === 'plan' ? 'plan' : undefined}
         initialHumanSender={initialHumanSender}
       />
     );

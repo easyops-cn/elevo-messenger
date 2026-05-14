@@ -110,7 +110,7 @@ export function parseQuestionAnswered(
 export function parseQuestionAnswers(
   content: Record<string, unknown>
 ): QuestionAnswersData | undefined {
-  const answeredContent = content['vip.elevo.question_answers'];
+  const answeredContent = content['vip.elevo.received_question_answers'];
   if (!answeredContent) return undefined;
   const result = QuestionAnswersSchema.safeParse(answeredContent);
   if (result.success) {
@@ -170,6 +170,7 @@ export function AskUserQuestionCard({
   answerEventType = 'vip.elevo.ask_user_question_answers',
   answerIdField = 'question_id',
   answerIdValue,
+  agentMode,
   initialHumanSender,
 }: {
   data: AskUserQuestionCardData;
@@ -179,6 +180,7 @@ export function AskUserQuestionCard({
   answerEventType?: 'vip.elevo.ask_user_question_answers' | 'vip.elevo.question_answers';
   answerIdField?: 'question_id' | 'question_event_id';
   answerIdValue?: string;
+  agentMode?: string;
   initialHumanSender?: string;
 }) {
   const { t } = useTranslation();
@@ -263,10 +265,10 @@ export function AskUserQuestionCard({
 
     setSubmitting(true);
     try {
-      const bodyLines = Object.entries(answers).map(([q, ans]) => `${q}: ${ans.join(', ')}`);
+      const body = `${agentMode === 'plan' ? '/plan ' : ''}${Object.entries(answers).map(([q, ans]) => `${q}: ${ans.join(', ')}`).join('\n')}`;
       await mx.sendMessage(room.roomId, {
         msgtype: 'm.text',
-        body: bodyLines.join('\n'),
+        body,
         [answerEventType]: {
           [answerIdField]: answerId,
           answers,
@@ -287,6 +289,7 @@ export function AskUserQuestionCard({
     selections,
     otherTexts,
     mx,
+    agentMode,
     room.roomId,
     onSubmit,
     answerEventType,
