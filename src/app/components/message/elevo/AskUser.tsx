@@ -71,10 +71,11 @@ type QuestionAnswersData = z.infer<typeof QuestionAnswersSchema>;
 type QuestionAnsweredCardData = QuestionAnsweredData | QuestionAnswersData;
 
 export function isUserAnswerEvent(mEvent: MatrixEvent) {
+  const content = mEvent.getContent();
   return (
     mEvent.getType() === MessageEvent.RoomMessage &&
-    mEvent.getContent().msgtype === MsgType.Text &&
-    !!mEvent.getContent()['vip.elevo.ask_user_question_answers']
+    content.msgtype === MsgType.Text &&
+    (!!content['vip.elevo.ask_user_question_answers'] || !!content['vip.elevo.question_answers'])
   );
 }
 
@@ -194,7 +195,9 @@ export function AskUserQuestionCard({
   const isAssignedUser = !!assignedUserId && mx.getUserId() === assignedUserId;
   const isDisabled = !isAssignedUser || submitted || readOnly;
   const assignedDisplayName = assignedUserId
-    ? getMemberDisplayName(room, assignedUserId) ?? getMxIdLocalPart(assignedUserId) ?? assignedUserId
+    ? getMemberDisplayName(room, assignedUserId) ??
+      getMxIdLocalPart(assignedUserId) ??
+      assignedUserId
     : undefined;
 
   const answerId = answerIdValue ?? data.question_id;
