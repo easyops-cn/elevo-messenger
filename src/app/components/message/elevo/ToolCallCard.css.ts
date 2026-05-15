@@ -1,7 +1,28 @@
-import { style } from '@vanilla-extract/css';
+import { style, keyframes } from '@vanilla-extract/css';
 import { color, config, toRem } from 'folds';
 
 const cardBorder = `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`;
+
+const shimmer = keyframes({
+  '0%': { backgroundPosition: '200% center' },
+  '100%': { backgroundPosition: '-200% center' },
+});
+
+export const ToolCallHeaderShimmer = style({
+  backgroundSize: '200% auto',
+  backgroundImage: `linear-gradient(
+    90deg,
+    ${color.SurfaceVariant.OnContainer} 0%,
+    ${color.SurfaceVariant.OnContainer} 40%,
+    ${color.SurfaceVariant.Container} 50%,
+    ${color.SurfaceVariant.OnContainer} 60%,
+    ${color.SurfaceVariant.OnContainer} 100%
+  )`,
+  backgroundClip: 'text',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  animation: `${shimmer} 3s linear infinite 1s`,
+});
 
 export const ToolCallHeader = style({
   backgroundColor: color.SurfaceVariant.Container,
@@ -14,6 +35,7 @@ export const ToolCallHeader = style({
   gap: config.space.S200,
   cursor: 'pointer',
   width: 'fit-content',
+  maxWidth: '100%',
 });
 
 export const ToolCallBody = style({

@@ -130,6 +130,18 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
     [data.name]
   );
 
+  const toolTitle = useMemo(() => {
+    if (data.title) return data.title;
+
+    if (typeof data.input === 'string') {
+      try {
+        JSON.parse(data.input);
+      } catch {
+        return data.input.length > 120 ? `${data.input.slice(0, 120)}...` : data.input;
+      }
+    }
+  }, [data.title, data.input]);
+
   if (todos) {
     return (
       <Box style={style} direction="Column" gap="100">
@@ -189,12 +201,12 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
         tabIndex={0}
       >
         <Icon src={Icons.Terminal} size="100" style={{ color: iconColor }} />
-        <Text size="L400" priority="300">
-          {data.title ? (
+        <Text size="L400" priority="300" truncate className={data.status === 'inprogress' ? css.ToolCallHeaderShimmer : undefined}>
+          {toolTitle ? (
             <>
               {prettierToolName}
-              <Text size="T200" as="span">
-                {` ${data.title}`}
+              <Text size="T200" as="span" className={data.status === 'inprogress' ? css.ToolCallHeaderShimmer : undefined}>
+                {` ${toolTitle}`}
               </Text>
             </>
           ) : prettierToolName}
