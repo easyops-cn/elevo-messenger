@@ -7,7 +7,8 @@ import {
   AskUserQuestionCard,
   QuestionAnsweredCard,
   parseAskUserQuestion,
-  parseQuestionAnswered,
+  parseQuestionAnsweredOfOpenAgent,
+  parseQuestionAnsweredOfElevoWorker,
 } from './elevo/AskUser';
 import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
 import { ReasoningCard } from './elevo/ReasoningCard';
@@ -88,13 +89,25 @@ type MTextProps = {
   renderUrlsPreview?: (urls: string[]) => ReactNode;
   style?: CSSProperties;
   readOnly?: boolean;
+  eventId?: string;
 };
 
-export function MText({ edited, content, renderBody, renderUrlsPreview, style, readOnly }: MTextProps) {
+export function MText({ edited, content, renderBody, renderUrlsPreview, style, readOnly, eventId }: MTextProps) {
   const mx = useMatrixClient();
   const { body, formatted_body: customBody } = content;
+  const initialHumanSender =
+    typeof content['vip.elevo.initial_human_sender'] === 'string'
+      ? content['vip.elevo.initial_human_sender']
+      : undefined;
 
   if (typeof body !== 'string') return <BrokenContent />;
+
+  // The order of these checks is important.
+  // Check open-agent answer first since it's more specific, then check elevo worker answer.
+  const questionAnsweredOfOpenAgent = parseQuestionAnsweredOfOpenAgent(content);
+  if (questionAnsweredOfOpenAgent) {
+    return <QuestionAnsweredCard data={questionAnsweredOfOpenAgent} style={style} />;
+  }
 
   const oidcLogin = parseOidcLogin(content);
   if (oidcLogin && (!oidcLogin.userId || oidcLogin.userId === mx.getUserId())) {
@@ -103,7 +116,14 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
 
   const askUserQuestion = parseAskUserQuestion(content);
   if (askUserQuestion) {
-    return <AskUserQuestionCard data={askUserQuestion} style={style} readOnly={readOnly} />;
+    return (
+      <AskUserQuestionCard
+        data={askUserQuestion}
+        style={style}
+        readOnly={readOnly}
+        initialHumanSender={initialHumanSender}
+      />
+    );
   }
 
   const sseRender = parseSseRender(content);
@@ -120,14 +140,21 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
     );
   }
 
-  const questionAnswered = parseQuestionAnswered(content);
-  if (questionAnswered) {
-    return <QuestionAnsweredCard data={questionAnswered} style={style} />;
+  const questionAnsweredOfElevoWorker = parseQuestionAnsweredOfElevoWorker(content);
+  if (questionAnsweredOfElevoWorker) {
+    return <QuestionAnsweredCard data={questionAnsweredOfElevoWorker} style={style} />;
   }
 
   const toolCall = parseToolCall(content);
   if (toolCall) {
-    return <ToolCallCard data={toolCall} style={style} />;
+    return (
+      <ToolCallCard
+        data={toolCall}
+        style={style}
+        eventId={eventId}
+        initialHumanSender={initialHumanSender}
+      />
+    );
   }
 
   if (reasoning) {

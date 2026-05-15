@@ -50,20 +50,34 @@ const AskUserQuestionSchema = z.object({
   questions: z.array(AskUserQuestionItemSchema).min(1),
 });
 
-type AskUserQuestionData = z.infer<typeof AskUserQuestionSchema>;
+export type AskUserQuestionData = z.infer<typeof AskUserQuestionSchema>;
+export type AskUserQuestionCardData = Omit<AskUserQuestionData, 'question_id'> & {
+  question_id?: string;
+};
 
-const QuestionAnsweredSchema = z.object({
+const QuestionAnsweredSchemaOfElevoWorker = z.object({
+  provider: z.literal("elevo-worker").optional(),
   question_id: z.string(),
   answers: z.record(z.string(), z.array(z.string())),
 });
 
-type QuestionAnsweredData = z.infer<typeof QuestionAnsweredSchema>;
+type QuestionAnsweredDataOfElevoWorker = z.infer<typeof QuestionAnsweredSchemaOfElevoWorker>;
+
+const QuestionAnsweredSchemaOfOpenAgent = z.object({
+  provider: z.literal("open-agent"),
+  question_event_id: z.string(),
+  answers: z.record(z.string(), z.array(z.string())),
+});
+
+type QuestionAnsweredDataOfOpenAgent = z.infer<typeof QuestionAnsweredSchemaOfOpenAgent>;
+type QuestionAnsweredData = QuestionAnsweredDataOfElevoWorker | QuestionAnsweredDataOfOpenAgent;
 
 export function isUserAnswerEvent(mEvent: MatrixEvent) {
+  const content = mEvent.getContent();
   return (
     mEvent.getType() === MessageEvent.RoomMessage &&
-    mEvent.getContent().msgtype === MsgType.Text &&
-    !!mEvent.getContent()['vip.elevo.ask_user_question_answers']
+    content.msgtype === MsgType.Text &&
+    !!content['vip.elevo.ask_user_question_answers']
   );
 }
 
@@ -82,17 +96,30 @@ export function parseAskUserQuestion(
   console.error('Failed to parse ask user question content:', result.error);
 }
 
-export function parseQuestionAnswered(
+export function parseQuestionAnsweredOfElevoWorker(
   content: Record<string, unknown>
-): QuestionAnsweredData | undefined {
+): QuestionAnsweredDataOfElevoWorker | undefined {
   const answeredContent = content['vip.elevo.question_answered'];
   if (!answeredContent) return undefined;
-  const result = QuestionAnsweredSchema.safeParse(answeredContent);
+  const result = QuestionAnsweredSchemaOfElevoWorker.safeParse(answeredContent);
   if (result.success) {
     return result.data;
   }
   // eslint-disable-next-line no-console
   console.error('Failed to parse question answered content:', result.error);
+}
+
+export function parseQuestionAnsweredOfOpenAgent(
+  content: Record<string, unknown>
+): QuestionAnsweredDataOfOpenAgent | undefined {
+  const answeredContent = content['vip.elevo.question_answered'];
+  if (!answeredContent) return undefined;
+  const result = QuestionAnsweredSchemaOfOpenAgent.safeParse(answeredContent);
+  if (result.success) {
+    return result.data;
+  }
+  // eslint-disable-next-line no-console
+  console.error('Failed to parse question answers content:', result.error);
 }
 
 // Types
@@ -142,11 +169,19 @@ export function AskUserQuestionCard({
   style,
   readOnly,
   onSubmit,
+  provider = 'elevo-worker',
+  eventId,
+  agentMode,
+  initialHumanSender,
 }: {
-  data: AskUserQuestionData;
+  data: AskUserQuestionCardData;
   style?: CSSProperties;
   readOnly?: boolean;
   onSubmit?: () => void;
+  provider?: 'elevo-worker' | 'open-agent';
+  eventId?: string;
+  agentMode?: string;
+  initialHumanSender?: string;
 }) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
@@ -158,13 +193,20 @@ export function AskUserQuestionCard({
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
-  const isAssignedUser = !data.userId || mx.getUserId() === data.userId;
+  const assignedUserId = data.userId ?? initialHumanSender;
+  const isAssignedUser = !!assignedUserId && mx.getUserId() === assignedUserId;
   const isDisabled = !isAssignedUser || submitted || readOnly;
-  const assignedDisplayName = data.userId
-    ? getMemberDisplayName(room, data.userId) ?? getMxIdLocalPart(data.userId) ?? data.userId
+  const assignedDisplayName = assignedUserId
+    ? getMemberDisplayName(room, assignedUserId) ??
+      getMxIdLocalPart(assignedUserId) ??
+      assignedUserId
     : undefined;
 
+  const answerIdField = provider === 'open-agent' ? 'question_event_id' : 'question_id';
+  const answerId = provider === 'open-agent' ? eventId : data.question_id;
+
   const canSubmit = useMemo(() => {
+    if (!answerId) return false;
     if (submitted) return false;
     for (let i = 0; i < data.questions.length; i += 1) {
       const sel = selections[i] ?? [];
@@ -172,7 +214,7 @@ export function AskUserQuestionCard({
       if (sel.some((s) => s === 'Other:') && !otherTexts[String(i)]?.trim()) return false;
     }
     return true;
-  }, [data.questions.length, selections, otherTexts, submitted]);
+  }, [answerId, data.questions.length, selections, otherTexts, submitted]);
 
   const handleOptionToggle = useCallback(
     (qIndex: number, label: string, isOther: boolean) => {
@@ -224,12 +266,13 @@ export function AskUserQuestionCard({
 
     setSubmitting(true);
     try {
-      const bodyLines = Object.entries(answers).map(([q, ans]) => `${q}: ${ans.join(', ')}`);
+      const body = `${agentMode === 'plan' ? '/plan ' : ''}${Object.entries(answers).map(([q, ans]) => `${q}: ${ans.join(', ')}`).join('\n')}`;
       await mx.sendMessage(room.roomId, {
         msgtype: 'm.text',
-        body: bodyLines.join('\n'),
+        body,
         'vip.elevo.ask_user_question_answers': {
-          question_id: data.question_id,
+          provider,
+          [answerIdField]: answerId,
           answers,
         },
       } as unknown as RoomMessageEventContent);
@@ -241,7 +284,20 @@ export function AskUserQuestionCard({
     } finally {
       setSubmitting(false);
     }
-  }, [submitting, canSubmit, data, selections, otherTexts, mx, room.roomId, onSubmit]);
+  }, [
+    submitting,
+    canSubmit,
+    data,
+    selections,
+    otherTexts,
+    mx,
+    provider,
+    agentMode,
+    room.roomId,
+    onSubmit,
+    answerIdField,
+    answerId,
+  ]);
 
   const currentQuestion = data.questions[activeTab];
   const currentSel = selections[activeTab] ?? [];
@@ -368,6 +424,7 @@ export function AskUserQuestionCard({
                         e.stopPropagation();
                       }
                     }}
+                    onClick={(e) => e.stopPropagation()}
                     placeholder={t('askUserQuestion.otherPlaceholder')}
                     disabled={isDisabled}
                     className={OtherInput}
