@@ -7,8 +7,8 @@ import {
   AskUserQuestionCard,
   QuestionAnsweredCard,
   parseAskUserQuestion,
-  parseQuestionAnswers,
-  parseQuestionAnswered,
+  parseQuestionAnsweredOfOpenAgent,
+  parseQuestionAnsweredOfElevoWorker,
 } from './elevo/AskUser';
 import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
 import { ReasoningCard } from './elevo/ReasoningCard';
@@ -102,9 +102,11 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
 
   if (typeof body !== 'string') return <BrokenContent />;
 
-  const questionAnswers = parseQuestionAnswers(content);
-  if (questionAnswers) {
-    return <QuestionAnsweredCard data={questionAnswers} style={style} />;
+  // The order of these checks is important.
+  // Check open-agent answer first since it's more specific, then check elevo worker answer.
+  const questionAnsweredOfOpenAgent = parseQuestionAnsweredOfOpenAgent(content);
+  if (questionAnsweredOfOpenAgent) {
+    return <QuestionAnsweredCard data={questionAnsweredOfOpenAgent} style={style} />;
   }
 
   const oidcLogin = parseOidcLogin(content);
@@ -138,9 +140,9 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
     );
   }
 
-  const questionAnswered = parseQuestionAnswered(content);
-  if (questionAnswered) {
-    return <QuestionAnsweredCard data={questionAnswered} style={style} />;
+  const questionAnsweredOfElevoWorker = parseQuestionAnsweredOfElevoWorker(content);
+  if (questionAnsweredOfElevoWorker) {
+    return <QuestionAnsweredCard data={questionAnsweredOfElevoWorker} style={style} />;
   }
 
   const toolCall = parseToolCall(content);

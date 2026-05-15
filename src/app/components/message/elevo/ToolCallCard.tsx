@@ -166,9 +166,8 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
         data={question}
         style={style}
         readOnly={data.status !== 'completed'}
-        answerEventType="vip.elevo.question_answers"
-        answerIdField="question_event_id"
-        answerIdValue={eventId}
+        provider="open-agent"
+        eventId={eventId}
         agentMode={data.metadata?.agent_mode === 'plan' ? 'plan' : undefined}
         initialHumanSender={initialHumanSender}
       />

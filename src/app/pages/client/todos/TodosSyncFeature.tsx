@@ -5,7 +5,7 @@ import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useElevoConfig } from '../../../hooks/useElevoConfig';
 import {
   parseAskUserQuestion,
-  parseQuestionAnswered,
+  parseQuestionAnsweredOfElevoWorker,
 } from '../../../components/message/elevo/AskUser';
 import { todosAtom } from '../../../state/todos/todosAtom';
 import type { TodoItem, TodosResponse } from './useTodosApi';
@@ -143,7 +143,7 @@ function TodosTimelineSync() {
       }
 
       // Handle QuestionAnswered
-      const answeredData = parseQuestionAnswered(content?.["m.new_content"] ?? {});
+      const answeredData = parseQuestionAnsweredOfElevoWorker(content?.["m.new_content"] ?? {});
       if (answeredData) {
         setTodos({ type: 'REMOVE_BY_QUESTION_ID', questionId: answeredData.question_id });
       }

@@ -55,27 +55,29 @@ export type AskUserQuestionCardData = Omit<AskUserQuestionData, 'question_id'> &
   question_id?: string;
 };
 
-const QuestionAnsweredSchema = z.object({
+const QuestionAnsweredSchemaOfElevoWorker = z.object({
+  provider: z.literal("elevo-worker").optional(),
   question_id: z.string(),
   answers: z.record(z.string(), z.array(z.string())),
 });
 
-type QuestionAnsweredData = z.infer<typeof QuestionAnsweredSchema>;
+type QuestionAnsweredDataOfElevoWorker = z.infer<typeof QuestionAnsweredSchemaOfElevoWorker>;
 
-const QuestionAnswersSchema = z.object({
+const QuestionAnsweredSchemaOfOpenAgent = z.object({
+  provider: z.literal("open-agent"),
   question_event_id: z.string(),
   answers: z.record(z.string(), z.array(z.string())),
 });
 
-type QuestionAnswersData = z.infer<typeof QuestionAnswersSchema>;
-type QuestionAnsweredCardData = QuestionAnsweredData | QuestionAnswersData;
+type QuestionAnsweredDataOfOpenAgent = z.infer<typeof QuestionAnsweredSchemaOfOpenAgent>;
+type QuestionAnsweredData = QuestionAnsweredDataOfElevoWorker | QuestionAnsweredDataOfOpenAgent;
 
 export function isUserAnswerEvent(mEvent: MatrixEvent) {
   const content = mEvent.getContent();
   return (
     mEvent.getType() === MessageEvent.RoomMessage &&
     content.msgtype === MsgType.Text &&
-    (!!content['vip.elevo.ask_user_question_answers'] || !!content['vip.elevo.question_answers'])
+    !!content['vip.elevo.ask_user_question_answers']
   );
 }
 
@@ -94,12 +96,12 @@ export function parseAskUserQuestion(
   console.error('Failed to parse ask user question content:', result.error);
 }
 
-export function parseQuestionAnswered(
+export function parseQuestionAnsweredOfElevoWorker(
   content: Record<string, unknown>
-): QuestionAnsweredData | undefined {
+): QuestionAnsweredDataOfElevoWorker | undefined {
   const answeredContent = content['vip.elevo.question_answered'];
   if (!answeredContent) return undefined;
-  const result = QuestionAnsweredSchema.safeParse(answeredContent);
+  const result = QuestionAnsweredSchemaOfElevoWorker.safeParse(answeredContent);
   if (result.success) {
     return result.data;
   }
@@ -107,12 +109,12 @@ export function parseQuestionAnswered(
   console.error('Failed to parse question answered content:', result.error);
 }
 
-export function parseQuestionAnswers(
+export function parseQuestionAnsweredOfOpenAgent(
   content: Record<string, unknown>
-): QuestionAnswersData | undefined {
-  const answeredContent = content['vip.elevo.received_question_answers'];
+): QuestionAnsweredDataOfOpenAgent | undefined {
+  const answeredContent = content['vip.elevo.question_answered'];
   if (!answeredContent) return undefined;
-  const result = QuestionAnswersSchema.safeParse(answeredContent);
+  const result = QuestionAnsweredSchemaOfOpenAgent.safeParse(answeredContent);
   if (result.success) {
     return result.data;
   }
@@ -130,7 +132,7 @@ export function QuestionAnsweredCard({
   data,
   style,
 }: {
-  data: QuestionAnsweredCardData;
+  data: QuestionAnsweredData;
   style?: CSSProperties;
 }) {
   const { t } = useTranslation();
@@ -167,9 +169,8 @@ export function AskUserQuestionCard({
   style,
   readOnly,
   onSubmit,
-  answerEventType = 'vip.elevo.ask_user_question_answers',
-  answerIdField = 'question_id',
-  answerIdValue,
+  provider = 'elevo-worker',
+  eventId,
   agentMode,
   initialHumanSender,
 }: {
@@ -177,9 +178,8 @@ export function AskUserQuestionCard({
   style?: CSSProperties;
   readOnly?: boolean;
   onSubmit?: () => void;
-  answerEventType?: 'vip.elevo.ask_user_question_answers' | 'vip.elevo.question_answers';
-  answerIdField?: 'question_id' | 'question_event_id';
-  answerIdValue?: string;
+  provider?: 'elevo-worker' | 'open-agent';
+  eventId?: string;
   agentMode?: string;
   initialHumanSender?: string;
 }) {
@@ -202,7 +202,8 @@ export function AskUserQuestionCard({
       assignedUserId
     : undefined;
 
-  const answerId = answerIdValue ?? data.question_id;
+  const answerIdField = provider === 'open-agent' ? 'question_event_id' : 'question_id';
+  const answerId = provider === 'open-agent' ? eventId : data.question_id;
 
   const canSubmit = useMemo(() => {
     if (!answerId) return false;
@@ -269,7 +270,8 @@ export function AskUserQuestionCard({
       await mx.sendMessage(room.roomId, {
         msgtype: 'm.text',
         body,
-        [answerEventType]: {
+        'vip.elevo.ask_user_question_answers': {
+          provider,
           [answerIdField]: answerId,
           answers,
         },
@@ -289,10 +291,10 @@ export function AskUserQuestionCard({
     selections,
     otherTexts,
     mx,
+    provider,
     agentMode,
     room.roomId,
     onSubmit,
-    answerEventType,
     answerIdField,
     answerId,
   ]);
@@ -422,6 +424,7 @@ export function AskUserQuestionCard({
                         e.stopPropagation();
                       }
                     }}
+                    onClick={(e) => e.stopPropagation()}
                     placeholder={t('askUserQuestion.otherPlaceholder')}
                     disabled={isDisabled}
                     className={OtherInput}
