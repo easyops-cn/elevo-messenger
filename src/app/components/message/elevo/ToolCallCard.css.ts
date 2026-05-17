@@ -103,3 +103,81 @@ export const TodoTextCompleted = style({
   textDecoration: 'line-through',
   opacity: 0.45,
 });
+
+export const ApplyPatchList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: config.space.S200,
+});
+
+export const ApplyPatchCard = style({
+  backgroundColor: color.SurfaceVariant.Container,
+  border: cardBorder,
+  borderRadius: config.radii.R300,
+  width: 'fit-content',
+  maxWidth: toRem(600),
+  overflow: 'hidden',
+});
+
+export const ApplyPatchHeader = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: config.space.S200,
+  padding: `${config.space.S100} ${config.space.S300}`,
+  borderBottom: cardBorder,
+  selectors: {
+    '&:last-child': {
+      borderBottom: 'none',
+    },
+  },
+});
+
+export const ApplyPatchHeaderNoBody = style({
+  borderBottom: 'none',
+});
+
+export const ApplyPatchPath = style({
+  fontFamily: 'monospace',
+  fontSize: toRem(12),
+  wordBreak: 'break-all',
+  flex: 1,
+  minWidth: 0,
+});
+
+export const ApplyPatchMoveTo = style({
+  fontFamily: 'monospace',
+  fontSize: toRem(12),
+  opacity: 0.7,
+  wordBreak: 'break-all',
+});
+
+export const ApplyPatchDiff = style({
+  fontFamily: 'monospace',
+  fontSize: toRem(13),
+  lineHeight: toRem(20),
+  margin: 0,
+  padding: `${config.space.S200} 0`,
+  maxHeight: toRem(210),
+  overflow: 'auto',
+});
+
+export const ApplyPatchDiffLine = style({
+  display: 'block',
+  padding: `0 ${config.space.S300}`,
+  whiteSpace: 'pre-wrap',
+  wordBreak: 'break-word',
+});
+
+export const ApplyPatchDiffLineAdded = style({
+  backgroundColor: color.Success.Container,
+  color: color.Success.OnContainer,
+});
+
+export const ApplyPatchDiffLineRemoved = style({
+  backgroundColor: color.Critical.Container,
+  color: color.Critical.OnContainer,
+});
+
+export const ApplyPatchDiffLineMeta = style({
+  opacity: 0.7,
+});

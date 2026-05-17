@@ -1127,7 +1127,10 @@
   "toolCall": {
     "inprogressDescription": "Running...",
     "completedDescription": "Completed",
-    "updateTodos": "Update Todos"
+    "updateTodos": "Update Todos",
+    "applyPatchAdd": "Add File",
+    "applyPatchUpdate": "Update File",
+    "applyPatchDelete": "Delete File"
   },
   "verification_gate": {
     "title": "Verify This Device",

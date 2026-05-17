@@ -1127,7 +1127,10 @@
   "toolCall": {
     "inprogressDescription": "执行中...",
     "completedDescription": "已完成",
-    "updateTodos": "更新待办"
+    "updateTodos": "更新待办",
+    "applyPatchAdd": "新增文件",
+    "applyPatchUpdate": "更新文件",
+    "applyPatchDelete": "删除文件"
   },
   "verification_gate": {
     "title": "验证此设备",
