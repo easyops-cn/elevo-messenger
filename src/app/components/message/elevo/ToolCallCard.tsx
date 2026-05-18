@@ -267,7 +267,7 @@ function ApplyPatchOperationCard({ operation }: ApplyPatchOperationCardProps) {
 }
 
 function getTodosForRender(data: ToolCallData): TodoItem[] | undefined {
-  if (data.name !== 'todowrite') return undefined;
+  if (data.name?.toLowerCase() !== 'todowrite') return undefined;
 
   if (data.status === 'completed') {
     const parsedOutput = tryParseJson(data.output);
