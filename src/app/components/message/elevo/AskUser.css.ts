@@ -182,7 +182,7 @@ export const FormField = style({
   gap: config.space.S100,
 });
 
-export const FormInput = style({
+const FormInput = style({
   width: '100%',
   padding: config.space.S200,
   border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,

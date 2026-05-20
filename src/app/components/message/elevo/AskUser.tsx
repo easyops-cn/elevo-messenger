@@ -24,7 +24,6 @@ import {
   AnsweredItem,
   QuestionCardFooter,
   FormField,
-  FormInput,
   FormTextarea,
 } from './AskUser.css';
 import { DisabledRadioIcon } from '../../../icons/DisabledRadioIcon';
@@ -400,30 +399,57 @@ export function AskUserQuestionCard({
                       </Text>
                     )}
                     {field.type === 'select' ? (
-                      <select
-                        id={fieldId}
-                        value={value}
-                        onChange={(e) =>
-                          setFormAnswers((prev) => ({
-                            ...prev,
-                            [activeTab]: {
-                              ...(prev[activeTab] ?? {}),
-                              [field.name]: e.target.value,
-                            },
-                          }))
-                        }
-                        disabled={isDisabled}
-                        className={FormInput}
-                      >
-                        <option value="" disabled>
-                          {field.placeholder ?? t('askUserQuestion.selectPlaceholder')}
-                        </option>
-                        {(field.options ?? []).map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
+                      <Box direction="Column" gap="100" role="radiogroup" aria-labelledby={fieldId}>
+                        {(field.options ?? []).map((option) => {
+                          const isSelected = value === option;
+                          return (
+                            // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+                            <div
+                              key={option}
+                              className={OptionItem({
+                                selected: isAssignedUser && !isDisabled && isSelected,
+                                disabled: isDisabled,
+                              })}
+                              onClick={() => {
+                                if (isDisabled) return;
+                                setFormAnswers((prev) => ({
+                                  ...prev,
+                                  [activeTab]: {
+                                    ...(prev[activeTab] ?? {}),
+                                    [field.name]: option,
+                                  },
+                                }));
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  if (isDisabled) return;
+                                  setFormAnswers((prev) => ({
+                                    ...prev,
+                                    [activeTab]: {
+                                      ...(prev[activeTab] ?? {}),
+                                      [field.name]: option,
+                                    },
+                                  }));
+                                }
+                              }}
+                              role="radio"
+                              aria-checked={isSelected}
+                              tabIndex={!isDisabled ? 0 : -1}
+                            >
+                              <Icon
+                                src={isDisabled ? DisabledRadioIcon : RadioIcon}
+                                filled={isSelected}
+                                size="50"
+                                className={OptionIcon}
+                              />
+                              <Text size="T300" priority="400">
+                                {option}
+                              </Text>
+                            </div>
+                          );
+                        })}
+                      </Box>
                     ) : (
                       <textarea
                         id={fieldId}
