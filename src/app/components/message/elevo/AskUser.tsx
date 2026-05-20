@@ -229,10 +229,11 @@ export function AskUserQuestionCard({
 
   const submitted = submittedProp ?? localSubmitted;
   const isWaitingForServerAnswer = submittedProp === false && localSubmitted;
+  const isLocallyAnswered = submittedProp !== undefined ? localSubmitted : submitted;
 
   const assignedUserId = data.userId ?? initialHumanSender;
   const isAssignedUser = !!assignedUserId && mx.getUserId() === assignedUserId;
-  const isDisabled = !isAssignedUser || submitted || isWaitingForServerAnswer || readOnly;
+  const isDisabled = !isAssignedUser || isLocallyAnswered || submitted || readOnly;
   const assignedDisplayName = assignedUserId
     ? getMemberDisplayName(room, assignedUserId) ??
       getMxIdLocalPart(assignedUserId) ??
@@ -245,6 +246,7 @@ export function AskUserQuestionCard({
   const canSubmit = useMemo(() => {
     if (!answerId) return false;
     if (submitted) return false;
+    if (isLocallyAnswered) return false;
     for (let i = 0; i < data.questions.length; i += 1) {
       const q = data.questions[i];
       if (isFormQuestion(q)) {
@@ -261,7 +263,7 @@ export function AskUserQuestionCard({
       }
     }
     return true;
-  }, [answerId, data.questions, formAnswers, selections, otherTexts, submitted]);
+  }, [answerId, data.questions, formAnswers, selections, otherTexts, isLocallyAnswered, submitted]);
 
   const handleOptionToggle = useCallback(
     (qIndex: number, label: string, isOther: boolean) => {
