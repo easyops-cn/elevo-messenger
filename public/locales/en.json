@@ -1115,6 +1115,7 @@
   },
   "askUserQuestion": {
     "submitted": "Submitted",
+    "waitingForServer": "Submitted, waiting for server confirmation...",
     "answeredTitle": "User answered the question",
     "questionLabel": "Q: ",
     "answerLabel": "A: ",
@@ -1122,6 +1123,7 @@
     "otherPlaceholder": "Enter your answer...",
     "submit": "Submit answers",
     "submitting": "Submitting...",
+    "selectPlaceholder": "Select an option...",
     "questionTab": "Q{{index}}/{{total}}",
     "assignedTo": "This question should be answered by {{name}}"
   },

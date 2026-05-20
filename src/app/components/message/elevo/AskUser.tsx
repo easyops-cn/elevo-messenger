@@ -1,4 +1,4 @@
-import React, { CSSProperties, useCallback, useMemo, useState } from 'react';
+import React, { CSSProperties, useCallback, useId, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod/v4';
 import { Box, Icon, Icons, Text, config } from 'folds';
@@ -23,6 +23,9 @@ import {
   AssignedHint,
   AnsweredItem,
   QuestionCardFooter,
+  FormField,
+  FormInput,
+  FormTextarea,
 } from './AskUser.css';
 import { DisabledRadioIcon } from '../../../icons/DisabledRadioIcon';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
@@ -38,11 +41,32 @@ const AskUserQuestionOptionSchema = z.object({
 });
 
 const AskUserQuestionItemSchema = z.object({
+  type: z.literal('choice').optional(),
   question: z.string(),
   header: z.string(),
   multiSelect: z.boolean(),
   options: z.array(AskUserQuestionOptionSchema),
 });
+
+const AskUserFormFieldSchema = z.object({
+  name: z.string(),
+  label: z.string(),
+  type: z.enum(['textarea', 'select']),
+  placeholder: z.string().optional(),
+  options: z.array(z.string()).optional(),
+  description: z.string().optional(),
+});
+
+const AskUserFormQuestionItemSchema = z.object({
+  type: z.literal('form'),
+  question: z.string(),
+  header: z.string(),
+  fields: z.array(AskUserFormFieldSchema),
+});
+
+type AskUserQuestionItem = z.infer<typeof AskUserQuestionItemSchema>;
+export type AskUserFormQuestionItem = z.infer<typeof AskUserFormQuestionItemSchema>;
+type AskUserQuestionCardItem = AskUserQuestionItem | AskUserFormQuestionItem;
 
 const AskUserQuestionSchema = z.object({
   userId: z.string().optional(),
@@ -51,22 +75,23 @@ const AskUserQuestionSchema = z.object({
 });
 
 export type AskUserQuestionData = z.infer<typeof AskUserQuestionSchema>;
-export type AskUserQuestionCardData = Omit<AskUserQuestionData, 'question_id'> & {
+export type AskUserQuestionCardData = Omit<AskUserQuestionData, 'question_id' | 'questions'> & {
   question_id?: string;
+  questions: AskUserQuestionCardItem[];
 };
 
 const QuestionAnsweredSchemaOfElevoWorker = z.object({
-  provider: z.literal("elevo-worker").optional(),
+  provider: z.literal('elevo-worker').optional(),
   question_id: z.string(),
-  answers: z.record(z.string(), z.array(z.string())),
+  answers: z.record(z.string(), z.union([z.array(z.string()), z.string()])),
 });
 
 type QuestionAnsweredDataOfElevoWorker = z.infer<typeof QuestionAnsweredSchemaOfElevoWorker>;
 
 const QuestionAnsweredSchemaOfOpenAgent = z.object({
-  provider: z.literal("open-agent"),
+  provider: z.literal('open-agent'),
   question_event_id: z.string(),
-  answers: z.record(z.string(), z.array(z.string())),
+  answers: z.record(z.string(), z.union([z.array(z.string()), z.string()])),
 });
 
 type QuestionAnsweredDataOfOpenAgent = z.infer<typeof QuestionAnsweredSchemaOfOpenAgent>;
@@ -125,6 +150,11 @@ export function parseQuestionAnsweredOfOpenAgent(
 // Types
 
 type QuestionSelections = Record<number, string[]>;
+type FormAnswers = Record<number, Record<string, string>>;
+
+function isFormQuestion(question: AskUserQuestionCardItem): question is AskUserFormQuestionItem {
+  return question.type === 'form';
+}
 
 // Components
 
@@ -154,7 +184,7 @@ export function QuestionAnsweredCard({
               </Text>
               <Text size="T300" priority="500" style={{ marginTop: config.space.S100 }}>
                 {t('askUserQuestion.answerLabel')}
-                {answers.join(', ')}
+                {Array.isArray(answers) ? answers.join(', ') : answers}
               </Text>
             </div>
           ))}
@@ -173,6 +203,7 @@ export function AskUserQuestionCard({
   eventId,
   agentMode,
   initialHumanSender,
+  submitted: submittedProp,
 }: {
   data: AskUserQuestionCardData;
   style?: CSSProperties;
@@ -182,20 +213,26 @@ export function AskUserQuestionCard({
   eventId?: string;
   agentMode?: string;
   initialHumanSender?: string;
+  submitted?: boolean;
 }) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const room = useRoom();
+  const formIdPrefix = useId();
 
-  const [submitted, setSubmitted] = useState(false);
+  const [localSubmitted, setLocalSubmitted] = useState(false);
   const [selections, setSelections] = useState<QuestionSelections>({});
+  const [formAnswers, setFormAnswers] = useState<FormAnswers>({});
   const [otherTexts, setOtherTexts] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
+  const submitted = submittedProp ?? localSubmitted;
+  const isWaitingForServerAnswer = submittedProp === false && localSubmitted;
+
   const assignedUserId = data.userId ?? initialHumanSender;
   const isAssignedUser = !!assignedUserId && mx.getUserId() === assignedUserId;
-  const isDisabled = !isAssignedUser || submitted || readOnly;
+  const isDisabled = !isAssignedUser || submitted || isWaitingForServerAnswer || readOnly;
   const assignedDisplayName = assignedUserId
     ? getMemberDisplayName(room, assignedUserId) ??
       getMxIdLocalPart(assignedUserId) ??
@@ -209,17 +246,28 @@ export function AskUserQuestionCard({
     if (!answerId) return false;
     if (submitted) return false;
     for (let i = 0; i < data.questions.length; i += 1) {
-      const sel = selections[i] ?? [];
-      if (sel.length === 0) return false;
-      if (sel.some((s) => s === 'Other:') && !otherTexts[String(i)]?.trim()) return false;
+      const q = data.questions[i];
+      if (isFormQuestion(q)) {
+        let hasEmptyField = false;
+        for (let j = 0; j < q.fields.length; j += 1) {
+          const field = q.fields[j];
+          if (!formAnswers[i]?.[field.name]?.trim()) hasEmptyField = true;
+        }
+        if (hasEmptyField) return false;
+      } else {
+        const sel = selections[i] ?? [];
+        if (sel.length === 0) return false;
+        if (sel.some((s) => s === 'Other:') && !otherTexts[String(i)]?.trim()) return false;
+      }
     }
     return true;
-  }, [answerId, data.questions.length, selections, otherTexts, submitted]);
+  }, [answerId, data.questions, formAnswers, selections, otherTexts, submitted]);
 
   const handleOptionToggle = useCallback(
     (qIndex: number, label: string, isOther: boolean) => {
       if (isDisabled) return;
       const q = data.questions[qIndex];
+      if (isFormQuestion(q)) return;
 
       setSelections((prev) => {
         const current = prev[qIndex] ?? [];
@@ -254,19 +302,25 @@ export function AskUserQuestionCard({
   const handleSubmit = useCallback(async () => {
     if (submitting || !canSubmit) return;
 
-    const answers: Record<string, string[]> = {};
+    const answers: Record<string, string[] | string> = {};
     for (let i = 0; i < data.questions.length; i += 1) {
       const q = data.questions[i];
-      const sel = (selections[i] ?? []).map((s) => {
-        if (s === 'Other:') return otherTexts[String(i)]?.trim() || '';
-        return s;
-      });
-      answers[q.question] = sel;
+      if (isFormQuestion(q)) {
+        answers[q.question] = JSON.stringify(formAnswers[i] ?? {});
+      } else {
+        const sel = (selections[i] ?? []).map((s) => {
+          if (s === 'Other:') return otherTexts[String(i)]?.trim() || '';
+          return s;
+        });
+        answers[q.question] = sel;
+      }
     }
 
     setSubmitting(true);
     try {
-      const body = `${agentMode === 'plan' ? '/plan ' : ''}${Object.entries(answers).map(([q, ans]) => `${q}: ${ans.join(', ')}`).join('\n')}`;
+      const body = `${agentMode === 'plan' ? '/plan ' : ''}${Object.entries(answers)
+        .map(([q, ans]) => `${q}: ${Array.isArray(ans) ? ans.join(', ') : ans}`)
+        .join('\n')}`;
       await mx.sendMessage(room.roomId, {
         msgtype: 'm.text',
         body,
@@ -276,7 +330,7 @@ export function AskUserQuestionCard({
           answers,
         },
       } as unknown as RoomMessageEventContent);
-      setSubmitted(true);
+      setLocalSubmitted(true);
       onSubmit?.();
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -288,6 +342,7 @@ export function AskUserQuestionCard({
     submitting,
     canSubmit,
     data,
+    formAnswers,
     selections,
     otherTexts,
     mx,
@@ -328,120 +383,184 @@ export function AskUserQuestionCard({
           <Text size="T300" priority="400" style={{ marginBottom: config.space.S200 }}>
             {currentQuestion.question}
           </Text>
-          <Box direction="Column" gap="100">
-            {currentQuestion.options.map((opt) => {
-              const isSelected = currentSel.includes(opt.label);
-              return (
-                // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-                <div
-                  key={opt.label}
-                  className={OptionItem({
-                    selected: isAssignedUser && !isDisabled && isSelected,
-                    disabled: isDisabled,
-                  })}
-                  onClick={() => handleOptionToggle(activeTab, opt.label, false)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleOptionToggle(activeTab, opt.label, false);
-                    }
-                  }}
-                  role={currentQuestion.multiSelect ? 'checkbox' : 'radio'}
-                  aria-checked={isSelected}
-                  tabIndex={!isDisabled ? 0 : -1}
-                >
-                  <Icon
-                    src={
-                      currentQuestion.multiSelect
-                        ? isDisabled
-                          ? DisabledCheckboxIcon
-                          : CheckboxIcon
-                        : isDisabled
-                        ? DisabledRadioIcon
-                        : RadioIcon
-                    }
-                    filled={isSelected}
-                    size="50"
-                    className={OptionIcon}
-                  />
-                  <Box grow="Yes" direction="Column" gap="0">
-                    <Text size="T300" priority="400">
-                      {opt.label}
+          {isFormQuestion(currentQuestion) ? (
+            <Box direction="Column" gap="300">
+              {currentQuestion.fields.map((field) => {
+                const value = formAnswers[activeTab]?.[field.name] ?? '';
+                const fieldId = `${formIdPrefix}-${activeTab}-${field.name}`;
+                return (
+                  <div key={field.name} className={FormField}>
+                    <Text as="label" htmlFor={fieldId} size="T300" priority="400">
+                      {field.label}
                     </Text>
-                    {opt.description && (
-                      <Text size="T300" priority="300">
-                        {opt.description}
+                    {field.description && (
+                      <Text size="T200" priority="300">
+                        {field.description}
                       </Text>
                     )}
-                  </Box>
-                </div>
-              );
-            })}
-            {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
-            <div
-              className={OptionItem({
-                selected: isAssignedUser && !isDisabled && hasOtherSelected,
-                disabled: isDisabled,
+                    {field.type === 'select' ? (
+                      <select
+                        id={fieldId}
+                        value={value}
+                        onChange={(e) =>
+                          setFormAnswers((prev) => ({
+                            ...prev,
+                            [activeTab]: {
+                              ...(prev[activeTab] ?? {}),
+                              [field.name]: e.target.value,
+                            },
+                          }))
+                        }
+                        disabled={isDisabled}
+                        className={FormInput}
+                      >
+                        <option value="" disabled>
+                          {field.placeholder ?? t('askUserQuestion.selectPlaceholder')}
+                        </option>
+                        {(field.options ?? []).map((option) => (
+                          <option key={option} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <textarea
+                        id={fieldId}
+                        value={value}
+                        onChange={(e) =>
+                          setFormAnswers((prev) => ({
+                            ...prev,
+                            [activeTab]: {
+                              ...(prev[activeTab] ?? {}),
+                              [field.name]: e.target.value,
+                            },
+                          }))
+                        }
+                        placeholder={field.placeholder}
+                        disabled={isDisabled}
+                        className={FormTextarea}
+                      />
+                    )}
+                  </div>
+                );
               })}
-              onClick={() => handleOptionToggle(activeTab, 'Other:', true)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  handleOptionToggle(activeTab, 'Other:', true);
-                }
-              }}
-              role={currentQuestion.multiSelect ? 'checkbox' : 'radio'}
-              aria-checked={hasOtherSelected}
-              tabIndex={isAssignedUser && !submitted && !readOnly ? 0 : -1}
-            >
-              <Icon
-                src={
-                  currentQuestion.multiSelect
-                    ? isDisabled
-                      ? DisabledCheckboxIcon
-                      : CheckboxIcon
-                    : isDisabled
-                    ? DisabledRadioIcon
-                    : RadioIcon
-                }
-                filled={hasOtherSelected}
-                size="50"
-                className={OptionIcon}
-              />
-              <Box grow="Yes" direction="Column" gap="100">
-                <Text size="T300" priority="400">
-                  {t('askUserQuestion.other')}
-                </Text>
-                {hasOtherSelected && (
-                  <input
-                    type="text"
-                    value={otherTexts[String(activeTab)] ?? ''}
-                    onChange={(e) =>
-                      setOtherTexts((prev) => ({ ...prev, [String(activeTab)]: e.target.value }))
-                    }
+            </Box>
+          ) : (
+            <Box direction="Column" gap="100">
+              {currentQuestion.options.map((opt) => {
+                const isSelected = currentSel.includes(opt.label);
+                return (
+                  // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+                  <div
+                    key={opt.label}
+                    className={OptionItem({
+                      selected: isAssignedUser && !isDisabled && isSelected,
+                      disabled: isDisabled,
+                    })}
+                    onClick={() => handleOptionToggle(activeTab, opt.label, false)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
-                        e.stopPropagation();
+                        e.preventDefault();
+                        handleOptionToggle(activeTab, opt.label, false);
                       }
                     }}
-                    onClick={(e) => e.stopPropagation()}
-                    placeholder={t('askUserQuestion.otherPlaceholder')}
-                    disabled={isDisabled}
-                    className={OtherInput}
-                    // eslint-disable-next-line jsx-a11y/no-autofocus
-                    autoFocus
-                  />
-                )}
-              </Box>
-            </div>
-          </Box>
+                    role={currentQuestion.multiSelect ? 'checkbox' : 'radio'}
+                    aria-checked={isSelected}
+                    tabIndex={!isDisabled ? 0 : -1}
+                  >
+                    <Icon
+                      src={
+                        currentQuestion.multiSelect
+                          ? isDisabled
+                            ? DisabledCheckboxIcon
+                            : CheckboxIcon
+                          : isDisabled
+                          ? DisabledRadioIcon
+                          : RadioIcon
+                      }
+                      filled={isSelected}
+                      size="50"
+                      className={OptionIcon}
+                    />
+                    <Box grow="Yes" direction="Column" gap="0">
+                      <Text size="T300" priority="400">
+                        {opt.label}
+                      </Text>
+                      {opt.description && (
+                        <Text size="T300" priority="300">
+                          {opt.description}
+                        </Text>
+                      )}
+                    </Box>
+                  </div>
+                );
+              })}
+              {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
+              <div
+                className={OptionItem({
+                  selected: isAssignedUser && !isDisabled && hasOtherSelected,
+                  disabled: isDisabled,
+                })}
+                onClick={() => handleOptionToggle(activeTab, 'Other:', true)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleOptionToggle(activeTab, 'Other:', true);
+                  }
+                }}
+                role={currentQuestion.multiSelect ? 'checkbox' : 'radio'}
+                aria-checked={hasOtherSelected}
+                tabIndex={isAssignedUser && !submitted && !readOnly ? 0 : -1}
+              >
+                <Icon
+                  src={
+                    currentQuestion.multiSelect
+                      ? isDisabled
+                        ? DisabledCheckboxIcon
+                        : CheckboxIcon
+                      : isDisabled
+                      ? DisabledRadioIcon
+                      : RadioIcon
+                  }
+                  filled={hasOtherSelected}
+                  size="50"
+                  className={OptionIcon}
+                />
+                <Box grow="Yes" direction="Column" gap="100">
+                  <Text size="T300" priority="400">
+                    {t('askUserQuestion.other')}
+                  </Text>
+                  {hasOtherSelected && (
+                    <input
+                      type="text"
+                      value={otherTexts[String(activeTab)] ?? ''}
+                      onChange={(e) =>
+                        setOtherTexts((prev) => ({ ...prev, [String(activeTab)]: e.target.value }))
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.stopPropagation();
+                        }
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      placeholder={t('askUserQuestion.otherPlaceholder')}
+                      disabled={isDisabled}
+                      className={OtherInput}
+                      // eslint-disable-next-line jsx-a11y/no-autofocus
+                      autoFocus
+                    />
+                  )}
+                </Box>
+              </div>
+            </Box>
+          )}
         </div>
         <div className={QuestionCardFooter}>
-          {submitted ? (
+          {submitted || isWaitingForServerAnswer ? (
             <>
-              <Icon src={Icons.Check} size="200" className={SubmittedIcon} />
+              {submitted && <Icon src={Icons.Check} size="200" className={SubmittedIcon} />}
               <Text size="T300" priority="300" className={SubmittedText}>
-                {t('askUserQuestion.submitted')}
+                {submitted ? t('askUserQuestion.submitted') : t('askUserQuestion.waitingForServer')}
               </Text>
             </>
           ) : (

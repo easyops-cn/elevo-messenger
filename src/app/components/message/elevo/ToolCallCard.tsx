@@ -6,7 +6,11 @@ import { Box, Icon, Icons, Text, toRem } from 'folds';
 import * as css from './ToolCallCard.css';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { SquareAsteriskIcon } from '../../../icons/SquareAsteriskIcon';
-import { AskUserQuestionCard, type AskUserQuestionCardData } from './AskUser';
+import {
+  AskUserQuestionCard,
+  type AskUserFormQuestionItem,
+  type AskUserQuestionCardData,
+} from './AskUser';
 import { elevoColor } from '../../../../config.css';
 import { MessageLayout, settingsAtom } from '../../../state/settings';
 import { useSetting } from '../../../state/hooks/settings';
@@ -58,6 +62,31 @@ const QuestionToolInputSchema = z.object({
       multiple: z.boolean().optional(),
     })
   ),
+});
+
+const AskHumanToolInputSchema = z.object({
+  questions: z.array(
+    z.object({
+      type: z.literal('form'),
+      question: z.string(),
+      header: z.string(),
+      fields: z.array(
+        z.object({
+          name: z.string(),
+          label: z.string(),
+          type: z.enum(['textarea', 'select']),
+          placeholder: z.string().optional(),
+          options: z.array(z.string()).optional(),
+          description: z.string().optional(),
+        })
+      ),
+    })
+  ),
+});
+
+const AskHumanToolOutputSchema = z.object({
+  type: z.literal('text'),
+  text: z.string(),
 });
 
 type TodoItem = z.infer<typeof TodoItemSchema>;
@@ -212,15 +241,14 @@ type ApplyPatchOperationCardProps = {
 
 const COLLAPSED_LINE_COUNT = 10;
 
-function ApplyPatchOperationCard({ operation, iconClassName, status }: ApplyPatchOperationCardProps) {
+function ApplyPatchOperationCard({
+  operation,
+  iconClassName,
+  status,
+}: ApplyPatchOperationCardProps) {
   const [expanded, setExpanded] = useState(false);
 
-  const label =
-    operation.kind === 'add'
-      ? 'Add'
-      : operation.kind === 'delete'
-      ? 'Delete'
-      : 'Edit';
+  const label = operation.kind === 'add' ? 'Add' : operation.kind === 'delete' ? 'Delete' : 'Edit';
 
   const body =
     operation.kind === 'add'
@@ -229,10 +257,7 @@ function ApplyPatchOperationCard({ operation, iconClassName, status }: ApplyPatc
       ? operation.diff
       : null;
 
-  const diffLines = useMemo(
-    () => (body !== null ? buildApplyPatchDiffLines(body) : []),
-    [body]
-  );
+  const diffLines = useMemo(() => (body !== null ? buildApplyPatchDiffLines(body) : []), [body]);
 
   const isOverflow = diffLines.length > COLLAPSED_LINE_COUNT;
   const visibleLines = expanded ? diffLines : diffLines.slice(0, COLLAPSED_LINE_COUNT);
@@ -269,7 +294,9 @@ function ApplyPatchOperationCard({ operation, iconClassName, status }: ApplyPatc
               {visibleLines.map((node) => (
                 <span
                   key={node.key}
-                  className={`${css.ApplyPatchDiffLine}${node.className ? ` ${node.className}` : ''}`}
+                  className={`${css.ApplyPatchDiffLine}${
+                    node.className ? ` ${node.className}` : ''
+                  }`}
                 >
                   {`${node.line}\n`}
                 </span>
@@ -280,7 +307,12 @@ function ApplyPatchOperationCard({ operation, iconClassName, status }: ApplyPatc
             <div
               className={css.ApplyPatchDiffCollapsedOverlay}
               onClick={() => setExpanded(true)}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(true); } }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setExpanded(true);
+                }
+              }}
               role="button"
               tabIndex={0}
               aria-label="Expand diff"
@@ -328,6 +360,26 @@ function getQuestionForRender(data: ToolCallData): AskUserQuestionCardData | und
   };
 }
 
+function getAskHumanForRender(data: ToolCallData):
+  | {
+      question: AskUserQuestionCardData;
+      submitted: boolean;
+    }
+  | undefined {
+  if (data.name !== 'mcp__elevo__ask_human') return undefined;
+
+  const parsedInput = tryParseJson(data.input);
+  const result = AskHumanToolInputSchema.safeParse(parsedInput);
+  if (!result.success) return undefined;
+
+  return {
+    question: {
+      questions: result.data.questions as AskUserFormQuestionItem[],
+    },
+    submitted: AskHumanToolOutputSchema.safeParse(tryParseJson(data.output)).success,
+  };
+}
+
 type ToolCallCardProps = {
   data: ToolCallData;
   style?: CSSProperties;
@@ -337,7 +389,7 @@ type ToolCallCardProps = {
 export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolCallCardProps) {
   const { t } = useTranslation();
   const [messageLayout] = useSetting(settingsAtom, 'messageLayout');
-  
+
   const [bodyExpanded, setBodyExpanded] = useState(false);
   const iconClassName = classNames(
     css.ToolCallHeaderIcon,
@@ -350,13 +402,19 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
   );
 
   const prettierInput = useMemo(() => tryJsonPrettier(data.input), [data.input]);
-  const prettierOutput = useMemo(() => tryJsonPrettier(data.output ?? data.error), [data.output, data.error]);
+  const prettierOutput = useMemo(
+    () => tryJsonPrettier(data.output ?? data.error),
+    [data.output, data.error]
+  );
   const todos = useMemo(() => getTodosForRender(data), [data]);
   const question = useMemo(() => getQuestionForRender(data), [data]);
+  const askHuman = useMemo(() => getAskHumanForRender(data), [data]);
   const patchOperations = useMemo(() => getApplyPatchForRender(data), [data]);
 
-  const prettierToolName = useMemo(() =>
-    data.name.charAt(0).toUpperCase() + data.name.slice(1).replace(/_([a-z])?/g, (_, c) => (` ${c ? c.toUpperCase() : ''}`)),
+  const prettierToolName = useMemo(
+    () =>
+      data.name.charAt(0).toUpperCase() +
+      data.name.slice(1).replace(/_([a-z])?/g, (_, c) => ` ${c ? c.toUpperCase() : ''}`),
     [data.name]
   );
 
@@ -368,14 +426,14 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
         const input = JSON.parse(data.input);
         let title = '';
         switch (prettierToolName) {
-          case "Bash":
+          case 'Bash':
             if (typeof input.description === 'string') {
               title = input.description;
             } else if (typeof input.command === 'string') {
               title = input.command;
             }
             break;
-          case "Glob":
+          case 'Glob':
             if (typeof input.pattern === 'string') {
               title = input.pattern;
             }
@@ -401,14 +459,27 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
           {todos.map((todo) => {
             const checked = todo.status === 'completed';
             return (
-              <li key={`${todo.content}-${todo.priority ?? 'none'}-${todo.status}`} className={css.TodoItem}>
+              <li
+                key={`${todo.content}-${todo.priority ?? 'none'}-${todo.status}`}
+                className={css.TodoItem}
+              >
                 <Icon
-                  src={checked ? DisabledCheckboxIcon : todo.status === 'in_progress' ? SquareAsteriskIcon : DisabledCheckboxIcon}
+                  src={
+                    checked
+                      ? DisabledCheckboxIcon
+                      : todo.status === 'in_progress'
+                      ? SquareAsteriskIcon
+                      : DisabledCheckboxIcon
+                  }
                   filled={checked}
                   size="50"
                   style={{ opacity: checked ? 0.45 : 0.75, marginTop: toRem(2) }}
                 />
-                <Text size="T200" priority="300" className={checked ? css.TodoTextCompleted : css.TodoText}>
+                <Text
+                  size="T200"
+                  priority="300"
+                  className={checked ? css.TodoTextCompleted : css.TodoText}
+                >
                   {todo.content}
                 </Text>
               </li>
@@ -428,6 +499,20 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
         provider="open-agent"
         eventId={eventId}
         agentMode={data.metadata?.agent_mode === 'plan' ? 'plan' : undefined}
+        initialHumanSender={initialHumanSender}
+      />
+    );
+  }
+
+  if (askHuman && eventId) {
+    return (
+      <AskUserQuestionCard
+        data={askHuman.question}
+        style={style}
+        readOnly={data.status !== 'completed' || askHuman.submitted}
+        provider="open-agent"
+        eventId={eventId}
+        submitted={askHuman.submitted}
         initialHumanSender={initialHumanSender}
       />
     );
@@ -453,7 +538,12 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
       <div
         className={css.ToolCallHeader({ interactive: true })}
         onClick={() => setBodyExpanded((v) => !v)}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setBodyExpanded((v) => !v); } }}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            setBodyExpanded((v) => !v);
+          }
+        }}
         role="button"
         tabIndex={0}
       >
@@ -467,29 +557,32 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
         <Text size="T300" truncate>
           <span style={{ fontWeight: 500 }}>{prettierToolName}</span>
           {toolTitle ? (
-            <span style={{ color: elevoColor.Text.Secondary }}>
-              {` ${toolTitle}`}
-            </span>
+            <span style={{ color: elevoColor.Text.Secondary }}>{` ${toolTitle}`}</span>
           ) : null}
         </Text>
       </div>
       {bodyExpanded && (
         <div className={css.ToolCallBody}>
           <div className={css.InlineRow}>
-            <Text size="T200" className={css.InlineLabel}>IN</Text>
-            <pre className={css.InlineContent} title={prettierInput}>{prettierInput}</pre>
+            <Text size="T200" className={css.InlineLabel}>
+              IN
+            </Text>
+            <pre className={css.InlineContent} title={prettierInput}>
+              {prettierInput}
+            </pre>
           </div>
-          {(data.status === 'completed' || data.status === 'failed') && (
-            data.output !== undefined || data.error !== undefined
-          ) && (
-            <>
-              <div className={css.InlineDivider} />
-              <div className={css.InlineRowTop}>
-                <Text size="T200" className={css.InlineLabel}>OUT</Text>
-                <pre className={css.OutputContent}>{prettierOutput}</pre>
-              </div>
-            </>
-          )}
+          {(data.status === 'completed' || data.status === 'failed') &&
+            (data.output !== undefined || data.error !== undefined) && (
+              <>
+                <div className={css.InlineDivider} />
+                <div className={css.InlineRowTop}>
+                  <Text size="T200" className={css.InlineLabel}>
+                    OUT
+                  </Text>
+                  <pre className={css.OutputContent}>{prettierOutput}</pre>
+                </div>
+              </>
+            )}
         </div>
       )}
     </Box>
