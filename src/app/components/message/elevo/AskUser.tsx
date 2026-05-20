@@ -183,7 +183,7 @@ function AskUserSelect({
   options: AskUserSelectOption[];
   selectedValues: string[];
   multiSelect: boolean;
-  disabled: boolean;
+  disabled?: boolean;
   isAssignedUser: boolean;
   otherText: string;
   otherLabel: string;
