@@ -1115,7 +1115,6 @@
   },
   "askUserQuestion": {
     "submitted": "已提交",
-    "waitingForServer": "已提交，等待服务端确认...",
     "answeredTitle": "用户已回答问题",
     "questionLabel": "问：",
     "answerLabel": "答：",

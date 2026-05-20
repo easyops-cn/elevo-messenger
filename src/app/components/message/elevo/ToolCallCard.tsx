@@ -509,7 +509,7 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
       <AskUserQuestionCard
         data={askHuman.question}
         style={style}
-        readOnly={data.status !== 'completed' || askHuman.submitted}
+        readOnly={askHuman.submitted}
         provider="open-agent"
         eventId={eventId}
         submitted={askHuman.submitted}

@@ -228,7 +228,6 @@ export function AskUserQuestionCard({
   const [activeTab, setActiveTab] = useState(0);
 
   const submitted = submittedProp ?? localSubmitted;
-  const isWaitingForServerAnswer = submittedProp === false && localSubmitted;
   const isLocallyAnswered = submittedProp !== undefined ? localSubmitted : submitted;
 
   const assignedUserId = data.userId ?? initialHumanSender;
@@ -558,11 +557,11 @@ export function AskUserQuestionCard({
           )}
         </div>
         <div className={QuestionCardFooter}>
-          {submitted || isWaitingForServerAnswer ? (
+          {submitted || isLocallyAnswered ? (
             <>
-              {submitted && <Icon src={Icons.Check} size="200" className={SubmittedIcon} />}
+              <Icon src={Icons.Check} size="200" className={SubmittedIcon} />
               <Text size="T300" priority="300" className={SubmittedText}>
-                {submitted ? t('askUserQuestion.submitted') : t('askUserQuestion.waitingForServer')}
+                {t('askUserQuestion.submitted')}
               </Text>
             </>
           ) : (
