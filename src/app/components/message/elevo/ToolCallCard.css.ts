@@ -1,16 +1,26 @@
 import { keyframes, style } from '@vanilla-extract/css';
+import { recipe } from '@vanilla-extract/recipes';
 import { color, config, toRem } from 'folds';
 import { elevoColor } from '../../../../config.css';
 
 const cardBorder = `${config.borderWidth.B300} solid ${elevoColor.Border.Light}`;
 
-export const ToolCallHeader = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: config.space.S200,
-  cursor: 'pointer',
-  width: 'fit-content',
-  maxWidth: '100%',
+export const ToolCallHeader = recipe({
+  base: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: config.space.S200,
+    width: 'fit-content',
+    maxWidth: '100%',
+  },
+  variants: {
+    interactive: {
+      true: { cursor: 'pointer' },
+    },
+  },
+  defaultVariants: {
+    interactive: false,
+  },
 });
 
 export const ToolCallHeaderIcon = style({
@@ -177,6 +187,23 @@ export const ApplyPatchBody = style({
   border: cardBorder,
   borderRadius: config.radii.R300,
   overflow: 'hidden',
+  position: 'relative',
+});
+
+export const ApplyPatchDiffScrollContainer = style({
+  overflowX: 'auto',
+  overflowY: 'hidden',
+});
+
+export const ApplyPatchDiffCollapsedOverlay = style({
+  position: 'absolute',
+  bottom: 0,
+  left: 0,
+  right: 0,
+  height: toRem(48),
+  background: `linear-gradient(to bottom, transparent, ${color.SurfaceVariant.Container})`,
+  pointerEvents: 'none',
+  borderRadius: `0 0 ${config.radii.R300} ${config.radii.R300}`,
 });
 
 export const ApplyPatchMoveTo = style({
@@ -192,15 +219,13 @@ export const ApplyPatchDiff = style({
   lineHeight: toRem(20),
   margin: 0,
   padding: `${config.space.S200} 0`,
-  maxHeight: toRem(210),
-  overflow: 'auto',
+  minWidth: 'fit-content',
 });
 
 export const ApplyPatchDiffLine = style({
   display: 'block',
   padding: `0 ${config.space.S300}`,
-  whiteSpace: 'pre-wrap',
-  wordBreak: 'break-word',
+  whiteSpace: 'pre',
 });
 
 export const ApplyPatchDiffLineAdded = style({

@@ -210,7 +210,11 @@ type ApplyPatchOperationCardProps = {
   status: ToolCallData['status'];
 };
 
+const COLLAPSED_LINE_COUNT = 10;
+
 function ApplyPatchOperationCard({ operation, iconClassName, status }: ApplyPatchOperationCardProps) {
+  const [expanded, setExpanded] = useState(false);
+
   const label =
     operation.kind === 'add'
       ? 'Add'
@@ -230,11 +234,14 @@ function ApplyPatchOperationCard({ operation, iconClassName, status }: ApplyPatc
     [body]
   );
 
+  const isOverflow = diffLines.length > COLLAPSED_LINE_COUNT;
+  const visibleLines = expanded ? diffLines : diffLines.slice(0, COLLAPSED_LINE_COUNT);
+
   const moveTo = operation.kind === 'update' ? operation.moveTo : undefined;
 
   return (
     <Box direction="Column" gap="200">
-      <div className={css.ToolCallHeader}>
+      <div className={css.ToolCallHeader()}>
         <div className={iconClassName}>
           {status === 'inprogress' && (
             <svg viewBox="0 0 8 8" className={css.ToolCallSpinnerSvg}>
@@ -257,16 +264,29 @@ function ApplyPatchOperationCard({ operation, iconClassName, status }: ApplyPatc
       </div>
       {body !== null && (
         <div className={css.ApplyPatchBody}>
-          <pre className={css.ApplyPatchDiff}>
-            {diffLines.map((node) => (
-              <span
-                key={node.key}
-                className={`${css.ApplyPatchDiffLine}${node.className ? ` ${node.className}` : ''}`}
-              >
-                {`${node.line}\n`}
-              </span>
-            ))}
-          </pre>
+          <div className={css.ApplyPatchDiffScrollContainer}>
+            <pre className={css.ApplyPatchDiff}>
+              {visibleLines.map((node) => (
+                <span
+                  key={node.key}
+                  className={`${css.ApplyPatchDiffLine}${node.className ? ` ${node.className}` : ''}`}
+                >
+                  {`${node.line}\n`}
+                </span>
+              ))}
+            </pre>
+          </div>
+          {isOverflow && !expanded && (
+            <div
+              className={css.ApplyPatchDiffCollapsedOverlay}
+              onClick={() => setExpanded(true)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setExpanded(true); } }}
+              role="button"
+              tabIndex={0}
+              aria-label="Expand diff"
+              style={{ pointerEvents: 'auto', cursor: 'pointer' }}
+            />
+          )}
         </div>
       )}
     </Box>
@@ -361,7 +381,7 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
             }
             break;
         }
-        return title.trim() || input;
+        return title.trim() || data.input;
       } catch {
         return data.input.length > 72 ? `${data.input.slice(0, 72)}...` : data.input;
       }
@@ -371,7 +391,7 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
   if (todos) {
     return (
       <Box style={style} direction="Column" gap="200">
-        <div className={css.ToolCallHeader}>
+        <div className={css.ToolCallHeader()}>
           <div className={iconClassName} />
           <Text size="T300" truncate>
             <span style={{ fontWeight: 500 }}>{t('toolCall.updateTodos')}</span>
@@ -431,7 +451,7 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
   return (
     <Box style={style} direction="Column" gap="200">
       <div
-        className={css.ToolCallHeader}
+        className={css.ToolCallHeader({ interactive: true })}
         onClick={() => setBodyExpanded((v) => !v)}
         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setBodyExpanded((v) => !v); } }}
         role="button"
