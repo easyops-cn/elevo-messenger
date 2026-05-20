@@ -20,6 +20,10 @@ export const ToolCallHeaderIcon = style({
   flexShrink: 0,
 });
 
+export const ToolCallHeaderIconOffset = style({
+  marginLeft: `calc((${toRem(8)} + ${config.space.S200}) * -1)`,
+});
+
 export const ToolCallHeaderIconCompleted = style({
   backgroundColor: color.Success.Main,
 });
@@ -101,38 +105,7 @@ export const InlineContent = style({
 
 const outputLineHeight = toRem(18);
 
-export const OutputCollapsed = style({
-  fontFamily: 'monospace',
-  fontSize: toRem(12),
-  lineHeight: outputLineHeight,
-  whiteSpace: 'pre',
-  overflow: 'hidden',
-  margin: 0,
-  minWidth: 0,
-  cursor: 'pointer',
-});
-
-export const OutputFade = style({
-  position: 'relative',
-  minWidth: 0,
-  maxWidth: '100%',
-  overflow: 'hidden',
-  cursor: 'pointer',
-  selectors: {
-    '&::after': {
-      content: '""',
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: outputLineHeight,
-      background: `linear-gradient(transparent, ${color.SurfaceVariant.Container})`,
-      pointerEvents: 'none',
-    },
-  },
-});
-
-export const OutputExpanded = style({
+export const OutputContent = style({
   fontFamily: 'monospace',
   fontSize: toRem(12),
   lineHeight: outputLineHeight,
@@ -140,7 +113,6 @@ export const OutputExpanded = style({
   overflow: 'auto',
   margin: 0,
   minWidth: 0,
-  cursor: 'pointer',
 });
 
 export const InlineDivider = style({
@@ -175,11 +147,6 @@ export const Divider = style({
   margin: `${config.space.S200} 0`,
 });
 
-export const TodoHeader = style({
-  fontSize: toRem(13),
-  marginBottom: config.space.S200,
-});
-
 export const TodoList = style({
   margin: 0,
   paddingLeft: 0,
@@ -205,44 +172,11 @@ export const TodoTextCompleted = style({
   opacity: 0.45,
 });
 
-export const ApplyPatchList = style({
-  display: 'flex',
-  flexDirection: 'column',
-  gap: config.space.S200,
-});
-
-export const ApplyPatchCard = style({
+export const ApplyPatchBody = style({
   backgroundColor: color.SurfaceVariant.Container,
   border: cardBorder,
   borderRadius: config.radii.R300,
-  width: 'fit-content',
-  maxWidth: toRem(600),
   overflow: 'hidden',
-});
-
-export const ApplyPatchHeader = style({
-  display: 'flex',
-  alignItems: 'center',
-  gap: config.space.S200,
-  padding: `${config.space.S100} ${config.space.S300}`,
-  borderBottom: cardBorder,
-  selectors: {
-    '&:last-child': {
-      borderBottom: 'none',
-    },
-  },
-});
-
-export const ApplyPatchHeaderNoBody = style({
-  borderBottom: 'none',
-});
-
-export const ApplyPatchPath = style({
-  fontFamily: 'monospace',
-  fontSize: toRem(12),
-  wordBreak: 'break-all',
-  flex: 1,
-  minWidth: 0,
 });
 
 export const ApplyPatchMoveTo = style({

@@ -127,7 +127,7 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
   }
 
   const sseRender = parseSseRender(content);
-  const reasoning = content['vip.elevo.reasoning'] === true;
+  const reasoning = !!content['vip.elevo.reasoning'];
   if (sseRender?.streaming) {
     return (
       <SseMarkdownBody

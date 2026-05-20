@@ -8,6 +8,8 @@ import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { SquareAsteriskIcon } from '../../../icons/SquareAsteriskIcon';
 import { AskUserQuestionCard, type AskUserQuestionCardData } from './AskUser';
 import { elevoColor } from '../../../../config.css';
+import { MessageLayout, settingsAtom } from '../../../state/settings';
+import { useSetting } from '../../../state/hooks/settings';
 
 const ToolCallSchema = z.object({
   name: z.string(),
@@ -204,17 +206,17 @@ function buildApplyPatchDiffLines(text: string): ApplyPatchDiffLineModel[] {
 
 type ApplyPatchOperationCardProps = {
   operation: ApplyPatchOperation;
+  iconClassName: string;
+  status: ToolCallData['status'];
 };
 
-function ApplyPatchOperationCard({ operation }: ApplyPatchOperationCardProps) {
-  const { t } = useTranslation();
-
+function ApplyPatchOperationCard({ operation, iconClassName, status }: ApplyPatchOperationCardProps) {
   const label =
     operation.kind === 'add'
-      ? t('toolCall.applyPatchAdd')
+      ? 'Add'
       : operation.kind === 'delete'
-      ? t('toolCall.applyPatchDelete')
-      : t('toolCall.applyPatchUpdate');
+      ? 'Delete'
+      : 'Edit';
 
   const body =
     operation.kind === 'add'
@@ -229,19 +231,20 @@ function ApplyPatchOperationCard({ operation }: ApplyPatchOperationCardProps) {
   );
 
   const moveTo = operation.kind === 'update' ? operation.moveTo : undefined;
-  const headerClassName =
-    body === null
-      ? `${css.ApplyPatchHeader} ${css.ApplyPatchHeaderNoBody}`
-      : css.ApplyPatchHeader;
 
   return (
-    <div className={css.ApplyPatchCard}>
-      <div className={headerClassName}>
-        <Text size="L400" priority="400" as="span">
-          {label}
-        </Text>
-        <Text size="T200" priority="300" as="span" truncate className={css.ApplyPatchPath}>
-          {operation.path}
+    <Box direction="Column" gap="200">
+      <div className={css.ToolCallHeader}>
+        <div className={iconClassName}>
+          {status === 'inprogress' && (
+            <svg viewBox="0 0 8 8" className={css.ToolCallSpinnerSvg}>
+              <circle className={css.ToolCallSpinnerArc} cx="4" cy="4" r="3" />
+            </svg>
+          )}
+        </div>
+        <Text size="T300" truncate>
+          <span style={{ fontWeight: 500 }}>{label}</span>
+          <span style={{ color: elevoColor.Text.Secondary }}> {operation.path}</span>
         </Text>
         {moveTo && (
           <>
@@ -253,18 +256,20 @@ function ApplyPatchOperationCard({ operation }: ApplyPatchOperationCardProps) {
         )}
       </div>
       {body !== null && (
-        <pre className={css.ApplyPatchDiff}>
-          {diffLines.map((node) => (
-            <span
-              key={node.key}
-              className={`${css.ApplyPatchDiffLine}${node.className ? ` ${node.className}` : ''}`}
-            >
-              {`${node.line}\n`}
-            </span>
-          ))}
-        </pre>
+        <div className={css.ApplyPatchBody}>
+          <pre className={css.ApplyPatchDiff}>
+            {diffLines.map((node) => (
+              <span
+                key={node.key}
+                className={`${css.ApplyPatchDiffLine}${node.className ? ` ${node.className}` : ''}`}
+              >
+                {`${node.line}\n`}
+              </span>
+            ))}
+          </pre>
+        </div>
       )}
-    </div>
+    </Box>
   );
 }
 
@@ -311,12 +316,17 @@ type ToolCallCardProps = {
 };
 export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolCallCardProps) {
   const { t } = useTranslation();
-  const [outputExpanded, setOutputExpanded] = useState(false);
+  const [messageLayout] = useSetting(settingsAtom, 'messageLayout');
+  
+  const [bodyExpanded, setBodyExpanded] = useState(false);
   const iconClassName = classNames(
     css.ToolCallHeaderIcon,
     data.status === 'completed' && css.ToolCallHeaderIconCompleted,
     data.status === 'failed' && css.ToolCallHeaderIconFailed,
     data.status === 'inprogress' && css.ToolCallHeaderIconInprogress,
+    {
+      [css.ToolCallHeaderIconOffset]: messageLayout === MessageLayout.Modern,
+    }
   );
 
   const prettierInput = useMemo(() => tryJsonPrettier(data.input), [data.input]);
@@ -330,32 +340,61 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
     [data.name]
   );
 
+  const toolTitle = useMemo(() => {
+    if (data.title) return data.title;
+
+    if (typeof data.input === 'string') {
+      try {
+        const input = JSON.parse(data.input);
+        let title = '';
+        switch (prettierToolName) {
+          case "Bash":
+            if (typeof input.description === 'string') {
+              title = input.description;
+            } else if (typeof input.command === 'string') {
+              title = input.command;
+            }
+            break;
+          case "Glob":
+            if (typeof input.pattern === 'string') {
+              title = input.pattern;
+            }
+            break;
+        }
+        return title.trim() || input;
+      } catch {
+        return data.input.length > 72 ? `${data.input.slice(0, 72)}...` : data.input;
+      }
+    }
+  }, [data.title, data.input, prettierToolName]);
+
   if (todos) {
     return (
-      <Box style={style} direction="Column" gap="100">
-        <div className={css.ToolCallBody}>
-          <Text size="B300" priority="400" className={css.TodoHeader}>
-            {t('toolCall.updateTodos')}
+      <Box style={style} direction="Column" gap="200">
+        <div className={css.ToolCallHeader}>
+          <div className={iconClassName} />
+          <Text size="T300" truncate>
+            <span style={{ fontWeight: 500 }}>{t('toolCall.updateTodos')}</span>
           </Text>
-          <ul className={css.TodoList}>
-            {todos.map((todo) => {
-              const checked = todo.status === 'completed';
-              return (
-                <li key={`${todo.content}-${todo.priority ?? 'none'}-${todo.status}`} className={css.TodoItem}>
-                  <Icon
-                    src={checked ? DisabledCheckboxIcon : todo.status === 'in_progress' ? SquareAsteriskIcon : DisabledCheckboxIcon}
-                    filled={checked}
-                    size="50"
-                    style={{ opacity: checked ? 0.45 : 0.75, marginTop: toRem(2) }}
-                  />
-                  <Text size="T200" priority="300" className={checked ? css.TodoTextCompleted : css.TodoText}>
-                    {todo.content}
-                  </Text>
-                </li>
-              );
-            })}
-          </ul>
         </div>
+        <ul className={css.TodoList}>
+          {todos.map((todo) => {
+            const checked = todo.status === 'completed';
+            return (
+              <li key={`${todo.content}-${todo.priority ?? 'none'}-${todo.status}`} className={css.TodoItem}>
+                <Icon
+                  src={checked ? DisabledCheckboxIcon : todo.status === 'in_progress' ? SquareAsteriskIcon : DisabledCheckboxIcon}
+                  filled={checked}
+                  size="50"
+                  style={{ opacity: checked ? 0.45 : 0.75, marginTop: toRem(2) }}
+                />
+                <Text size="T200" priority="300" className={checked ? css.TodoTextCompleted : css.TodoText}>
+                  {todo.content}
+                </Text>
+              </li>
+            );
+          })}
+        </ul>
       </Box>
     );
   }
@@ -376,22 +415,28 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
 
   if (patchOperations) {
     return (
-      <Box style={style} direction="Column" gap="100">
-        <div className={css.ApplyPatchList}>
-          {patchOperations.map((op) => (
-            <ApplyPatchOperationCard
-              key={applyPatchOperationKey(op)}
-              operation={op}
-            />
-          ))}
-        </div>
+      <Box style={style} direction="Column" gap="300">
+        {patchOperations.map((op) => (
+          <ApplyPatchOperationCard
+            key={applyPatchOperationKey(op)}
+            operation={op}
+            iconClassName={iconClassName}
+            status={data.status}
+          />
+        ))}
       </Box>
     );
   }
 
   return (
     <Box style={style} direction="Column" gap="200">
-      <div className={css.ToolCallHeader}>
+      <div
+        className={css.ToolCallHeader}
+        onClick={() => setBodyExpanded((v) => !v)}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setBodyExpanded((v) => !v); } }}
+        role="button"
+        tabIndex={0}
+      >
         <div className={iconClassName}>
           {data.status === 'inprogress' && (
             <svg viewBox="0 0 8 8" className={css.ToolCallSpinnerSvg}>
@@ -401,46 +446,32 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
         </div>
         <Text size="T300" truncate>
           <span style={{ fontWeight: 500 }}>{prettierToolName}</span>
-          {data.title ? (
+          {toolTitle ? (
             <span style={{ color: elevoColor.Text.Secondary }}>
-              {` ${data.title}`}
+              {` ${toolTitle}`}
             </span>
           ) : null}
         </Text>
       </div>
-      <div className={css.ToolCallBody}>
-        <div className={css.InlineRow}>
-          <Text size="T200" className={css.InlineLabel}>IN</Text>
-          <pre className={css.InlineContent} title={prettierInput}>{prettierInput}</pre>
-        </div>
-        {(data.status === 'completed' || data.status === 'failed') && (
-          data.output !== undefined || data.error !== undefined
-        ) && (
-          <>
-            <div className={css.InlineDivider} />
-            <div className={css.InlineRowTop}>
-              <Text size="T200" className={css.InlineLabel}>OUT</Text>
-              <div
-                onClick={(e) => { e.stopPropagation(); setOutputExpanded((v) => !v); }}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOutputExpanded((v) => !v); } }}
-                className={css.OutputFade}
-              >
-                <pre
-                  className={outputExpanded ? css.OutputExpanded : css.OutputCollapsed}
-                  title={outputExpanded ? undefined : prettierOutput}
-                  style={!outputExpanded ? { maxHeight: toRem(68) } : undefined}
-                  ref={(el) => {
-                    if (!el?.parentElement) return;
-                    el.parentElement.classList.toggle(css.OutputFade, !outputExpanded && el.scrollHeight > el.clientHeight);
-                  }}
-                >{prettierOutput}</pre>
+      {bodyExpanded && (
+        <div className={css.ToolCallBody}>
+          <div className={css.InlineRow}>
+            <Text size="T200" className={css.InlineLabel}>IN</Text>
+            <pre className={css.InlineContent} title={prettierInput}>{prettierInput}</pre>
+          </div>
+          {(data.status === 'completed' || data.status === 'failed') && (
+            data.output !== undefined || data.error !== undefined
+          ) && (
+            <>
+              <div className={css.InlineDivider} />
+              <div className={css.InlineRowTop}>
+                <Text size="T200" className={css.InlineLabel}>OUT</Text>
+                <pre className={css.OutputContent}>{prettierOutput}</pre>
               </div>
-            </div>
-          </>
-        )}
-      </div>
+            </>
+          )}
+        </div>
+      )}
     </Box>
   );
 }

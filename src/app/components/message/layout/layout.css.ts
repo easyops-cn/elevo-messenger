@@ -104,7 +104,7 @@ export const MessageBase = recipe({
         padding: `${config.space.S100} 0 ${config.space.S100} ${config.space.S200}`,
       },
       false: {
-        padding: `${config.space.S100} ${config.space.S200} ${config.space.S100} ${config.space.S400}`,
+        padding: `${config.space.S200} ${config.space.S200} ${config.space.S100} ${config.space.S400}`,
       },
     },
   },
