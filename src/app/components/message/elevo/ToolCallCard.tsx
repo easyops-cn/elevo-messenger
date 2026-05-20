@@ -6,7 +6,7 @@ import { Box, Icon, Icons, Text, toRem } from 'folds';
 import * as css from './ToolCallCard.css';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { SquareAsteriskIcon } from '../../../icons/SquareAsteriskIcon';
-import { AskUserQuestionCard, type AskUserQuestionCardData } from './AskUser';
+import { AskUserQuestionCard, QuestionAnsweredCard, type AskUserQuestionCardData } from './AskUser';
 import { elevoColor } from '../../../../config.css';
 import { MessageLayout, settingsAtom } from '../../../state/settings';
 import { useSetting } from '../../../state/hooks/settings';
@@ -99,6 +99,8 @@ const AskHumanToolOutputSchema = z.object({
   text: z.string(),
 });
 
+const AskHumanToolAnswerSchema = z.record(z.string(), z.union([z.array(z.string()), z.string()]));
+
 type TodoItem = z.infer<typeof TodoItemSchema>;
 
 export function parseToolCall(content: Record<string, unknown>): ToolCallData | undefined {
@@ -124,6 +126,53 @@ function tryParseJson(val: unknown): unknown {
   } catch {
     return val;
   }
+}
+
+function unescapeQuotedString(val: string): string {
+  try {
+    return JSON.parse(`"${val.replace(/"/g, '\\"')}"`);
+  } catch {
+    return val.replace(/\\'/g, "'").replace(/\\"/g, '"').replace(/\\\\/g, '\\');
+  }
+}
+
+function tryParseAskHumanToolOutput(
+  val: unknown
+): z.infer<typeof AskHumanToolOutputSchema> | undefined {
+  const parsed = tryParseJson(val);
+  const result = AskHumanToolOutputSchema.safeParse(parsed);
+  if (result.success) return result.data;
+
+  if (typeof val !== 'string') return undefined;
+  const pythonDictResult =
+    /^\s*\{\s*'type'\s*:\s*'text'\s*,\s*'text'\s*:\s*'((?:\\'|[^'])*)'\s*\}\s*$/s.exec(val);
+  if (!pythonDictResult) return undefined;
+
+  return {
+    type: 'text',
+    text: unescapeQuotedString(pythonDictResult[1]),
+  };
+}
+
+function getAskHumanAnswersForRender(data: ToolCallData):
+  | {
+      provider: 'elevo-copilot';
+      answers: z.infer<typeof AskHumanToolAnswerSchema>;
+    }
+  | undefined {
+  if (data.name !== 'mcp__elevo__ask_human') return undefined;
+  if (data.status !== 'completed') return undefined;
+
+  const output = tryParseAskHumanToolOutput(data.output);
+  if (!output) return undefined;
+
+  const answers = AskHumanToolAnswerSchema.safeParse(tryParseJson(output.text));
+  if (!answers.success) return undefined;
+
+  return {
+    provider: 'elevo-copilot',
+    answers: answers.data,
+  };
 }
 
 function parseApplyPatchText(patchText: string): ApplyPatchOperation[] | undefined {
@@ -428,6 +477,7 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
   const todos = useMemo(() => getTodosForRender(data), [data]);
   const question = useMemo(() => getQuestionForRender(data), [data]);
   const askHuman = useMemo(() => getAskHumanForRender(data), [data]);
+  const askHumanAnswers = useMemo(() => getAskHumanAnswersForRender(data), [data]);
   const patchOperations = useMemo(() => getApplyPatchForRender(data), [data]);
 
   const prettierToolName = useMemo(
@@ -519,6 +569,15 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
         eventId={eventId}
         agentMode={data.metadata?.agent_mode === 'plan' ? 'plan' : undefined}
         initialHumanSender={initialHumanSender}
+      />
+    );
+  }
+
+  if (askHumanAnswers && eventId) {
+    return (
+      <QuestionAnsweredCard
+        data={{ ...askHumanAnswers, question_event_id: eventId }}
+        style={style}
       />
     );
   }
