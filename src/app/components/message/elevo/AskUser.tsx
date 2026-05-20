@@ -173,6 +173,7 @@ function AskUserSelect({
   otherText,
   otherLabel,
   otherPlaceholder,
+  showOtherOption,
   labelledBy,
   onToggle,
   onOtherTextChange,
@@ -185,6 +186,7 @@ function AskUserSelect({
   otherText: string;
   otherLabel: string;
   otherPlaceholder: string;
+  showOtherOption: boolean;
   labelledBy?: string;
   onToggle: (label: string, isOther: boolean) => void;
   onOtherTextChange: (value: string) => void;
@@ -261,7 +263,7 @@ function AskUserSelect({
       aria-labelledby={labelledBy}
     >
       {options.map((option) => renderOption(option))}
-      {renderOption({ label: otherLabel }, true)}
+      {showOtherOption && renderOption({ label: otherLabel }, true)}
     </Box>
   );
 }
@@ -312,6 +314,7 @@ export function AskUserQuestionCard({
   agentMode,
   initialHumanSender,
   submitted: submittedProp,
+  showOtherOption = true,
 }: {
   data: AskUserQuestionCardData;
   style?: CSSProperties;
@@ -322,6 +325,7 @@ export function AskUserQuestionCard({
   agentMode?: string;
   initialHumanSender?: string;
   submitted?: boolean;
+  showOtherOption?: boolean;
 }) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
@@ -363,6 +367,7 @@ export function AskUserQuestionCard({
           const field = q.fields[j];
           if (!formAnswers[i]?.[field.name]?.trim()) hasEmptyField = true;
           if (
+            showOtherOption &&
             field.type === 'select' &&
             formAnswers[i]?.[field.name] === OTHER_OPTION_VALUE &&
             !formOtherTexts[`${i}:${field.name}`]?.trim()
@@ -374,7 +379,11 @@ export function AskUserQuestionCard({
       } else {
         const sel = selections[i] ?? [];
         if (sel.length === 0) return false;
-        if (sel.some((s) => s === OTHER_OPTION_VALUE) && !otherTexts[String(i)]?.trim())
+        if (
+          showOtherOption &&
+          sel.some((s) => s === OTHER_OPTION_VALUE) &&
+          !otherTexts[String(i)]?.trim()
+        )
           return false;
       }
     }
@@ -387,6 +396,7 @@ export function AskUserQuestionCard({
     selections,
     otherTexts,
     isLocallyAnswered,
+    showOtherOption,
     submitted,
   ]);
 
@@ -448,11 +458,13 @@ export function AskUserQuestionCard({
       const q = data.questions[i];
       if (isFormQuestion(q)) {
         const formAnswer = { ...(formAnswers[i] ?? {}) };
-        q.fields.forEach((field) => {
-          if (field.type === 'select' && formAnswer[field.name] === OTHER_OPTION_VALUE) {
-            formAnswer[field.name] = formOtherTexts[`${i}:${field.name}`]?.trim() || '';
-          }
-        });
+        if (showOtherOption) {
+          q.fields.forEach((field) => {
+            if (field.type === 'select' && formAnswer[field.name] === OTHER_OPTION_VALUE) {
+              formAnswer[field.name] = formOtherTexts[`${i}:${field.name}`]?.trim() || '';
+            }
+          });
+        }
         answers[q.question] = JSON.stringify(formAnswer);
       } else {
         const sel = (selections[i] ?? []).map((s) => {
@@ -500,6 +512,7 @@ export function AskUserQuestionCard({
     onSubmit,
     answerIdField,
     answerId,
+    showOtherOption,
   ]);
 
   const currentQuestion = data.questions[activeTab];
@@ -557,6 +570,7 @@ export function AskUserQuestionCard({
                         otherPlaceholder={
                           field.placeholder ?? t('askUserQuestion.otherPlaceholder')
                         }
+                        showOtherOption={showOtherOption}
                         labelledBy={fieldId}
                         onToggle={(label, isOther) =>
                           handleFormOptionToggle(activeTab, field.name, label, isOther)
@@ -600,6 +614,7 @@ export function AskUserQuestionCard({
               otherText={otherTexts[String(activeTab)] ?? ''}
               otherLabel={t('askUserQuestion.other')}
               otherPlaceholder={t('askUserQuestion.otherPlaceholder')}
+              showOtherOption={showOtherOption}
               onToggle={(label, isOther) => handleOptionToggle(activeTab, label, isOther)}
               onOtherTextChange={(nextValue) =>
                 setOtherTexts((prev) => ({ ...prev, [String(activeTab)]: nextValue }))

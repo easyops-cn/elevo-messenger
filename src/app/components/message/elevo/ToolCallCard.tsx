@@ -514,6 +514,7 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
         eventId={eventId}
         submitted={askHuman.submitted}
         initialHumanSender={initialHumanSender}
+        showOtherOption={false}
       />
     );
   }
