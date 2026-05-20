@@ -510,7 +510,7 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
         data={askHuman.question}
         style={style}
         readOnly={askHuman.submitted}
-        provider="open-agent"
+        provider="elevo-copilot"
         eventId={eventId}
         submitted={askHuman.submitted}
         initialHumanSender={initialHumanSender}

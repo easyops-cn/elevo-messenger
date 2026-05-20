@@ -88,7 +88,7 @@ const QuestionAnsweredSchemaOfElevoWorker = z.object({
 type QuestionAnsweredDataOfElevoWorker = z.infer<typeof QuestionAnsweredSchemaOfElevoWorker>;
 
 const QuestionAnsweredSchemaOfOpenAgent = z.object({
-  provider: z.literal('open-agent'),
+  provider: z.union([z.literal('open-agent'), z.literal('elevo-copilot')]),
   question_event_id: z.string(),
   answers: z.record(z.string(), z.union([z.array(z.string()), z.string()])),
 });
@@ -320,7 +320,7 @@ export function AskUserQuestionCard({
   style?: CSSProperties;
   readOnly?: boolean;
   onSubmit?: () => void;
-  provider?: 'elevo-worker' | 'open-agent';
+  provider?: 'elevo-worker' | 'open-agent' | 'elevo-copilot';
   eventId?: string;
   agentMode?: string;
   initialHumanSender?: string;
@@ -352,8 +352,8 @@ export function AskUserQuestionCard({
       assignedUserId
     : undefined;
 
-  const answerIdField = provider === 'open-agent' ? 'question_event_id' : 'question_id';
-  const answerId = provider === 'open-agent' ? eventId : data.question_id;
+  const answerIdField = provider === 'elevo-worker' ? 'question_id' : 'question_event_id';
+  const answerId = provider === 'elevo-worker' ? data.question_id : eventId;
 
   const canSubmit = useMemo(() => {
     if (!answerId) return false;
