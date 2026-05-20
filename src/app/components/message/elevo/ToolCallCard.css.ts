@@ -1,35 +1,10 @@
-import { style, keyframes } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 import { color, config, toRem } from 'folds';
+import { elevoColor } from '../../../../config.css';
 
-const cardBorder = `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`;
-
-const shimmer = keyframes({
-  '0%': { backgroundPosition: '200% center' },
-  '100%': { backgroundPosition: '-200% center' },
-});
-
-export const ToolCallHeaderShimmer = style({
-  backgroundSize: '200% auto',
-  backgroundImage: `linear-gradient(
-    90deg,
-    ${color.SurfaceVariant.OnContainer} 0%,
-    ${color.SurfaceVariant.OnContainer} 40%,
-    ${color.SurfaceVariant.Container} 50%,
-    ${color.SurfaceVariant.OnContainer} 60%,
-    ${color.SurfaceVariant.OnContainer} 100%
-  )`,
-  backgroundClip: 'text',
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  animation: `${shimmer} 3s linear infinite 1s`,
-});
+const cardBorder = `${config.borderWidth.B300} solid ${elevoColor.Border.Light}`;
 
 export const ToolCallHeader = style({
-  backgroundColor: color.SurfaceVariant.Container,
-  color: color.SurfaceVariant.OnContainer,
-  border: cardBorder,
-  borderRadius: config.radii.R300,
-  padding: `${config.space.S100} ${config.space.S200}`,
   display: 'flex',
   alignItems: 'center',
   gap: config.space.S200,
@@ -38,13 +13,139 @@ export const ToolCallHeader = style({
   maxWidth: '100%',
 });
 
+export const ToolCallHeaderIcon = style({
+  width: toRem(8),
+  height: toRem(8),
+  borderRadius: '50%',
+  flexShrink: 0,
+});
+
+export const ToolCallHeaderIconCompleted = style({
+  backgroundColor: color.Success.Main,
+});
+
+export const ToolCallHeaderIconFailed = style({
+  backgroundColor: color.Critical.Main,
+});
+
+const toolCallSpinner = keyframes({
+  to: { transform: 'rotate(360deg)' },
+});
+
+export const ToolCallHeaderIconInprogress = style({
+  backgroundColor: 'transparent',
+  position: 'relative',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+});
+
+export const ToolCallSpinnerSvg = style({
+  position: 'absolute',
+  width: toRem(8),
+  height: toRem(8),
+  animation: `${toolCallSpinner} 0.8s linear infinite`,
+});
+
+export const ToolCallSpinnerArc = style({
+  fill: 'none',
+  stroke: color.Primary.Main,
+  strokeWidth: 2,
+  strokeLinecap: 'round',
+  strokeDasharray: '14.14',
+  strokeDashoffset: 10,
+});
+
 export const ToolCallBody = style({
   backgroundColor: color.SurfaceVariant.Container,
   border: cardBorder,
   borderRadius: config.radii.R300,
   padding: `${config.space.S200} ${config.space.S300}`,
-  width: 'fit-content',
-  maxWidth: toRem(600),
+  marginBottom: config.space.S100,
+  // maxWidth: toRem(600),
+  width: '100%',
+  overflow: 'hidden',
+});
+
+export const InlineRow = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: config.space.S100,
+});
+
+export const InlineRowTop = style({
+  display: 'flex',
+  alignItems: 'flex-start',
+  gap: config.space.S100,
+});
+
+export const InlineLabel = style({
+  fontWeight: 500,
+  fontSize: toRem(12),
+  width: toRem(36),
+  flexShrink: 0,
+  lineHeight: toRem(18),
+  color: elevoColor.Text.Muted,
+});
+
+export const InlineContent = style({
+  fontFamily: 'monospace',
+  fontSize: toRem(12),
+  lineHeight: toRem(18),
+  whiteSpace: 'nowrap',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  margin: 0,
+  minWidth: 0,
+});
+
+const outputLineHeight = toRem(18);
+
+export const OutputCollapsed = style({
+  fontFamily: 'monospace',
+  fontSize: toRem(12),
+  lineHeight: outputLineHeight,
+  whiteSpace: 'pre',
+  overflow: 'hidden',
+  margin: 0,
+  minWidth: 0,
+  cursor: 'pointer',
+});
+
+export const OutputFade = style({
+  position: 'relative',
+  minWidth: 0,
+  maxWidth: '100%',
+  overflow: 'hidden',
+  cursor: 'pointer',
+  selectors: {
+    '&::after': {
+      content: '""',
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: outputLineHeight,
+      background: `linear-gradient(transparent, ${color.SurfaceVariant.Container})`,
+      pointerEvents: 'none',
+    },
+  },
+});
+
+export const OutputExpanded = style({
+  fontFamily: 'monospace',
+  fontSize: toRem(12),
+  lineHeight: outputLineHeight,
+  whiteSpace: 'pre',
+  overflow: 'auto',
+  margin: 0,
+  minWidth: 0,
+  cursor: 'pointer',
+});
+
+export const InlineDivider = style({
+  borderTop: cardBorder,
+  margin: `${config.space.S200} 0`,
 });
 
 export const Label = style({

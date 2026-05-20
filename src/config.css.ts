@@ -161,6 +161,7 @@ export const [elevoLight, elevoColor] = createTheme({
     SearchBar: 'rgba(0, 0, 0, 0.06)',
   },
   Border: {
+    Light: 'rgba(0, 0, 0, 0.08)',
     ExtremeLight: 'rgba(0, 0, 0, 0.04)',
   },
   shadow: {
@@ -185,6 +186,7 @@ export const elevoDark = createTheme(elevoColor, {
     SearchBar: 'rgba(255, 255, 255, 0.1)',
   },
   Border: {
+    Light: 'rgba(255, 255, 255, 0.08)',
     ExtremeLight: 'rgba(255, 255, 255, 0.04)',
   },
   shadow: {

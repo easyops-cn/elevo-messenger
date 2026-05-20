@@ -146,7 +146,7 @@ export const PageMainFloating = style({
 });
 
 export const PageMainSidePanel = style({
-  width: toRem(456),
+  width: `max(${toRem(456)}, 33vw)`,
   flexShrink: 0,
   flexGrow: 0,
 });

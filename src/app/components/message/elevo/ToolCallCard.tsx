@@ -1,11 +1,13 @@
 import React, { CSSProperties, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod/v4';
-import { Box, Icon, Icons, Text, color, toRem } from 'folds';
+import classNames from 'classnames';
+import { Box, Icon, Icons, Text, toRem } from 'folds';
 import * as css from './ToolCallCard.css';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { SquareAsteriskIcon } from '../../../icons/SquareAsteriskIcon';
 import { AskUserQuestionCard, type AskUserQuestionCardData } from './AskUser';
+import { elevoColor } from '../../../../config.css';
 
 const ToolCallSchema = z.object({
   name: z.string(),
@@ -67,10 +69,10 @@ function tryJsonPrettier(val: unknown): string {
   if (typeof val !== 'string') return JSON.stringify(val, null, 2);
   try {
     const data = JSON.parse(val);
-    if (typeof data === 'string') return data;
+    if (typeof data === 'string') return data.trim();
     return JSON.stringify(data, null, 2);
   } catch {
-    return val;
+    return val.trim();
   }
 }
 
@@ -309,11 +311,16 @@ type ToolCallCardProps = {
 };
 export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolCallCardProps) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
-  const iconColor = data.status === 'completed' ? color.Success.Main : data.status === 'failed' ? color.Critical.Main : color.Secondary.Main;
+  const [outputExpanded, setOutputExpanded] = useState(false);
+  const iconClassName = classNames(
+    css.ToolCallHeaderIcon,
+    data.status === 'completed' && css.ToolCallHeaderIconCompleted,
+    data.status === 'failed' && css.ToolCallHeaderIconFailed,
+    data.status === 'inprogress' && css.ToolCallHeaderIconInprogress,
+  );
 
   const prettierInput = useMemo(() => tryJsonPrettier(data.input), [data.input]);
-  const prettierOutput = useMemo(() => tryJsonPrettier(data.output), [data.output]);
+  const prettierOutput = useMemo(() => tryJsonPrettier(data.output ?? data.error), [data.output, data.error]);
   const todos = useMemo(() => getTodosForRender(data), [data]);
   const question = useMemo(() => getQuestionForRender(data), [data]);
   const patchOperations = useMemo(() => getApplyPatchForRender(data), [data]);
@@ -322,18 +329,6 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
     data.name.charAt(0).toUpperCase() + data.name.slice(1).replace(/_([a-z])?/g, (_, c) => (` ${c ? c.toUpperCase() : ''}`)),
     [data.name]
   );
-
-  const toolTitle = useMemo(() => {
-    if (data.title) return data.title;
-
-    if (typeof data.input === 'string') {
-      try {
-        JSON.parse(data.input);
-      } catch {
-        return data.input.length > 120 ? `${data.input.slice(0, 120)}...` : data.input;
-      }
-    }
-  }, [data.title, data.input]);
 
   if (todos) {
     return (
@@ -395,58 +390,57 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
   }
 
   return (
-    <Box style={style} direction="Column" gap="100">
-      <div
-        className={css.ToolCallHeader}
-        onClick={() => setExpanded((v) => !v)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setExpanded((v) => !v);
-          }
-        }}
-        role="button"
-        tabIndex={0}
-      >
-        <Icon src={Icons.Terminal} size="100" style={{ color: iconColor }} />
-        <Text size="L400" priority="300" truncate className={data.status === 'inprogress' ? css.ToolCallHeaderShimmer : undefined}>
-          {toolTitle ? (
-            <>
-              {prettierToolName}
-              <Text size="T200" as="span" className={data.status === 'inprogress' ? css.ToolCallHeaderShimmer : undefined}>
-                {` ${toolTitle}`}
-              </Text>
-            </>
-          ) : prettierToolName}
-        </Text>
-        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="100" />
-      </div>
-      {expanded && (
-        <div className={css.ToolCallBody}>
-          <Text size="T200" priority="300" className={css.Label}>
-            Input
-          </Text>
-          <pre className={css.Preformatted}>{prettierInput}</pre>
-          {data.status === 'completed' && data.output !== undefined && (
-            <>
-              <div className={css.Divider} />
-              <Text size="T200" priority="300" className={css.Label}>
-                Output
-              </Text>
-              <pre className={css.Preformatted}>{prettierOutput}</pre>
-            </>
-          )}
-          {data.status === 'failed' && data.error !== undefined && (
-            <>
-              <div className={css.Divider} />
-              <Text size="T200" priority="300" className={css.Label}>
-                Error
-              </Text>
-              <pre className={css.ErrorPre}>{String(data.error)}</pre>
-            </>
+    <Box style={style} direction="Column" gap="200">
+      <div className={css.ToolCallHeader}>
+        <div className={iconClassName}>
+          {data.status === 'inprogress' && (
+            <svg viewBox="0 0 8 8" className={css.ToolCallSpinnerSvg}>
+              <circle className={css.ToolCallSpinnerArc} cx="4" cy="4" r="3" />
+            </svg>
           )}
         </div>
-      )}
+        <Text size="T300" truncate>
+          <span style={{ fontWeight: 500 }}>{prettierToolName}</span>
+          {data.title ? (
+            <span style={{ color: elevoColor.Text.Secondary }}>
+              {` ${data.title}`}
+            </span>
+          ) : null}
+        </Text>
+      </div>
+      <div className={css.ToolCallBody}>
+        <div className={css.InlineRow}>
+          <Text size="T200" className={css.InlineLabel}>IN</Text>
+          <pre className={css.InlineContent} title={prettierInput}>{prettierInput}</pre>
+        </div>
+        {(data.status === 'completed' || data.status === 'failed') && (
+          data.output !== undefined || data.error !== undefined
+        ) && (
+          <>
+            <div className={css.InlineDivider} />
+            <div className={css.InlineRowTop}>
+              <Text size="T200" className={css.InlineLabel}>OUT</Text>
+              <div
+                onClick={(e) => { e.stopPropagation(); setOutputExpanded((v) => !v); }}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setOutputExpanded((v) => !v); } }}
+                className={css.OutputFade}
+              >
+                <pre
+                  className={outputExpanded ? css.OutputExpanded : css.OutputCollapsed}
+                  title={outputExpanded ? undefined : prettierOutput}
+                  style={!outputExpanded ? { maxHeight: toRem(68) } : undefined}
+                  ref={(el) => {
+                    if (!el?.parentElement) return;
+                    el.parentElement.classList.toggle(css.OutputFade, !outputExpanded && el.scrollHeight > el.clientHeight);
+                  }}
+                >{prettierOutput}</pre>
+              </div>
+            </div>
+          </>
+        )}
+      </div>
     </Box>
   );
 }
