@@ -151,11 +151,120 @@ export function parseQuestionAnsweredOfOpenAgent(
 type QuestionSelections = Record<number, string[]>;
 type FormAnswers = Record<number, Record<string, string>>;
 
+const OTHER_OPTION_VALUE = 'Other:';
+
 function isFormQuestion(question: AskUserQuestionCardItem): question is AskUserFormQuestionItem {
   return question.type === 'form';
 }
 
 // Components
+
+type AskUserSelectOption = {
+  label: string;
+  description?: string;
+};
+
+function AskUserSelect({
+  options,
+  selectedValues,
+  multiSelect,
+  disabled,
+  isAssignedUser,
+  otherText,
+  otherLabel,
+  otherPlaceholder,
+  labelledBy,
+  onToggle,
+  onOtherTextChange,
+}: {
+  options: AskUserSelectOption[];
+  selectedValues: string[];
+  multiSelect: boolean;
+  disabled: boolean;
+  isAssignedUser: boolean;
+  otherText: string;
+  otherLabel: string;
+  otherPlaceholder: string;
+  labelledBy?: string;
+  onToggle: (label: string, isOther: boolean) => void;
+  onOtherTextChange: (value: string) => void;
+}) {
+  const hasOtherSelected = selectedValues.includes(OTHER_OPTION_VALUE);
+  const optionRole = multiSelect ? 'checkbox' : 'radio';
+  const iconSrc = multiSelect
+    ? disabled
+      ? DisabledCheckboxIcon
+      : CheckboxIcon
+    : disabled
+    ? DisabledRadioIcon
+    : RadioIcon;
+
+  const renderOption = (option: AskUserSelectOption, isOther = false) => {
+    const isSelected = isOther ? hasOtherSelected : selectedValues.includes(option.label);
+    return (
+      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+      <div
+        key={option.label}
+        className={OptionItem({
+          selected: isAssignedUser && !disabled && isSelected,
+          disabled,
+        })}
+        onClick={() => onToggle(option.label, isOther)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle(option.label, isOther);
+          }
+        }}
+        role={optionRole}
+        aria-checked={isSelected}
+        tabIndex={!disabled ? 0 : -1}
+      >
+        <Icon src={iconSrc} filled={isSelected} size="50" className={OptionIcon} />
+        <Box grow="Yes" direction="Column" gap={isOther ? '100' : '0'}>
+          <Text size="T300" priority="400">
+            {option.label}
+          </Text>
+          {option.description && (
+            <Text size="T300" priority="300">
+              {option.description}
+            </Text>
+          )}
+          {isOther && hasOtherSelected && (
+            <input
+              type="text"
+              value={otherText}
+              onChange={(e) => onOtherTextChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.stopPropagation();
+                }
+              }}
+              onClick={(e) => e.stopPropagation()}
+              placeholder={otherPlaceholder}
+              disabled={disabled}
+              className={OtherInput}
+              // eslint-disable-next-line jsx-a11y/no-autofocus
+              autoFocus
+            />
+          )}
+        </Box>
+      </div>
+    );
+  };
+
+  return (
+    <Box
+      direction="Column"
+      gap="100"
+      role={multiSelect ? 'group' : 'radiogroup'}
+      aria-labelledby={labelledBy}
+    >
+      {options.map((option) => renderOption(option))}
+      {renderOption({ label: otherLabel }, true)}
+    </Box>
+  );
+}
 
 export function QuestionAnsweredCard({
   data,
@@ -223,6 +332,7 @@ export function AskUserQuestionCard({
   const [selections, setSelections] = useState<QuestionSelections>({});
   const [formAnswers, setFormAnswers] = useState<FormAnswers>({});
   const [otherTexts, setOtherTexts] = useState<Record<string, string>>({});
+  const [formOtherTexts, setFormOtherTexts] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
@@ -252,16 +362,33 @@ export function AskUserQuestionCard({
         for (let j = 0; j < q.fields.length; j += 1) {
           const field = q.fields[j];
           if (!formAnswers[i]?.[field.name]?.trim()) hasEmptyField = true;
+          if (
+            field.type === 'select' &&
+            formAnswers[i]?.[field.name] === OTHER_OPTION_VALUE &&
+            !formOtherTexts[`${i}:${field.name}`]?.trim()
+          ) {
+            hasEmptyField = true;
+          }
         }
         if (hasEmptyField) return false;
       } else {
         const sel = selections[i] ?? [];
         if (sel.length === 0) return false;
-        if (sel.some((s) => s === 'Other:') && !otherTexts[String(i)]?.trim()) return false;
+        if (sel.some((s) => s === OTHER_OPTION_VALUE) && !otherTexts[String(i)]?.trim())
+          return false;
       }
     }
     return true;
-  }, [answerId, data.questions, formAnswers, selections, otherTexts, isLocallyAnswered, submitted]);
+  }, [
+    answerId,
+    data.questions,
+    formAnswers,
+    formOtherTexts,
+    selections,
+    otherTexts,
+    isLocallyAnswered,
+    submitted,
+  ]);
 
   const handleOptionToggle = useCallback(
     (qIndex: number, label: string, isOther: boolean) => {
@@ -273,13 +400,13 @@ export function AskUserQuestionCard({
         const current = prev[qIndex] ?? [];
 
         if (isOther) {
-          if (current.some((s) => s === 'Other:')) {
-            return { ...prev, [qIndex]: current.filter((s) => s !== 'Other:') };
+          if (current.some((s) => s === OTHER_OPTION_VALUE)) {
+            return { ...prev, [qIndex]: current.filter((s) => s !== OTHER_OPTION_VALUE) };
           }
           if (!q.multiSelect) {
-            return { ...prev, [qIndex]: ['Other:'] };
+            return { ...prev, [qIndex]: [OTHER_OPTION_VALUE] };
           }
-          return { ...prev, [qIndex]: [...current, 'Other:'] };
+          return { ...prev, [qIndex]: [...current, OTHER_OPTION_VALUE] };
         }
 
         if (!q.multiSelect) {
@@ -299,6 +426,20 @@ export function AskUserQuestionCard({
     [data.questions, isDisabled]
   );
 
+  const handleFormOptionToggle = useCallback(
+    (qIndex: number, fieldName: string, label: string, isOther: boolean) => {
+      if (isDisabled) return;
+      setFormAnswers((prev) => ({
+        ...prev,
+        [qIndex]: {
+          ...(prev[qIndex] ?? {}),
+          [fieldName]: isOther ? OTHER_OPTION_VALUE : label,
+        },
+      }));
+    },
+    [isDisabled]
+  );
+
   const handleSubmit = useCallback(async () => {
     if (submitting || !canSubmit) return;
 
@@ -306,10 +447,16 @@ export function AskUserQuestionCard({
     for (let i = 0; i < data.questions.length; i += 1) {
       const q = data.questions[i];
       if (isFormQuestion(q)) {
-        answers[q.question] = JSON.stringify(formAnswers[i] ?? {});
+        const formAnswer = { ...(formAnswers[i] ?? {}) };
+        q.fields.forEach((field) => {
+          if (field.type === 'select' && formAnswer[field.name] === OTHER_OPTION_VALUE) {
+            formAnswer[field.name] = formOtherTexts[`${i}:${field.name}`]?.trim() || '';
+          }
+        });
+        answers[q.question] = JSON.stringify(formAnswer);
       } else {
         const sel = (selections[i] ?? []).map((s) => {
-          if (s === 'Other:') return otherTexts[String(i)]?.trim() || '';
+          if (s === OTHER_OPTION_VALUE) return otherTexts[String(i)]?.trim() || '';
           return s;
         });
         answers[q.question] = sel;
@@ -343,6 +490,7 @@ export function AskUserQuestionCard({
     canSubmit,
     data,
     formAnswers,
+    formOtherTexts,
     selections,
     otherTexts,
     mx,
@@ -356,7 +504,6 @@ export function AskUserQuestionCard({
 
   const currentQuestion = data.questions[activeTab];
   const currentSel = selections[activeTab] ?? [];
-  const hasOtherSelected = currentSel.includes('Other:');
 
   return (
     <Box style={style} direction="Column" gap="0">
@@ -399,57 +546,28 @@ export function AskUserQuestionCard({
                       </Text>
                     )}
                     {field.type === 'select' ? (
-                      <Box direction="Column" gap="100" role="radiogroup" aria-labelledby={fieldId}>
-                        {(field.options ?? []).map((option) => {
-                          const isSelected = value === option;
-                          return (
-                            // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-                            <div
-                              key={option}
-                              className={OptionItem({
-                                selected: isAssignedUser && !isDisabled && isSelected,
-                                disabled: isDisabled,
-                              })}
-                              onClick={() => {
-                                if (isDisabled) return;
-                                setFormAnswers((prev) => ({
-                                  ...prev,
-                                  [activeTab]: {
-                                    ...(prev[activeTab] ?? {}),
-                                    [field.name]: option,
-                                  },
-                                }));
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter' || e.key === ' ') {
-                                  e.preventDefault();
-                                  if (isDisabled) return;
-                                  setFormAnswers((prev) => ({
-                                    ...prev,
-                                    [activeTab]: {
-                                      ...(prev[activeTab] ?? {}),
-                                      [field.name]: option,
-                                    },
-                                  }));
-                                }
-                              }}
-                              role="radio"
-                              aria-checked={isSelected}
-                              tabIndex={!isDisabled ? 0 : -1}
-                            >
-                              <Icon
-                                src={isDisabled ? DisabledRadioIcon : RadioIcon}
-                                filled={isSelected}
-                                size="50"
-                                className={OptionIcon}
-                              />
-                              <Text size="T300" priority="400">
-                                {option}
-                              </Text>
-                            </div>
-                          );
-                        })}
-                      </Box>
+                      <AskUserSelect
+                        options={(field.options ?? []).map((option) => ({ label: option }))}
+                        selectedValues={value ? [value] : []}
+                        multiSelect={false}
+                        disabled={isDisabled}
+                        isAssignedUser={isAssignedUser}
+                        otherText={formOtherTexts[`${activeTab}:${field.name}`] ?? ''}
+                        otherLabel={t('askUserQuestion.other')}
+                        otherPlaceholder={
+                          field.placeholder ?? t('askUserQuestion.otherPlaceholder')
+                        }
+                        labelledBy={fieldId}
+                        onToggle={(label, isOther) =>
+                          handleFormOptionToggle(activeTab, field.name, label, isOther)
+                        }
+                        onOtherTextChange={(nextValue) =>
+                          setFormOtherTexts((prev) => ({
+                            ...prev,
+                            [`${activeTab}:${field.name}`]: nextValue,
+                          }))
+                        }
+                      />
                     ) : (
                       <textarea
                         id={fieldId}
@@ -473,113 +591,20 @@ export function AskUserQuestionCard({
               })}
             </Box>
           ) : (
-            <Box direction="Column" gap="100">
-              {currentQuestion.options.map((opt) => {
-                const isSelected = currentSel.includes(opt.label);
-                return (
-                  // eslint-disable-next-line jsx-a11y/no-static-element-interactions
-                  <div
-                    key={opt.label}
-                    className={OptionItem({
-                      selected: isAssignedUser && !isDisabled && isSelected,
-                      disabled: isDisabled,
-                    })}
-                    onClick={() => handleOptionToggle(activeTab, opt.label, false)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        handleOptionToggle(activeTab, opt.label, false);
-                      }
-                    }}
-                    role={currentQuestion.multiSelect ? 'checkbox' : 'radio'}
-                    aria-checked={isSelected}
-                    tabIndex={!isDisabled ? 0 : -1}
-                  >
-                    <Icon
-                      src={
-                        currentQuestion.multiSelect
-                          ? isDisabled
-                            ? DisabledCheckboxIcon
-                            : CheckboxIcon
-                          : isDisabled
-                          ? DisabledRadioIcon
-                          : RadioIcon
-                      }
-                      filled={isSelected}
-                      size="50"
-                      className={OptionIcon}
-                    />
-                    <Box grow="Yes" direction="Column" gap="0">
-                      <Text size="T300" priority="400">
-                        {opt.label}
-                      </Text>
-                      {opt.description && (
-                        <Text size="T300" priority="300">
-                          {opt.description}
-                        </Text>
-                      )}
-                    </Box>
-                  </div>
-                );
-              })}
-              {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
-              <div
-                className={OptionItem({
-                  selected: isAssignedUser && !isDisabled && hasOtherSelected,
-                  disabled: isDisabled,
-                })}
-                onClick={() => handleOptionToggle(activeTab, 'Other:', true)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    handleOptionToggle(activeTab, 'Other:', true);
-                  }
-                }}
-                role={currentQuestion.multiSelect ? 'checkbox' : 'radio'}
-                aria-checked={hasOtherSelected}
-                tabIndex={isAssignedUser && !submitted && !readOnly ? 0 : -1}
-              >
-                <Icon
-                  src={
-                    currentQuestion.multiSelect
-                      ? isDisabled
-                        ? DisabledCheckboxIcon
-                        : CheckboxIcon
-                      : isDisabled
-                      ? DisabledRadioIcon
-                      : RadioIcon
-                  }
-                  filled={hasOtherSelected}
-                  size="50"
-                  className={OptionIcon}
-                />
-                <Box grow="Yes" direction="Column" gap="100">
-                  <Text size="T300" priority="400">
-                    {t('askUserQuestion.other')}
-                  </Text>
-                  {hasOtherSelected && (
-                    <input
-                      type="text"
-                      value={otherTexts[String(activeTab)] ?? ''}
-                      onChange={(e) =>
-                        setOtherTexts((prev) => ({ ...prev, [String(activeTab)]: e.target.value }))
-                      }
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.stopPropagation();
-                        }
-                      }}
-                      onClick={(e) => e.stopPropagation()}
-                      placeholder={t('askUserQuestion.otherPlaceholder')}
-                      disabled={isDisabled}
-                      className={OtherInput}
-                      // eslint-disable-next-line jsx-a11y/no-autofocus
-                      autoFocus
-                    />
-                  )}
-                </Box>
-              </div>
-            </Box>
+            <AskUserSelect
+              options={currentQuestion.options}
+              selectedValues={currentSel}
+              multiSelect={currentQuestion.multiSelect}
+              disabled={isDisabled}
+              isAssignedUser={isAssignedUser}
+              otherText={otherTexts[String(activeTab)] ?? ''}
+              otherLabel={t('askUserQuestion.other')}
+              otherPlaceholder={t('askUserQuestion.otherPlaceholder')}
+              onToggle={(label, isOther) => handleOptionToggle(activeTab, label, isOther)}
+              onOtherTextChange={(nextValue) =>
+                setOtherTexts((prev) => ({ ...prev, [String(activeTab)]: nextValue }))
+              }
+            />
           )}
         </div>
         <div className={QuestionCardFooter}>
