@@ -127,7 +127,12 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
   }
 
   const sseRender = parseSseRender(content);
-  const reasoning = !!content['vip.elevo.reasoning'];
+  const reasoningContent = content['vip.elevo.reasoning'];
+  const reasoning = !!reasoningContent;
+  const durationMs =
+    reasoningContent && typeof reasoningContent === 'object' && 'duration_ms' in reasoningContent
+      ? Number((reasoningContent as { duration_ms?: number }).duration_ms)
+      : undefined;
   if (sseRender?.streaming) {
     return (
       <SseMarkdownBody
@@ -160,7 +165,7 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
   if (reasoning) {
     const trimmedBody = trimReplyFromBody(body);
     return (
-      <ReasoningCard style={style}>
+      <ReasoningCard style={style} durationMs={durationMs}>
         <MessageTextBody
           preWrap={typeof customBody !== 'string'}
           jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}

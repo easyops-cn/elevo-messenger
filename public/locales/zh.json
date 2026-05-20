@@ -861,6 +861,7 @@
     "broken": "损坏的消息",
     "empty": "空消息",
     "thinking": "思考",
+    "thought_for_seconds": "思考了 {{seconds}} 秒",
     "viewReactions": "查看反应",
     "readReceipts": "已读回执",
     "sourceCode": "源代码",
