@@ -6,11 +6,7 @@ import { Box, Icon, Icons, Text, toRem } from 'folds';
 import * as css from './ToolCallCard.css';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { SquareAsteriskIcon } from '../../../icons/SquareAsteriskIcon';
-import {
-  AskUserQuestionCard,
-  type AskUserFormQuestionItem,
-  type AskUserQuestionCardData,
-} from './AskUser';
+import { AskUserQuestionCard, type AskUserQuestionCardData } from './AskUser';
 import { elevoColor } from '../../../../config.css';
 import { MessageLayout, settingsAtom } from '../../../state/settings';
 import { useSetting } from '../../../state/hooks/settings';
@@ -64,24 +60,38 @@ const QuestionToolInputSchema = z.object({
   ),
 });
 
-const AskHumanToolInputSchema = z.object({
-  questions: z.array(
+const AskHumanChoiceQuestionSchema = z.object({
+  type: z.literal('choice').optional(),
+  question: z.string(),
+  header: z.string(),
+  multiSelect: z.boolean().optional(),
+  options: z.array(
     z.object({
-      type: z.literal('form'),
-      question: z.string(),
-      header: z.string(),
-      fields: z.array(
-        z.object({
-          name: z.string(),
-          label: z.string(),
-          type: z.enum(['textarea', 'select']),
-          placeholder: z.string().optional(),
-          options: z.array(z.string()).optional(),
-          description: z.string().optional(),
-        })
-      ),
+      label: z.string(),
+      description: z.string().optional(),
     })
   ),
+});
+
+const AskHumanFormQuestionSchema = z.object({
+  type: z.literal('form'),
+  question: z.string(),
+  header: z.string(),
+  fields: z.array(
+    z.object({
+      name: z.string(),
+      label: z.string(),
+      type: z.enum(['text', 'number', 'select', 'textarea', 'email', 'password']),
+      required: z.boolean().optional(),
+      placeholder: z.string().optional(),
+      description: z.string().optional(),
+      options: z.array(z.string()).optional(),
+    })
+  ),
+});
+
+const AskHumanToolInputSchema = z.object({
+  questions: z.array(z.union([AskHumanChoiceQuestionSchema, AskHumanFormQuestionSchema])),
 });
 
 const AskHumanToolOutputSchema = z.object({
@@ -374,7 +384,16 @@ function getAskHumanForRender(data: ToolCallData):
 
   return {
     question: {
-      questions: result.data.questions as AskUserFormQuestionItem[],
+      questions: result.data.questions.map((question) => {
+        if (question.type === 'form') return question;
+        return {
+          type: 'choice' as const,
+          question: question.question,
+          header: question.header,
+          options: question.options,
+          multiSelect: question.multiSelect ?? false,
+        };
+      }),
     },
     submitted: AskHumanToolOutputSchema.safeParse(tryParseJson(data.output)).success,
   };

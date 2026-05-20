@@ -24,6 +24,7 @@ import {
   AnsweredItem,
   QuestionCardFooter,
   FormField,
+  FormInput,
   FormTextarea,
 } from './AskUser.css';
 import { DisabledRadioIcon } from '../../../icons/DisabledRadioIcon';
@@ -50,7 +51,8 @@ const AskUserQuestionItemSchema = z.object({
 const AskUserFormFieldSchema = z.object({
   name: z.string(),
   label: z.string(),
-  type: z.enum(['textarea', 'select']),
+  type: z.enum(['text', 'number', 'select', 'textarea', 'email', 'password']),
+  required: z.boolean().optional(),
   placeholder: z.string().optional(),
   options: z.array(z.string()).optional(),
   description: z.string().optional(),
@@ -365,8 +367,9 @@ export function AskUserQuestionCard({
         let hasEmptyField = false;
         for (let j = 0; j < q.fields.length; j += 1) {
           const field = q.fields[j];
-          if (!formAnswers[i]?.[field.name]?.trim()) hasEmptyField = true;
+          if (field.required && !formAnswers[i]?.[field.name]?.trim()) hasEmptyField = true;
           if (
+            field.required &&
             showOtherOption &&
             field.type === 'select' &&
             formAnswers[i]?.[field.name] === OTHER_OPTION_VALUE &&
@@ -582,7 +585,7 @@ export function AskUserQuestionCard({
                           }))
                         }
                       />
-                    ) : (
+                    ) : field.type === 'textarea' ? (
                       <textarea
                         id={fieldId}
                         value={value}
@@ -598,6 +601,25 @@ export function AskUserQuestionCard({
                         placeholder={field.placeholder}
                         disabled={isDisabled}
                         className={FormTextarea}
+                      />
+                    ) : (
+                      <input
+                        id={fieldId}
+                        type={field.type}
+                        value={value}
+                        onChange={(e) =>
+                          setFormAnswers((prev) => ({
+                            ...prev,
+                            [activeTab]: {
+                              ...(prev[activeTab] ?? {}),
+                              [field.name]: e.target.value,
+                            },
+                          }))
+                        }
+                        placeholder={field.placeholder}
+                        required={field.required}
+                        disabled={isDisabled}
+                        className={FormInput}
                       />
                     )}
                   </div>
