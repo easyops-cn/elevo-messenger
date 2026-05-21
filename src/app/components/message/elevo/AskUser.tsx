@@ -474,7 +474,7 @@ export function AskUserQuestionCard({
           if (s === OTHER_OPTION_VALUE) return otherTexts[String(i)]?.trim() || '';
           return s;
         });
-        answers[q.question] = sel;
+        answers[q.question] = provider === 'elevo-copilot' ? sel.join(', ') : sel;
       }
     }
 

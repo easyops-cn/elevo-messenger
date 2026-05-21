@@ -154,14 +154,16 @@ function tryParseAskHumanToolOutput(
   };
 }
 
-function getAskHumanAnswersForRender(data: ToolCallData):
+function getAskHumanAnswersForRender(data: ToolCallData, eventId?: string):
   | {
+      question_event_id: string,
       provider: 'elevo-copilot';
       answers: z.infer<typeof AskHumanToolAnswerSchema>;
     }
   | undefined {
   if (data.name !== 'mcp__elevo__ask_human') return undefined;
   if (data.status !== 'completed') return undefined;
+  if (!eventId) return undefined;
 
   const output = tryParseAskHumanToolOutput(data.output);
   if (!output) return undefined;
@@ -170,6 +172,7 @@ function getAskHumanAnswersForRender(data: ToolCallData):
   if (!answers.success) return undefined;
 
   return {
+    question_event_id: eventId,
     provider: 'elevo-copilot',
     answers: answers.data,
   };
@@ -477,7 +480,7 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
   const todos = useMemo(() => getTodosForRender(data), [data]);
   const question = useMemo(() => getQuestionForRender(data), [data]);
   const askHuman = useMemo(() => getAskHumanForRender(data), [data]);
-  const askHumanAnswers = useMemo(() => getAskHumanAnswersForRender(data), [data]);
+  const askHumanAnswers = useMemo(() => getAskHumanAnswersForRender(data, eventId), [data, eventId]);
   const patchOperations = useMemo(() => getApplyPatchForRender(data), [data]);
 
   const prettierToolName = useMemo(
@@ -573,10 +576,10 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
     );
   }
 
-  if (askHumanAnswers && eventId) {
+  if (askHumanAnswers) {
     return (
       <QuestionAnsweredCard
-        data={{ ...askHumanAnswers, question_event_id: eventId }}
+        data={askHumanAnswers}
         style={style}
       />
     );
