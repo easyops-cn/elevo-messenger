@@ -3,12 +3,9 @@ import { useSetAtom, useAtomValue } from 'jotai';
 import { RoomEvent, type RoomEventHandlerMap } from 'matrix-js-sdk';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useElevoConfig } from '../../../hooks/useElevoConfig';
-import {
-  parseAskUserQuestion,
-  parseQuestionAnsweredOfElevoWorker,
-} from '../../../components/message/elevo/AskUser';
 import { todosAtom } from '../../../state/todos/todosAtom';
 import type { TodoItem, TodosResponse } from './useTodosApi';
+import { parseToolCall, getAskHumanForRender, getAskHumanAnswersForRender } from '../../../components/message';
 
 function TodosApiSync() {
   const setTodos = useSetAtom(todosAtom);
@@ -124,28 +121,47 @@ function TodosTimelineSync() {
       const content = mEvent.getContent();
       if (!content) return;
 
-      // Handle new AskUserQuestion
-      const questionData = parseAskUserQuestion(content);
-      if (questionData) {
-        const assignee = questionData.userId;
-        if (assignee && assignee === mx.getUserId()) {
-          const todoItem: TodoItem = {
-            room_id: room.roomId,
-            question_event_id: mEvent.getId()!,
-            sender: mEvent.getSender()!,
-            assignee,
-            question: questionData,
-            created_at: Math.floor(mEvent.getTs() / 1000),
-          };
-          setTodos({ type: 'ADD_LIVE_ITEM', item: todoItem });
-        }
-        return;
-      }
+      const relation = mEvent.getRelation();
+      const isReplace = relation?.rel_type === 'm.replace';
+      const toolCall = parseToolCall(isReplace ? content['m.new_content'] : content);
 
-      // Handle QuestionAnswered
-      const answeredData = parseQuestionAnsweredOfElevoWorker(content?.["m.new_content"] ?? {});
-      if (answeredData) {
-        setTodos({ type: 'REMOVE_BY_QUESTION_ID', questionId: answeredData.question_id });
+      if (toolCall) {
+        const eventId = mEvent.getId();
+        const originalEventId = isReplace ? relation.event_id : eventId;
+
+        const askHumanAnswers = getAskHumanAnswersForRender(toolCall, originalEventId);
+
+        // Remove todo when askHuman question is answered
+        if (askHumanAnswers) {
+          setTodos({ type: 'REMOVE_BY_QUESTION_ID', questionId: askHumanAnswers.question_event_id });
+          return;
+        }
+
+        // Skip m.replace events for adding (the original event already handled it)
+        if (isReplace) return;
+
+        const askHuman = getAskHumanForRender(toolCall);
+        // Add todo when askHuman question is pending for current user
+        if (askHuman && eventId) {
+          const assignee =
+            typeof content['vip.elevo.initial_human_sender'] === 'string'
+              ? content['vip.elevo.initial_human_sender']
+              : undefined;
+          if (assignee && assignee === mx.getUserId()) {
+            const sender = mEvent.getSender();
+            if (sender) {
+              const todoItem: TodoItem = {
+                room_id: room.roomId,
+                question_event_id: eventId,
+                sender,
+                assignee,
+                question: askHuman.question,
+                created_at: Math.floor(mEvent.getTs() / 1000),
+              };
+              setTodos({ type: 'ADD_LIVE_ITEM', item: todoItem });
+            }
+          }
+        }
       }
     };
 

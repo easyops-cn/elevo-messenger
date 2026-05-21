@@ -40,7 +40,7 @@ const AskUserQuestionOptionSchema = z.object({
   description: z.string().optional(),
 });
 
-const AskUserQuestionItemSchema = z.object({
+const AskUserChoiceQuestionItemSchema = z.object({
   type: z.literal('choice').optional(),
   question: z.string(),
   header: z.string(),
@@ -65,29 +65,20 @@ const AskUserFormQuestionItemSchema = z.object({
   fields: z.array(AskUserFormFieldSchema),
 });
 
+const AskUserQuestionItemSchema = z.union([
+  AskUserChoiceQuestionItemSchema,
+  AskUserFormQuestionItemSchema,
+]);
+
 type AskUserQuestionItem = z.infer<typeof AskUserQuestionItemSchema>;
 export type AskUserFormQuestionItem = z.infer<typeof AskUserFormQuestionItemSchema>;
 type AskUserQuestionCardItem = AskUserQuestionItem | AskUserFormQuestionItem;
 
 const AskUserQuestionSchema = z.object({
-  userId: z.string().optional(),
-  question_id: z.string(),
   questions: z.array(AskUserQuestionItemSchema).min(1),
 });
 
 export type AskUserQuestionData = z.infer<typeof AskUserQuestionSchema>;
-export type AskUserQuestionCardData = Omit<AskUserQuestionData, 'question_id' | 'questions'> & {
-  question_id?: string;
-  questions: AskUserQuestionCardItem[];
-};
-
-const QuestionAnsweredSchemaOfElevoWorker = z.object({
-  provider: z.literal('elevo-worker').optional(),
-  question_id: z.string(),
-  answers: z.record(z.string(), z.union([z.array(z.string()), z.string()])),
-});
-
-type QuestionAnsweredDataOfElevoWorker = z.infer<typeof QuestionAnsweredSchemaOfElevoWorker>;
 
 const QuestionAnsweredSchemaOfOpenAgent = z.object({
   provider: z.union([z.literal('open-agent'), z.literal('elevo-copilot')]),
@@ -96,7 +87,7 @@ const QuestionAnsweredSchemaOfOpenAgent = z.object({
 });
 
 type QuestionAnsweredDataOfOpenAgent = z.infer<typeof QuestionAnsweredSchemaOfOpenAgent>;
-type QuestionAnsweredData = QuestionAnsweredDataOfElevoWorker | QuestionAnsweredDataOfOpenAgent;
+type QuestionAnsweredData = QuestionAnsweredDataOfOpenAgent;
 
 export function isUserAnswerEvent(mEvent: MatrixEvent) {
   const content = mEvent.getContent();
@@ -108,32 +99,6 @@ export function isUserAnswerEvent(mEvent: MatrixEvent) {
 }
 
 // Parsers
-
-export function parseAskUserQuestion(
-  content: Record<string, unknown>
-): AskUserQuestionData | undefined {
-  const questionContent = content['vip.elevo.ask_user_question'];
-  if (!questionContent) return undefined;
-  const result = AskUserQuestionSchema.safeParse(questionContent);
-  if (result.success) {
-    return result.data;
-  }
-  // eslint-disable-next-line no-console
-  console.error('Failed to parse ask user question content:', result.error);
-}
-
-export function parseQuestionAnsweredOfElevoWorker(
-  content: Record<string, unknown>
-): QuestionAnsweredDataOfElevoWorker | undefined {
-  const answeredContent = content['vip.elevo.question_answered'];
-  if (!answeredContent) return undefined;
-  const result = QuestionAnsweredSchemaOfElevoWorker.safeParse(answeredContent);
-  if (result.success) {
-    return result.data;
-  }
-  // eslint-disable-next-line no-console
-  console.error('Failed to parse question answered content:', result.error);
-}
 
 export function parseQuestionAnsweredOfOpenAgent(
   content: Record<string, unknown>
@@ -296,7 +261,26 @@ export function QuestionAnsweredCard({
               </Text>
               <Text size="T300" priority="500" style={{ marginTop: config.space.S100 }}>
                 {t('askUserQuestion.answerLabel')}
-                {Array.isArray(answers) ? answers.join(', ') : answers}
+                {Array.isArray(answers)
+                  ? answers.join(', ')
+                  : (() => {
+                      try {
+                        const parsed = JSON.parse(answers);
+                        if (
+                          typeof parsed === 'object' &&
+                          parsed !== null &&
+                          !Array.isArray(parsed) &&
+                          Object.values(parsed).every((v) => typeof v === 'string')
+                        ) {
+                          return Object.entries(parsed as Record<string, string>)
+                            .map(([k, v]) => `${k}: ${v}`)
+                            .join(', ');
+                        }
+                        return answers;
+                      } catch {
+                        return answers;
+                      }
+                    })()}
               </Text>
             </div>
           ))}
@@ -311,18 +295,18 @@ export function AskUserQuestionCard({
   style,
   readOnly,
   onSubmit,
-  provider = 'elevo-worker',
+  provider = 'elevo-copilot',
   eventId,
   agentMode,
   initialHumanSender,
   submitted: submittedProp,
   showOtherOption = true,
 }: {
-  data: AskUserQuestionCardData;
+  data: AskUserQuestionData;
   style?: CSSProperties;
   readOnly?: boolean;
   onSubmit?: () => void;
-  provider?: 'elevo-worker' | 'open-agent' | 'elevo-copilot';
+  provider?: 'open-agent' | 'elevo-copilot';
   eventId?: string;
   agentMode?: string;
   initialHumanSender?: string;
@@ -345,7 +329,7 @@ export function AskUserQuestionCard({
   const submitted = submittedProp ?? localSubmitted;
   const isLocallyAnswered = submittedProp !== undefined ? localSubmitted : submitted;
 
-  const assignedUserId = data.userId ?? initialHumanSender;
+  const assignedUserId = initialHumanSender;
   const isAssignedUser = !!assignedUserId && mx.getUserId() === assignedUserId;
   const isDisabled = !isAssignedUser || isLocallyAnswered || submitted || readOnly;
   const assignedDisplayName = assignedUserId
@@ -354,8 +338,8 @@ export function AskUserQuestionCard({
       assignedUserId
     : undefined;
 
-  const answerIdField = provider === 'elevo-worker' ? 'question_id' : 'question_event_id';
-  const answerId = provider === 'elevo-worker' ? data.question_id : eventId;
+  const answerIdField = 'question_event_id';
+  const answerId = eventId;
 
   const canSubmit = useMemo(() => {
     if (!answerId) return false;

@@ -40,12 +40,12 @@ export const todosAtom = atom<TodosAtomState, [TodosAtomAction], undefined>(
           baseTodosAtom,
           produce(get(baseTodosAtom), (draft) => {
             if (action.append) {
-              const existingIds = new Set(draft.apiItems.map((i) => i.question.question_id));
-              const newItems = action.items.filter((i) => !existingIds.has(i.question.question_id));
+              const existingIds = new Set(draft.apiItems.map((i) => i.question_event_id));
+              const newItems = action.items.filter((i) => !existingIds.has(i.question_event_id));
               draft.apiItems.push(...newItems);
             } else {
-              const liveIds = new Set(draft.liveItems.map((i) => i.question.question_id));
-              draft.apiItems = action.items.filter((i) => !liveIds.has(i.question.question_id));
+              const liveIds = new Set(draft.liveItems.map((i) => i.question_event_id));
+              draft.apiItems = action.items.filter((i) => !liveIds.has(i.question_event_id));
             }
             draft.nextCursor = action.nextCursor;
           })
@@ -56,9 +56,9 @@ export const todosAtom = atom<TodosAtomState, [TodosAtomAction], undefined>(
         set(
           baseTodosAtom,
           produce(get(baseTodosAtom), (draft) => {
-            const qid = action.item.question.question_id;
-            const alreadyInApi = draft.apiItems.some((i) => i.question.question_id === qid);
-            const alreadyInLive = draft.liveItems.some((i) => i.question.question_id === qid);
+            const qid = action.item.question_event_id;
+            const alreadyInApi = draft.apiItems.some((i) => i.question_event_id === qid);
+            const alreadyInLive = draft.liveItems.some((i) => i.question_event_id === qid);
             if (!alreadyInApi && !alreadyInLive) {
               draft.liveItems.unshift(action.item);
             }
@@ -70,8 +70,8 @@ export const todosAtom = atom<TodosAtomState, [TodosAtomAction], undefined>(
         set(
           baseTodosAtom,
           produce(get(baseTodosAtom), (draft) => {
-            draft.apiItems = draft.apiItems.filter((i) => i.question.question_id !== action.questionId);
-            draft.liveItems = draft.liveItems.filter((i) => i.question.question_id !== action.questionId);
+            draft.apiItems = draft.apiItems.filter((i) => i.question_event_id !== action.questionId);
+            draft.liveItems = draft.liveItems.filter((i) => i.question_event_id !== action.questionId);
           })
         );
         return;

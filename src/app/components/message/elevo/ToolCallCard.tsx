@@ -6,7 +6,7 @@ import { Box, Icon, Icons, Text, toRem } from 'folds';
 import * as css from './ToolCallCard.css';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { SquareAsteriskIcon } from '../../../icons/SquareAsteriskIcon';
-import { AskUserQuestionCard, QuestionAnsweredCard, type AskUserQuestionCardData } from './AskUser';
+import { AskUserQuestionCard, QuestionAnsweredCard, type AskUserQuestionData } from './AskUser';
 import { elevoColor } from '../../../../config.css';
 import { MessageLayout, settingsAtom } from '../../../state/settings';
 import { useSetting } from '../../../state/hooks/settings';
@@ -154,7 +154,7 @@ function tryParseAskHumanToolOutput(
   };
 }
 
-function getAskHumanAnswersForRender(data: ToolCallData, eventId?: string):
+export function getAskHumanAnswersForRender(data: ToolCallData, eventId?: string):
   | {
       question_event_id: string,
       provider: 'elevo-copilot';
@@ -405,7 +405,7 @@ function getTodosForRender(data: ToolCallData): TodoItem[] | undefined {
   return undefined;
 }
 
-function getQuestionForRender(data: ToolCallData): AskUserQuestionCardData | undefined {
+function getQuestionForRender(data: ToolCallData): AskUserQuestionData | undefined {
   if (data.name !== 'question') return undefined;
 
   const parsedInput = tryParseJson(data.input);
@@ -422,9 +422,9 @@ function getQuestionForRender(data: ToolCallData): AskUserQuestionCardData | und
   };
 }
 
-function getAskHumanForRender(data: ToolCallData):
+export function getAskHumanForRender(data: ToolCallData):
   | {
-      question: AskUserQuestionCardData;
+      question: AskUserQuestionData;
       submitted: boolean;
     }
   | undefined {

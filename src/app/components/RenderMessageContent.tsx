@@ -44,7 +44,6 @@ type RenderMessageContentProps = {
   htmlReactParserOptions: HTMLReactParserOptions;
   linkifyOpts: Opts;
   outlineAttachment?: boolean;
-  readOnly?: boolean;
 };
 export function RenderMessageContent({
   displayName,
@@ -58,7 +57,6 @@ export function RenderMessageContent({
   htmlReactParserOptions,
   linkifyOpts,
   outlineAttachment,
-  readOnly,
 }: RenderMessageContentProps) {
   const renderUrlsPreview = (urls: string[]) => {
     const filteredUrls = urls.filter((url) => !testMatrixTo(url));
@@ -88,7 +86,6 @@ export function RenderMessageContent({
             />
           )}
           renderUrlsPreview={urlPreview ? renderUrlsPreview : undefined}
-          readOnly={readOnly}
           eventId={eventId}
         />
       );
@@ -145,7 +142,6 @@ export function RenderMessageContent({
           />
         )}
         renderUrlsPreview={urlPreview ? renderUrlsPreview : undefined}
-        readOnly={readOnly}
         eventId={eventId}
       />
     );

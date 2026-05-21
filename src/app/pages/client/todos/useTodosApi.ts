@@ -1,21 +1,13 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { useElevoConfig } from '../../../hooks/useElevoConfig';
+import type { AskUserQuestionData } from '../../../components/message';
 
 export type TodoItem = {
   room_id: string;
   question_event_id: string;
   sender: string;
   assignee: string;
-  question: {
-    userId?: string;
-    question_id: string;
-    questions: Array<{
-      question: string;
-      header: string;
-      multiSelect: boolean;
-      options: Array<{ label: string; description?: string }>;
-    }>;
-  };
+  question: AskUserQuestionData;
   created_at: number;
 };
 
