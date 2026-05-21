@@ -108,7 +108,7 @@ import {
 import { getMemberDisplayName, getMentionContent, trimReplyFromBody } from '../../utils/room';
 import { CommandAutocomplete } from './CommandAutocomplete';
 import { VoiceRecordingBoard, VoiceRecordingBoardHandlers } from './VoiceRecordingBoard';
-import { Command, SHRUG, TABLEFLIP, UNFLIP, useCommands } from '../../hooks/useCommands';
+import { SHRUG, TABLEFLIP, UNFLIP, useCommands } from '../../hooks/useCommands';
 import { mobileOrTablet } from '../../utils/user-agent';
 import { ReplyLayout, ThreadIndicator } from '../../components/message';
 import { roomToParentsAtom } from '../../state/room/roomToParents';
@@ -460,32 +460,41 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       );
       let msgType = MsgType.Text;
 
-      if (commandName) {
+      if (commandName === 'me' && commands.me) {
+        msgType = MsgType.Emote;
         plainText = trimCommand(commandName, plainText);
         customHtml = trimCommand(commandName, customHtml);
-      }
-      if (commandName === Command.Me) {
-        msgType = MsgType.Emote;
-      } else if (commandName === Command.Notice) {
+      } else if (commandName === 'notice' && commands.notice) {
         msgType = MsgType.Notice;
-      } else if (commandName === Command.Shrug) {
+        plainText = trimCommand(commandName, plainText);
+        customHtml = trimCommand(commandName, customHtml);
+      } else if (commandName === 'shrug' && commands.shrug) {
+        plainText = trimCommand(commandName, plainText);
+        customHtml = trimCommand(commandName, customHtml);
         plainText = `${SHRUG} ${plainText}`;
         customHtml = `${SHRUG} ${customHtml}`;
-      } else if (commandName === Command.TableFlip) {
+      } else if (commandName === 'tableflip' && commands.tableflip) {
+        plainText = trimCommand(commandName, plainText);
+        customHtml = trimCommand(commandName, customHtml);
         plainText = `${TABLEFLIP} ${plainText}`;
         customHtml = `${TABLEFLIP} ${customHtml}`;
-      } else if (commandName === Command.UnFlip) {
+      } else if (commandName === 'unflip' && commands.unflip) {
+        plainText = trimCommand(commandName, plainText);
+        customHtml = trimCommand(commandName, customHtml);
         plainText = `${UNFLIP} ${plainText}`;
         customHtml = `${UNFLIP} ${customHtml}`;
       } else if (commandName) {
-        const commandContent = commands[commandName as Command];
-        if (commandContent) {
-          commandContent.exe(plainText);
+        const commandContent = commands[commandName];
+        if (commandContent?.exe) {
+          commandContent.exe(trimCommand(commandName, plainText));
+          resetEditor(editor);
+          resetEditorHistory(editor);
+          sendTypingStatus(false);
+          return;
         }
-        resetEditor(editor);
-        resetEditorHistory(editor);
-        sendTypingStatus(false);
-        return;
+        // Custom command without exe or disabled command: keep /command prefix as plain text
+      } else {
+        // No command: use plain text as-is
       }
 
       if (plainText === '') return;

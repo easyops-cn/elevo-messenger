@@ -26,6 +26,16 @@ export type WorkspacesConfig = {
   oauth?: OAuthConfig;
 };
 
+export type CustomCommandConfig = {
+  name: string;
+  description: string;
+};
+
+export type CommandsConfig = {
+  '*'?: boolean;
+  [commandName: string]: boolean | CustomCommandConfig | undefined;
+};
+
 export type ElevoConfig = {
   workspaces?: WorkspacesConfig;
   features: FeatureConfig;
@@ -34,6 +44,7 @@ export type ElevoConfig = {
   todos?: {
     api: string;
   };
+  commands?: CommandsConfig;
 };
 
 export const DEFAULT_ELEVO_FEATURES: FeatureConfig = {
