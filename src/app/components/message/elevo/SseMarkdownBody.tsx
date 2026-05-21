@@ -142,7 +142,7 @@ export function SseMarkdownBody({ sseData, reasoning, renderBody, renderUrlsPrev
   const content = useMemo(() => ({
     body: markdownBody,
     formatted_body: sanitizedHtml,
-    ...(reasoning ? { 'vip.elevo.reasoning': true } : null),
+    ...(reasoning ? { 'vip.elevo.reasoning': {} } : null),
   }), [markdownBody, sanitizedHtml, reasoning]);
 
   if (!markdownBody && !streamDone) {

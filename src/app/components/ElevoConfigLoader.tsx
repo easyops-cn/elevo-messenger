@@ -43,6 +43,7 @@ export const fetchElevoConfig = async (baseUrl: string): Promise<ElevoConfig> =>
       },
       oidcStaticClients: data.oidc_static_clients,
       elevoContactsRoomId: data.elevo_contacts_room_id,
+      commands: data.commands,
     };
   } catch {
     return DEFAULT_ELEVO_CONFIG;

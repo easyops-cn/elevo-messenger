@@ -861,6 +861,7 @@
     "broken": "Broken message",
     "empty": "Empty message",
     "thinking": "Thinking",
+    "thought_for_seconds": "Thought for {{seconds}} seconds",
     "viewReactions": "View Reactions",
     "readReceipts": "Read Receipts",
     "sourceCode": "Source Code",
@@ -1121,13 +1122,17 @@
     "otherPlaceholder": "Enter your answer...",
     "submit": "Submit answers",
     "submitting": "Submitting...",
+    "selectPlaceholder": "Select an option...",
     "questionTab": "Q{{index}}/{{total}}",
     "assignedTo": "This question should be answered by {{name}}"
   },
   "toolCall": {
     "inprogressDescription": "Running...",
     "completedDescription": "Completed",
-    "updateTodos": "Update Todos"
+    "updateTodos": "Update Todos",
+    "applyPatchAdd": "Add File",
+    "applyPatchUpdate": "Update File",
+    "applyPatchDelete": "Delete File"
   },
   "verification_gate": {
     "title": "Verify This Device",

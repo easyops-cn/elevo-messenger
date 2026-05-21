@@ -176,6 +176,33 @@ export const OtherInput = style({
   boxSizing: 'border-box',
 });
 
+export const FormField = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: config.space.S100,
+});
+
+export const FormInput = style({
+  width: '100%',
+  padding: config.space.S200,
+  border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
+  borderRadius: config.radii.R300,
+  backgroundColor: color.SurfaceVariant.Container,
+  color: 'inherit',
+  fontSize: config.fontSize.T300,
+  fontFamily: 'inherit',
+  outline: 'none',
+  boxSizing: 'border-box',
+});
+
+export const FormTextarea = style([
+  FormInput,
+  {
+    minHeight: toRem(88),
+    resize: 'vertical',
+  },
+]);
+
 export const SubmittedIcon = style({
   color: color.Success.Main,
 });

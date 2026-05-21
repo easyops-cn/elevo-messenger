@@ -11,6 +11,7 @@ import {
 } from 'matrix-js-sdk';
 import { RoomServerAclEventContent } from 'matrix-js-sdk/lib/types';
 import { useMemo } from 'react';
+import { useElevoConfig } from './useElevoConfig';
 import {
   addRoomIdToMDirect,
   getDMRoomFor,
@@ -164,15 +165,16 @@ export enum Command {
 export type CommandContent = {
   name: string;
   description: string;
-  exe: CommandExe;
+  exe?: CommandExe;
 };
 
-export type CommandRecord = Record<Command, CommandContent>;
+export type CommandRecord = Record<string, CommandContent>;
 
 export const useCommands = (mx: MatrixClient, room: Room): CommandRecord => {
   const { navigateRoom } = useRoomNavigate();
+  const { commands: commandsConfig } = useElevoConfig();
 
-  const commands: CommandRecord = useMemo(
+  const builtins: CommandRecord = useMemo(
     () => ({
       [Command.Me]: {
         name: Command.Me,
@@ -534,6 +536,36 @@ export const useCommands = (mx: MatrixClient, room: Room): CommandRecord => {
     }),
     [mx, room, navigateRoom]
   );
+
+  const commands: CommandRecord = useMemo(() => {
+    const result: CommandRecord = {};
+    const disableAll = commandsConfig?.['*'] === false;
+
+    Object.entries(builtins).forEach(([key, cmd]) => {
+      if (disableAll) return;
+      const cfg = commandsConfig?.[key];
+      if (cfg === false) return;
+      result[key] = {
+        name: cmd.name,
+        description: typeof cfg === 'object' && cfg.description ? cfg.description : cmd.description,
+        exe: cmd.exe,
+      };
+    });
+
+    if (commandsConfig) {
+      Object.entries(commandsConfig).forEach(([key, value]) => {
+        if (key === '*' || value === false) return;
+        if (typeof value === 'object' && 'name' in value) {
+          result[key] = {
+            name: value.name,
+            description: value.description,
+          };
+        }
+      });
+    }
+
+    return result;
+  }, [builtins, commandsConfig]);
 
   return commands;
 };

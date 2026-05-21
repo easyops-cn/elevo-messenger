@@ -4,11 +4,8 @@ import { IContent } from 'matrix-js-sdk';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import {
-  AskUserQuestionCard,
   QuestionAnsweredCard,
-  parseAskUserQuestion,
   parseQuestionAnsweredOfOpenAgent,
-  parseQuestionAnsweredOfElevoWorker,
 } from './elevo/AskUser';
 import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
 import { ReasoningCard } from './elevo/ReasoningCard';
@@ -88,11 +85,10 @@ type MTextProps = {
   renderBody: (props: RenderBodyProps) => ReactNode;
   renderUrlsPreview?: (urls: string[]) => ReactNode;
   style?: CSSProperties;
-  readOnly?: boolean;
   eventId?: string;
 };
 
-export function MText({ edited, content, renderBody, renderUrlsPreview, style, readOnly, eventId }: MTextProps) {
+export function MText({ edited, content, renderBody, renderUrlsPreview, style, eventId }: MTextProps) {
   const mx = useMatrixClient();
   const { body, formatted_body: customBody } = content;
   const initialHumanSender =
@@ -114,20 +110,13 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
     return <OidcLoginCard data={oidcLogin} style={style} />;
   }
 
-  const askUserQuestion = parseAskUserQuestion(content);
-  if (askUserQuestion) {
-    return (
-      <AskUserQuestionCard
-        data={askUserQuestion}
-        style={style}
-        readOnly={readOnly}
-        initialHumanSender={initialHumanSender}
-      />
-    );
-  }
-
   const sseRender = parseSseRender(content);
-  const reasoning = content['vip.elevo.reasoning'] === true;
+  const reasoningContent = content['vip.elevo.reasoning'];
+  const reasoning = !!reasoningContent;
+  const durationMs =
+    reasoningContent && typeof reasoningContent === 'object' && 'duration_ms' in reasoningContent
+      ? Number((reasoningContent as { duration_ms?: number }).duration_ms)
+      : undefined;
   if (sseRender?.streaming) {
     return (
       <SseMarkdownBody
@@ -138,11 +127,6 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
         style={style}
       />
     );
-  }
-
-  const questionAnsweredOfElevoWorker = parseQuestionAnsweredOfElevoWorker(content);
-  if (questionAnsweredOfElevoWorker) {
-    return <QuestionAnsweredCard data={questionAnsweredOfElevoWorker} style={style} />;
   }
 
   const toolCall = parseToolCall(content);
@@ -160,7 +144,7 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, r
   if (reasoning) {
     const trimmedBody = trimReplyFromBody(body);
     return (
-      <ReasoningCard style={style}>
+      <ReasoningCard style={style} durationMs={durationMs}>
         <MessageTextBody
           preWrap={typeof customBody !== 'string'}
           jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
