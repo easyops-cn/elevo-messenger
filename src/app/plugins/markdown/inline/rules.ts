@@ -35,8 +35,11 @@ export const ItalicRule1: InlineMDRule = {
 const ITALIC_MD_2 = '_';
 const ITALIC_PREFIX_2 = `${ESC_NEG_LB}_`;
 const ITALIC_NEG_LA_2 = '(?!_)';
+// Per CommonMark: _ must not be inside a word (require non-word-char or boundary before/after)
+const WORD_BOUNDARY_LB = '(?<=[\\s.,;:!?\\-()\\[\\]^/]|^)';
+const WORD_BOUNDARY_LA = '(?=[\\s.,;:!?\\-()\\[\\]^/]|$)';
 const ITALIC_REG_2 = new RegExp(
-  `${URL_NEG_LB}${ITALIC_PREFIX_2}${MIN_ANY}${ITALIC_PREFIX_2}${ITALIC_NEG_LA_2}`
+  `${URL_NEG_LB}${WORD_BOUNDARY_LB}${ITALIC_PREFIX_2}${MIN_ANY}${ITALIC_PREFIX_2}${WORD_BOUNDARY_LA}${ITALIC_NEG_LA_2}`
 );
 export const ItalicRule2: InlineMDRule = {
   match: (text) => text.match(ITALIC_REG_2),
@@ -50,7 +53,7 @@ const UNDERLINE_MD_1 = '__';
 const UNDERLINE_PREFIX_1 = `${ESC_NEG_LB}_{2}`;
 const UNDERLINE_NEG_LA_1 = '(?!_)';
 const UNDERLINE_REG_1 = new RegExp(
-  `${URL_NEG_LB}${UNDERLINE_PREFIX_1}${MIN_ANY}${UNDERLINE_PREFIX_1}${UNDERLINE_NEG_LA_1}`
+  `${URL_NEG_LB}${WORD_BOUNDARY_LB}${UNDERLINE_PREFIX_1}${MIN_ANY}${UNDERLINE_PREFIX_1}${WORD_BOUNDARY_LA}${UNDERLINE_NEG_LA_1}`
 );
 export const UnderlineRule: InlineMDRule = {
   match: (text) => text.match(UNDERLINE_REG_1),
