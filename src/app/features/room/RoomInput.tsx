@@ -114,7 +114,7 @@ import { ReplyLayout, ThreadIndicator } from '../../components/message';
 import { roomToParentsAtom } from '../../state/room/roomToParents';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useImagePackRooms } from '../../hooks/useImagePackRooms';
-import { useComposingCheck } from '../../hooks/useComposingCheck';
+import { isComposing } from '../../hooks/useComposingCheck';
 import { useSdkMessageListener, SdkMessagePayload } from '../../plugins/useTauriOpener';
 import { useMediaConfig } from '../../hooks/useMediaConfig';
 import { PlusIcon } from '../../icons/PlusIcon';
@@ -332,8 +332,6 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const handlePaste = useFilePasteHandler(handleFiles);
     const dropZoneVisible = useFileDropZone(fileDropContainerRef, handleFiles);
     const hideStickerBtn = !!threadRootId;
-
-    const isComposing = useComposingCheck();
 
     useEffect(() => {
       Transforms.insertFragment(editor, msgDraft);
@@ -580,7 +578,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           setReplyDraft(undefined);
         }
       },
-      [submit, setReplyDraft, enterForNewline, autocompleteQuery, isComposing]
+      [submit, setReplyDraft, enterForNewline, autocompleteQuery]
     );
 
     const handleKeyUp: KeyboardEventHandler = useCallback(

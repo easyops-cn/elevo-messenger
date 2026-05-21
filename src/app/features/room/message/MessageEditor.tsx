@@ -54,7 +54,7 @@ import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { getEditedEvent, getMentionContent, trimReplyFromFormattedBody } from '../../../utils/room';
 import { mobileOrTablet } from '../../../utils/user-agent';
-import { useComposingCheck } from '../../../hooks/useComposingCheck';
+import { isComposing } from '../../../hooks/useComposingCheck';
 import { CaseSensitiveIcon } from '../../../icons/CaseSensitiveIcon';
 import { SmileIcon } from '../../../icons/SmileIcon';
 
@@ -74,7 +74,6 @@ export const MessageEditor = as<'div', MessageEditorProps>(
     const [globalToolbar] = useSetting(settingsAtom, 'editorToolbar');
     const [isMarkdown] = useSetting(settingsAtom, 'isMarkdown');
     const [toolbar, setToolbar] = useState(globalToolbar);
-    const isComposing = useComposingCheck();
 
     const [autocompleteQuery, setAutocompleteQuery] =
       useState<AutocompleteQuery<AutocompletePrefix>>();
@@ -181,7 +180,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
           onCancel();
         }
       },
-      [onCancel, handleSave, enterForNewline, isComposing]
+      [onCancel, handleSave, enterForNewline]
     );
 
     const handleKeyUp: KeyboardEventHandler = useCallback(

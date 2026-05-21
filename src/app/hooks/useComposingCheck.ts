@@ -1,47 +1,32 @@
-import { useCallback, useEffect } from 'react';
-import { useAtomValue, useSetAtom } from 'jotai';
-import { lastCompositionEndAtom } from '../state/lastCompositionEnd';
+import { useEffect } from 'react';
 
-interface TimeStamped {
-  readonly timeStamp: number;
-}
+let _isComposing = false;
 
 export function useCompositionEndTracking(): void {
-  const setLastCompositionEnd = useSetAtom(lastCompositionEndAtom);
-
-  const recordCompositionEnd = useCallback(
-    (evt: TimeStamped) => {
-      setLastCompositionEnd(evt.timeStamp);
-    },
-    [setLastCompositionEnd]
-  );
-
   useEffect(() => {
-    window.addEventListener('compositionend', recordCompositionEnd, { capture: true });
-    return () => {
-      window.removeEventListener('compositionend', recordCompositionEnd, { capture: true });
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    const omCompositionStart = () => {
+      clearTimeout(timer);
+      _isComposing = true;
     };
-  });
+    const omCompositionEnd = () => {
+      // On Safari, compositionend is fired before the final keydown event,
+      // causing enter key to be treated as submit.
+      timer = setTimeout(() => {
+        _isComposing = false;
+      }, 100);
+    };
+
+    window.addEventListener('compositionstart', omCompositionStart, { capture: true });
+    window.addEventListener('compositionend', omCompositionEnd, { capture: true });
+    return () => {
+      window.removeEventListener('compositionstart', omCompositionStart, { capture: true });
+      window.removeEventListener('compositionend', omCompositionEnd, { capture: true });
+    };
+  }, []);
 }
 
-interface IsComposingLike {
-  readonly timeStamp: number;
-  readonly keyCode: number;
-  readonly nativeEvent: {
-    readonly isComposing?: boolean;
-  };
-}
-
-export function useComposingCheck({
-  compositionEndThreshold = 500,
-}: { compositionEndThreshold?: number } = {}): (evt: IsComposingLike) => boolean {
-  const compositionEnd = useAtomValue(lastCompositionEndAtom);
-  return useCallback(
-    (evt: IsComposingLike): boolean =>
-      evt.nativeEvent.isComposing ||
-      (evt.keyCode === 229 &&
-        typeof compositionEnd !== 'undefined' &&
-        evt.timeStamp - compositionEnd < compositionEndThreshold),
-    [compositionEndThreshold, compositionEnd]
-  );
+export function isComposing(evt: React.KeyboardEvent): boolean {
+  return evt.nativeEvent.isComposing || _isComposing;
 }
