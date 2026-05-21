@@ -1,4 +1,5 @@
 import React, {
+  CompositionEventHandler,
   KeyboardEventHandler,
   RefObject,
   forwardRef,
@@ -334,6 +335,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const hideStickerBtn = !!threadRootId;
 
     const isComposing = useComposingCheck();
+    const isComposingRef = useRef(false);
 
     useEffect(() => {
       Transforms.insertFragment(editor, msgDraft);
@@ -563,7 +565,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const handleKeyDown: KeyboardEventHandler = useCallback(
       (evt) => {
         if (isKeyHotkey('mod+enter', evt) || (!enterForNewline && isKeyHotkey('enter', evt))) {
-          if (isComposing(evt)) {
+          if (isComposingRef.current || isComposing(evt)) {
             // IME confirming keydown (Safari): block Slate's default newline insertion
             evt.preventDefault();
             return;
@@ -582,6 +584,14 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       },
       [submit, setReplyDraft, enterForNewline, autocompleteQuery, isComposing]
     );
+
+    const handleCompositionStart: CompositionEventHandler = useCallback(() => {
+      isComposingRef.current = true;
+    }, []);
+
+    const handleCompositionEnd: CompositionEventHandler = useCallback(() => {
+      isComposingRef.current = false;
+    }, []);
 
     const handleKeyUp: KeyboardEventHandler = useCallback(
       (evt) => {
@@ -739,6 +749,8 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           onKeyDown={handleKeyDown}
           onKeyUp={handleKeyUp}
           onPaste={handlePaste}
+          onCompositionStart={handleCompositionStart}
+          onCompositionEnd={handleCompositionEnd}
           top={
             <>
               {toolbar && (
