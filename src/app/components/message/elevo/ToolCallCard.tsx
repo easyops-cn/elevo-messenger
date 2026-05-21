@@ -390,13 +390,14 @@ function ApplyPatchOperationCard({
 function getTodosForRender(data: ToolCallData): TodoItem[] | undefined {
   if (data.name?.toLowerCase() !== 'todowrite') return undefined;
 
-  if (data.status === 'completed') {
+  const isCompleted = data.status === 'completed';
+  if (isCompleted) {
     const parsedOutput = tryParseJson(data.output);
     const todoList = TodoListSchema.safeParse(parsedOutput);
     if (todoList.success) return todoList.data;
   }
 
-  if (data.status === 'inprogress') {
+  if (isCompleted || data.status === 'inprogress') {
     const parsedInput = tryParseJson(data.input);
     const todoPayload = TodoPayloadSchema.safeParse(parsedInput);
     if (todoPayload.success) return todoPayload.data.todos;
@@ -506,8 +507,16 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
             }
             break;
           case 'Glob':
+          case 'Grep':
             if (typeof input.pattern === 'string') {
               title = input.pattern;
+            }
+            break;
+          case 'Read':
+          case 'Write':
+          case 'Edit':
+            if (typeof input.file_path === 'string') {
+              title = input.file_path;
             }
             break;
         }
