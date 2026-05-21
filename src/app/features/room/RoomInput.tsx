@@ -447,7 +447,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
 
     const submit = useCallback(() => {
       uploadBoardHandlers.current?.handleSend();
-      emitScrollToBottomRequest({ force: true });
+      emitScrollToBottomRequest();
 
       const commandName = getBeginCommand(editor);
       let plainText = toPlainText(editor.children, isMarkdown).trim();
@@ -627,7 +627,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           url: mxc,
           info,
         });
-        emitScrollToBottomRequest({ force: true });
+        emitScrollToBottomRequest();
       } finally {
         URL.revokeObjectURL(blobUrl);
       }

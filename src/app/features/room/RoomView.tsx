@@ -60,7 +60,6 @@ export function RoomView({
   eventId?: string;
   thread?: Thread;
 }) {
-  const roomInputRef = useRef<HTMLDivElement>(null);
   const roomViewRef = useRef<HTMLDivElement>(null);
 
   const room = useRoom();
@@ -102,7 +101,6 @@ export function RoomView({
               key={roomId}
               room={room}
               eventId={eventId}
-              roomInputRef={roomInputRef}
               editor={editor}
             />
           </Box>
@@ -123,7 +121,6 @@ export function RoomView({
                       editor={editor}
                       roomId={roomId}
                       fileDropContainerRef={roomViewRef}
-                      ref={roomInputRef}
                     />
                   )}
                   {!canMessage && (

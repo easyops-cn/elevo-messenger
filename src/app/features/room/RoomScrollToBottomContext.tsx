@@ -1,13 +1,9 @@
 import React, { ReactNode, createContext, useCallback, useContext, useMemo, useRef } from 'react';
 
-export type ScrollToBottomRequest = {
-  force: boolean;
-};
-
-type ScrollToBottomListener = (request: ScrollToBottomRequest) => void;
+type ScrollToBottomListener = () => void;
 
 type RoomScrollToBottomContextValue = {
-  emitScrollToBottomRequest: (request?: Partial<ScrollToBottomRequest>) => void;
+  emitScrollToBottomRequest: () => void;
   listenScrollToBottomRequest: (listener: ScrollToBottomListener) => () => void;
 };
 
@@ -22,11 +18,8 @@ export function RoomScrollToBottomProvider({ children }: { children: ReactNode }
   const listenersRef = useRef<Set<ScrollToBottomListener>>(new Set());
 
   const emitScrollToBottomRequest = useCallback(
-    (request?: Partial<ScrollToBottomRequest>) => {
-      const payload: ScrollToBottomRequest = {
-        force: request?.force ?? false,
-      };
-      listenersRef.current.forEach((listener) => listener(payload));
+    () => {
+      listenersRef.current.forEach((listener) => listener());
     },
     []
   );

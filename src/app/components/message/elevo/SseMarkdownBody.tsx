@@ -5,7 +5,6 @@ import { marked } from 'marked';
 import { color, config } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
-import { useRoomScrollToBottom } from '../../../features/room/RoomScrollToBottomContext';
 import { trimReplyFromBody } from '../../../utils/room';
 import { trimTrailingSlash } from '../../../utils/common';
 import { MText } from '../MsgTypeRenderers';
@@ -41,7 +40,6 @@ export function SseMarkdownBody({ sseData, reasoning, renderBody, renderUrlsPrev
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const homeserverBaseUrl = mx.getHomeserverUrl();
-  const { emitScrollToBottomRequest } = useRoomScrollToBottom();
   const [streamedBody, setStreamedBody] = useState('');
   const [streamError, setStreamError] = useState(false);
   const [streamDone, setStreamDone] = useState(false);
@@ -102,7 +100,6 @@ export function SseMarkdownBody({ sseData, reasoning, renderBody, renderUrlsPrev
                 typeof payload.delta === 'string'
               ) {
                 setStreamedBody((prev) => prev + payload.delta);
-                emitScrollToBottomRequest({ force: false });
               }
             } catch {
               // Ignore malformed SSE payload chunks and continue consuming stream.
@@ -129,7 +126,7 @@ export function SseMarkdownBody({ sseData, reasoning, renderBody, renderUrlsPrev
     return () => {
       abortController.abort();
     };
-  }, [homeserverBaseUrl, sseData.bridgeId, sseData.stepId, emitScrollToBottomRequest]);
+  }, [homeserverBaseUrl, sseData.bridgeId, sseData.stepId]);
 
   const markdownBody = !streamError ? streamedBody : 'Error loading streaming content.';
   
