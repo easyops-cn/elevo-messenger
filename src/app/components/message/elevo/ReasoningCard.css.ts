@@ -13,3 +13,11 @@ export const ReasoningToggle = style({
   gap: config.space.S100,
   width: 'fit-content',
 });
+
+export const ReasoningToggleEmpty = style({
+  cursor: 'default',
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: config.space.S100,
+  width: 'fit-content',
+});

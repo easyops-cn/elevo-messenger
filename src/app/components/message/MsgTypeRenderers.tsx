@@ -144,7 +144,7 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, e
   if (reasoning) {
     const trimmedBody = trimReplyFromBody(body);
     return (
-      <ReasoningCard style={style} durationMs={durationMs}>
+      <ReasoningCard style={style} durationMs={durationMs} empty={!trimmedBody}>
         <MessageTextBody
           preWrap={typeof customBody !== 'string'}
           jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}

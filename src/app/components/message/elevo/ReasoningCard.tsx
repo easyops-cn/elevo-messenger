@@ -7,8 +7,9 @@ type ReasoningCardProps = {
   style?: CSSProperties;
   children: ReactNode;
   durationMs?: number;
+  empty?: boolean;
 };
-export function ReasoningCard({ style, children, durationMs }: ReasoningCardProps) {
+export function ReasoningCard({ style, children, durationMs, empty }: ReasoningCardProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
@@ -25,21 +26,21 @@ export function ReasoningCard({ style, children, durationMs }: ReasoningCardProp
       gap="100"
     >
       <div
-        className={css.ReasoningToggle}
-        onClick={() => setExpanded((v) => !v)}
-        onKeyDown={(e) => {
+        className={empty ? css.ReasoningToggleEmpty : css.ReasoningToggle}
+        onClick={empty ? undefined : () => setExpanded((v) => !v)}
+        onKeyDown={empty ? undefined : (e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             setExpanded((v) => !v);
           }
         }}
-        role="button"
-        tabIndex={0}
+        role={empty ? undefined : 'button'}
+        tabIndex={empty ? undefined : 0}
       >
         <Text priority="300" size="T300">{label}</Text>
-        <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="100" />
+        {!empty && <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="100" />}
       </div>
-      {expanded && children}
+      {(expanded || empty) && children}
     </Box>
   );
 }
