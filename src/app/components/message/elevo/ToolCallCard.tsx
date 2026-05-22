@@ -519,6 +519,11 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
               title = input.file_path;
             }
             break;
+          case 'Skill':
+            if (typeof input.skill === 'string') {
+              title = input.skill;
+            }
+            break;
         }
         return title.trim() || data.input;
       } catch {
