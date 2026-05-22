@@ -1,7 +1,7 @@
 /* eslint-disable react/destructuring-assignment */
 import React, { MouseEventHandler, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { IEventWithRoomId, JoinRule, RelationType, Room } from 'matrix-js-sdk';
+import { JoinRule, Room, type MatrixEvent } from 'matrix-js-sdk';
 import { HTMLReactParserOptions } from 'html-react-parser';
 import { Box, Chip, Header, Icon, Icons, Text, config } from 'folds';
 import { Opts as LinkifyOpts } from 'linkifyjs';
@@ -16,11 +16,9 @@ import {
 } from '../../plugins/react-custom-html-parser';
 import { getMxIdLocalPart, mxcUrlToHttp } from '../../utils/matrix';
 import { useMatrixEventRenderer } from '../../hooks/useMatrixEventRenderer';
-import { GetContentCallback, MessageEvent, StateEvent } from '../../../types/matrix/room';
+import { GetContentCallback, MessageEvent } from '../../../types/matrix/room';
 import {
   AvatarBase,
-  ImageContent,
-  MSticker,
   ModernLayout,
   RedactedContent,
   Reply,
@@ -29,9 +27,6 @@ import {
   UsernameBold,
 } from '../../components/message';
 import { RenderMessageContent } from '../../components/RenderMessageContent';
-import { Image } from '../../components/media';
-import { ImageViewer } from '../../components/image-viewer';
-import * as customHtmlCss from '../../styles/CustomHtml.css';
 import { RoomAvatar, RoomIcon } from '../../components/room-avatar';
 import { getMemberAvatarMxc, getMemberDisplayName, getRoomAvatarUrl } from '../../utils/room';
 import { ResultItem } from './useMessageSearch';
@@ -97,19 +92,19 @@ export function SearchResultGroup({
     ]
   );
 
-  const renderMatrixEvent = useMatrixEventRenderer<[IEventWithRoomId, string, GetContentCallback]>(
+  const renderMatrixEvent = useMatrixEventRenderer<[MatrixEvent, string, GetContentCallback]>(
     {
       [MessageEvent.RoomMessage]: (event, displayName, getContent) => {
-        if (event.unsigned?.redacted_because) {
-          return <RedactedContent reason={event.unsigned?.redacted_because.content.reason} />;
+        if (event.isRedacted()) {
+          return <RedactedContent reason={event.getUnsigned().redacted_because?.content.reason} />;
         }
 
         return (
           <RenderMessageContent
             displayName={displayName}
-            msgType={event.content.msgtype ?? ''}
-            ts={event.origin_server_ts}
-            eventId={event.event_id}
+            msgType={event.getContent().msgtype ?? ''}
+            ts={event.getTs()}
+            eventId={event.getId()!}
             getContent={getContent}
             urlPreview={urlPreview}
             htmlReactParserOptions={htmlReactParserOptions}
@@ -119,48 +114,7 @@ export function SearchResultGroup({
           />
         );
       },
-      [MessageEvent.Reaction]: (event, displayName, getContent) => {
-        if (event.unsigned?.redacted_because) {
-          return <RedactedContent reason={event.unsigned?.redacted_because.content.reason} />;
-        }
-        return (
-          <MSticker
-            content={getContent()}
-            renderImageContent={(props) => (
-              <ImageContent
-                {...props}
-                renderImage={(p) => <Image {...p} loading="lazy" />}
-                renderViewer={(p) => <ImageViewer {...p} />}
-              />
-            )}
-          />
-        );
-      },
-      [StateEvent.RoomTombstone]: (event) => {
-        const { content } = event;
-        return (
-          <Box grow="Yes" direction="Column">
-            <Text size="T400" priority="300">
-              {t('notifications.roomTombstone', { body: content.body })}
-            </Text>
-          </Box>
-        );
-      },
     },
-    undefined,
-    (event) => {
-      if (event.unsigned?.redacted_because) {
-        return <RedactedContent reason={event.unsigned?.redacted_because.content.reason} />;
-      }
-      return (
-        <Box grow="Yes" direction="Column">
-          <Text size="T400" priority="300">
-            <code className={customHtmlCss.Code}>{event.type}</code>
-            {t('notifications.event')}
-          </Text>
-        </Box>
-      );
-    }
   );
 
   const handleOpenClick: MouseEventHandler = (evt) => {
@@ -195,26 +149,22 @@ export function SearchResultGroup({
       </Header>
       <Box direction="Column" gap="100">
         {items.map((item) => {
-          const { event } = item;
+          const { event: mEvent } = item;
 
+          const eventId = mEvent.getId()!;
+          const senderUserId = mEvent.sender!.userId;
           const displayName =
-            getMemberDisplayName(room, event.sender) ??
-            getMxIdLocalPart(event.sender) ??
-            event.sender;
-          const senderAvatarMxc = getMemberAvatarMxc(room, event.sender);
-
-          const relation = event.content['m.relates_to'];
-          const mainEventId =
-            relation?.rel_type === RelationType.Replace ? relation.event_id : event.event_id;
-
-          const getContent = (() =>
-            event.content['m.new_content'] ?? event.content) as GetContentCallback;
-
-          const replyEventId = relation?.['m.in_reply_to']?.event_id;
+            getMemberDisplayName(room, senderUserId) ??
+            getMxIdLocalPart(senderUserId) ??
+            senderUserId;
+          const senderAvatarMxc = getMemberAvatarMxc(room, senderUserId);
+          const getContent = (() => mEvent.getContent()) as GetContentCallback;
+          const mainEventId = mEvent.getId();
+          const { replyEventId } = mEvent;
 
           return (
             <SequenceCard
-              key={event.event_id}
+              key={eventId}
               style={{ padding: config.space.S400 }}
               variant="SurfaceVariant"
               direction="Column"
@@ -225,7 +175,7 @@ export function SearchResultGroup({
                   <AvatarBase>
                     <Avatar size="300" radii="Pill">
                       <UserAvatar
-                        userId={event.sender}
+                        userId={senderUserId}
                         src={
                           senderAvatarMxc
                             ? mxcUrlToHttp(
@@ -255,7 +205,7 @@ export function SearchResultGroup({
                       </Username>
                     </Box>
                     <Time
-                      ts={event.origin_server_ts}
+                      ts={mEvent.getTs()}
                       hour24Clock={hour24Clock}
                       dateFormatString={dateFormatString}
                     />
@@ -279,7 +229,7 @@ export function SearchResultGroup({
                     onClick={handleOpenClick}
                   />
                 )}
-                {renderMatrixEvent(event.type, false, event, displayName, getContent)}
+                {renderMatrixEvent(mEvent.getType(), false, mEvent, displayName, getContent)}
               </ModernLayout>
             </SequenceCard>
           );

@@ -1,18 +1,18 @@
 import {
-  IEventWithRoomId,
-  IResultContext,
   ISearchRequestBody,
   ISearchResponse,
-  ISearchResult,
+  RelationType,
   SearchOrderBy,
+  type ISearchResults,
+  type MatrixClient,
+  type MatrixEvent,
+  type SearchResult,
 } from 'matrix-js-sdk';
 import { useCallback } from 'react';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 
 export type ResultItem = {
-  rank: number;
-  event: IEventWithRoomId;
-  context: IResultContext;
+  event: MatrixEvent;
 };
 
 export type ResultGroup = {
@@ -20,21 +20,31 @@ export type ResultGroup = {
   items: ResultItem[];
 };
 
-export type SearchResult = {
+export type CustomSearchResult = {
   nextToken?: string;
   highlights: string[];
   groups: ResultGroup[];
 };
 
-const groupSearchResult = (results: ISearchResult[]): ResultGroup[] => {
+const groupSearchResult = (results: SearchResult[]): ResultGroup[] => {
   const groups: ResultGroup[] = [];
 
   results.forEach((item) => {
-    const roomId = item.result.room_id;
+    const event = item.context.getEvent();
+    const roomId = event.getRoomId();
+
+    if (
+      !roomId ||
+      event.getType() !== 'm.room.message' ||
+      event.isRelation(RelationType.Replace) ||
+      event.isState() ||
+      !event.sender
+    ) {
+      return;
+    }
+
     const resultItem: ResultItem = {
-      rank: item.rank,
-      event: item.result,
-      context: item.context,
+      event,
     };
 
     const lastAddedGroup: ResultGroup | undefined = groups[groups.length - 1];
@@ -51,13 +61,23 @@ const groupSearchResult = (results: ISearchResult[]): ResultGroup[] => {
   return groups;
 };
 
-const parseSearchResult = (result: ISearchResponse): SearchResult => {
-  const roomEvents = result.search_categories.room_events;
+const parseSearchResult = (mx: MatrixClient, result: ISearchResponse, query: ISearchRequestBody): CustomSearchResult => {
+  // The js-sdk method backPaginateRoomEventsSearch() uses _query internally
+  // so we're reusing the concept here since we want to delegate the
+  // pagination back to backPaginateRoomEventsSearch() in some cases.
+  const searchResults: ISearchResults = {
+      // abortSignal,
+      _query: query,
+      results: [],
+      highlights: [],
+  };
 
-  const searchResult: SearchResult = {
-    nextToken: roomEvents?.next_batch,
-    highlights: roomEvents?.highlights ?? [],
-    groups: groupSearchResult(roomEvents?.results ?? []),
+  const events = mx.processRoomEventsSearch(searchResults, result);
+
+  const searchResult: CustomSearchResult = {
+    nextToken: searchResults?.next_batch,
+    highlights: searchResults?.highlights ?? [],
+    groups: groupSearchResult(events.results),
   };
 
   return searchResult;
@@ -106,7 +126,7 @@ export const useMessageSearch = (params: MessageSearchParams) => {
         body: requestBody,
         next_batch: nextBatch === '' ? undefined : nextBatch,
       });
-      return parseSearchResult(r);
+      return parseSearchResult(mx, r, requestBody);
     },
     [mx, term, order, rooms, senders]
   );
