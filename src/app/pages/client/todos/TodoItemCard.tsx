@@ -89,7 +89,12 @@ export function TodoItemCard({ item, hour24Clock, dateFormatString, onSubmit, on
             </Chip>
           </Box>
           <Box grow="Yes" direction="Column" gap="200">
-            <AskUserQuestionCard data={item.question} onSubmit={handleSubmit} />
+            <AskUserQuestionCard
+              data={item.question}
+              eventId={item.question_event_id}
+              initialHumanSender={item.assignee}
+              onSubmit={handleSubmit}
+            />
           </Box>
         </ModernLayout>
       </SequenceCard>

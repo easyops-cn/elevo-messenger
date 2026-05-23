@@ -1,11 +1,12 @@
-import React, { CSSProperties, ReactNode } from 'react';
+import React, { CSSProperties, ReactNode, useMemo } from 'react';
 import { Box, Chip, Icon, Icons, Text, color, config } from 'folds';
 import { IContent } from 'matrix-js-sdk';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import {
+  AskUserQuestionCard,
   QuestionAnsweredCard,
-  parseQuestionAnsweredOfOpenAgent,
+  parseAskUser,
 } from './elevo/AskUser';
 import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
 import { ReasoningCard } from './elevo/ReasoningCard';
@@ -88,7 +89,14 @@ type MTextProps = {
   eventId?: string;
 };
 
-export function MText({ edited, content, renderBody, renderUrlsPreview, style, eventId }: MTextProps) {
+export function MText({
+  edited,
+  content,
+  renderBody,
+  renderUrlsPreview,
+  style,
+  eventId,
+}: MTextProps) {
   const mx = useMatrixClient();
   const { body, formatted_body: customBody } = content;
   const initialHumanSender =
@@ -96,21 +104,39 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, e
       ? content['vip.elevo.initial_human_sender']
       : undefined;
 
+  const askUser = useMemo(() => parseAskUser(content), [content]);
+  const oidcLogin = useMemo(() => parseOidcLogin(content), [content]);
+  const sseRender = useMemo(() => parseSseRender(content), [content]);
+  const toolCall = useMemo(() => parseToolCall(content), [content]);
+
   if (typeof body !== 'string') return <BrokenContent />;
 
-  // The order of these checks is important.
-  // Check open-agent answer first since it's more specific, then check elevo worker answer.
-  const questionAnsweredOfOpenAgent = parseQuestionAnsweredOfOpenAgent(content);
-  if (questionAnsweredOfOpenAgent) {
-    return <QuestionAnsweredCard data={questionAnsweredOfOpenAgent} style={style} />;
+  if (askUser) {
+
+    if (askUser.answers) {
+      return (
+        <QuestionAnsweredCard
+          answers={askUser.answers}
+          questions={askUser.questions}
+          style={style}
+        />
+      );
+    }
+
+    return (
+      <AskUserQuestionCard
+        data={askUser}
+        style={style}
+        eventId={eventId}
+        initialHumanSender={initialHumanSender}
+      />
+    );
   }
 
-  const oidcLogin = parseOidcLogin(content);
   if (oidcLogin && (!oidcLogin.userId || oidcLogin.userId === mx.getUserId())) {
     return <OidcLoginCard data={oidcLogin} style={style} />;
   }
 
-  const sseRender = parseSseRender(content);
   const reasoningContent = content['vip.elevo.reasoning'];
   const reasoning = !!reasoningContent;
   const durationMs =
@@ -129,16 +155,8 @@ export function MText({ edited, content, renderBody, renderUrlsPreview, style, e
     );
   }
 
-  const toolCall = parseToolCall(content);
   if (toolCall) {
-    return (
-      <ToolCallCard
-        data={toolCall}
-        style={style}
-        eventId={eventId}
-        initialHumanSender={initialHumanSender}
-      />
-    );
+    return <ToolCallCard data={toolCall} style={style} />;
   }
 
   if (reasoning) {

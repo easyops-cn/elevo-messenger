@@ -17,6 +17,7 @@ import {
   OptionItem,
   OptionIcon,
   SubmitButton,
+  ContinueButton,
   OtherInput,
   SubmittedIcon,
   SubmittedText,
@@ -41,10 +42,11 @@ const AskUserQuestionOptionSchema = z.object({
 });
 
 const AskUserChoiceQuestionItemSchema = z.object({
-  type: z.literal('choice').optional(),
+  id: z.string(),
+  type: z.literal('choice'),
   question: z.string(),
   header: z.string(),
-  multiSelect: z.boolean(),
+  multiSelect: z.boolean().optional(),
   options: z.array(AskUserQuestionOptionSchema),
 });
 
@@ -59,6 +61,7 @@ const AskUserFormFieldSchema = z.object({
 });
 
 const AskUserFormQuestionItemSchema = z.object({
+  id: z.string(),
   type: z.literal('form'),
   question: z.string(),
   header: z.string(),
@@ -76,18 +79,28 @@ type AskUserQuestionCardItem = AskUserQuestionItem | AskUserFormQuestionItem;
 
 const AskUserQuestionSchema = z.object({
   questions: z.array(AskUserQuestionItemSchema).min(1),
+  answers: z
+    .record(
+      z.string(),
+      z.union([
+        z.object({ answers: z.array(z.string()) }),
+        z.object({ fields: z.record(z.string(), z.string()) }),
+      ])
+    )
+    .optional(),
 });
 
 export type AskUserQuestionData = z.infer<typeof AskUserQuestionSchema>;
 
-const QuestionAnsweredSchemaOfOpenAgent = z.object({
-  provider: z.union([z.literal('open-agent'), z.literal('elevo-copilot')]),
-  question_event_id: z.string(),
-  answers: z.record(z.string(), z.union([z.array(z.string()), z.string()])),
-});
+const QuestionAnswersSchema = z.record(
+  z.string(),
+  z.union([
+    z.object({ answers: z.array(z.string()) }),
+    z.object({ fields: z.record(z.string(), z.string()) }),
+  ])
+);
 
-type QuestionAnsweredDataOfOpenAgent = z.infer<typeof QuestionAnsweredSchemaOfOpenAgent>;
-type QuestionAnsweredData = QuestionAnsweredDataOfOpenAgent;
+export type AskUserQuestionAnswers = z.infer<typeof QuestionAnswersSchema>;
 
 export function isUserAnswerEvent(mEvent: MatrixEvent) {
   const content = mEvent.getContent();
@@ -100,17 +113,15 @@ export function isUserAnswerEvent(mEvent: MatrixEvent) {
 
 // Parsers
 
-export function parseQuestionAnsweredOfOpenAgent(
-  content: Record<string, unknown>
-): QuestionAnsweredDataOfOpenAgent | undefined {
-  const answeredContent = content['vip.elevo.question_answered'];
-  if (!answeredContent) return undefined;
-  const result = QuestionAnsweredSchemaOfOpenAgent.safeParse(answeredContent);
+export function parseAskUser(content: Record<string, unknown>): AskUserQuestionData | undefined {
+  const askUserContent = content['vip.elevo.ask_user'];
+  if (!askUserContent) return undefined;
+  const result = AskUserQuestionSchema.safeParse(askUserContent);
   if (result.success) {
     return result.data;
   }
   // eslint-disable-next-line no-console
-  console.error('Failed to parse question answers content:', result.error);
+  console.error('Failed to parse ask user content:', result.error);
 }
 
 // Types
@@ -122,6 +133,17 @@ const OTHER_OPTION_VALUE = 'Other:';
 
 function isFormQuestion(question: AskUserQuestionCardItem): question is AskUserFormQuestionItem {
   return question.type === 'form';
+}
+
+function getChoiceMultiSelect(question: AskUserQuestionCardItem): boolean {
+  return !isFormQuestion(question) && question.multiSelect === true;
+}
+
+function getAnswerText(answer: AskUserQuestionAnswers[string]): string {
+  if ('answers' in answer) return answer.answers.join(', ');
+  return Object.entries(answer.fields)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join(', ');
 }
 
 // Components
@@ -236,13 +258,19 @@ function AskUserSelect({
 }
 
 export function QuestionAnsweredCard({
-  data,
+  answers,
+  questions,
   style,
 }: {
-  data: QuestionAnsweredData;
+  answers: AskUserQuestionAnswers;
+  questions?: AskUserQuestionItem[];
   style?: CSSProperties;
 }) {
   const { t } = useTranslation();
+  const questionById = useMemo(
+    () => new Map((questions ?? []).map((question) => [question.id, question.question])),
+    [questions]
+  );
 
   return (
     <Box style={style} direction="Column" gap="100">
@@ -253,34 +281,15 @@ export function QuestionAnsweredCard({
           </Text>
         </div>
         <div className={CardBody}>
-          {Object.entries(data.answers).map(([question, answers]) => (
-            <div key={question} className={AnsweredItem}>
+          {Object.entries(answers).map(([questionId, list]) => (
+            <div key={questionId} className={AnsweredItem}>
               <Text size="T300" priority="300">
                 {t('askUserQuestion.questionLabel')}
-                {question}
+                {questionById.get(questionId) ?? questionId}
               </Text>
               <Text size="T300" priority="500" style={{ marginTop: config.space.S100 }}>
                 {t('askUserQuestion.answerLabel')}
-                {Array.isArray(answers)
-                  ? answers.join(', ')
-                  : (() => {
-                      try {
-                        const parsed = JSON.parse(answers);
-                        if (
-                          typeof parsed === 'object' &&
-                          parsed !== null &&
-                          !Array.isArray(parsed) &&
-                          Object.values(parsed).every((v) => typeof v === 'string')
-                        ) {
-                          return Object.entries(parsed as Record<string, string>)
-                            .map(([k, v]) => `${k}: ${v}`)
-                            .join(', ');
-                        }
-                        return answers;
-                      } catch {
-                        return answers;
-                      }
-                    })()}
+                {getAnswerText(list)}
               </Text>
             </div>
           ))}
@@ -295,22 +304,18 @@ export function AskUserQuestionCard({
   style,
   readOnly,
   onSubmit,
-  provider = 'elevo-copilot',
   eventId,
   agentMode,
   initialHumanSender,
-  submitted: submittedProp,
   showOtherOption = true,
 }: {
   data: AskUserQuestionData;
   style?: CSSProperties;
   readOnly?: boolean;
   onSubmit?: () => void;
-  provider?: 'open-agent' | 'elevo-copilot';
   eventId?: string;
   agentMode?: string;
   initialHumanSender?: string;
-  submitted?: boolean;
   showOtherOption?: boolean;
 }) {
   const { t } = useTranslation();
@@ -326,32 +331,26 @@ export function AskUserQuestionCard({
   const [submitting, setSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
 
-  const submitted = submittedProp ?? localSubmitted;
-  const isLocallyAnswered = submittedProp !== undefined ? localSubmitted : submitted;
+  const submitted = !!data.answers || localSubmitted;
 
   const assignedUserId = initialHumanSender;
   const isAssignedUser = !!assignedUserId && mx.getUserId() === assignedUserId;
-  const isDisabled = !isAssignedUser || isLocallyAnswered || submitted || readOnly;
+  const isDisabled = !isAssignedUser || submitted || readOnly;
   const assignedDisplayName = assignedUserId
     ? getMemberDisplayName(room, assignedUserId) ??
       getMxIdLocalPart(assignedUserId) ??
       assignedUserId
     : undefined;
 
-  const answerIdField = 'question_event_id';
   const answerId = eventId;
 
-  const canSubmit = useMemo(() => {
-    if (!answerId) return false;
-    if (submitted) return false;
-    if (isLocallyAnswered) return false;
-    for (let i = 0; i < data.questions.length; i += 1) {
+  const isQuestionAnswered = useCallback(
+    (i: number) => {
       const q = data.questions[i];
       if (isFormQuestion(q)) {
-        let hasEmptyField = false;
         for (let j = 0; j < q.fields.length; j += 1) {
           const field = q.fields[j];
-          if (field.required && !formAnswers[i]?.[field.name]?.trim()) hasEmptyField = true;
+          if (field.required && !formAnswers[i]?.[field.name]?.trim()) return false;
           if (
             field.required &&
             showOtherOption &&
@@ -359,33 +358,35 @@ export function AskUserQuestionCard({
             formAnswers[i]?.[field.name] === OTHER_OPTION_VALUE &&
             !formOtherTexts[`${i}:${field.name}`]?.trim()
           ) {
-            hasEmptyField = true;
+            return false;
           }
         }
-        if (hasEmptyField) return false;
-      } else {
-        const sel = selections[i] ?? [];
-        if (sel.length === 0) return false;
-        if (
-          showOtherOption &&
-          sel.some((s) => s === OTHER_OPTION_VALUE) &&
-          !otherTexts[String(i)]?.trim()
-        )
-          return false;
+        return true;
       }
+      const sel = selections[i] ?? [];
+      if (sel.length === 0) return false;
+      if (
+        showOtherOption &&
+        sel.some((s) => s === OTHER_OPTION_VALUE) &&
+        !otherTexts[String(i)]?.trim()
+      )
+        return false;
+      return true;
+    },
+    [data.questions, formAnswers, formOtherTexts, selections, otherTexts, showOtherOption]
+  );
+
+  const canSubmit = useMemo(() => {
+    if (!answerId) return false;
+    if (submitted) return false;
+    for (let i = 0; i < data.questions.length; i += 1) {
+      if (!isQuestionAnswered(i)) return false;
     }
     return true;
-  }, [
-    answerId,
-    data.questions,
-    formAnswers,
-    formOtherTexts,
-    selections,
-    otherTexts,
-    isLocallyAnswered,
-    showOtherOption,
-    submitted,
-  ]);
+  }, [answerId, data.questions, isQuestionAnswered, submitted]);
+
+  const isLastTab = activeTab === data.questions.length - 1;
+  const currentAnswered = isQuestionAnswered(activeTab);
 
   const handleOptionToggle = useCallback(
     (qIndex: number, label: string, isOther: boolean) => {
@@ -400,13 +401,13 @@ export function AskUserQuestionCard({
           if (current.some((s) => s === OTHER_OPTION_VALUE)) {
             return { ...prev, [qIndex]: current.filter((s) => s !== OTHER_OPTION_VALUE) };
           }
-          if (!q.multiSelect) {
+          if (!getChoiceMultiSelect(q)) {
             return { ...prev, [qIndex]: [OTHER_OPTION_VALUE] };
           }
           return { ...prev, [qIndex]: [...current, OTHER_OPTION_VALUE] };
         }
 
-        if (!q.multiSelect) {
+        if (!getChoiceMultiSelect(q)) {
           // 单选时自动跳转到下一题
           if (qIndex < data.questions.length - 1) {
             setActiveTab(qIndex + 1);
@@ -440,7 +441,7 @@ export function AskUserQuestionCard({
   const handleSubmit = useCallback(async () => {
     if (submitting || !canSubmit) return;
 
-    const answers: Record<string, string[] | string> = {};
+    const answers: AskUserQuestionAnswers = {};
     for (let i = 0; i < data.questions.length; i += 1) {
       const q = data.questions[i];
       if (isFormQuestion(q)) {
@@ -452,27 +453,26 @@ export function AskUserQuestionCard({
             }
           });
         }
-        answers[q.question] = JSON.stringify(formAnswer);
+        answers[q.id] = { fields: formAnswer };
       } else {
         const sel = (selections[i] ?? []).map((s) => {
           if (s === OTHER_OPTION_VALUE) return otherTexts[String(i)]?.trim() || '';
           return s;
         });
-        answers[q.question] = provider === 'elevo-copilot' ? sel.join(', ') : sel;
+        answers[q.id] = { answers: sel };
       }
     }
 
     setSubmitting(true);
     try {
       const body = `${agentMode === 'plan' ? '/plan ' : ''}${Object.entries(answers)
-        .map(([q, ans]) => `${q}: ${Array.isArray(ans) ? ans.join(', ') : ans}`)
+        .map(([questionId, ans]) => `${questionId}: ${getAnswerText(ans)}`)
         .join('\n')}`;
       await mx.sendMessage(room.roomId, {
         msgtype: 'm.text',
         body,
         'vip.elevo.ask_user_question_answers': {
-          provider,
-          [answerIdField]: answerId,
+          question_event_id: answerId,
           answers,
         },
       } as unknown as RoomMessageEventContent);
@@ -493,11 +493,9 @@ export function AskUserQuestionCard({
     selections,
     otherTexts,
     mx,
-    provider,
     agentMode,
     room.roomId,
     onSubmit,
-    answerIdField,
     answerId,
     showOtherOption,
   ]);
@@ -512,7 +510,7 @@ export function AskUserQuestionCard({
           <div className={QuestionTabsBar}>
             {data.questions.map((q, qIndex) => (
               <button
-                key={q.question}
+                key={q.id}
                 type="button"
                 className={QuestionTab({ active: activeTab === qIndex })}
                 onClick={() => setActiveTab(qIndex)}
@@ -614,7 +612,7 @@ export function AskUserQuestionCard({
             <AskUserSelect
               options={currentQuestion.options}
               selectedValues={currentSel}
-              multiSelect={currentQuestion.multiSelect}
+              multiSelect={getChoiceMultiSelect(currentQuestion)}
               disabled={isDisabled}
               isAssignedUser={isAssignedUser}
               otherText={otherTexts[String(activeTab)] ?? ''}
@@ -629,7 +627,7 @@ export function AskUserQuestionCard({
           )}
         </div>
         <div className={QuestionCardFooter}>
-          {submitted || isLocallyAnswered ? (
+          {submitted ? (
             <>
               <Icon src={Icons.Check} size="200" className={SubmittedIcon} />
               <Text size="T300" priority="300" className={SubmittedText}>
@@ -638,16 +636,29 @@ export function AskUserQuestionCard({
             </>
           ) : (
             <>
-              <button
-                type="button"
-                className={SubmitButton({
-                  disabled: !canSubmit || submitting || isDisabled,
-                })}
-                disabled={!canSubmit || submitting || isDisabled}
-                onClick={handleSubmit}
-              >
-                {submitting ? t('askUserQuestion.submitting') : t('askUserQuestion.submit')}
-              </button>
+              {isLastTab ? (
+                <button
+                  type="button"
+                  className={SubmitButton({
+                    disabled: !canSubmit || submitting || isDisabled,
+                  })}
+                  disabled={!canSubmit || submitting || isDisabled}
+                  onClick={handleSubmit}
+                >
+                  {submitting ? t('askUserQuestion.submitting') : t('askUserQuestion.submit')}
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={ContinueButton({
+                    disabled: !currentAnswered || isDisabled,
+                  })}
+                  disabled={!currentAnswered || isDisabled}
+                  onClick={() => setActiveTab(activeTab + 1)}
+                >
+                  {t('askUserQuestion.continue')}
+                </button>
+              )}
               {!isAssignedUser && assignedDisplayName && (
                 <Text size="T200" priority="300" className={AssignedHint}>
                   {t('askUserQuestion.assignedTo', { name: assignedDisplayName })}

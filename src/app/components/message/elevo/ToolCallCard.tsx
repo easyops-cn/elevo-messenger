@@ -6,7 +6,6 @@ import { Box, Icon, Icons, Text, toRem } from 'folds';
 import * as css from './ToolCallCard.css';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { SquareAsteriskIcon } from '../../../icons/SquareAsteriskIcon';
-import { AskUserQuestionCard, QuestionAnsweredCard, type AskUserQuestionData } from './AskUser';
 import { elevoColor } from '../../../../config.css';
 import { MessageLayout, settingsAtom } from '../../../state/settings';
 import { useSetting } from '../../../state/hooks/settings';
@@ -44,63 +43,6 @@ type ApplyPatchOperation =
   | { kind: 'delete'; path: string }
   | { kind: 'update'; path: string; moveTo?: string; diff: string };
 
-const QuestionToolInputSchema = z.object({
-  questions: z.array(
-    z.object({
-      question: z.string(),
-      header: z.string(),
-      options: z.array(
-        z.object({
-          label: z.string(),
-          description: z.string(),
-        })
-      ),
-      multiple: z.boolean().optional(),
-    })
-  ),
-});
-
-const AskHumanChoiceQuestionSchema = z.object({
-  type: z.literal('choice').optional(),
-  question: z.string(),
-  header: z.string(),
-  multiSelect: z.boolean().optional(),
-  options: z.array(
-    z.object({
-      label: z.string(),
-      description: z.string().optional(),
-    })
-  ),
-});
-
-const AskHumanFormQuestionSchema = z.object({
-  type: z.literal('form'),
-  question: z.string(),
-  header: z.string(),
-  fields: z.array(
-    z.object({
-      name: z.string(),
-      label: z.string(),
-      type: z.enum(['text', 'number', 'select', 'textarea', 'email', 'password']),
-      required: z.boolean().optional(),
-      placeholder: z.string().optional(),
-      description: z.string().optional(),
-      options: z.array(z.string()).optional(),
-    })
-  ),
-});
-
-const AskHumanToolInputSchema = z.object({
-  questions: z.array(z.union([AskHumanChoiceQuestionSchema, AskHumanFormQuestionSchema])),
-});
-
-const AskHumanToolOutputSchema = z.object({
-  type: z.literal('text'),
-  text: z.string(),
-});
-
-const AskHumanToolAnswerSchema = z.record(z.string(), z.union([z.array(z.string()), z.string()]));
-
 type TodoItem = z.infer<typeof TodoItemSchema>;
 
 export function parseToolCall(content: Record<string, unknown>): ToolCallData | undefined {
@@ -126,56 +68,6 @@ function tryParseJson(val: unknown): unknown {
   } catch {
     return val;
   }
-}
-
-function unescapeQuotedString(val: string): string {
-  try {
-    return JSON.parse(`"${val.replace(/"/g, '\\"')}"`);
-  } catch {
-    return val.replace(/\\'/g, "'").replace(/\\"/g, '"').replace(/\\\\/g, '\\');
-  }
-}
-
-function tryParseAskHumanToolOutput(
-  val: unknown
-): z.infer<typeof AskHumanToolOutputSchema> | undefined {
-  const parsed = tryParseJson(val);
-  const result = AskHumanToolOutputSchema.safeParse(parsed);
-  if (result.success) return result.data;
-
-  if (typeof val !== 'string') return undefined;
-  const pythonDictResult =
-    /^\s*\{\s*'type'\s*:\s*'text'\s*,\s*'text'\s*:\s*'((?:\\'|[^'])*)'\s*\}\s*$/s.exec(val);
-  if (!pythonDictResult) return undefined;
-
-  return {
-    type: 'text',
-    text: unescapeQuotedString(pythonDictResult[1]),
-  };
-}
-
-export function getAskHumanAnswersForRender(data: ToolCallData, eventId?: string):
-  | {
-      question_event_id: string,
-      provider: 'elevo-copilot';
-      answers: z.infer<typeof AskHumanToolAnswerSchema>;
-    }
-  | undefined {
-  if (data.name !== 'mcp__elevo__ask_human') return undefined;
-  if (data.status !== 'completed') return undefined;
-  if (!eventId) return undefined;
-
-  const output = tryParseAskHumanToolOutput(data.output);
-  if (!output) return undefined;
-
-  const answers = AskHumanToolAnswerSchema.safeParse(tryParseJson(output.text));
-  if (!answers.success) return undefined;
-
-  return {
-    question_event_id: eventId,
-    provider: 'elevo-copilot',
-    answers: answers.data,
-  };
 }
 
 function parseApplyPatchText(patchText: string): ApplyPatchOperation[] | undefined {
@@ -406,59 +298,11 @@ function getTodosForRender(data: ToolCallData): TodoItem[] | undefined {
   return undefined;
 }
 
-function getQuestionForRender(data: ToolCallData): AskUserQuestionData | undefined {
-  if (data.name !== 'question') return undefined;
-
-  const parsedInput = tryParseJson(data.input);
-  const result = QuestionToolInputSchema.safeParse(parsedInput);
-  if (!result.success) return undefined;
-
-  return {
-    questions: result.data.questions.map((question) => ({
-      question: question.question,
-      header: question.header,
-      options: question.options,
-      multiSelect: question.multiple ?? false,
-    })),
-  };
-}
-
-export function getAskHumanForRender(data: ToolCallData):
-  | {
-      question: AskUserQuestionData;
-      submitted: boolean;
-    }
-  | undefined {
-  if (data.name !== 'mcp__elevo__ask_human') return undefined;
-
-  const parsedInput = tryParseJson(data.input);
-  const result = AskHumanToolInputSchema.safeParse(parsedInput);
-  if (!result.success) return undefined;
-
-  return {
-    question: {
-      questions: result.data.questions.map((question) => {
-        if (question.type === 'form') return question;
-        return {
-          type: 'choice' as const,
-          question: question.question,
-          header: question.header,
-          options: question.options,
-          multiSelect: question.multiSelect ?? false,
-        };
-      }),
-    },
-    submitted: AskHumanToolOutputSchema.safeParse(tryParseJson(data.output)).success,
-  };
-}
-
 type ToolCallCardProps = {
   data: ToolCallData;
   style?: CSSProperties;
-  eventId?: string;
-  initialHumanSender?: string;
 };
-export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolCallCardProps) {
+export function ToolCallCard({ data, style }: ToolCallCardProps) {
   const { t } = useTranslation();
   const [messageLayout] = useSetting(settingsAtom, 'messageLayout');
 
@@ -479,9 +323,6 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
     [data.output, data.error]
   );
   const todos = useMemo(() => getTodosForRender(data), [data]);
-  const question = useMemo(() => getQuestionForRender(data), [data]);
-  const askHuman = useMemo(() => getAskHumanForRender(data), [data]);
-  const askHumanAnswers = useMemo(() => getAskHumanAnswersForRender(data, eventId), [data, eventId]);
   const patchOperations = useMemo(() => getApplyPatchForRender(data), [data]);
 
   const prettierToolName = useMemo(
@@ -573,44 +414,6 @@ export function ToolCallCard({ data, style, eventId, initialHumanSender }: ToolC
           })}
         </ul>
       </Box>
-    );
-  }
-
-  if (question && eventId) {
-    return (
-      <AskUserQuestionCard
-        data={question}
-        style={style}
-        readOnly={data.status !== 'completed'}
-        provider="open-agent"
-        eventId={eventId}
-        agentMode={data.metadata?.agent_mode === 'plan' ? 'plan' : undefined}
-        initialHumanSender={initialHumanSender}
-      />
-    );
-  }
-
-  if (askHumanAnswers) {
-    return (
-      <QuestionAnsweredCard
-        data={askHumanAnswers}
-        style={style}
-      />
-    );
-  }
-
-  if (askHuman && eventId) {
-    return (
-      <AskUserQuestionCard
-        data={askHuman.question}
-        style={style}
-        readOnly={askHuman.submitted}
-        provider="elevo-copilot"
-        eventId={eventId}
-        submitted={askHuman.submitted}
-        initialHumanSender={initialHumanSender}
-        showOtherOption={false}
-      />
     );
   }
 

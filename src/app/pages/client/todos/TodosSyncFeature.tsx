@@ -5,7 +5,7 @@ import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useElevoConfig } from '../../../hooks/useElevoConfig';
 import { todosAtom } from '../../../state/todos/todosAtom';
 import type { TodoItem, TodosResponse } from './useTodosApi';
-import { parseToolCall, getAskHumanForRender, getAskHumanAnswersForRender } from '../../../components/message';
+import { parseAskUser, parseToolCall } from '../../../components/message';
 
 function TodosApiSync() {
   const setTodos = useSetAtom(todosAtom);
@@ -32,12 +32,20 @@ function TodosApiSync() {
         if (!res.ok) throw new Error(`Todos API error: ${res.status}`);
         const data: TodosResponse = await res.json();
         if (!cancelled) {
-          setTodos({ type: 'SET_API_PAGE', items: data.todos, nextCursor: data.next_cursor, append: false });
+          setTodos({
+            type: 'SET_API_PAGE',
+            items: data.todos,
+            nextCursor: data.next_cursor,
+            append: false,
+          });
           setTodos({ type: 'SET_INITIALIZED' });
         }
       } catch (err) {
         if (!cancelled) {
-          setTodos({ type: 'SET_ERROR', error: err instanceof Error ? err : new Error(String(err)) });
+          setTodos({
+            type: 'SET_ERROR',
+            error: err instanceof Error ? err : new Error(String(err)),
+          });
         }
       } finally {
         if (!cancelled) {
@@ -52,9 +60,12 @@ function TodosApiSync() {
     };
   }, [apiUrl, setTodos]);
 
-  useEffect(() => () => {
-    setTodos({ type: 'RESET' });
-  }, [setTodos]);
+  useEffect(
+    () => () => {
+      setTodos({ type: 'RESET' });
+    },
+    [setTodos]
+  );
 
   return null;
 }
@@ -82,7 +93,12 @@ export function useFetchTodosNextPage() {
       });
       if (!res.ok) throw new Error(`Todos API error: ${res.status}`);
       const data: TodosResponse = await res.json();
-      setTodos({ type: 'SET_API_PAGE', items: data.todos, nextCursor: data.next_cursor, append: true });
+      setTodos({
+        type: 'SET_API_PAGE',
+        items: data.todos,
+        nextCursor: data.next_cursor,
+        append: true,
+      });
     } catch (err) {
       // eslint-disable-next-line no-console
       console.error('Failed to fetch todos next page:', err);
@@ -123,26 +139,31 @@ function TodosTimelineSync() {
 
       const relation = mEvent.getRelation();
       const isReplace = relation?.rel_type === 'm.replace';
-      const toolCall = parseToolCall(isReplace ? content['m.new_content'] : content);
+      const renderContent = isReplace ? content['m.new_content'] : content;
+      const messageContent =
+        renderContent && typeof renderContent === 'object'
+          ? (renderContent as Record<string, unknown>)
+          : content;
+
+      const askUser = parseAskUser(messageContent);
+      if (askUser?.answers) {
+        const eventId = isReplace ? relation.event_id : mEvent.getId();
+        if (eventId) {
+          setTodos({ type: 'REMOVE_BY_QUESTION_ID', questionId: eventId });
+        }
+        return;
+      }
+
+      const toolCall = parseToolCall(messageContent);
 
       if (toolCall) {
         const eventId = mEvent.getId();
-        const originalEventId = isReplace ? relation.event_id : eventId;
-
-        const askHumanAnswers = getAskHumanAnswersForRender(toolCall, originalEventId);
-
-        // Remove todo when askHuman question is answered
-        if (askHumanAnswers) {
-          setTodos({ type: 'REMOVE_BY_QUESTION_ID', questionId: askHumanAnswers.question_event_id });
-          return;
-        }
 
         // Skip m.replace events for adding (the original event already handled it)
         if (isReplace) return;
 
-        const askHuman = getAskHumanForRender(toolCall);
-        // Add todo when askHuman question is pending for current user
-        if (askHuman && eventId) {
+        // Add todo when ask-user question is pending for current user
+        if (askUser && eventId) {
           const assignee =
             typeof content['vip.elevo.initial_human_sender'] === 'string'
               ? content['vip.elevo.initial_human_sender']
@@ -155,7 +176,7 @@ function TodosTimelineSync() {
                 question_event_id: eventId,
                 sender,
                 assignee,
-                question: askHuman.question,
+                question: askUser,
                 created_at: Math.floor(mEvent.getTs() / 1000),
               };
               setTodos({ type: 'ADD_LIVE_ITEM', item: todoItem });

@@ -163,6 +163,43 @@ export const SubmitButton = recipe({
   },
 });
 
+export const ContinueButton = recipe({
+  base: {
+    padding: `${config.space.S100} ${config.space.S400}`,
+    borderRadius: config.radii.R400,
+    border: 'none',
+    backgroundColor: color.Secondary.Container,
+    color: color.Secondary.OnContainer,
+    fontSize: toRem(14),
+    fontWeight: 600,
+    lineHeight: 1.5,
+    selectors: {
+      '&:hover': {
+        opacity: 0.9,
+      },
+    },
+  },
+  variants: {
+    disabled: {
+      true: {
+        opacity: 0.5,
+        cursor: 'not-allowed',
+        selectors: {
+          '&:hover': {
+            opacity: 0.5,
+          },
+        },
+      },
+      false: {
+        cursor: 'pointer',
+      },
+    },
+  },
+  defaultVariants: {
+    disabled: false,
+  },
+});
+
 export const OtherInput = style({
   width: '100%',
   padding: config.space.S100,

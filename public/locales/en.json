@@ -1122,6 +1122,7 @@
     "otherPlaceholder": "Enter your answer...",
     "submit": "Submit answers",
     "submitting": "Submitting...",
+    "continue": "Continue",
     "selectPlaceholder": "Select an option...",
     "questionTab": "Q{{index}}/{{total}}",
     "assignedTo": "This question should be answered by {{name}}"
