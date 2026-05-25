@@ -1620,7 +1620,7 @@ export function RoomTimeline({
       prevRenderedEvent !== undefined &&
       prevRenderedEvent.getSender() === eventSender &&
       prevRenderedEvent.getType() === mEvent.getType() &&
-      secondDifference(prevRenderedEvent.getTs(), mEvent.getTs()) <= 30;
+      secondDifference(prevRenderedEvent.getTs(), mEvent.getTs()) <= 90;
 
     const eventJSX =
       reactionOrEditEvent(mEvent) || isUserAnswerEvent(mEvent)
