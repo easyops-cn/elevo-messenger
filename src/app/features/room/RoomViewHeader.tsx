@@ -79,7 +79,6 @@ import { SearchIcon } from '../../icons/SearchIcon';
 import { UsersIcon } from '../../icons/UsersIcon';
 import { callChatAtom } from '../../state/callEmbed';
 import { useThreadChat } from '../../state/threadChat';
-import { useRoomMembers } from '../../hooks/useRoomMembers';
 
 type RoomMenuProps = {
   room: Room;
@@ -93,10 +92,9 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
   const powerLevels = usePowerLevelsContext();
   const creators = useRoomCreators(room);
 
-  const members = useRoomMembers(mx, room.roomId);
   const direct = useIsDirectRoom();
   const permissions = useRoomPermissions(creators, powerLevels);
-  const canInvite = !(direct && members.length >= 2) && permissions.action('invite', mx.getSafeUserId());
+  const canInvite = permissions.action('invite', mx.getSafeUserId());
   const notificationPreferences = useRoomsNotificationPreferencesContext();
   const notificationMode = getRoomNotificationMode(notificationPreferences, room.roomId);
   const { navigateRoom } = useRoomNavigate();
@@ -131,6 +129,7 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
       {invitePrompt && (
         <InviteUserPrompt
           room={room}
+          createRoomOnInvite={direct}
           requestClose={() => {
             setInvitePrompt(false);
             requestClose();
@@ -173,19 +172,21 @@ const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose
       </Box>
       <Line variant="Surface" size="300" />
       <Box direction="Column" gap="100" style={{ padding: config.space.S100 }}>
-        {canInvite && <MenuItem
-          onClick={handleInvite}
-          variant="Primary"
-          fill="None"
-          size="300"
-          after={<Icon size="100" src={Icons.UserPlus} />}
-          radii="300"
-          aria-pressed={invitePrompt}
-        >
-          <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
-            {t('room.invite')}
-          </Text>
-        </MenuItem>}
+        {canInvite && (
+          <MenuItem
+            onClick={handleInvite}
+            variant="Primary"
+            fill="None"
+            size="300"
+            after={<Icon size="100" src={Icons.UserPlus} />}
+            radii="300"
+            aria-pressed={invitePrompt}
+          >
+            <Text style={{ flexGrow: 1 }} as="span" size="T300" truncate>
+              {t('room.invite')}
+            </Text>
+          </MenuItem>
+        )}
         <MenuItem
           onClick={handleCopyLink}
           size="300"
@@ -532,21 +533,23 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
             </TooltipProvider>
           )}
 
-          {callView && <TooltipProvider
-            position="Bottom"
-            offset={4}
-            tooltip={
-              <Tooltip>
-                <Text>{t('common.members')}</Text>
-              </Tooltip>
-            }
-          >
-            {(triggerRef) => (
-              <IconButton size="300" fill="None" ref={triggerRef} onClick={handleMemberToggle}>
-                <Icon size="100" src={UsersIcon} />
-              </IconButton>
-            )}
-          </TooltipProvider>}
+          {callView && (
+            <TooltipProvider
+              position="Bottom"
+              offset={4}
+              tooltip={
+                <Tooltip>
+                  <Text>{t('common.members')}</Text>
+                </Tooltip>
+              }
+            >
+              {(triggerRef) => (
+                <IconButton size="300" fill="None" ref={triggerRef} onClick={handleMemberToggle}>
+                  <Icon size="100" src={UsersIcon} />
+                </IconButton>
+              )}
+            </TooltipProvider>
+          )}
 
           <TooltipProvider
             position="Bottom"
@@ -593,10 +596,14 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
 
           {screenSize === ScreenSize.Desktop && (
             <>
-              <Line direction="Vertical" size="300" style={{
-                height: toRem(16),
-                margin: `0 ${toRem(6)}`,
-              }} />
+              <Line
+                direction="Vertical"
+                size="300"
+                style={{
+                  height: toRem(16),
+                  margin: `0 ${toRem(6)}`,
+                }}
+              />
               <TooltipProvider
                 position="Bottom"
                 offset={4}
@@ -607,7 +614,9 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                     ) : threadChat.open ? (
                       <Text>{t('room.closeThread')}</Text>
                     ) : (
-                      <Text>{showSidePanel ? t('room.hideSidePanel') : t('room.showSidePanel')}</Text>
+                      <Text>
+                        {showSidePanel ? t('room.hideSidePanel') : t('room.showSidePanel')}
+                      </Text>
                     )}
                   </Tooltip>
                 }

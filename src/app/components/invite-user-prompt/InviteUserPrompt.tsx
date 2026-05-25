@@ -29,10 +29,11 @@ import {
   Scroll,
   MenuItem,
 } from 'folds';
-import { Room } from 'matrix-js-sdk';
+import { ICreateRoomStateEvent, Preset, Room, Visibility } from 'matrix-js-sdk';
 import { isKeyHotkey } from 'is-hotkey';
 import FocusTrap from 'focus-trap-react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
 import { stopPropagation } from '../../utils/keyboard';
 import { useDirectUsers } from '../../hooks/useDirectUsers';
 import { getMxIdLocalPart, getMxIdServer, isUserId } from '../../utils/matrix';
@@ -45,6 +46,8 @@ import { BreakWord } from '../../styles/Text.css';
 import { useAlive } from '../../hooks/useAlive';
 import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { useRoomMembers } from '../../hooks/useRoomMembers';
+import { createRoomEncryptionState } from '../create-room';
+import { getHomeRoomPath } from '../../pages/pathUtils';
 
 const SEARCH_OPTIONS: UseAsyncSearchOptions = {
   limit: 1000,
@@ -56,12 +59,15 @@ const SEARCH_OPTIONS: UseAsyncSearchOptions = {
 type InviteUserProps = {
   room: Room;
   requestClose: () => void;
+  createRoomOnInvite?: boolean;
 };
-export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
+export function InviteUserPrompt({ room, requestClose, createRoomOnInvite }: InviteUserProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const alive = useAlive();
-  const { elevoContactsRoomId } = useElevoConfig();
+  const navigate = useNavigate();
+  const elevoConfig = useElevoConfig();
+  const { elevoContactsRoomId } = elevoConfig;
 
   const inputRef = useRef<HTMLInputElement>(null);
   const directUsers = useDirectUsers();
@@ -69,9 +75,10 @@ export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
 
   const contactsMembers = useRoomMembers(mx, elevoContactsRoomId);
 
-  const contactsMembersMap = useMemo(() => new Map(
-    contactsMembers.map((m) => [m.userId, m.name])
-  ), [contactsMembers]);
+  const contactsMembersMap = useMemo(
+    () => new Map(contactsMembers.map((m) => [m.userId, m.name])),
+    [contactsMembers]
+  );
 
   const filteredUsers = useMemo(() => {
     const merged = [...new Set([...directUsers, ...contactsMembersMap.keys()])];
@@ -90,21 +97,49 @@ export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
     [contactsMembersMap]
   );
 
-  const [result, search, resetSearch] = useAsyncSearch(
-    filteredUsers,
-    getSearchStr,
-    SEARCH_OPTIONS
-  );
+  const [result, search, resetSearch] = useAsyncSearch(filteredUsers, getSearchStr, SEARCH_OPTIONS);
   const queryHighlighRegex = result?.query
     ? makeHighlightRegex(result.query.split(' '))
     : undefined;
 
-  const [inviteState, invite] = useAsyncCallback<void, Error, [string, string | undefined]>(
+  const [inviteState, invite] = useAsyncCallback<
+    string | undefined,
+    Error,
+    [string, string | undefined]
+  >(
     useCallback(
       async (userId, reason) => {
+        if (createRoomOnInvite) {
+          const myUserId = mx.getSafeUserId();
+          const inviteUserIds = [
+            ...new Set([
+              ...room
+                .getJoinedMembers()
+                .map((member) => member.userId)
+                .filter((memberUserId) => memberUserId !== myUserId),
+              userId,
+            ]),
+          ];
+          const initialState: ICreateRoomStateEvent[] = [];
+
+          if (elevoConfig.features.encryption) {
+            initialState.push(createRoomEncryptionState());
+          }
+
+          const createResult = await mx.createRoom({
+            invite: inviteUserIds,
+            visibility: Visibility.Private,
+            preset: Preset.TrustedPrivateChat,
+            initial_state: initialState,
+          });
+
+          return createResult.room_id;
+        }
+
         await mx.invite(room.roomId, userId, reason);
+        return undefined;
       },
-      [mx, room]
+      [createRoomOnInvite, elevoConfig.features.encryption, mx, room]
     )
   );
 
@@ -119,9 +154,12 @@ export function InviteUserPrompt({ room, requestClose }: InviteUserProps) {
     const reasonInput = target?.reasonInput as HTMLTextAreaElement | undefined;
     const reason = reasonInput?.value.trim();
 
-    invite(validUserId, reason || undefined).then(() => {
+    invite(validUserId, reason || undefined).then((roomId) => {
       if (alive()) {
         requestClose();
+        if (roomId) {
+          navigate(getHomeRoomPath(roomId));
+        }
       }
     });
   };

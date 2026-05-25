@@ -1,15 +1,5 @@
 import React, { MouseEventHandler, useCallback, useMemo, useRef, useState } from 'react';
-import {
-  Box,
-  Chip,
-  Icon,
-  Icons,
-  MenuItem,
-  Spinner,
-  Text,
-  color,
-  config,
-} from 'folds';
+import { Box, Chip, Icon, Icons, MenuItem, Spinner, Text, color, config } from 'folds';
 import { Room, RoomMember } from 'matrix-js-sdk';
 import { useTranslation } from 'react-i18next';
 
@@ -24,10 +14,7 @@ import { getMxIdLocalPart } from '../../utils/matrix';
 import { UserAvatar } from '../../components/user-avatar';
 import { MemberSort } from '../../hooks/useMemberSort';
 import { usePowerLevelsContext } from '../../hooks/usePowerLevels';
-import {
-  useOpenUserRoomProfile,
-  useUserRoomProfileState,
-} from '../../state/hooks/userRoomProfile';
+import { useOpenUserRoomProfile, useUserRoomProfileState } from '../../state/hooks/userRoomProfile';
 import { useSpaceOptionally } from '../../hooks/useSpace';
 import { useGetMemberPowerTag } from '../../hooks/useMemberPowerTag';
 import { useRoomCreators } from '../../hooks/useRoomCreators';
@@ -104,9 +91,11 @@ function MemberItem({
         </Avatar>
       }
       after={
-        badge && <Box alignItems="Center" gap="100" shrink="No" title={badge.label}>
-          <Icon size="100" src={ShieldUserIcon} style={{ color: color[badge.variant].Main }} />
-        </Box>
+        badge && (
+          <Box alignItems="Center" gap="100" shrink="No" title={badge.label}>
+            <Icon size="100" src={ShieldUserIcon} style={{ color: color[badge.variant].Main }} />
+          </Box>
+        )
       }
     >
       <Box grow="Yes">
@@ -135,9 +124,7 @@ type MembersPanelProps = {
   room: Room;
 };
 
-export function MembersPanel({
-  room,
-}: MembersPanelProps) {
+export function MembersPanel({ room }: MembersPanelProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const members = useRoomMembers(mx, room.roomId);
@@ -147,7 +134,7 @@ export function MembersPanel({
   const creators = useRoomCreators(room);
   const permissions = useRoomPermissions(creators, powerLevels);
   const direct = useIsDirectRoom();
-  const canInvite = !(direct && members.length >= 2) && permissions.action('invite', mx.getSafeUserId());
+  const canInvite = permissions.action('invite', mx.getSafeUserId());
   const [invitePrompt, setInvitePrompt] = useState(false);
   const getPowerTag = useGetMemberPowerTag(room, creators, powerLevels);
 
@@ -189,7 +176,11 @@ export function MembersPanel({
   return (
     <Box direction="Column" gap="100">
       {invitePrompt && (
-        <InviteUserPrompt room={room} requestClose={() => setInvitePrompt(false)} />
+        <InviteUserPrompt
+          room={room}
+          createRoomOnInvite={direct}
+          requestClose={() => setInvitePrompt(false)}
+        />
       )}
       <Box
         className={css.MembersGroupLabel}
