@@ -2,8 +2,15 @@ import { listen } from '@tauri-apps/api/event';
 import { invoke } from '@tauri-apps/api/core';
 import { useAtomValue } from 'jotai';
 import React, { ReactNode, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { RoomEvent, RoomEventHandlerMap, type EventTimelineSetHandlerMap } from 'matrix-js-sdk';
+import {
+  RoomEvent,
+  RoomEventHandlerMap,
+  type EventTimelineSetHandlerMap,
+  type MatrixEvent,
+  type Room,
+} from 'matrix-js-sdk';
 import { unreadEqual, unreadInfoToUnread, roomToUnreadAtom } from '../../state/room/roomToUnread';
 import LogoSVG from '../../../../public/res/apple/apple-touch-icon-144x144.png';
 import NotificationSound from '../../../../public/sound/notification.ogg';
@@ -15,6 +22,7 @@ import { usePreviousValue } from '../../hooks/usePreviousValue';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { getHomeInvitesPath } from '../pathUtils';
 import {
+  getLatestMessageText,
   getMemberDisplayName,
   getNotificationType,
   getUnreadInfo,
@@ -25,14 +33,15 @@ import { getMxIdLocalPart, mxcUrlToHttp } from '../../utils/matrix';
 import { useSelectedRoom } from '../../hooks/router/useSelectedRoom';
 import { useInboxNotificationsSelected } from '../../hooks/router/useInbox';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
-import { useSdkMessageListener, isDesktopTauri, type SdkMessagePayload } from '../../plugins/useTauriOpener';
+import {
+  useSdkMessageListener,
+  isDesktopTauri,
+  type SdkMessagePayload,
+} from '../../plugins/useTauriOpener';
 import { useRoomNavigate } from '../../hooks/useRoomNavigate';
 import { useRoomsUnread } from '../../state/hooks/unread';
 import { useAllHomeRooms } from './home/useAllHomeRooms';
-import {
-  sendSystemNotification,
-  type SystemNotificationHandle,
-} from '../../utils/notification';
+import { sendSystemNotification, type SystemNotificationHandle } from '../../utils/notification';
 import { TodosSyncFeature } from './todos/TodosSyncFeature';
 
 function SystemEmojiFeature() {
@@ -117,6 +126,7 @@ function MessageNotifications() {
   const notifyRef = useRef<SystemNotificationHandle>();
   const unreadCacheRef = useRef<Map<string, UnreadInfo>>(new Map());
   const mx = useMatrixClient();
+  const { t } = useTranslation();
   const useAuthentication = useMediaAuthentication();
   const [showNotifications] = useSetting(settingsAtom, 'showNotifications');
   const [notificationSound] = useSetting(settingsAtom, 'isNotificationSounds');
@@ -130,21 +140,29 @@ function MessageNotifications() {
       roomName,
       roomAvatar,
       username,
+      room,
       roomId,
-      eventId
+      eventId,
+      mEvent,
     }: {
       roomName: string;
       roomAvatar?: string;
       username: string;
+      room: Room;
       roomId: string;
       eventId: string;
+      mEvent: MatrixEvent;
     }) => {
+      const body =
+        getLatestMessageText(room, mEvent, mx.getSafeUserId(), false, t, true, true) ??
+        `New message from ${username}`;
+
       notifyRef.current?.close();
       notifyRef.current = await sendSystemNotification({
         title: roomName,
         icon: roomAvatar,
         badge: roomAvatar,
-        body: `New message from ${username}`,
+        body,
         silent: true,
         onClick: () => {
           if (!window.closed) {
@@ -155,7 +173,7 @@ function MessageNotifications() {
         },
       });
     },
-    [navigateRoom]
+    [mx, navigateRoom, t]
   );
 
   const playSound = useCallback(() => {
@@ -208,8 +226,10 @@ function MessageNotifications() {
             ? mxcUrlToHttp(mx, avatarMxc, useAuthentication, 96, 96, 'crop') ?? undefined
             : undefined,
           username: getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender) ?? sender,
+          room,
           roomId: room.roomId,
           eventId,
+          mEvent,
         }).catch(() => {
           // Ignore transient notification send errors.
         });
@@ -250,7 +270,9 @@ function ClientToolSdkHandler() {
   const mx = useMatrixClient();
 
   // Track registered tools per webview label: Map<label, Map<toolName, { roomId, data }>>
-  const registeredToolsRef = useRef<Map<string, Map<string, { roomId: string; data: unknown }>>>(new Map());
+  const registeredToolsRef = useRef<Map<string, Map<string, { roomId: string; data: unknown }>>>(
+    new Map()
+  );
 
   useSdkMessageListener('client_tool_register', (payload: SdkMessagePayload) => {
     const { source, roomId, data } = payload;
