@@ -337,7 +337,7 @@ export function Home() {
                   return (
                     <VirtualTile
                       virtualItem={vItem}
-                      key={vItem.index}
+                      key={roomId}
                       ref={virtualizer.measureElement}
                       style={{ top: vItem.start }}
                     >

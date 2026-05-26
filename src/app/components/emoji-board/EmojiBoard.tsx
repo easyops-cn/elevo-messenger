@@ -568,7 +568,7 @@ export function EmojiBoard({
                     virtualItem={vItem}
                     style={{ paddingTop: config.space.S200 }}
                     ref={virtualizer.measureElement}
-                    key={vItem.index}
+                    key={group.id}
                   >
                     <EmojiGroup key={group.id} id={group.id} label={group.name}>
                       {group.items.map(renderItem)}

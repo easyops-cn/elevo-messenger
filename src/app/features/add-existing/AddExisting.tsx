@@ -270,7 +270,7 @@ export function AddExistingModal({ parentId, space, requestClose }: AddExistingM
                             virtualItem={vItem}
                             style={{ paddingBottom: config.space.S100 }}
                             ref={virtualizer.measureElement}
-                            key={vItem.index}
+                            key={roomId}
                           >
                             <MenuItem
                               data-room-id={roomId}

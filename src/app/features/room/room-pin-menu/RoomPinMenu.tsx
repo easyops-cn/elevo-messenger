@@ -434,7 +434,7 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(
                           virtualItem={vItem}
                           style={{ paddingBottom: config.space.S200 }}
                           ref={virtualizer.measureElement}
-                          key={vItem.index}
+                          key={eventId}
                         >
                           <SequenceCard
                             style={{ padding: config.space.S400, borderRadius: config.radii.R300 }}
