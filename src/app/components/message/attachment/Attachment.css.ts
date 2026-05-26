@@ -41,7 +41,7 @@ export const AttachmentBox = recipe({
       true: {
         backgroundColor: '#FFFFFF',
         borderRadius: config.radii.R400,
-        width: 'initial',
+        width: 'fit-content',
         maxHeight: 'initial',
       },
     },

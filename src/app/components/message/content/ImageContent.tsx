@@ -133,7 +133,11 @@ export const ImageContent = as<'div', ImageContentProps>(
     }, [loadSrc]);
 
     return (
-      <Box className={classNames(css.RelativeBase, className)} {...props} ref={ref}>
+      <Box className={classNames(css.RelativeBase, className)} {...props} style={{
+        width,
+        height,
+        ...props.style,
+      }} ref={ref}>
         {srcState.status === AsyncStatus.Success && (
           <Overlay open={viewer} backdrop={<OverlayBackdrop />}>
             <OverlayCenter>
@@ -162,7 +166,8 @@ export const ImageContent = as<'div', ImageContentProps>(
         )}
         {typeof blurHash === 'string' && !load && (
           <BlurhashCanvas
-            style={{ width: '100%', height: '100%' }}
+            className={css.AbsoluteContainer}
+            style={{ width, height }}
             width={32}
             height={32}
             hash={blurHash}
@@ -215,14 +220,15 @@ export const ImageContent = as<'div', ImageContentProps>(
             </TooltipProvider>
           </Box>
         )}
-        {!error && (srcState.status === AsyncStatus.Loading || srcState.status === AsyncStatus.Idle) &&
+        {(srcState.status === AsyncStatus.Loading || srcState.status === AsyncStatus.Idle) &&
+          !load &&
           !blurred && (
-            <Box alignItems="Center" justifyContent="Center" style={{ width, height }}>
+            <Box className={css.AbsoluteContainer} alignItems="Center" justifyContent="Center" style={{ width, height }}>
               <Spinner variant="Secondary" />
             </Box>
           )}
         {(error || srcState.status === AsyncStatus.Error) && (
-          <Box alignItems="Center" justifyContent="Center" style={{ width, height }}>
+          <Box className={css.AbsoluteContainer} alignItems="Center" justifyContent="Center" style={{ width, height }}>
             <TooltipProvider
               tooltip={
                 <Tooltip variant="Critical">
