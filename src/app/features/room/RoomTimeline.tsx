@@ -150,7 +150,7 @@ const getLiveTimeline = (room: Room, thread: Thread | undefined): EventTimeline 
   if (thread) {
     return thread.liveTimeline;
   }
-  return room.getUnfilteredTimelineSet().getLiveTimeline();
+  return room.getLiveTimeline();
 };
 
 const getEventTimeline = (
@@ -441,7 +441,7 @@ const getRoomUnreadInfo = (room: Room, scrollTo: boolean, thread: Thread | undef
   const latestTimeline = evtTimeline && getFirstLinkedTimeline(evtTimeline, Direction.Forward);
   return {
     readUptoEventId,
-    inLiveTimeline: latestTimeline === room.getLiveTimeline(),
+    inLiveTimeline: latestTimeline === getLiveTimeline(room, thread),
     scrollTo,
   };
 };

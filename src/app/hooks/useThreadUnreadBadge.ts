@@ -19,7 +19,7 @@ export function useThreadUnreadBadge({
 
   useEffect(() => {
     const getHasUnreadBadge = () =>
-      threadHaveNotification(room, thread.id) || threadHaveUnread(mx, thread);
+      threadHaveNotification(room, thread.id) || threadHaveUnread(thread);
 
     const updateHasUnreadBadge = () => {
       setHasThreadUnreadBadge(getHasUnreadBadge());

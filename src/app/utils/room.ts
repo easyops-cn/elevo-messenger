@@ -209,10 +209,43 @@ export const isNotificationEvent = (mEvent: MatrixEvent) => {
   if (eType === 'm.room.member') return false;
 
   if (mEvent.isRedacted()) return false;
-  if (mEvent.getRelation()?.rel_type === 'm.replace') return false;
+  if (mEvent.isRelation(RelationType.Replace)) return false;
 
   return true;
 };
+
+export const findLatestNotificationEvent = (events: MatrixEvent[]): MatrixEvent | undefined => {
+  for (let i = events.length - 1; i >= 0; i -= 1) {
+    const event = events[i];
+    if (isNotificationEvent(event)) {
+      return event;
+    }
+  }
+}
+
+export const timelineHasUnread = (room: Room, timeline: MatrixEvent[]): boolean => {
+  const userId = room.client.getSafeUserId();
+
+  const latestEvent = timeline[timeline.length - 1];
+  if (latestEvent?.getSender() === userId) {
+    return false;
+  }
+
+  const latestNotificationEventId = findLatestNotificationEvent(timeline)?.getId();
+
+  if (latestNotificationEventId) {
+    return !room.hasUserReadEvent(userId, latestNotificationEventId);
+  }
+
+  const latestEventId = latestEvent?.getId();
+  if (!latestEventId) return false;
+
+  if (room.hasUserReadEvent(userId, latestEventId)) {
+    return false;
+  }
+
+  return true;
+}
 
 export const roomHaveNotification = (room: Room): boolean => {
   const total = room.getRoomUnreadNotificationCount(NotificationCountType.Total);
@@ -221,23 +254,7 @@ export const roomHaveNotification = (room: Room): boolean => {
   return total > 0 || highlight > 0;
 };
 
-export const roomHaveUnread = (mx: MatrixClient, room: Room) => {
-  const userId = mx.getUserId();
-  if (!userId) return false;
-  const readUpToId = room.getEventReadUpTo(userId);
-  const liveEvents = room.getLiveTimeline().getEvents();
-
-  if (liveEvents[liveEvents.length - 1]?.getSender() === userId) {
-    return false;
-  }
-
-  for (let i = liveEvents.length - 1; i >= 0; i -= 1) {
-    const event = liveEvents[i];
-    if (event.getId() === readUpToId) return false;
-    if (isNotificationEvent(event)) return true;
-  }
-  return liveEvents.length > 0;
-};
+export const roomHaveUnread = (room: Room) => timelineHasUnread(room, room.getLiveTimeline().getEvents());
 
 export const threadHaveNotification = (room: Room, threadId: string): boolean => {
   const total = room.getThreadUnreadNotificationCount(threadId, NotificationCountType.Total);
@@ -246,23 +263,7 @@ export const threadHaveNotification = (room: Room, threadId: string): boolean =>
   return total > 0 || highlight > 0;
 };
 
-export const threadHaveUnread = (mx: MatrixClient, thread: Thread) => {
-  const userId = mx.getUserId();
-  if (!userId) return false;
-  const readUpToId = thread.getEventReadUpTo(userId);
-  const liveEvents = thread.liveTimeline.getEvents();
-
-  if (liveEvents[liveEvents.length - 1]?.getSender() === userId) {
-    return false;
-  }
-
-  for (let i = liveEvents.length - 1; i >= 0; i -= 1) {
-    const event = liveEvents[i];
-    if (event.getId() === readUpToId) return false;
-    if (isNotificationEvent(event)) return true;
-  }
-  return true;
-};
+export const threadHaveUnread = (thread: Thread) => timelineHasUnread(thread.room, thread.events);
 
 export const getUnreadInfo = (room: Room): UnreadInfo => {
   const total = room.getRoomUnreadNotificationCount(NotificationCountType.Total);
@@ -280,7 +281,7 @@ export const getUnreadInfos = (mx: MatrixClient): UnreadInfo[] => {
     if (room.getMyMembership() !== 'join') return unread;
     if (getNotificationType(mx, room.roomId) === NotificationType.Mute) return unread;
 
-    if (roomHaveNotification(room) || roomHaveUnread(mx, room)) {
+    if (roomHaveNotification(room) || roomHaveUnread(room)) {
       unread.push(getUnreadInfo(room));
     }
 
