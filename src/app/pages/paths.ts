@@ -108,3 +108,16 @@ export const ME_NOTIFICATIONS_PATH = `/me/${_NOTIFICATIONS_PATH}`;
 export const ME_INVITES_PATH = `/me/${_INVITES_PATH}`;
 
 export const TODOS_PATH = '/todos/';
+
+export const DESKTOP_SETTINGS_PATH = '/desktop/settings/';
+export type DesktopSettingsPathSearchParams = {
+  page?: string;
+};
+
+export const DESKTOP_IMAGE_VIEWER_PATH = '/desktop/image-viewer/';
+export type DesktopImageViewerPathSearchParams = {
+  alt?: string;
+  url?: string;
+  mimeType?: string;
+  encInfo?: string;
+};

@@ -26,11 +26,17 @@ import * as css from './style.css';
 import { scaleYDimension } from '../../../utils/common';
 import { FALLBACK_MIMETYPE } from '../../../utils/mimeTypes';
 import { stopPropagation } from '../../../utils/keyboard';
-import { decryptFile, downloadEncryptedMedia, downloadMedia, mxcUrlToHttp } from '../../../utils/matrix';
+import {
+  decryptFile,
+  downloadEncryptedMedia,
+  downloadMedia,
+  mxcUrlToHttp,
+} from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { NO_SERVICE_WORKER } from '../../../utils/noServiceWorker';
 import { ModalWide } from '../../../styles/Modal.css';
 import { validBlurHash } from '../../../utils/blurHash';
+import { isDesktopTauri, openImageViewerWindow } from '../../../plugins/useTauriOpener';
 
 type RenderViewerProps = {
   src: string;
@@ -128,6 +134,20 @@ export const ImageContent = as<'div', ImageContentProps>(
       loadSrc();
     };
 
+    const handleOpenViewer = () => {
+      if (isDesktopTauri) {
+        openImageViewerWindow({
+          alt: body,
+          url,
+          mimeType,
+          encInfo,
+          labelSeed: url,
+        });
+        return;
+      }
+      setViewer(true);
+    };
+
     useEffect(() => {
       loadSrc();
     }, [loadSrc]);
@@ -177,7 +197,7 @@ export const ImageContent = as<'div', ImageContentProps>(
               src: srcState.data,
               onLoad: handleLoad,
               onError: handleError,
-              onClick: () => setViewer(true),
+              onClick: handleOpenViewer,
               tabIndex: 0,
             })}
           </div>
@@ -215,7 +235,8 @@ export const ImageContent = as<'div', ImageContentProps>(
             </TooltipProvider>
           </Box>
         )}
-        {!error && (srcState.status === AsyncStatus.Loading || srcState.status === AsyncStatus.Idle) &&
+        {!error &&
+          (srcState.status === AsyncStatus.Loading || srcState.status === AsyncStatus.Idle) &&
           !blurred && (
             <Box alignItems="Center" justifyContent="Center" style={{ width, height }}>
               <Spinner variant="Secondary" />

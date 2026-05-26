@@ -37,6 +37,8 @@ import {
   ME_INVITES_PATH,
   ME_NOTIFICATIONS_PATH,
   TODOS_PATH,
+  DESKTOP_SETTINGS_PATH,
+  DESKTOP_IMAGE_VIEWER_PATH,
 } from './paths';
 import {
   getAppPathFromHref,
@@ -82,6 +84,7 @@ import { getFallbackSession } from '../state/sessions';
 import { CallStatusRenderer } from './CallStatusRenderer';
 import { CallEmbedProvider } from '../components/CallEmbedProvider';
 import { PageNotFound } from './PageNotFound';
+import { DesktopImageViewerWindow, DesktopSettingsWindow } from './DesktopSecondary';
 
 function TauriDeepLinkHandler() {
   useTauriDeepLink();
@@ -232,10 +235,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           {mobile ? (
             <Route index element={<div />} />
           ) : (
-            <Route
-              index
-              loader={() => redirect(getExploreFeaturedPath())}
-            />
+            <Route index loader={() => redirect(getExploreFeaturedPath())} />
           )}
           <Route path={_FEATURED_PATH} element={<FeaturedRooms />} />
           <Route path={_SERVER_PATH} element={<PublicRooms />} />
@@ -284,10 +284,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           {mobile ? (
             <Route index element={<div />} />
           ) : (
-            <Route
-              index
-              loader={() => redirect(getContactsContactsPath())}
-            />
+            <Route index loader={() => redirect(getContactsContactsPath())} />
           )}
           <Route path={_CONTACTS_CONTACTS_PATH} element={<ContactsPage />} />
           <Route path={_CONTACTS_ROLE_PATH} element={<ContactsRolePage />} />
@@ -295,11 +292,16 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
         <Route path={ME_NOTIFICATIONS_PATH} loader={() => redirect(getMePath())} />
         <Route path={ME_INVITES_PATH} loader={() => redirect(getHomeInvitesPath())} />
       </Route>
-      <Route path="/*" element={
-        <AuthRouteThemeManager>
-          <PageNotFound />
-        </AuthRouteThemeManager>
-      } />
+      <Route path={DESKTOP_SETTINGS_PATH} element={<DesktopSettingsWindow />} />
+      <Route path={DESKTOP_IMAGE_VIEWER_PATH} element={<DesktopImageViewerWindow />} />
+      <Route
+        path="/*"
+        element={
+          <AuthRouteThemeManager>
+            <PageNotFound />
+          </AuthRouteThemeManager>
+        }
+      />
     </Route>
   );
 

@@ -1,7 +1,17 @@
 import { useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 import { mobileOrTablet } from '../utils/user-agent';
+import {
+  DESKTOP_IMAGE_VIEWER_PATH,
+  DESKTOP_SETTINGS_PATH,
+  type DesktopImageViewerPathSearchParams,
+  type DesktopSettingsPathSearchParams,
+} from '../pages/paths';
+import { withOriginBaseUrl, withSearchParam } from '../pages/pathUtils';
+import type { SettingsPages } from '../features/settings';
+import { trimSlash, trimTrailingSlash } from '../utils/common';
 
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 // Desktop = running inside Tauri on a non-mobile OS.
@@ -11,18 +21,12 @@ export const isDesktopTauri = isTauri && !mobileOrTablet();
 // Domains whose links open in an in-app WebviewWindow with the ElevoMessengerSDK injected.
 // Keep in sync with ALLOWED_DOMAINS in src-tauri/src/lib.rs.
 // Replace placeholders with real domains before shipping.
-const ALLOWED_DOMAINS: string[] = [
-  'localhost',
-  'easyops.local',
-  'elevo.vip',
-];
+const ALLOWED_DOMAINS: string[] = ['localhost', 'easyops.local', 'elevo.vip'];
 
 function isDomainAllowed(href: string): boolean {
   try {
     const { hostname } = new URL(href);
-    return ALLOWED_DOMAINS.some(
-      (d) => hostname === d || hostname.endsWith(`.${d}`)
-    );
+    return ALLOWED_DOMAINS.some((d) => hostname === d || hostname.endsWith(`.${d}`));
   } catch {
     return false;
   }
@@ -56,13 +60,15 @@ function labelFromUrl(href: string, roomId: string): string {
  */
 function openSidePanel(href: string, roomId: string, label?: string): void {
   if (isDesktopTauri && isDomainAllowed(href)) {
-    invoke('open_side_panel', { url: href, label: label ?? labelFromUrl(href, roomId), roomId }).catch(
-      (error) => {
-        // eslint-disable-next-line no-console
-        console.error('Failed to open side panel, falling back to system browser:', error);
-        window.open(href, '_blank', 'noopener,noreferrer');
-      }
-    );
+    invoke('open_side_panel', {
+      url: href,
+      label: label ?? labelFromUrl(href, roomId),
+      roomId,
+    }).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to open side panel, falling back to system browser:', error);
+      window.open(href, '_blank', 'noopener,noreferrer');
+    });
   } else {
     window.open(href, '_blank', 'noopener,noreferrer');
   }
@@ -76,6 +82,102 @@ export function openWorkspacePanel(href: string, roomId: string): void {
 /** Open a task management side panel with label `tasks-{ROOM_ID}`. */
 export function openTasksPanel(href: string, roomId: string): void {
   openSidePanel(href, roomId, `tasks-${sanitizeRoomId(roomId)}`);
+}
+
+type AppWindowOptions = {
+  label: string;
+  path: string;
+  title: string;
+  width: number;
+  height: number;
+  minWidth?: number;
+  minHeight?: number;
+};
+
+function openAppWindow(options: AppWindowOptions): void {
+  invoke('open_app_window', options).catch((error) => {
+    // eslint-disable-next-line no-console
+    console.error('Failed to open app window:', error);
+  });
+}
+
+function getCurrentAppBaseUrl(): string {
+  const { location } = window;
+  const baseUrl = trimTrailingSlash(
+    `${trimSlash(location.origin)}/${trimSlash(import.meta.env.BASE_URL ?? '')}`
+  );
+  const { hash } = location;
+  if (!hash.startsWith('#/')) return baseUrl;
+
+  const hashPath = hash.slice(1);
+  if (
+    hashPath.startsWith(DESKTOP_SETTINGS_PATH) ||
+    hashPath.startsWith(DESKTOP_IMAGE_VIEWER_PATH)
+  ) {
+    return baseUrl;
+  }
+
+  return `${baseUrl}/#`;
+}
+
+export function openSettingsWindow(initialPage?: SettingsPages): void {
+  const searchParams: DesktopSettingsPathSearchParams = {};
+  if (initialPage !== undefined) searchParams.page = String(initialPage);
+
+  openAppWindow({
+    label: 'settings',
+    path: withOriginBaseUrl(
+      getCurrentAppBaseUrl(),
+      initialPage === undefined
+        ? DESKTOP_SETTINGS_PATH
+        : withSearchParam(DESKTOP_SETTINGS_PATH, searchParams)
+    ),
+    title: 'Settings',
+    width: 900,
+    height: 700,
+    minWidth: 720,
+    minHeight: 520,
+  });
+}
+
+export type ImageViewerWindowPayload = {
+  alt: string;
+  url: string;
+  mimeType?: string;
+  encInfo?: EncryptedAttachmentInfo;
+  labelSeed?: string;
+};
+
+function sanitizeWindowLabelPart(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80);
+}
+
+export function openImageViewerWindow({
+  alt,
+  url,
+  mimeType,
+  encInfo,
+  labelSeed,
+}: ImageViewerWindowPayload): void {
+  const searchParams: DesktopImageViewerPathSearchParams = {
+    alt,
+    url,
+  };
+  if (mimeType) searchParams.mimeType = mimeType;
+  if (encInfo) searchParams.encInfo = JSON.stringify(encInfo);
+
+  openAppWindow({
+    label: `image-viewer-${sanitizeWindowLabelPart(labelSeed ?? url)}`,
+    path: withOriginBaseUrl(
+      getCurrentAppBaseUrl(),
+      withSearchParam(DESKTOP_IMAGE_VIEWER_PATH, searchParams)
+    ),
+    title: alt || 'Image Preview',
+    width: 1000,
+    height: 760,
+    minWidth: 640,
+    minHeight: 480,
+  });
 }
 
 export type SdkMessagePayload<T = unknown> = {
