@@ -1,12 +1,17 @@
 import { useEffect } from 'react';
 import { useSetAtom } from 'jotai';
-import { settingsAtom, getSettings } from '../state/settings';
+import {
+  settingsAtom,
+  getSettings,
+  setSettings as persistSettings,
+  subscribeSettings,
+} from '../state/settings';
 import { getTauriSettings, setTauriSettings } from '../state/utils/tauriStore';
 import { isDesktopTauri } from '../plugins/useTauriOpener';
 import type { Settings } from '../state/settings';
 
 export function useTauriSettingsSync(): void {
-  const setSettings = useSetAtom(settingsAtom);
+  const setJotaiSettings = useSetAtom(settingsAtom);
 
   useEffect(() => {
     if (!isDesktopTauri) return;
@@ -21,7 +26,8 @@ export function useTauriSettingsSync(): void {
         if (tauriSettings != null) {
           const defaults = getSettings();
           const merged: Settings = { ...defaults, ...tauriSettings };
-          setSettings(merged);
+          persistSettings(merged, false);
+          setJotaiSettings({ settings: merged, broadcast: false });
         } else {
           const currentSettings = getSettings();
           await setTauriSettings(currentSettings);
@@ -35,5 +41,12 @@ export function useTauriSettingsSync(): void {
     return () => {
       cancelled = true;
     };
-  }, [setSettings]);
+  }, [setJotaiSettings]);
+
+  useEffect(() => {
+    if (!isDesktopTauri) return undefined;
+    return subscribeSettings((settings) => {
+      setJotaiSettings({ settings, broadcast: false });
+    });
+  }, [setJotaiSettings]);
 }

@@ -3,9 +3,7 @@ import { Box, Spinner, Text } from 'folds';
 import { useSearchParams } from 'react-router-dom';
 import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 import { AuthRouteThemeManager } from './ThemeManager';
-import { ClientBindAtoms, ClientRoot } from './client';
-import { ClientInitStorageAtom } from './client/ClientInitStorageAtom';
-import { ClientRoomsNotificationPreferences } from './client/ClientRoomsNotificationPreferences';
+import { ClientRoot } from './client';
 import { getFallbackSession } from '../state/sessions';
 import { Settings, SettingsPages } from '../features/settings';
 import { ImageViewer } from '../components/image-viewer';
@@ -28,13 +26,7 @@ function DesktopSecondaryProviders({ children }: { children: ReactNode }) {
 
   return (
     <AuthRouteThemeManager>
-      <ClientRoot>
-        <ClientInitStorageAtom>
-          <ClientRoomsNotificationPreferences>
-            <ClientBindAtoms>{children}</ClientBindAtoms>
-          </ClientRoomsNotificationPreferences>
-        </ClientInitStorageAtom>
-      </ClientRoot>
+      <ClientRoot mode="passive">{children}</ClientRoot>
     </AuthRouteThemeManager>
   );
 }

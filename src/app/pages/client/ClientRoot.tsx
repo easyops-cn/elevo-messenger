@@ -147,9 +147,11 @@ const useLogoutListener = (mx?: MatrixClient) => {
 
 type ClientRootProps = {
   children: ReactNode;
+  mode?: 'live' | 'passive';
 };
-export function ClientRoot({ children }: ClientRootProps) {
-  const [loading, setLoading] = useState(true);
+export function ClientRoot({ children, mode = 'live' }: ClientRootProps) {
+  const live = mode === 'live';
+  const [loading, setLoading] = useState(live);
   const setMatrixReady = useSetAtom(matrixReadyAtom);
   const { baseUrl, userId } = getFallbackSession() ?? {};
 
@@ -176,27 +178,30 @@ export function ClientRoot({ children }: ClientRootProps) {
   }, [loadState, loadMatrix]);
 
   useEffect(() => {
-    if (mx && !mx.clientRunning) {
+    if (live && mx && !mx.clientRunning) {
       startMatrix(mx);
     }
-  }, [mx, startMatrix]);
+  }, [live, mx, startMatrix]);
 
   useSyncState(
-    mx,
-    useCallback((state) => {
-      if (state === 'PREPARED') {
-        setLoading(false);
-        setMatrixReady(true);
-      }
-    }, [setMatrixReady])
+    live ? mx : undefined,
+    useCallback(
+      (state) => {
+        if (state === 'PREPARED') {
+          setLoading(false);
+          setMatrixReady(true);
+        }
+      },
+      [setMatrixReady]
+    )
   );
 
   return (
     <AutoDiscovery userId={userId!} baseUrl={baseUrl!}>
       <SpecVersions baseUrl={baseUrl!}>
-        {mx && <SyncStatusBridge mx={mx} />}
-        {mx && !isDesktopTauri && <SyncStatus mx={mx} />}
-        {loading && <ClientRootOptions mx={mx} />}
+        {live && mx && <SyncStatusBridge mx={mx} />}
+        {live && mx && !isDesktopTauri && <SyncStatus mx={mx} />}
+        {live && loading && <ClientRootOptions mx={mx} />}
         {(loadState.status === AsyncStatus.Error || startState.status === AsyncStatus.Error) && (
           <SplashScreen>
             <Box
@@ -212,13 +217,16 @@ export function ClientRoot({ children }: ClientRootProps) {
                     <>
                       <Text>{`Failed to load. ${loadState.error.message}`}</Text>
 
-                      <Button variant="Critical" onClick={() => {
-                        if (mx) {
-                          logoutClient(mx);
-                          return;
-                        }
-                        clearLoginData();
-                      }}>
+                      <Button
+                        variant="Critical"
+                        onClick={() => {
+                          if (mx) {
+                            logoutClient(mx);
+                            return;
+                          }
+                          clearLoginData();
+                        }}
+                      >
                         <Text as="span" size="B400">
                           Clear storage and retry
                         </Text>
@@ -243,19 +251,21 @@ export function ClientRoot({ children }: ClientRootProps) {
         ) : (
           <MatrixClientProvider value={mx}>
             <ElevoConfigLoader mx={mx}>
-              <DeviceVerificationGate>
-                <ServerConfigsLoader>
-                  {(serverConfigs) => (
-                    <CapabilitiesProvider value={serverConfigs.capabilities ?? {}}>
-                      <MediaConfigProvider value={serverConfigs.mediaConfig ?? {}}>
-                        <AuthMetadataProvider value={serverConfigs.authMetadata}>
-                          {children}
-                        </AuthMetadataProvider>
-                      </MediaConfigProvider>
-                    </CapabilitiesProvider>
-                  )}
-                </ServerConfigsLoader>
-              </DeviceVerificationGate>
+              <ServerConfigsLoader>
+                {(serverConfigs) => (
+                  <CapabilitiesProvider value={serverConfigs.capabilities ?? {}}>
+                    <MediaConfigProvider value={serverConfigs.mediaConfig ?? {}}>
+                      <AuthMetadataProvider value={serverConfigs.authMetadata}>
+                        {live ? (
+                          <DeviceVerificationGate>{children}</DeviceVerificationGate>
+                        ) : (
+                          children
+                        )}
+                      </AuthMetadataProvider>
+                    </MediaConfigProvider>
+                  </CapabilitiesProvider>
+                )}
+              </ServerConfigsLoader>
             </ElevoConfigLoader>
           </MatrixClientProvider>
         )}
