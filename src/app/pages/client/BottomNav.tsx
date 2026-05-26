@@ -31,7 +31,6 @@ import { MessageCircleIcon } from '../../icons/MessageCircleIcon';
 import { CompassIcon } from '../../icons/Compass';
 import { ListTodoIcon } from '../../icons/ListTodoIcon';
 import { SettingsIcon } from '../../icons/SettingsIcon';
-import { isDesktopTauri, openSettingsWindow } from '../../plugins/useTauriOpener';
 
 type SettingsModalState = {
   open: boolean;
@@ -87,10 +86,6 @@ export function BottomNav() {
   useEffect(
     () =>
       onOpenAbout(() => {
-        if (isDesktopTauri) {
-          openSettingsWindow(SettingsPages.AboutPage);
-          return;
-        }
         setSettingsModal((prev) => ({
           open: true,
           initialPage: SettingsPages.AboutPage,
@@ -101,10 +96,6 @@ export function BottomNav() {
   );
 
   const openSettings = () => {
-    if (isDesktopTauri) {
-      openSettingsWindow();
-      return;
-    }
     setSettingsModal((prev) => ({
       open: true,
       initialPage: undefined,

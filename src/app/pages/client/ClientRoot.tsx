@@ -147,11 +147,9 @@ const useLogoutListener = (mx?: MatrixClient) => {
 
 type ClientRootProps = {
   children: ReactNode;
-  mode?: 'live' | 'passive';
 };
-export function ClientRoot({ children, mode = 'live' }: ClientRootProps) {
-  const live = mode === 'live';
-  const [loading, setLoading] = useState(live);
+export function ClientRoot({ children }: ClientRootProps) {
+  const [loading, setLoading] = useState(true);
   const setMatrixReady = useSetAtom(matrixReadyAtom);
   const { baseUrl, userId } = getFallbackSession() ?? {};
 
@@ -178,13 +176,13 @@ export function ClientRoot({ children, mode = 'live' }: ClientRootProps) {
   }, [loadState, loadMatrix]);
 
   useEffect(() => {
-    if (live && mx && !mx.clientRunning) {
+    if (mx && !mx.clientRunning) {
       startMatrix(mx);
     }
-  }, [live, mx, startMatrix]);
+  }, [mx, startMatrix]);
 
   useSyncState(
-    live ? mx : undefined,
+    mx,
     useCallback(
       (state) => {
         if (state === 'PREPARED') {
@@ -199,9 +197,9 @@ export function ClientRoot({ children, mode = 'live' }: ClientRootProps) {
   return (
     <AutoDiscovery userId={userId!} baseUrl={baseUrl!}>
       <SpecVersions baseUrl={baseUrl!}>
-        {live && mx && <SyncStatusBridge mx={mx} />}
-        {live && mx && !isDesktopTauri && <SyncStatus mx={mx} />}
-        {live && loading && <ClientRootOptions mx={mx} />}
+        {mx && <SyncStatusBridge mx={mx} />}
+        {mx && !isDesktopTauri && <SyncStatus mx={mx} />}
+        {loading && <ClientRootOptions mx={mx} />}
         {(loadState.status === AsyncStatus.Error || startState.status === AsyncStatus.Error) && (
           <SplashScreen>
             <Box
@@ -251,21 +249,19 @@ export function ClientRoot({ children, mode = 'live' }: ClientRootProps) {
         ) : (
           <MatrixClientProvider value={mx}>
             <ElevoConfigLoader mx={mx}>
-              <ServerConfigsLoader>
-                {(serverConfigs) => (
-                  <CapabilitiesProvider value={serverConfigs.capabilities ?? {}}>
-                    <MediaConfigProvider value={serverConfigs.mediaConfig ?? {}}>
-                      <AuthMetadataProvider value={serverConfigs.authMetadata}>
-                        {live ? (
-                          <DeviceVerificationGate>{children}</DeviceVerificationGate>
-                        ) : (
-                          children
-                        )}
-                      </AuthMetadataProvider>
-                    </MediaConfigProvider>
-                  </CapabilitiesProvider>
-                )}
-              </ServerConfigsLoader>
+              <DeviceVerificationGate>
+                <ServerConfigsLoader>
+                  {(serverConfigs) => (
+                    <CapabilitiesProvider value={serverConfigs.capabilities ?? {}}>
+                      <MediaConfigProvider value={serverConfigs.mediaConfig ?? {}}>
+                        <AuthMetadataProvider value={serverConfigs.authMetadata}>
+                          {children}
+                        </AuthMetadataProvider>
+                      </MediaConfigProvider>
+                    </CapabilitiesProvider>
+                  )}
+                </ServerConfigsLoader>
+              </DeviceVerificationGate>
             </ElevoConfigLoader>
           </MatrixClientProvider>
         )}

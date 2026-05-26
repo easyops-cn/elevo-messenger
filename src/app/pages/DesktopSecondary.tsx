@@ -1,50 +1,16 @@
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
-import { Box, Spinner, Text } from 'folds';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Box, Spinner, Text, varsClass } from 'folds';
 import { useSearchParams } from 'react-router-dom';
 import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
-import { AuthRouteThemeManager } from './ThemeManager';
-import { ClientRoot } from './client';
-import { getFallbackSession } from '../state/sessions';
-import { Settings, SettingsPages } from '../features/settings';
+import { lightTheme } from '../../colors.css';
+import { elevoConfig, elevoLight } from '../../config.css';
 import { ImageViewer } from '../components/image-viewer';
-import { useMatrixClient } from '../hooks/useMatrixClient';
-import { useMediaAuthentication } from '../hooks/useMediaAuthentication';
-import { decryptFile, downloadEncryptedMedia, mxcUrlToHttp } from '../utils/matrix';
+import { decryptFile, downloadEncryptedMedia, downloadMedia } from '../utils/matrix';
 import { FALLBACK_MIMETYPE } from '../utils/mimeTypes';
-import { PageRoot } from '../components/page';
-
-function DesktopSecondaryProviders({ children }: { children: ReactNode }) {
-  if (!getFallbackSession()) {
-    return (
-      <AuthRouteThemeManager>
-        <Box grow="Yes" alignItems="Center" justifyContent="Center">
-          <Text>Sign in to continue.</Text>
-        </Box>
-      </AuthRouteThemeManager>
-    );
-  }
-
-  return (
-    <AuthRouteThemeManager>
-      <ClientRoot mode="passive">{children}</ClientRoot>
-    </AuthRouteThemeManager>
-  );
-}
+import { getFallbackSession } from '../state/sessions';
 
 function closeCurrentWindow() {
   window.close();
-}
-
-export function DesktopSettingsWindow() {
-  const [searchParams] = useSearchParams();
-  const page = Number(searchParams.get('page'));
-  const initialPage = Number.isInteger(page) ? (page as SettingsPages) : undefined;
-
-  return (
-    <DesktopSecondaryProviders>
-      <Settings initialPage={initialPage} requestClose={closeCurrentWindow} />
-    </DesktopSecondaryProviders>
-  );
 }
 
 function parseEncryptedInfo(value: string | null): EncryptedAttachmentInfo | undefined {
@@ -56,13 +22,27 @@ function parseEncryptedInfo(value: string | null): EncryptedAttachmentInfo | und
   }
 }
 
+function mxcToDownloadUrl(
+  baseUrl: string,
+  mxcUrl: string,
+  useAuthentication: boolean
+): string | undefined {
+  const match = mxcUrl.match(/^mxc:\/\/([^/]+)\/(.+)$/);
+  if (!match) return undefined;
+
+  const [, serverName, mediaId] = match;
+  const mediaPath = useAuthentication
+    ? '/_matrix/client/v1/media/download'
+    : '/_matrix/media/v3/download';
+  return `${baseUrl}${mediaPath}/${encodeURIComponent(serverName)}/${encodeURIComponent(mediaId)}`;
+}
+
 function DesktopImageViewerContent() {
-  const mx = useMatrixClient();
-  const useAuthentication = useMediaAuthentication();
   const [searchParams] = useSearchParams();
   const alt = searchParams.get('alt') || 'Image';
   const url = searchParams.get('url');
   const mimeType = searchParams.get('mimeType') || FALLBACK_MIMETYPE;
+  const useAuthentication = searchParams.get('useAuthentication') === 'true';
   const encInfo = useMemo(() => parseEncryptedInfo(searchParams.get('encInfo')), [searchParams]);
   const [src, setSrc] = useState<string>();
   const [error, setError] = useState<string>();
@@ -80,14 +60,23 @@ function DesktopImageViewerContent() {
         return;
       }
 
-      const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
+      const session = getFallbackSession();
+      if (!session) {
+        setError('Sign in to preview this image.');
+        return;
+      }
+
+      const mediaUrl = mxcToDownloadUrl(session.baseUrl, url, useAuthentication);
       if (!mediaUrl) {
         setError('Invalid image URL.');
         return;
       }
 
       if (!encInfo) {
-        setSrc(mediaUrl);
+        const blob = await downloadMedia(mediaUrl);
+        if (!alive) return;
+        objectUrl = URL.createObjectURL(blob);
+        setSrc(objectUrl);
         return;
       }
 
@@ -107,7 +96,7 @@ function DesktopImageViewerContent() {
       alive = false;
       if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [mx, url, useAuthentication, encInfo, mimeType]);
+  }, [url, useAuthentication, encInfo, mimeType]);
 
   if (error) {
     return (
@@ -129,11 +118,14 @@ function DesktopImageViewerContent() {
 }
 
 export function DesktopImageViewerWindow() {
+  useEffect(() => {
+    document.body.className = '';
+    document.body.classList.add(elevoConfig, varsClass, lightTheme, elevoLight, 'prism-light');
+  }, []);
+
   return (
-    <DesktopSecondaryProviders>
-      <PageRoot nav={null} variant="Surface">
-        <DesktopImageViewerContent />
-      </PageRoot>
-    </DesktopSecondaryProviders>
+    <Box style={{ width: '100vw', height: '100vh' }}>
+      <DesktopImageViewerContent />
+    </Box>
   );
 }

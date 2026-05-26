@@ -37,7 +37,6 @@ import {
   ME_INVITES_PATH,
   ME_NOTIFICATIONS_PATH,
   TODOS_PATH,
-  DESKTOP_SETTINGS_PATH,
   DESKTOP_IMAGE_VIEWER_PATH,
 } from './paths';
 import {
@@ -84,7 +83,7 @@ import { getFallbackSession } from '../state/sessions';
 import { CallStatusRenderer } from './CallStatusRenderer';
 import { CallEmbedProvider } from '../components/CallEmbedProvider';
 import { PageNotFound } from './PageNotFound';
-import { DesktopImageViewerWindow, DesktopSettingsWindow } from './DesktopSecondary';
+import { DesktopImageViewerWindow } from './DesktopSecondary';
 
 function TauriDeepLinkHandler() {
   useTauriDeepLink();
@@ -292,7 +291,6 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
         <Route path={ME_NOTIFICATIONS_PATH} loader={() => redirect(getMePath())} />
         <Route path={ME_INVITES_PATH} loader={() => redirect(getHomeInvitesPath())} />
       </Route>
-      <Route path={DESKTOP_SETTINGS_PATH} element={<DesktopSettingsWindow />} />
       <Route path={DESKTOP_IMAGE_VIEWER_PATH} element={<DesktopImageViewerWindow />} />
       <Route
         path="/*"

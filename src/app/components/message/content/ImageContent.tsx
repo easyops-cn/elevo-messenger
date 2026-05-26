@@ -141,6 +141,9 @@ export const ImageContent = as<'div', ImageContentProps>(
           url,
           mimeType,
           encInfo,
+          useAuthentication,
+          width: info?.w,
+          height: info?.h,
           labelSeed: url,
         });
         return;

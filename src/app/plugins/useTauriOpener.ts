@@ -3,14 +3,8 @@ import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
 import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 import { mobileOrTablet } from '../utils/user-agent';
-import {
-  DESKTOP_IMAGE_VIEWER_PATH,
-  DESKTOP_SETTINGS_PATH,
-  type DesktopImageViewerPathSearchParams,
-  type DesktopSettingsPathSearchParams,
-} from '../pages/paths';
+import { DESKTOP_IMAGE_VIEWER_PATH, type DesktopImageViewerPathSearchParams } from '../pages/paths';
 import { withOriginBaseUrl, withSearchParam } from '../pages/pathUtils';
-import type { SettingsPages } from '../features/settings';
 import { trimSlash, trimTrailingSlash } from '../utils/common';
 
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
@@ -110,34 +104,11 @@ function getCurrentAppBaseUrl(): string {
   if (!hash.startsWith('#/')) return baseUrl;
 
   const hashPath = hash.slice(1);
-  if (
-    hashPath.startsWith(DESKTOP_SETTINGS_PATH) ||
-    hashPath.startsWith(DESKTOP_IMAGE_VIEWER_PATH)
-  ) {
+  if (hashPath.startsWith(DESKTOP_IMAGE_VIEWER_PATH)) {
     return baseUrl;
   }
 
   return `${baseUrl}/#`;
-}
-
-export function openSettingsWindow(initialPage?: SettingsPages): void {
-  const searchParams: DesktopSettingsPathSearchParams = {};
-  if (initialPage !== undefined) searchParams.page = String(initialPage);
-
-  openAppWindow({
-    label: 'settings',
-    path: withOriginBaseUrl(
-      getCurrentAppBaseUrl(),
-      initialPage === undefined
-        ? DESKTOP_SETTINGS_PATH
-        : withSearchParam(DESKTOP_SETTINGS_PATH, searchParams)
-    ),
-    title: 'Settings',
-    width: 900,
-    height: 700,
-    minWidth: 720,
-    minHeight: 520,
-  });
 }
 
 export type ImageViewerWindowPayload = {
@@ -145,6 +116,9 @@ export type ImageViewerWindowPayload = {
   url: string;
   mimeType?: string;
   encInfo?: EncryptedAttachmentInfo;
+  useAuthentication?: boolean;
+  width?: number;
+  height?: number;
   labelSeed?: string;
 };
 
@@ -157,6 +131,9 @@ export function openImageViewerWindow({
   url,
   mimeType,
   encInfo,
+  useAuthentication,
+  width,
+  height,
   labelSeed,
 }: ImageViewerWindowPayload): void {
   const searchParams: DesktopImageViewerPathSearchParams = {
@@ -165,6 +142,22 @@ export function openImageViewerWindow({
   };
   if (mimeType) searchParams.mimeType = mimeType;
   if (encInfo) searchParams.encInfo = JSON.stringify(encInfo);
+  if (useAuthentication !== undefined) {
+    searchParams.useAuthentication = useAuthentication ? 'true' : 'false';
+  }
+  if (width) searchParams.width = String(width);
+  if (height) searchParams.height = String(height);
+
+  const dpr = window.devicePixelRatio || 1;
+  const headerHeight = 56;
+  const minWidth = 480;
+  const minHeight = 360;
+  const maxWidth = 1200;
+  const maxHeight = 900;
+  const imageWidth = width ? Math.ceil(width / dpr) : 1000;
+  const imageHeight = height ? Math.ceil(height / dpr) : 704;
+  const windowWidth = Math.min(Math.max(imageWidth, minWidth), maxWidth);
+  const windowHeight = Math.min(Math.max(imageHeight + headerHeight, minHeight), maxHeight);
 
   openAppWindow({
     label: `image-viewer-${sanitizeWindowLabelPart(labelSeed ?? url)}`,
@@ -173,10 +166,10 @@ export function openImageViewerWindow({
       withSearchParam(DESKTOP_IMAGE_VIEWER_PATH, searchParams)
     ),
     title: alt || 'Image Preview',
-    width: 1000,
-    height: 760,
-    minWidth: 640,
-    minHeight: 480,
+    width: windowWidth,
+    height: windowHeight,
+    minWidth,
+    minHeight,
   });
 }
 

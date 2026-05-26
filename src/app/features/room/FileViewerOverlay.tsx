@@ -120,10 +120,23 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
       url,
       mimeType: mimetype,
       encInfo,
+      useAuthentication: useAuth,
+      width: content.info?.w as number | undefined,
+      height: content.info?.h as number | undefined,
       labelSeed: fileEvent.getId() ?? url,
     });
     requestClose();
-  }, [fileEvent, viewerType, url, filename, mimetype, encInfo, requestClose]);
+  }, [
+    content.info,
+    fileEvent,
+    viewerType,
+    url,
+    filename,
+    mimetype,
+    encInfo,
+    useAuth,
+    requestClose,
+  ]);
 
   if (!viewerType) {
     if (!url) return null;
