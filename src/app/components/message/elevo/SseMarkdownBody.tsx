@@ -139,13 +139,13 @@ export function SseMarkdownBody({ sseData, reasoning, renderBody, renderUrlsPrev
   const content = useMemo(() => ({
     body: markdownBody,
     formatted_body: sanitizedHtml,
-    ...(reasoning ? { 'vip.elevo.reasoning': {} } : null),
-  }), [markdownBody, sanitizedHtml, reasoning]);
+    ...(reasoning ? { 'vip.elevo.reasoning': { streaming: !streamDone } } : null),
+  }), [markdownBody, sanitizedHtml, reasoning, streamDone]);
 
   if (!markdownBody && !streamDone) {
     return (
       <MessageTextBody style={{...style, fontStyle: 'italic', opacity: config.opacity.P300 }}>
-        {t('room.typing')}
+        {t('message.thinking')}
       </MessageTextBody>
     );
   }

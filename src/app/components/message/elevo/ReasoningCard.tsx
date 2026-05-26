@@ -7,16 +7,19 @@ type ReasoningCardProps = {
   style?: CSSProperties;
   children: ReactNode;
   durationMs?: number;
+  streaming?: boolean;
   empty?: boolean;
 };
-export function ReasoningCard({ style, children, durationMs, empty }: ReasoningCardProps) {
+export function ReasoningCard({ style, children, durationMs, streaming, empty }: ReasoningCardProps) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
 
   const label =
-    typeof durationMs === 'number' && durationMs > 0
+    typeof durationMs === 'number'
       ? t('message.thought_for_seconds', { seconds: Math.max(1, Math.round(durationMs / 1000)) })
-      : t('message.thinking');
+      : streaming
+      ? t('message.thinking')
+      : t('message.thought')
 
   return (
     <Box

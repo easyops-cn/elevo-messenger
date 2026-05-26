@@ -137,12 +137,12 @@ export function MText({
     return <OidcLoginCard data={oidcLogin} style={style} />;
   }
 
-  const reasoningContent = content['vip.elevo.reasoning'];
+  const reasoningContent = content['vip.elevo.reasoning'] as undefined | {
+    duration_ms?: number;
+    streaming?: boolean;
+  };
   const reasoning = !!reasoningContent;
-  const durationMs =
-    reasoningContent && typeof reasoningContent === 'object' && 'duration_ms' in reasoningContent
-      ? Number((reasoningContent as { duration_ms?: number }).duration_ms)
-      : undefined;
+
   if (sseRender?.streaming) {
     return (
       <SseMarkdownBody
@@ -161,8 +161,13 @@ export function MText({
 
   if (reasoning) {
     const trimmedBody = trimReplyFromBody(body);
+    const durationMs =
+      typeof reasoningContent?.duration_ms === 'number'
+        ? Number(reasoningContent.duration_ms)
+        : undefined;
+    const reasoningStreaming = reasoningContent?.streaming;
     return (
-      <ReasoningCard style={style} durationMs={durationMs} empty={!trimmedBody}>
+      <ReasoningCard style={style} durationMs={durationMs} streaming={reasoningStreaming} empty={!trimmedBody}>
         <MessageTextBody
           preWrap={typeof customBody !== 'string'}
           jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
