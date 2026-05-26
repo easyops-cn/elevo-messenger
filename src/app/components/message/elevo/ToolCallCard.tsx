@@ -38,6 +38,11 @@ const ApplyPatchInputSchema = z.object({
   patchText: z.string(),
 });
 
+const ToolCallDiffInputSchema = z.object({
+  diff: z.string(),
+  path: z.string().optional(),
+});
+
 type ApplyPatchOperation =
   | { kind: 'add'; path: string; content: string }
   | { kind: 'delete'; path: string }
@@ -159,6 +164,32 @@ function getApplyPatchForRender(data: ToolCallData): ApplyPatchOperation[] | und
   const result = ApplyPatchInputSchema.safeParse(parsedInput);
   if (!result.success) return undefined;
   return parseApplyPatchText(result.data.patchText);
+}
+
+function isPatchDiffLine(line: string): boolean {
+  return line.startsWith('@@') || /^[+\-\s]/.test(line);
+}
+
+function normalizeAddToolDiff(diff: string): string {
+  const lines = diff.split('\n');
+  if (lines.every(isPatchDiffLine)) return diff;
+  const hunkHeader = `@@ -0,0 +1,${lines.length} @@`;
+  return [hunkHeader, ...lines.map((line) => `+${line}`)].join('\n');
+}
+
+function getToolCallDiffForRender(data: ToolCallData): ApplyPatchOperation[] | undefined {
+  const parsedInput = tryParseJson(data.input);
+  const result = ToolCallDiffInputSchema.safeParse(parsedInput);
+  if (!result.success) return undefined;
+
+  const path = result.data.path ?? '';
+  if (data.name === 'Edit') {
+    return [{ kind: 'update', path, diff: result.data.diff }];
+  }
+  if (data.name === 'Add') {
+    return [{ kind: 'add', path, content: normalizeAddToolDiff(result.data.diff) }];
+  }
+  return undefined;
 }
 
 function applyPatchOperationKey(op: ApplyPatchOperation): string {
@@ -323,7 +354,10 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
     [data.output, data.error]
   );
   const todos = useMemo(() => getTodosForRender(data), [data]);
-  const patchOperations = useMemo(() => getApplyPatchForRender(data), [data]);
+  const patchOperations = useMemo(
+    () => getApplyPatchForRender(data) ?? getToolCallDiffForRender(data),
+    [data]
+  );
 
   const prettierToolName = useMemo(
     () =>
