@@ -12,6 +12,7 @@ import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
 import { ReasoningCard } from './elevo/ReasoningCard';
 import { SseMarkdownBody, parseSseRender } from './elevo/SseMarkdownBody';
 import { OidcLoginCard, parseOidcLogin } from './elevo/OidcLoginCard';
+import { PlanCard, hasPlan } from './elevo/PlanCard';
 import { trimReplyFromBody } from '../../utils/room';
 import { MessageTextBody } from './layout';
 import {
@@ -108,11 +109,22 @@ export function MText({
   const oidcLogin = useMemo(() => parseOidcLogin(content), [content]);
   const sseRender = useMemo(() => parseSseRender(content), [content]);
   const toolCall = useMemo(() => parseToolCall(content), [content]);
+  const plan = hasPlan(content);
+
+  if (plan) {
+    return (
+      <PlanCard
+        content={content}
+        renderBody={renderBody}
+        renderUrlsPreview={renderUrlsPreview}
+        style={style}
+      />
+    );
+  }
 
   if (typeof body !== 'string') return <BrokenContent />;
 
   if (askUser) {
-
     if (askUser.answers) {
       return (
         <QuestionAnsweredCard
