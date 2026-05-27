@@ -22,6 +22,7 @@ import {
   Room,
   RoomEvent,
   RoomEventHandlerMap,
+  ThreadEvent,
   type Thread,
 } from 'matrix-js-sdk';
 import { HTMLReactParserOptions } from 'html-react-parser';
@@ -191,6 +192,9 @@ const getTimelinesEventsCount = (timelines: EventTimeline[]): number => {
     count + timelineToEventsCount(tm);
   return timelines.reduce(timelineEventCountReducer, 0);
 };
+
+const timelineIncludesEvent = (timelines: EventTimeline[], eventId: string): boolean =>
+  timelines.some((timeline) => timeline.getEvents().some((evt) => evt.getId() === eventId));
 
 const getTimelineAndBaseIndex = (
   timelines: EventTimeline[],
@@ -414,6 +418,32 @@ const useLiveTimelineRefresh = (room: Room, onRefresh: () => void) => {
       room.removeListener(RoomEvent.TimelineRefresh, handleTimelineRefresh);
     };
   }, [room, onRefresh]);
+};
+
+const useThreadRootUpdate = (
+  room: Room,
+  thread: Thread | undefined,
+  onUpdate: (updatedThread: Thread) => void
+) => {
+  useEffect(() => {
+    if (thread) return undefined;
+
+    const handleThreadUpdate = (updatedThread: Thread) => {
+      if (updatedThread.room.roomId !== room.roomId) return;
+      onUpdate(updatedThread);
+    };
+
+    room.on(ThreadEvent.New, handleThreadUpdate);
+    room.on(ThreadEvent.Update, handleThreadUpdate);
+    room.on(ThreadEvent.NewReply, handleThreadUpdate);
+    room.on(ThreadEvent.Delete, handleThreadUpdate);
+    return () => {
+      room.removeListener(ThreadEvent.New, handleThreadUpdate);
+      room.removeListener(ThreadEvent.Update, handleThreadUpdate);
+      room.removeListener(ThreadEvent.NewReply, handleThreadUpdate);
+      room.removeListener(ThreadEvent.Delete, handleThreadUpdate);
+    };
+  }, [room, thread, onUpdate]);
 };
 
 const getInitialTimeline = (room: Room, thread: Thread | undefined) => {
@@ -731,6 +761,19 @@ export function RoomTimeline({
         setTimeline(getInitialTimeline(room, thread));
       }
     }, [room, thread, liveTimelineLinked])
+  );
+
+  useThreadRootUpdate(
+    room,
+    thread,
+    useCallback(
+      (updatedThread) => {
+        if (timelineIncludesEvent(timeline.linkedTimelines, updatedThread.id)) {
+          setTimeline((currentTimeline) => ({ ...currentTimeline }));
+        }
+      },
+      [timeline.linkedTimelines]
+    )
   );
 
   const tryAutoMarkAsRead = useCallback(() => {
