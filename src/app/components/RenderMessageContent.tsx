@@ -34,13 +34,7 @@ import { IImageContent } from '../../types/matrix/common';
 import { useMatrixClient } from '../hooks/useMatrixClient';
 import { useMediaAuthentication } from '../hooks/useMediaAuthentication';
 import { mxcUrlToHttp } from '../utils/matrix';
-import { openDesktopFilePreview, type DesktopPreviewViewerType } from '../utils/desktopPreview';
-import {
-  READABLE_EXT_TO_MIME_TYPE,
-  READABLE_TEXT_MIME_TYPES,
-  getFileNameExt,
-  mimeTypeToExt,
-} from '../utils/mimeTypes';
+import { openDesktopFilePreview } from '../utils/desktopPreview';
 
 type RenderMessageContentProps = {
   displayName: string;
@@ -167,35 +161,6 @@ export function RenderMessageContent({
               url={url}
               encInfo={encInfo}
               info={info}
-              onOpenDesktop={async () => {
-                const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
-                if (!mediaUrl) return false;
-                let viewerType: DesktopPreviewViewerType = 'file';
-                if (mimeType.startsWith('image/')) viewerType = 'image';
-                else if (mimeType.startsWith('video/')) viewerType = 'video';
-                else if (mimeType.startsWith('audio/')) viewerType = 'audio';
-                else if (mimeType === 'application/pdf') viewerType = 'pdf';
-                else if (
-                  READABLE_TEXT_MIME_TYPES.includes(mimeType) ||
-                  READABLE_EXT_TO_MIME_TYPE[getFileNameExt(body)]
-                ) {
-                  viewerType = 'text';
-                }
-                return openDesktopFilePreview({
-                  viewerType,
-                  name: body,
-                  mimeType,
-                  size: info.size,
-                  mediaUrl,
-                  encInfo,
-                  langName:
-                    viewerType === 'text'
-                      ? READABLE_TEXT_MIME_TYPES.includes(mimeType)
-                        ? mimeTypeToExt(mimeType)
-                        : mimeTypeToExt(READABLE_EXT_TO_MIME_TYPE[getFileNameExt(body)] ?? mimeType)
-                      : undefined,
-                });
-              }}
             />
           </FileContent>
         )}
