@@ -6,7 +6,12 @@ import { Avatar } from '../../components/avatar';
 import { UserAvatar } from '../../components/user-avatar';
 import { useThreadUnreadBadge } from '../../hooks/useThreadUnreadBadge';
 import { getMxIdLocalPart } from '../../utils/matrix';
-import { getLatestMessageText, getMemberDisplayName } from '../../utils/room';
+import {
+  getEditedEvent,
+  getLatestMessageText,
+  getLatestMessageTextFromContent,
+  getMemberDisplayName,
+} from '../../utils/room';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { RelativeTime } from '../../components/RelativeTime';
 import { MessageDeletedContent } from '../../components/message';
@@ -52,9 +57,27 @@ export function ThreadMenuItem({
     const rIsRedacted = threadEvent?.isRedacted() ?? false;
     const rSenderId = rIsRedacted ? threadEvent?.getSender() : undefined;
     const rSenderName = rSenderId ? getMemberDisplayName(room, rSenderId) ?? getMxIdLocalPart(rSenderId) ?? rSenderId : undefined;
-    const latestSummary = threadLastReply
-      ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t, false)
-      : undefined;
+    const latestReplyId = threadLastReply?.getId();
+    const editedLastReply =
+      latestReplyId && threadLastReply
+        ? getEditedEvent(latestReplyId, threadLastReply, thread.timelineSet)
+        : undefined;
+    const latestReplyContent = editedLastReply?.getContent()['m.new_content'];
+    const latestSummary =
+      threadLastReply && latestReplyContent
+        ? getLatestMessageTextFromContent(
+            room,
+            threadLastReply,
+            latestReplyContent,
+            mx.getSafeUserId(),
+            false,
+            t,
+            false,
+            false
+          )
+        : threadLastReply
+          ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t, false)
+          : undefined;
     const senderId = threadLastReply?.getSender();
     const senderName = senderId
       ? getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId
@@ -75,7 +98,7 @@ export function ThreadMenuItem({
       latestReplyAvatarUrl: avatarUrl,
       latestTs: ts,
     };
-  }, [mx, room, threadEvent, threadLastReply, t, useAuthentication]);
+  }, [mx, room, thread, threadEvent, threadLastReply, t, useAuthentication]);
 
   return (
     <MenuItem

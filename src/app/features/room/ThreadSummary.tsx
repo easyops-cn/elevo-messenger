@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
-import { MatrixEvent, Room, type Thread } from 'matrix-js-sdk';
+import React, { useEffect, useMemo, useState } from 'react';
+import { MatrixEvent, RelationType, Room, RoomEvent, type Thread } from 'matrix-js-sdk';
 import { Badge, Box, Chip, Icon, Icons, Text, config, toRem } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { MessageSquareTextIcon } from '../../icons/MessageSquareTextIcon';
@@ -10,7 +10,9 @@ import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useThreadUnreadBadge } from '../../hooks/useThreadUnreadBadge';
 import { getMxIdLocalPart } from '../../utils/matrix';
 import {
+  getEditedEvent,
   getLatestMessageText,
+  getLatestMessageTextFromContent,
   getMemberDisplayName,
 } from '../../utils/room';
 
@@ -27,12 +29,32 @@ export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSum
   const { t } = useTranslation();
 
   const mEventId = mEvent.getId() ?? thread.id;
+  const [editVersion, setEditVersion] = useState(0);
   const hasThreadUnreadBadge = useThreadUnreadBadge({
     room,
     thread,
     threadId: mEventId,
   });
   const threadLastReply = thread.replyToEvent;
+  const threadLastReplyId = threadLastReply?.getId();
+
+  useEffect(() => {
+    if (!threadLastReplyId) return undefined;
+
+    const handleTimelineEvent = (timelineEvent: MatrixEvent) => {
+      if (
+        timelineEvent.isRelation(RelationType.Replace) &&
+        timelineEvent.getAssociatedId() === threadLastReplyId
+      ) {
+        setEditVersion((version) => version + 1);
+      }
+    };
+
+    thread.on(RoomEvent.Timeline, handleTimelineEvent);
+    return () => {
+      thread.removeListener(RoomEvent.Timeline, handleTimelineEvent);
+    };
+  }, [thread, threadLastReplyId]);
 
   const {
     threadSummary,
@@ -40,9 +62,27 @@ export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSum
     threadLastReplySenderName,
     threadLastReplyAvatarUrl,
   } = useMemo(() => {
-    const summary = threadLastReply
-      ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t, false)
-      : undefined;
+    const lastReplyId = threadLastReply?.getId();
+    const editedLastReply =
+      editVersion >= 0 && lastReplyId && threadLastReply
+        ? getEditedEvent(lastReplyId, threadLastReply, thread.timelineSet)
+        : undefined;
+    const latestReplyContent = editedLastReply?.getContent()['m.new_content'];
+    const summary =
+      threadLastReply && latestReplyContent
+        ? getLatestMessageTextFromContent(
+            room,
+            threadLastReply,
+            latestReplyContent,
+            mx.getSafeUserId(),
+            false,
+            t,
+            false,
+            false
+          )
+        : threadLastReply
+          ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t, false)
+          : undefined;
 
     const lastReplySenderId = threadLastReply?.getSender();
     const lastReplySenderName = lastReplySenderId
@@ -71,7 +111,7 @@ export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSum
       threadLastReplySenderName: lastReplySenderName,
       threadLastReplyAvatarUrl: lastReplyAvatarUrl,
     };
-  }, [mx, room, threadLastReply, t, useAuthentication]);
+  }, [mx, room, thread, threadLastReply, editVersion, t, useAuthentication]);
 
   return (
     <Chip

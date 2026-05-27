@@ -16,6 +16,7 @@ import {
   RelationType,
   Room,
   RoomMember,
+  type IContent,
   type Thread,
 } from 'matrix-js-sdk';
 import { CryptoBackend } from 'matrix-js-sdk/lib/common-crypto/CryptoBackend';
@@ -597,16 +598,16 @@ export const guessPerfectParent = (
   return perfectParent;
 };
 
-export const getLatestMessageText = (
+export const getLatestMessageTextFromContent = (
   room: Room,
   evt: MatrixEvent,
+  content: IContent,
   myUserId: string,
   direct: boolean | undefined,
   t: (key: string, options?: Record<string, unknown>) => string,
   showUsername = true,
   showSelfName = false
 ): string | undefined => {
-  const content = evt.getContent();
   const sender = evt.getSender();
   if (!sender || !content?.body) return undefined;
 
@@ -629,3 +630,23 @@ export const getLatestMessageText = (
   const senderName = getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender) ?? sender;
   return `${senderName}: ${body}`;
 };
+
+export const getLatestMessageText = (
+  room: Room,
+  evt: MatrixEvent,
+  myUserId: string,
+  direct: boolean | undefined,
+  t: (key: string, options?: Record<string, unknown>) => string,
+  showUsername = true,
+  showSelfName = false
+): string | undefined =>
+  getLatestMessageTextFromContent(
+    room,
+    evt,
+    evt.getContent(),
+    myUserId,
+    direct,
+    t,
+    showUsername,
+    showSelfName
+  );
