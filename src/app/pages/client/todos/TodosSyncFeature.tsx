@@ -174,6 +174,7 @@ function TodosTimelineSync() {
               const todoItem: TodoItem = {
                 room_id: room.roomId,
                 question_event_id: eventId,
+                thread_root_id: mEvent.threadRootId,
                 sender,
                 assignee,
                 question: askUser,

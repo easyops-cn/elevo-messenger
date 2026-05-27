@@ -33,6 +33,7 @@ import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { getMemberDisplayName } from '../../../utils/room';
 import { getMxIdLocalPart } from '../../../utils/matrix';
 import { MessageEvent } from '../../../../types/matrix/room';
+import { useRoomThread } from '../../../features/room/RoomThreadContext';
 
 // Schemas & Types
 
@@ -305,6 +306,7 @@ export function AskUserQuestionCard({
   readOnly,
   onSubmit,
   eventId,
+  threadRootId,
   agentMode,
   initialHumanSender,
   showOtherOption = true,
@@ -314,6 +316,7 @@ export function AskUserQuestionCard({
   readOnly?: boolean;
   onSubmit?: () => void;
   eventId?: string;
+  threadRootId?: string | null;
   agentMode?: string;
   initialHumanSender?: string;
   showOtherOption?: boolean;
@@ -321,7 +324,9 @@ export function AskUserQuestionCard({
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const room = useRoom();
+  const thread = useRoomThread();
   const formIdPrefix = useId();
+  const answerThreadRootId = thread?.id ?? threadRootId;
 
   const [localSubmitted, setLocalSubmitted] = useState(false);
   const [selections, setSelections] = useState<QuestionSelections>({});
@@ -468,14 +473,20 @@ export function AskUserQuestionCard({
       const body = `${agentMode === 'plan' ? '/plan ' : ''}${Object.entries(answers)
         .map(([questionId, ans]) => `${questionId}: ${getAnswerText(ans)}`)
         .join('\n')}`;
-      await mx.sendMessage(room.roomId, {
+      const content = {
         msgtype: 'm.text',
         body,
         'vip.elevo.ask_user_question_answers': {
           question_event_id: answerId,
           answers,
         },
-      } as unknown as RoomMessageEventContent);
+      } as unknown as RoomMessageEventContent;
+
+      if (answerThreadRootId) {
+        await mx.sendMessage(room.roomId, answerThreadRootId, content);
+      } else {
+        await mx.sendMessage(room.roomId, content);
+      }
       setLocalSubmitted(true);
       onSubmit?.();
     } catch (err) {
@@ -495,6 +506,7 @@ export function AskUserQuestionCard({
     mx,
     agentMode,
     room.roomId,
+    answerThreadRootId,
     onSubmit,
     answerId,
     showOtherOption,

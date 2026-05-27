@@ -5,6 +5,7 @@ import type { AskUserQuestionData } from '../../../components/message';
 export type TodoItem = {
   room_id: string;
   question_event_id: string;
+  thread_root_id?: string;
   sender: string;
   assignee: string;
   question: AskUserQuestionData;

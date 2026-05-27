@@ -92,6 +92,7 @@ export function TodoItemCard({ item, hour24Clock, dateFormatString, onSubmit, on
             <AskUserQuestionCard
               data={item.question}
               eventId={item.question_event_id}
+              threadRootId={item.thread_root_id}
               initialHumanSender={item.assignee}
               onSubmit={handleSubmit}
             />
