@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import { Box, varsClass } from 'folds';
 import 'folds/dist/style.css';
 import './index.css';
@@ -27,6 +28,10 @@ const applyTheme = (themeKind: ThemeKind) => {
   document.body.classList.add(
     ...(themeKind === ThemeKind.Dark ? DarkTheme.classNames : LightTheme.classNames)
   );
+};
+
+const closePreviewWindow = () => {
+  getCurrentWindow().close();
 };
 
 function PreviewTheme({ children }: { children: React.ReactNode }) {
@@ -72,6 +77,17 @@ function PreviewApp() {
     window.__ElevoPreview_receive__ = setPayload;
   }, []);
 
+  useEffect(() => {
+    const handleKeyDown = (evt: KeyboardEvent) => {
+      if (evt.key !== 'Escape') return;
+      evt.preventDefault();
+      closePreviewWindow();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <PreviewTheme>
       <Box className={css.PreviewShell} direction="Column">
@@ -81,7 +97,7 @@ function PreviewApp() {
             className={css.PreviewShell}
             item={previewItem}
             hideCloseButton
-            requestClose={() => window.close()}
+            requestClose={closePreviewWindow}
           />
         ) : null}
       </Box>
