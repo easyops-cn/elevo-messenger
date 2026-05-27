@@ -15,6 +15,7 @@ import { mxcUrlToHttp } from '../../utils/matrix';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { ImageViewer } from '../image-viewer';
 import { onEnterOrSpace } from '../../utils/keyboard';
+import { openDesktopFilePreview } from '../../utils/desktopPreview';
 
 const linkStyles = { color: color.Success.Main };
 
@@ -45,6 +46,20 @@ export const UrlPreviewCard = as<'div', { url: string; ts: number }>(
       );
 
       const imgUrl = mxcUrlToHttp(mx, prev['og:image'] || '', useAuthentication);
+      const openImage = async () => {
+        if (
+          imgUrl &&
+          (await openDesktopFilePreview({
+            viewerType: 'image',
+            name: prev['og:title'] || url,
+            mimeType: 'image/*',
+            mediaUrl: imgUrl,
+          }))
+        ) {
+          return;
+        }
+        setViewer(true);
+      };
 
       return (
         <>
@@ -54,8 +69,8 @@ export const UrlPreviewCard = as<'div', { url: string; ts: number }>(
               alt={prev['og:title']}
               title={prev['og:title']}
               tabIndex={0}
-              onKeyDown={(evt) => onEnterOrSpace(() => setViewer(true))(evt)}
-              onClick={() => setViewer(true)}
+              onKeyDown={(evt) => onEnterOrSpace(openImage)(evt)}
+              onClick={openImage}
             />
           )}
           {imgUrl && (

@@ -34,6 +34,7 @@ import {
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { validBlurHash } from '../../../utils/blurHash';
 import { PlayIcon } from '../../../icons/PlayIcon';
+import { openDesktopFilePreview } from '../../../utils/desktopPreview';
 
 type RenderVideoProps = {
   title: string;
@@ -122,6 +123,25 @@ export const VideoContent = as<'div', VideoContentProps>(
       loadSrc();
     };
 
+    const handleOpenVideo = async () => {
+      const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
+      if (
+        mediaUrl &&
+        (await openDesktopFilePreview({
+          viewerType: 'video',
+          name: body,
+          mimeType,
+          size: info.size,
+          duration: info.duration,
+          mediaUrl,
+          encInfo,
+        }))
+      ) {
+        return;
+      }
+      loadSrc();
+    };
+
     useEffect(() => {
       if (autoPlay) loadSrc();
     }, [autoPlay, loadSrc]);
@@ -158,7 +178,7 @@ export const VideoContent = as<'div', VideoContentProps>(
               size="500"
               radii="Pill"
               outlined
-              onClick={loadSrc}
+              onClick={handleOpenVideo}
             >
               <Icon src={PlayIcon} size="200" filled />
             </IconButton>

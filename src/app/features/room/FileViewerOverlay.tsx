@@ -25,6 +25,7 @@ import {
   downloadMedia,
   mxcUrlToHttp,
 } from '../../utils/matrix';
+import { openDesktopFilePreview, type DesktopPreviewViewerType } from '../../utils/desktopPreview';
 
 type ViewerType = 'image' | 'video' | 'audio' | 'text' | 'pdf';
 
@@ -62,6 +63,46 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
     ? (content['org.matrix.msc1767.audio']?.waveform as number[])
     : undefined;
   const viewerType = getFileType(mimetype, filename);
+  const desktopViewerType: DesktopPreviewViewerType = viewerType ?? 'file';
+
+  useEffect(() => {
+    if (!url) return;
+    const open = async () => {
+      const mediaUrl = mxcUrlToHttp(mx, url, useAuth);
+      if (!mediaUrl) return;
+      const opened = await openDesktopFilePreview({
+        viewerType: desktopViewerType,
+        name: filename,
+        mimeType: mimetype,
+        size: fileSize,
+        duration: audioInfo.duration,
+        mediaUrl,
+        encInfo,
+        waveform: audioWaveform,
+        langName:
+          viewerType === 'text'
+            ? READABLE_TEXT_MIME_TYPES.includes(mimetype)
+              ? mimeTypeToExt(mimetype)
+              : mimeTypeToExt(READABLE_EXT_TO_MIME_TYPE[getFileNameExt(filename)] ?? mimetype)
+            : undefined,
+      });
+      if (opened) requestClose();
+    };
+    open();
+  }, [
+    audioInfo.duration,
+    audioWaveform,
+    desktopViewerType,
+    encInfo,
+    fileSize,
+    filename,
+    mimetype,
+    mx,
+    requestClose,
+    url,
+    useAuth,
+    viewerType,
+  ]);
 
   const imageOrVideoUrl = useMemo(() => {
     if ((viewerType !== 'image' && viewerType !== 'video') || !url) return undefined;

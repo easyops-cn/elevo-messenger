@@ -31,6 +31,7 @@ import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { NO_SERVICE_WORKER } from '../../../utils/noServiceWorker';
 import { ModalWide } from '../../../styles/Modal.css';
 import { validBlurHash } from '../../../utils/blurHash';
+import { openDesktopFilePreview } from '../../../utils/desktopPreview';
 
 type RenderViewerProps = {
   src: string;
@@ -128,6 +129,24 @@ export const ImageContent = as<'div', ImageContentProps>(
       loadSrc();
     };
 
+    const handleOpenViewer = async () => {
+      const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
+      if (
+        mediaUrl &&
+        (await openDesktopFilePreview({
+          viewerType: 'image',
+          name: body,
+          mimeType: mimeType ?? FALLBACK_MIMETYPE,
+          size: info?.size,
+          mediaUrl,
+          encInfo,
+        }))
+      ) {
+        return;
+      }
+      setViewer(true);
+    };
+
     useEffect(() => {
       loadSrc();
     }, [loadSrc]);
@@ -182,7 +201,7 @@ export const ImageContent = as<'div', ImageContentProps>(
               src: srcState.data,
               onLoad: handleLoad,
               onError: handleError,
-              onClick: () => setViewer(true),
+              onClick: handleOpenViewer,
               tabIndex: 0,
             })}
           </div>

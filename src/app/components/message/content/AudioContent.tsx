@@ -22,6 +22,7 @@ import {
   mxcUrlToHttp,
 } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
+import { openDesktopFilePreview } from '../../../utils/desktopPreview';
 
 
 type RenderMediaControlProps = {
@@ -31,17 +32,21 @@ type RenderMediaControlProps = {
   children: ReactNode;
 };
 export type AudioContentProps = {
+  name?: string;
   mimeType: string;
   url: string;
   info: IAudioInfo;
   encInfo?: EncryptedAttachmentInfo;
+  waveform?: number[];
   renderMediaControl: (props: RenderMediaControlProps) => ReactNode;
 };
 export function AudioContent({
+  name,
   mimeType,
   url,
   info,
   encInfo,
+  waveform,
   renderMediaControl,
 }: AudioContentProps) {
   const mx = useMatrixClient();
@@ -96,7 +101,26 @@ export function AudioContent({
     if (srcState.status === AsyncStatus.Success) {
       setPlaying(!playing);
     } else if (srcState.status !== AsyncStatus.Loading) {
-      loadSrc();
+      const openDesktop = async () => {
+        const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
+        if (
+          mediaUrl &&
+          (await openDesktopFilePreview({
+            viewerType: 'audio',
+            name: name ?? 'Audio',
+            mimeType,
+            size: info.size,
+            duration: info.duration,
+            mediaUrl,
+            encInfo,
+            waveform,
+          }))
+        ) {
+          return;
+        }
+        loadSrc();
+      };
+      openDesktop();
     }
   };
 

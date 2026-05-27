@@ -11,8 +11,10 @@ import {
 } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { WaveformPlayer } from '../../media/WaveformPlayer';
+import { openDesktopFilePreview } from '../../../utils/desktopPreview';
 
 export type VoiceMessageProps = {
+  name?: string;
   mimeType: string;
   url: string;
   info: IAudioInfo;
@@ -21,6 +23,7 @@ export type VoiceMessageProps = {
 };
 
 export function VoiceMessage({
+  name,
   mimeType,
   url,
   info,
@@ -44,6 +47,26 @@ export function VoiceMessage({
   const infoDuration = info.duration ?? 0;
   const durationSec = (infoDuration >= 0 ? infoDuration : 0) / 1000;
 
+  const handlePlayClick = async () => {
+    const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
+    if (
+      mediaUrl &&
+      (await openDesktopFilePreview({
+        viewerType: 'audio',
+        name: name ?? 'Audio',
+        mimeType,
+        size: info.size,
+        duration: info.duration,
+        mediaUrl,
+        encInfo,
+        waveform,
+      }))
+    ) {
+      return;
+    }
+    loadSrc();
+  };
+
   return (
     <WaveformPlayer
       audioSrc={srcState.status === AsyncStatus.Success ? srcState.data : null}
@@ -51,7 +74,7 @@ export function VoiceMessage({
       durationSec={durationSec}
       mimeType={mimeType}
       isLoading={srcState.status === AsyncStatus.Loading}
-      onPlayClick={loadSrc}
+      onPlayClick={handlePlayClick}
       autoPlay
     />
   );

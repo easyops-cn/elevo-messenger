@@ -77,9 +77,17 @@ type ReadTextFileProps = {
   mimeType: string;
   url: string;
   encInfo?: EncryptedAttachmentInfo;
+  onOpenDesktop?: () => Promise<boolean>;
   renderViewer: (props: RenderTextViewerProps) => ReactNode;
 };
-export function ReadTextFile({ body, mimeType, url, encInfo, renderViewer }: ReadTextFileProps) {
+export function ReadTextFile({
+  body,
+  mimeType,
+  url,
+  encInfo,
+  onOpenDesktop,
+  renderViewer,
+}: ReadTextFileProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const [textViewer, setTextViewer] = useState(false);
@@ -137,9 +145,14 @@ export function ReadTextFile({ body, mimeType, url, encInfo, renderViewer }: Rea
           fill="Solid"
           radii="300"
           size="400"
-          onClick={() =>
-            textState.status === AsyncStatus.Success ? setTextViewer(true) : loadText()
-          }
+          onClick={async () => {
+            if (await onOpenDesktop?.()) return;
+            if (textState.status === AsyncStatus.Success) {
+              setTextViewer(true);
+            } else {
+              loadText();
+            }
+          }}
           disabled={textState.status === AsyncStatus.Loading}
           before={
             textState.status === AsyncStatus.Loading ? (
@@ -168,9 +181,17 @@ export type ReadPdfFileProps = {
   mimeType: string;
   url: string;
   encInfo?: EncryptedAttachmentInfo;
+  onOpenDesktop?: () => Promise<boolean>;
   renderViewer: (props: RenderPdfViewerProps) => ReactNode;
 };
-export function ReadPdfFile({ body, mimeType, url, encInfo, renderViewer }: ReadPdfFileProps) {
+export function ReadPdfFile({
+  body,
+  mimeType,
+  url,
+  encInfo,
+  onOpenDesktop,
+  renderViewer,
+}: ReadPdfFileProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const [pdfViewer, setPdfViewer] = useState(false);
@@ -223,7 +244,14 @@ export function ReadPdfFile({ body, mimeType, url, encInfo, renderViewer }: Read
           fill="Solid"
           radii="300"
           size="400"
-          onClick={() => (pdfState.status === AsyncStatus.Success ? setPdfViewer(true) : loadPdf())}
+          onClick={async () => {
+            if (await onOpenDesktop?.()) return;
+            if (pdfState.status === AsyncStatus.Success) {
+              setPdfViewer(true);
+            } else {
+              loadPdf();
+            }
+          }}
           disabled={pdfState.status === AsyncStatus.Loading}
           before={
             pdfState.status === AsyncStatus.Loading ? (
@@ -248,8 +276,16 @@ export type DownloadFileProps = {
   url: string;
   info: IFileInfo;
   encInfo?: EncryptedAttachmentInfo;
+  onOpenDesktop?: () => Promise<boolean>;
 };
-export function DownloadFile({ body, mimeType, url, info, encInfo }: DownloadFileProps) {
+export function DownloadFile({
+  body,
+  mimeType,
+  url,
+  info,
+  encInfo,
+  onOpenDesktop,
+}: DownloadFileProps) {
   const [downloadState, download] = useMediaDownload(url, mimeType, body, encInfo);
 
   return downloadState.status === AsyncStatus.Error ? (
@@ -260,7 +296,10 @@ export function DownloadFile({ body, mimeType, url, info, encInfo }: DownloadFil
       fill="Soft"
       radii="300"
       size="400"
-      onClick={() => download()}
+      onClick={async () => {
+        if (await onOpenDesktop?.()) return;
+        download();
+      }}
       disabled={downloadState.status === AsyncStatus.Loading}
       before={
         downloadState.status === AsyncStatus.Loading ? (

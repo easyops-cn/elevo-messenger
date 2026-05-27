@@ -365,10 +365,12 @@ export function MVideo({ content, renderAsFile, renderVideoContent }: MVideoProp
 }
 
 type RenderAudioContentProps = {
+  name: string;
   info: IAudioInfo;
   mimeType: string;
   url: string;
   encInfo?: IEncryptedFile;
+  waveform?: number[];
 };
 type MAudioProps = {
   content: IAudioContent;
@@ -390,6 +392,7 @@ export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: 
 
   const msc1767Audio = content['org.matrix.msc1767.audio'];
   const waveform = msc1767Audio?.waveform;
+  const filename = content.filename ?? content.body ?? 'Audio';
   if (Array.isArray(waveform) && waveform.length > 0) {
     return (
       <Box
@@ -410,13 +413,13 @@ export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: 
           url={mxcUrl}
           info={audioInfo}
           encInfo={content.file}
+          name={filename}
           waveform={waveform}
         />
       </Box>
     );
   }
 
-  const filename = content.filename ?? content.body ?? 'Audio';
   return (
     <Attachment outlined={outlined}>
       <AttachmentHeader>
@@ -436,10 +439,12 @@ export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: 
       <AttachmentBox>
         <AttachmentContent>
           {renderAudioContent({
+            name: filename,
             info: audioInfo,
             mimeType: safeMimeType,
             url: mxcUrl,
             encInfo: content.file,
+            waveform,
           })}
         </AttachmentContent>
       </AttachmentBox>
