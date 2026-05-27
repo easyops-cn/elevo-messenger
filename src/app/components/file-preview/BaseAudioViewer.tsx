@@ -29,7 +29,7 @@ import {
 import { secondsToMinutesAndSeconds } from '../../utils/common';
 import { MediaControl } from '../media/MediaControls';
 import { WaveformPlayer } from '../media/WaveformPlayer';
-import * as css from '../audio-viewer/AudioViewer.css';
+import * as css from './AudioViewer.css';
 
 export type BaseAudioInfo = {
   size?: number;

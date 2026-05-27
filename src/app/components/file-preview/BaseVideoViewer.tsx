@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { Box, Chip, Header, Icon, IconButton, Icons, Text, as } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { Video } from '../media/Video';
-import * as css from '../video-viewer/VideoViewer.css';
+import * as css from './VideoViewer.css';
 
 export type BaseVideoViewerProps = {
   name: string;

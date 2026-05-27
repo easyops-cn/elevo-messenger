@@ -3,7 +3,7 @@ import classNames from 'classnames';
 import { Box, Button, Header, Icon, IconButton, Icons, Spinner, Text, as, config } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { bytesToSize, getFileTypeIcon, secondsToMinutesAndSeconds } from '../../utils/common';
-import * as css from '../unknown-file-viewer/UnknownFileViewer.css';
+import * as css from './UnknownFileViewer.css';
 
 export type BaseUnknownFileViewerProps = {
   name: string;
