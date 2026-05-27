@@ -3,16 +3,14 @@ import { Box, Chip, Icon, Icons, Text, color, config } from 'folds';
 import { IContent } from 'matrix-js-sdk';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import {
-  AskUserQuestionCard,
-  QuestionAnsweredCard,
-  parseAskUser,
-} from './elevo/AskUser';
+import { AskUserQuestionCard, QuestionAnsweredCard, parseAskUser } from './elevo/AskUser';
 import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
 import { ReasoningCard } from './elevo/ReasoningCard';
 import { SseMarkdownBody, parseSseRender } from './elevo/SseMarkdownBody';
 import { OidcLoginCard, parseOidcLogin } from './elevo/OidcLoginCard';
 import { PlanCard, hasPlan } from './elevo/PlanCard';
+import { DiffSummaryCard } from './elevo/DiffSummaryCard';
+import { parseDiffContent } from './elevo/diffSummary';
 import { trimReplyFromBody } from '../../utils/room';
 import { MessageTextBody } from './layout';
 import {
@@ -109,6 +107,7 @@ export function MText({
   const oidcLogin = useMemo(() => parseOidcLogin(content), [content]);
   const sseRender = useMemo(() => parseSseRender(content), [content]);
   const toolCall = useMemo(() => parseToolCall(content), [content]);
+  const diff = useMemo(() => parseDiffContent(content), [content]);
   const plan = hasPlan(content);
 
   if (plan) {
@@ -123,6 +122,10 @@ export function MText({
   }
 
   if (typeof body !== 'string') return <BrokenContent />;
+
+  if (diff) {
+    return <DiffSummaryCard diff={diff} style={style} />;
+  }
 
   if (askUser) {
     if (askUser.answers) {
@@ -149,10 +152,12 @@ export function MText({
     return <OidcLoginCard data={oidcLogin} style={style} />;
   }
 
-  const reasoningContent = content['vip.elevo.reasoning'] as undefined | {
-    duration_ms?: number;
-    streaming?: boolean;
-  };
+  const reasoningContent = content['vip.elevo.reasoning'] as
+    | undefined
+    | {
+        duration_ms?: number;
+        streaming?: boolean;
+      };
   const reasoning = !!reasoningContent;
 
   if (sseRender?.streaming) {
@@ -179,7 +184,12 @@ export function MText({
         : undefined;
     const reasoningStreaming = reasoningContent?.streaming;
     return (
-      <ReasoningCard style={style} durationMs={durationMs} streaming={reasoningStreaming} empty={!trimmedBody}>
+      <ReasoningCard
+        style={style}
+        durationMs={durationMs}
+        streaming={reasoningStreaming}
+        empty={!trimmedBody}
+      >
         <MessageTextBody
           preWrap={typeof customBody !== 'string'}
           jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
