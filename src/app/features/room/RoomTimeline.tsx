@@ -31,18 +31,7 @@ import { Editor } from 'slate';
 import { SessionMembershipData } from 'matrix-js-sdk/lib/matrixrtc';
 import to from 'await-to-js';
 import { useAtomValue, useSetAtom } from 'jotai';
-import {
-  Badge,
-  Box,
-  Chip,
-  Icon,
-  Icons,
-  Scroll,
-  Text,
-  as,
-  config,
-  toRem,
-} from 'folds';
+import { Badge, Box, Chip, Icon, Icons, Scroll, Text, as, config, toRem } from 'folds';
 import { Opts as LinkifyOpts } from 'linkifyjs';
 import { useTranslation } from 'react-i18next';
 import { eventWithShortcode, factoryEventSentBy, getMxIdLocalPart } from '../../utils/matrix';
@@ -101,7 +90,7 @@ import { GetContentCallback, MessageEvent, StateEvent } from '../../../types/mat
 import { useDocumentFocusChange } from '../../hooks/useDocumentFocusChange';
 import { RenderMessageContent } from '../../components/RenderMessageContent';
 import { Image } from '../../components/media';
-import { ImageViewer } from '../../components/image-viewer';
+import { DesktopImageViewer } from '../media-preview/DesktopImageViewer';
 import { roomToParentsAtom } from '../../state/room/roomToParents';
 import { useRoomUnread } from '../../state/hooks/unread';
 import { roomToUnreadAtom } from '../../state/room/roomToUnread';
@@ -134,17 +123,14 @@ const TimelineFloat = as<'div', css.TimelineFloatVariants>(
   )
 );
 
-const TimelineDivider = as<'div'>(
-  ({ children, ...props }, ref) => (
-    <Box gap="100" justifyContent="Center" alignItems="Center" {...props} ref={ref}>
-      {children}
-    </Box>
-  )
-);
+const TimelineDivider = as<'div'>(({ children, ...props }, ref) => (
+  <Box gap="100" justifyContent="Center" alignItems="Center" {...props} ref={ref}>
+    {children}
+  </Box>
+));
 
-const getTimelineSet = (room: Room, thread: Thread| undefined): EventTimelineSet => (
-  thread ? thread.timelineSet : room.getUnfilteredTimelineSet()
-);
+const getTimelineSet = (room: Room, thread: Thread | undefined): EventTimelineSet =>
+  thread ? thread.timelineSet : room.getUnfilteredTimelineSet();
 
 const getLiveTimeline = (room: Room, thread: Thread | undefined): EventTimeline => {
   if (thread) {
@@ -156,16 +142,13 @@ const getLiveTimeline = (room: Room, thread: Thread | undefined): EventTimeline 
 const getEventTimeline = (
   room: Room,
   eventId: string,
-  thread: Thread| undefined
+  thread: Thread | undefined
 ): EventTimeline | undefined => {
   const timelineSet = getTimelineSet(room, thread);
   return timelineSet.getTimelineForEvent(eventId) ?? undefined;
 };
 
-const getFirstLinkedTimeline = (
-  timeline: EventTimeline,
-  direction: Direction
-): EventTimeline => {
+const getFirstLinkedTimeline = (timeline: EventTimeline, direction: Direction): EventTimeline => {
   const linkedTm = timeline.getNeighbouringTimeline(direction);
   if (!linkedTm) return timeline;
   return getFirstLinkedTimeline(linkedTm, direction);
@@ -362,7 +345,11 @@ const useTimelinePagination = (
   return handleTimelinePagination;
 };
 
-const useLiveEventArrive = (room: Room, thread: Thread | undefined, onArrive: (mEvent: MatrixEvent) => void) => {
+const useLiveEventArrive = (
+  room: Room,
+  thread: Thread | undefined,
+  onArrive: (mEvent: MatrixEvent) => void
+) => {
   useEffect(() => {
     const handleTimelineEvent: EventTimelineSetHandlerMap[RoomEvent.Timeline] = (
       mEvent,
@@ -446,11 +433,7 @@ const getRoomUnreadInfo = (room: Room, scrollTo: boolean, thread: Thread | undef
   };
 };
 
-export function RoomTimeline({
-  room,
-  eventId,
-  editor,
-}: RoomTimelineProps) {
+export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
   const thread = useRoomThread();
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
@@ -510,14 +493,17 @@ export function RoomTimeline({
     smooth: true,
   });
 
-  const { scrollable, scrollToBottom, toggleAutoScroll } = useAutoScroll(scrollRef, scrollContentRef);
+  const { scrollable, scrollToBottom, toggleAutoScroll } = useAutoScroll(
+    scrollRef,
+    scrollContentRef
+  );
   const atBottomRef = useRef(!scrollable);
   atBottomRef.current = !scrollable;
 
   useEffect(() => {
     const unsubscribe = listenScrollToBottomRequest(() => {
       scrollToBottom();
-      
+
       scrollToBottomRef.current.count += 1;
       scrollToBottomRef.current.smooth = false;
     });
@@ -561,8 +547,7 @@ export function RoomTimeline({
   );
   const eventsLength = getTimelinesEventsCount(timeline.linkedTimelines);
   const liveTimelineLinked =
-    timeline.linkedTimelines[timeline.linkedTimelines.length - 1] ===
-    getLiveTimeline(room, thread);
+    timeline.linkedTimelines[timeline.linkedTimelines.length - 1] === getLiveTimeline(room, thread);
   const canPaginateBack =
     typeof timeline.linkedTimelines[0]?.getPaginationToken(Direction.Backward) === 'string';
   const rangeAtStart = timeline.range.start === 0;
@@ -594,7 +579,7 @@ export function RoomTimeline({
       ),
       onEnd: handleTimelinePagination,
     });
-  
+
   const loadEventTimeline = useEventTimelineLoader(
     mx,
     activeTimelineSet,
@@ -640,7 +625,9 @@ export function RoomTimeline({
             // Check if the document is in focus (user is actively viewing the app),
             // and either there are no unread messages or the latest message is from the current user.
             // If either condition is met, trigger the markAsRead function to send a read receipt.
-            requestAnimationFrame(() => markAsRead(mx, mEvt.getRoomId()!, hideActivity, thread?.id));
+            requestAnimationFrame(() =>
+              markAsRead(mx, mEvt.getRoomId()!, hideActivity, thread?.id)
+            );
           }
 
           if (!document.hasFocus() && !unreadInfo) {
@@ -704,7 +691,8 @@ export function RoomTimeline({
           undefined;
         const scrolled =
           eventElement !== undefined
-            ? (toggleAutoScroll(false), scrollToElement(eventElement, {
+            ? (toggleAutoScroll(false),
+              scrollToElement(eventElement, {
                 behavior: 'smooth',
                 align: 'center',
                 stopInView: true,
@@ -784,7 +772,10 @@ export function RoomTimeline({
       const evtTimeline = getEventTimeline(room, readUptoEventId, thread);
       const absoluteIndex =
         evtTimeline && getEventIdAbsoluteIndex(linkedTimelines, evtTimeline, readUptoEventId);
-      if (absoluteIndex !== undefined && absoluteIndex < getTimelinesEventsCount(linkedTimelines) - 1) {
+      if (
+        absoluteIndex !== undefined &&
+        absoluteIndex < getTimelinesEventsCount(linkedTimelines) - 1
+      ) {
         scrollToItem(absoluteIndex, {
           behavior: 'instant',
           align: 'start',
@@ -862,7 +853,7 @@ export function RoomTimeline({
   const handleJumpToLatest = () => {
     setTimeline(getInitialTimeline(room, thread));
     toggleAutoScroll(true);
-    scrollToBottom()
+    scrollToBottom();
   };
 
   const handleJumpToUnread = () => {
@@ -956,11 +947,14 @@ export function RoomTimeline({
     [room, thread, activeTimelineSet, setReplyDraft, editor]
   );
 
-  const handleOpenThread: MouseEventHandler<HTMLButtonElement> = useCallback((evt) => {
-    const rootId = evt.currentTarget.getAttribute('data-event-id');
-    if (!rootId) return;
-    setThreadChat({ open: true, threadRootId: rootId });
-  }, [setThreadChat]);
+  const handleOpenThread: MouseEventHandler<HTMLButtonElement> = useCallback(
+    (evt) => {
+      const rootId = evt.currentTarget.getAttribute('data-event-id');
+      if (!rootId) return;
+      setThreadChat({ open: true, threadRootId: rootId });
+    },
+    [setThreadChat]
+  );
 
   const handleReactionToggle = useCallback(
     (targetEventId: string, key: string, shortcode?: string) => {
@@ -1066,7 +1060,12 @@ export function RoomTimeline({
             }
             threadSummary={
               showThreadSummary && (
-                <ThreadSummary mEvent={mEvent} room={room} thread={replyToThread} onOpenThread={handleOpenThread} />
+                <ThreadSummary
+                  mEvent={mEvent}
+                  room={room}
+                  thread={replyToThread}
+                  onOpenThread={handleOpenThread}
+                />
               )
             }
             hideReadReceipts={hideActivity}
@@ -1150,7 +1149,12 @@ export function RoomTimeline({
             }
             threadSummary={
               showThreadSummary && (
-                <ThreadSummary mEvent={mEvent} room={room} thread={replyToThread} onOpenThread={handleOpenThread} />
+                <ThreadSummary
+                  mEvent={mEvent}
+                  room={room}
+                  thread={replyToThread}
+                  onOpenThread={handleOpenThread}
+                />
               )
             }
             hideReadReceipts={hideActivity}
@@ -1169,7 +1173,7 @@ export function RoomTimeline({
                         <ImageContent
                           {...props}
                           renderImage={(p) => <Image {...p} loading="lazy" />}
-                          renderViewer={(p) => <ImageViewer {...p} />}
+                          renderViewer={(p) => <DesktopImageViewer {...p} />}
                         />
                       )}
                     />
@@ -1266,7 +1270,7 @@ export function RoomTimeline({
                   <ImageContent
                     {...props}
                     renderImage={(p) => <Image {...p} loading="lazy" />}
-                    renderViewer={(p) => <ImageViewer {...p} />}
+                    renderViewer={(p) => <DesktopImageViewer {...p} />}
                   />
                 )}
               />
@@ -1309,9 +1313,7 @@ export function RoomTimeline({
               time={timeJSX}
               content={
                 <Box grow="No" direction="Column">
-                  <Text size="T300">
-                    {parsed.body}
-                  </Text>
+                  <Text size="T300">{parsed.body}</Text>
                 </Box>
               }
             />
@@ -1350,9 +1352,7 @@ export function RoomTimeline({
               time={timeJSX}
               content={
                 <Box grow="No" direction="Column">
-                  <Text size="T300">
-                    {t('room.changedRoomName', { name: senderName })}
-                  </Text>
+                  <Text size="T300">{t('room.changedRoomName', { name: senderName })}</Text>
                 </Box>
               }
             />
@@ -1391,9 +1391,7 @@ export function RoomTimeline({
               time={timeJSX}
               content={
                 <Box grow="No" direction="Column">
-                  <Text size="T300">
-                    {t('room.changedRoomTopic', { name: senderName })}
-                  </Text>
+                  <Text size="T300">{t('room.changedRoomTopic', { name: senderName })}</Text>
                 </Box>
               }
             />
@@ -1432,9 +1430,7 @@ export function RoomTimeline({
               time={timeJSX}
               content={
                 <Box grow="No" direction="Column">
-                  <Text size="T300">
-                    {t('room.changedRoomAvatar', { name: senderName })}
-                  </Text>
+                  <Text size="T300">{t('room.changedRoomAvatar', { name: senderName })}</Text>
                 </Box>
               }
             />

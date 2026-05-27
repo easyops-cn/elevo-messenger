@@ -143,6 +143,10 @@ export default defineConfig({
     sourcemap: true,
     copyPublicDir: false,
     rollupOptions: {
+      input: {
+        app: path.resolve(__dirname, 'index.html'),
+        preview: path.resolve(__dirname, 'preview.html'),
+      },
       plugins: [inject({ Buffer: ['buffer', 'Buffer'] })],
     },
   },

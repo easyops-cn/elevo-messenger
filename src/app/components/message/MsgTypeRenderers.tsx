@@ -3,11 +3,7 @@ import { Box, Chip, Icon, Icons, Text, color, config } from 'folds';
 import { IContent } from 'matrix-js-sdk';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import {
-  AskUserQuestionCard,
-  QuestionAnsweredCard,
-  parseAskUser,
-} from './elevo/AskUser';
+import { AskUserQuestionCard, QuestionAnsweredCard, parseAskUser } from './elevo/AskUser';
 import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
 import { ReasoningCard } from './elevo/ReasoningCard';
 import { SseMarkdownBody, parseSseRender } from './elevo/SseMarkdownBody';
@@ -149,10 +145,12 @@ export function MText({
     return <OidcLoginCard data={oidcLogin} style={style} />;
   }
 
-  const reasoningContent = content['vip.elevo.reasoning'] as undefined | {
-    duration_ms?: number;
-    streaming?: boolean;
-  };
+  const reasoningContent = content['vip.elevo.reasoning'] as
+    | undefined
+    | {
+        duration_ms?: number;
+        streaming?: boolean;
+      };
   const reasoning = !!reasoningContent;
 
   if (sseRender?.streaming) {
@@ -179,7 +177,12 @@ export function MText({
         : undefined;
     const reasoningStreaming = reasoningContent?.streaming;
     return (
-      <ReasoningCard style={style} durationMs={durationMs} streaming={reasoningStreaming} empty={!trimmedBody}>
+      <ReasoningCard
+        style={style}
+        durationMs={durationMs}
+        streaming={reasoningStreaming}
+        empty={!trimmedBody}
+      >
         <MessageTextBody
           preWrap={typeof customBody !== 'string'}
           jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
@@ -369,14 +372,23 @@ type RenderAudioContentProps = {
   mimeType: string;
   url: string;
   encInfo?: IEncryptedFile;
+  body: string;
+  waveform?: number[];
 };
 type MAudioProps = {
   content: IAudioContent;
   renderAsFile: () => ReactNode;
   renderAudioContent: (props: RenderAudioContentProps) => ReactNode;
+  renderAudioPreviewAction?: (props: RenderAudioContentProps) => ReactNode;
   outlined?: boolean;
 };
-export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: MAudioProps) {
+export function MAudio({
+  content,
+  renderAsFile,
+  renderAudioContent,
+  renderAudioPreviewAction,
+  outlined,
+}: MAudioProps) {
   const audioInfo = content?.info;
   const mxcUrl = content.file?.url ?? content.url;
   const safeMimeType = getBlobSafeMimeType(audioInfo?.mimetype ?? '');
@@ -390,33 +402,44 @@ export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: 
 
   const msc1767Audio = content['org.matrix.msc1767.audio'];
   const waveform = msc1767Audio?.waveform;
+  const filename = content.filename ?? content.body ?? 'Audio';
+  const audioRenderProps: RenderAudioContentProps = {
+    body: filename,
+    info: audioInfo,
+    mimeType: safeMimeType,
+    url: mxcUrl,
+    encInfo: content.file,
+    waveform: Array.isArray(waveform) ? waveform : undefined,
+  };
   if (Array.isArray(waveform) && waveform.length > 0) {
     return (
-      <Box
-        style={{
-          padding: config.space.S300,
-          backgroundColor: color.SurfaceVariant.Container,
-          color: color.SurfaceVariant.OnContainer,
-          borderRadius: config.radii.R400,
-          ...(outlined
-            ? {
-                boxShadow: `inset 0 0 0 ${config.borderWidth.B300} ${color.SurfaceVariant.ContainerLine}`,
-              }
-            : {}),
-        }}
-      >
-        <VoiceMessage
-          mimeType={safeMimeType}
-          url={mxcUrl}
-          info={audioInfo}
-          encInfo={content.file}
-          waveform={waveform}
-        />
+      <Box direction="Column" gap="200">
+        <Box
+          style={{
+            padding: config.space.S300,
+            backgroundColor: color.SurfaceVariant.Container,
+            color: color.SurfaceVariant.OnContainer,
+            borderRadius: config.radii.R400,
+            ...(outlined
+              ? {
+                  boxShadow: `inset 0 0 0 ${config.borderWidth.B300} ${color.SurfaceVariant.ContainerLine}`,
+                }
+              : {}),
+          }}
+        >
+          <VoiceMessage
+            mimeType={safeMimeType}
+            url={mxcUrl}
+            info={audioInfo}
+            encInfo={content.file}
+            waveform={waveform}
+          />
+        </Box>
+        {renderAudioPreviewAction?.(audioRenderProps)}
       </Box>
     );
   }
 
-  const filename = content.filename ?? content.body ?? 'Audio';
   return (
     <Attachment outlined={outlined}>
       <AttachmentHeader>
@@ -435,12 +458,8 @@ export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: 
       </AttachmentHeader>
       <AttachmentBox>
         <AttachmentContent>
-          {renderAudioContent({
-            info: audioInfo,
-            mimeType: safeMimeType,
-            url: mxcUrl,
-            encInfo: content.file,
-          })}
+          {renderAudioContent(audioRenderProps)}
+          {renderAudioPreviewAction?.(audioRenderProps)}
         </AttachmentContent>
       </AttachmentBox>
     </Attachment>

@@ -181,14 +181,12 @@ export const eventWithShortcode = (ev: MatrixEvent) =>
   typeof ev.getContent().shortcode === 'string';
 
 export const getDMRoomFor = (mx: MatrixClient, userId: string): Room | undefined => {
-  const dmLikeRooms = mx
-    .getRooms()
-    .filter(
-      (room) =>
-        room.getMyMembership() === Membership.Join &&
-        // room.hasEncryptionStateEvent() &&
-        room.getMembers().length <= 2
-    );
+  const dmLikeRooms = mx.getRooms().filter(
+    (room) =>
+      room.getMyMembership() === Membership.Join &&
+      // room.hasEncryptionStateEvent() &&
+      room.getMembers().length <= 2
+  );
 
   return dmLikeRooms.find((room) => room.getMember(userId));
 };
@@ -297,12 +295,14 @@ export const mxcUrlToHttp = (
     useAuthentication
   );
 
-export const downloadMedia = async (src: string): Promise<Blob> => {
+export const downloadMedia = async (src: string, accessToken?: string): Promise<Blob> => {
   const headers: Record<string, string> = {};
-  if (NO_SERVICE_WORKER) {
-    const accessToken = localStorage.getItem('elevo_access_token');
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
+  if (accessToken) {
+    headers.Authorization = `Bearer ${accessToken}`;
+  } else if (NO_SERVICE_WORKER) {
+    const storedAccessToken = localStorage.getItem('elevo_access_token');
+    if (storedAccessToken) {
+      headers.Authorization = `Bearer ${storedAccessToken}`;
     }
   }
   const res = await fetch(src, { method: 'GET', headers });
@@ -312,9 +312,10 @@ export const downloadMedia = async (src: string): Promise<Blob> => {
 
 export const downloadEncryptedMedia = async (
   src: string,
-  decryptContent: (buf: ArrayBuffer) => Promise<Blob>
+  decryptContent: (buf: ArrayBuffer) => Promise<Blob>,
+  accessToken?: string
 ): Promise<Blob> => {
-  const encryptedContent = await downloadMedia(src);
+  const encryptedContent = await downloadMedia(src, accessToken);
   const decryptedContent = await decryptContent(await encryptedContent.arrayBuffer());
 
   return decryptedContent;

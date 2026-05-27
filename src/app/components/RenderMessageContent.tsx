@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 import React from 'react';
 import { MsgType } from 'matrix-js-sdk';
 import { HTMLReactParserOptions } from 'html-react-parser';
@@ -30,7 +31,16 @@ import { ImageViewer } from './image-viewer';
 import { PdfViewer } from './Pdf-viewer';
 import { TextViewer } from './text-viewer';
 import { testMatrixTo } from '../plugins/matrix-to';
-import { IImageContent } from '../../types/matrix/common';
+import { IAudioInfo, IEncryptedFile, IImageContent } from '../../types/matrix/common';
+import { useMatrixClient } from '../hooks/useMatrixClient';
+import { useMediaAuthentication } from '../hooks/useMediaAuthentication';
+import { mxcUrlToHttp } from '../utils/matrix';
+import {
+  canOpenDesktopMediaPreview,
+  getMediaPreviewLangName,
+  openDesktopMediaPreview,
+} from '../features/media-preview/openMediaPreview';
+import type { ImageContentProps, VideoContentProps } from './message/content';
 
 type RenderMessageContentProps = {
   displayName: string;
@@ -58,6 +68,62 @@ export function RenderMessageContent({
   linkifyOpts,
   outlineAttachment,
 }: RenderMessageContentProps) {
+  const mx = useMatrixClient();
+  const useAuth = useMediaAuthentication();
+
+  const getAccessToken = () => (useAuth ? mx.getAccessToken() ?? undefined : undefined);
+
+  const openFilePreview = async (
+    type: 'image' | 'pdf' | 'text' | 'unknown',
+    name: string,
+    mimeType: string,
+    url: string,
+    encInfo?: IEncryptedFile,
+    size?: number
+  ): Promise<boolean> => {
+    if (!canOpenDesktopMediaPreview()) return false;
+    const mediaUrl = mxcUrlToHttp(mx, url, useAuth);
+    if (!mediaUrl) return false;
+    await openDesktopMediaPreview({
+      type,
+      name,
+      mimeType,
+      size,
+      mediaUrl,
+      accessToken: getAccessToken(),
+      encInfo,
+      langName: getMediaPreviewLangName(mimeType, name),
+    });
+    return true;
+  };
+
+  const openAudioVideoPreview = async (
+    type: 'audio' | 'video',
+    name: string,
+    mimeType: string,
+    url: string,
+    encInfo?: IEncryptedFile,
+    size?: number,
+    info?: IAudioInfo,
+    waveform?: number[]
+  ): Promise<boolean> => {
+    if (!canOpenDesktopMediaPreview()) return false;
+    const mediaUrl = mxcUrlToHttp(mx, url, useAuth);
+    if (!mediaUrl) return false;
+    await openDesktopMediaPreview({
+      type,
+      name,
+      mimeType,
+      size,
+      mediaUrl,
+      accessToken: getAccessToken(),
+      encInfo,
+      info,
+      waveform,
+    });
+    return true;
+  };
+
   const renderUrlsPreview = (urls: string[]) => {
     const filteredUrls = urls.filter((url) => !testMatrixTo(url));
     if (filteredUrls.length === 0) return undefined;
@@ -67,6 +133,39 @@ export function RenderMessageContent({
           <UrlPreviewCard key={url} url={url} ts={ts} />
         ))}
       </UrlPreviewHolder>
+    );
+  };
+
+  const renderImageContent = (props: ImageContentProps) => {
+    const { body, mimeType, url, encInfo, info } = props;
+    return (
+      <ImageContent
+        {...props}
+        onOpenPreview={() =>
+          openFilePreview('image', body, mimeType ?? 'image/*', url, encInfo, info?.size)
+        }
+        renderImage={(p) => <Image {...p} loading="lazy" />}
+        renderViewer={(p) => <ImageViewer {...p} />}
+      />
+    );
+  };
+
+  const renderVideoContent = (props: VideoContentProps) => {
+    const { body, info, mimeType, url, encInfo } = props;
+    return (
+      <VideoContent
+        {...props}
+        onOpenPreview={() =>
+          openAudioVideoPreview('video', body, mimeType, url, encInfo, info.size)
+        }
+        renderThumbnail={() => (
+          <ThumbnailContent
+            info={info}
+            renderImage={(src) => <Image alt={body} title={body} src={src} loading="lazy" />}
+          />
+        )}
+        renderVideo={(p) => <Video {...p} />}
+      />
     );
   };
   const renderCaption = () => {
@@ -107,6 +206,9 @@ export function RenderMessageContent({
                 mimeType={mimeType}
                 url={url}
                 encInfo={encInfo}
+                onOpenPreview={() =>
+                  openFilePreview('pdf', body, mimeType, url, encInfo, info.size)
+                }
                 renderViewer={(p) => <PdfViewer {...p} />}
               />
             )}
@@ -116,6 +218,9 @@ export function RenderMessageContent({
                 mimeType={mimeType}
                 url={url}
                 encInfo={encInfo}
+                onOpenPreview={() =>
+                  openFilePreview('text', body, mimeType, url, encInfo, info.size)
+                }
                 renderViewer={(p) => <TextViewer {...p} />}
               />
             )}
@@ -187,16 +292,7 @@ export function RenderMessageContent({
   if (msgType === MsgType.Image) {
     return (
       <>
-        <MImage
-          content={getContent()}
-          renderImageContent={(props) => (
-            <ImageContent
-              {...props}
-              renderImage={(p) => <Image {...p} loading="lazy" />}
-              renderViewer={(p) => <ImageViewer {...p} />}
-            />
-          )}
-        />
+        <MImage content={getContent()} renderImageContent={renderImageContent} />
         {renderCaption()}
       </>
     );
@@ -208,22 +304,7 @@ export function RenderMessageContent({
         <MVideo
           content={getContent()}
           renderAsFile={renderFile}
-          renderVideoContent={({ body, info, ...props }) => (
-            <VideoContent
-              body={body}
-              info={info}
-              {...props}
-              renderThumbnail={() => (
-                <ThumbnailContent
-                  info={info}
-                  renderImage={(src) => (
-                    <Image alt={body} title={body} src={src} loading="lazy" />
-                  )}
-                />
-              )}
-              renderVideo={(p) => <Video {...p} />}
-            />
-          )}
+          renderVideoContent={renderVideoContent}
         />
         {renderCaption()}
       </>
@@ -239,6 +320,29 @@ export function RenderMessageContent({
           renderAudioContent={(props) => (
             <AudioContent {...props} renderMediaControl={(p) => <MediaControl {...p} />} />
           )}
+          renderAudioPreviewAction={(props) =>
+            canOpenDesktopMediaPreview() ? (
+              <DownloadFile
+                body="Open Preview"
+                mimeType={props.mimeType}
+                url={props.url}
+                encInfo={props.encInfo}
+                info={{ size: props.info.size ?? 0 }}
+                onClick={() =>
+                  openAudioVideoPreview(
+                    'audio',
+                    props.body,
+                    props.mimeType,
+                    props.url,
+                    props.encInfo,
+                    props.info.size,
+                    props.info,
+                    props.waveform
+                  )
+                }
+              />
+            ) : null
+          }
           outlined={outlineAttachment}
         />
         {renderCaption()}

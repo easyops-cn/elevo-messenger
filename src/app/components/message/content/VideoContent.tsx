@@ -24,7 +24,11 @@ import {
 import * as css from './style.css';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
-import { bytesToSize, millisecondsToMinutesAndSeconds, scaleYDimension } from '../../../utils/common';
+import {
+  bytesToSize,
+  millisecondsToMinutesAndSeconds,
+  scaleYDimension,
+} from '../../../utils/common';
 import {
   decryptFile,
   downloadEncryptedMedia,
@@ -43,7 +47,7 @@ type RenderVideoProps = {
   autoPlay: boolean;
   controls: boolean;
 };
-type VideoContentProps = {
+export type VideoContentProps = {
   body: string;
   mimeType: string;
   url: string;
@@ -52,6 +56,7 @@ type VideoContentProps = {
   autoPlay?: boolean;
   markedAsSpoiler?: boolean;
   spoilerReason?: string;
+  onOpenPreview?: () => Promise<boolean>;
   renderThumbnail?: () => ReactNode;
   renderVideo: (props: RenderVideoProps) => ReactNode;
 };
@@ -67,6 +72,7 @@ export const VideoContent = as<'div', VideoContentProps>(
       autoPlay,
       markedAsSpoiler,
       spoilerReason,
+      onOpenPreview,
       renderThumbnail,
       renderVideo,
       ...props
@@ -158,7 +164,10 @@ export const VideoContent = as<'div', VideoContentProps>(
               size="500"
               radii="Pill"
               outlined
-              onClick={loadSrc}
+              onClick={async () => {
+                if (onOpenPreview && (await onOpenPreview())) return;
+                loadSrc();
+              }}
             >
               <Icon src={PlayIcon} size="200" filled />
             </IconButton>

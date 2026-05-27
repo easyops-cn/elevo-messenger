@@ -78,8 +78,16 @@ type ReadTextFileProps = {
   url: string;
   encInfo?: EncryptedAttachmentInfo;
   renderViewer: (props: RenderTextViewerProps) => ReactNode;
+  onOpenPreview?: () => Promise<boolean>;
 };
-export function ReadTextFile({ body, mimeType, url, encInfo, renderViewer }: ReadTextFileProps) {
+export function ReadTextFile({
+  body,
+  mimeType,
+  url,
+  encInfo,
+  renderViewer,
+  onOpenPreview,
+}: ReadTextFileProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const [textViewer, setTextViewer] = useState(false);
@@ -137,9 +145,11 @@ export function ReadTextFile({ body, mimeType, url, encInfo, renderViewer }: Rea
           fill="Solid"
           radii="300"
           size="400"
-          onClick={() =>
-            textState.status === AsyncStatus.Success ? setTextViewer(true) : loadText()
-          }
+          onClick={async () => {
+            if (onOpenPreview && (await onOpenPreview())) return;
+            if (textState.status === AsyncStatus.Success) setTextViewer(true);
+            else loadText();
+          }}
           disabled={textState.status === AsyncStatus.Loading}
           before={
             textState.status === AsyncStatus.Loading ? (
@@ -169,8 +179,16 @@ export type ReadPdfFileProps = {
   url: string;
   encInfo?: EncryptedAttachmentInfo;
   renderViewer: (props: RenderPdfViewerProps) => ReactNode;
+  onOpenPreview?: () => Promise<boolean>;
 };
-export function ReadPdfFile({ body, mimeType, url, encInfo, renderViewer }: ReadPdfFileProps) {
+export function ReadPdfFile({
+  body,
+  mimeType,
+  url,
+  encInfo,
+  renderViewer,
+  onOpenPreview,
+}: ReadPdfFileProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const [pdfViewer, setPdfViewer] = useState(false);
@@ -223,7 +241,11 @@ export function ReadPdfFile({ body, mimeType, url, encInfo, renderViewer }: Read
           fill="Solid"
           radii="300"
           size="400"
-          onClick={() => (pdfState.status === AsyncStatus.Success ? setPdfViewer(true) : loadPdf())}
+          onClick={async () => {
+            if (onOpenPreview && (await onOpenPreview())) return;
+            if (pdfState.status === AsyncStatus.Success) setPdfViewer(true);
+            else loadPdf();
+          }}
           disabled={pdfState.status === AsyncStatus.Loading}
           before={
             pdfState.status === AsyncStatus.Loading ? (
@@ -248,9 +270,11 @@ export type DownloadFileProps = {
   url: string;
   info: IFileInfo;
   encInfo?: EncryptedAttachmentInfo;
+  onClick?: () => void;
 };
-export function DownloadFile({ body, mimeType, url, info, encInfo }: DownloadFileProps) {
+export function DownloadFile({ body, mimeType, url, info, encInfo, onClick }: DownloadFileProps) {
   const [downloadState, download] = useMediaDownload(url, mimeType, body, encInfo);
+  const label = onClick ? body : `Download (${bytesToSize(info.size ?? 0)})`;
 
   return downloadState.status === AsyncStatus.Error ? (
     renderErrorButton(download, `Retry Download (${bytesToSize(info.size ?? 0)})`)
@@ -260,7 +284,7 @@ export function DownloadFile({ body, mimeType, url, info, encInfo }: DownloadFil
       fill="Soft"
       radii="300"
       size="400"
-      onClick={() => download()}
+      onClick={onClick ?? (() => download())}
       disabled={downloadState.status === AsyncStatus.Loading}
       before={
         downloadState.status === AsyncStatus.Loading ? (
@@ -270,7 +294,9 @@ export function DownloadFile({ body, mimeType, url, info, encInfo }: DownloadFil
         )
       }
     >
-      <Text size="B400" truncate>{`Download (${bytesToSize(info.size ?? 0)})`}</Text>
+      <Text size="B400" truncate>
+        {label}
+      </Text>
     </Button>
   );
 }

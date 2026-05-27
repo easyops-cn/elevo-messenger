@@ -13,39 +13,25 @@ import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { ModalWide } from '../../styles/Modal.css';
 import { stopPropagation } from '../../utils/keyboard';
 import type { IAudioInfo } from '../../../types/matrix/common';
-import {
-  READABLE_TEXT_MIME_TYPES,
-  READABLE_EXT_TO_MIME_TYPE,
-  getFileNameExt,
-  mimeTypeToExt,
-} from '../../utils/mimeTypes';
+import { READABLE_TEXT_MIME_TYPES, mimeTypeToExt } from '../../utils/mimeTypes';
 import {
   decryptFile,
   downloadEncryptedMedia,
   downloadMedia,
   mxcUrlToHttp,
 } from '../../utils/matrix';
-
-type ViewerType = 'image' | 'video' | 'audio' | 'text' | 'pdf';
+import {
+  canOpenDesktopMediaPreview,
+  getMediaPreviewLangName,
+  getMediaPreviewType,
+  mediaPreviewPayloadFromEvent,
+  openDesktopMediaPreview,
+} from '../media-preview/openMediaPreview';
 
 type FileViewerOverlayProps = {
   fileEvent: MatrixEvent;
   requestClose: () => void;
 };
-
-function getFileType(mimetype: string, filename: string): ViewerType | null {
-  if (mimetype.startsWith('image/')) return 'image';
-  if (mimetype.startsWith('video/')) return 'video';
-  if (mimetype.startsWith('audio/')) return 'audio';
-  if (mimetype === 'application/pdf') return 'pdf';
-  if (
-    READABLE_TEXT_MIME_TYPES.includes(mimetype) ||
-    READABLE_EXT_TO_MIME_TYPE[getFileNameExt(filename)]
-  ) {
-    return 'text';
-  }
-  return null;
-}
 
 export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlayProps) {
   const mx = useMatrixClient();
@@ -61,7 +47,14 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
   const audioWaveform = Array.isArray(content['org.matrix.msc1767.audio']?.waveform)
     ? (content['org.matrix.msc1767.audio']?.waveform as number[])
     : undefined;
-  const viewerType = getFileType(mimetype, filename);
+  const viewerType = getMediaPreviewType(mimetype, filename);
+
+  useEffect(() => {
+    if (!canOpenDesktopMediaPreview()) return;
+    const payload = mediaPreviewPayloadFromEvent(mx, fileEvent, useAuth);
+    if (!payload) return;
+    openDesktopMediaPreview(payload).finally(requestClose);
+  }, [fileEvent, mx, requestClose, useAuth]);
 
   const imageOrVideoUrl = useMemo(() => {
     if ((viewerType !== 'image' && viewerType !== 'video') || !url) return undefined;
@@ -84,9 +77,7 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
       if (!mediaUrl) return;
 
       const fileContent = encInfo
-        ? await downloadEncryptedMedia(mediaUrl, (encBuf) =>
-            decryptFile(encBuf, mimetype, encInfo)
-          )
+        ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimetype, encInfo))
         : await downloadMedia(mediaUrl);
 
       if (!alive) return;
@@ -114,7 +105,9 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
     }
   }, [pdfBlobUrl]);
 
-  if (!viewerType) {
+  if (canOpenDesktopMediaPreview()) return null;
+
+  if (viewerType === 'unknown') {
     if (!url) return null;
     return (
       <Overlay open backdrop={<OverlayBackdrop />}>
@@ -151,10 +144,10 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
     viewerType === 'image' || viewerType === 'video'
       ? !!imageOrVideoUrl
       : viewerType === 'audio'
-        ? !!url
+      ? !!url
       : viewerType === 'text'
-        ? !!textData
-        : !!pdfBlobUrl;
+      ? !!textData
+      : !!pdfBlobUrl;
 
   return (
     <Overlay open={showViewer} backdrop={<OverlayBackdrop />}>
@@ -176,11 +169,7 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
               <ImageViewer src={imageOrVideoUrl} alt={filename} requestClose={requestClose} />
             )}
             {viewerType === 'video' && imageOrVideoUrl && (
-              <VideoViewer
-                name={filename}
-                src={imageOrVideoUrl}
-                requestClose={requestClose}
-              />
+              <VideoViewer name={filename} src={imageOrVideoUrl} requestClose={requestClose} />
             )}
             {viewerType === 'audio' && url && (
               <AudioViewer
@@ -201,9 +190,7 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
                 langName={
                   READABLE_TEXT_MIME_TYPES.includes(mimetype)
                     ? mimeTypeToExt(mimetype)
-                    : mimeTypeToExt(
-                        READABLE_EXT_TO_MIME_TYPE[getFileNameExt(filename)] ?? mimetype
-                      )
+                    : getMediaPreviewLangName(mimetype, filename) ?? mimeTypeToExt(mimetype)
                 }
                 requestClose={requestClose}
               />

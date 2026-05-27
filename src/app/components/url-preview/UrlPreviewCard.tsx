@@ -13,8 +13,8 @@ import * as css from './UrlPreviewCard.css';
 import { tryDecodeURIComponent } from '../../utils/dom';
 import { mxcUrlToHttp } from '../../utils/matrix';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
-import { ImageViewer } from '../image-viewer';
 import { onEnterOrSpace } from '../../utils/keyboard';
+import { DesktopImageViewer } from '../../features/media-preview/DesktopImageViewer';
 
 const linkStyles = { color: color.Success.Main };
 
@@ -66,7 +66,7 @@ export const UrlPreviewCard = as<'div', { url: string; ts: number }>(
               requestClose={() => {
                 setViewer(false);
               }}
-              renderViewer={(p) => <ImageViewer {...p} />}
+              renderViewer={(p) => <DesktopImageViewer {...p} />}
             />
           )}
           <UrlPreviewContent>

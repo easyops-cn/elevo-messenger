@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode, useCallback, useState } from 'react';
 import classNames from 'classnames';
 import { Box, Button, Header, Icon, IconButton, Icons, Spinner, Text, as, config } from 'folds';
 import { useTranslation } from 'react-i18next';
@@ -14,17 +14,41 @@ export type UnknownFileViewerProps = {
   mimetype: string;
   encInfo?: EncryptedAttachmentInfo;
   requestClose: () => void;
+  onDownload?: () => Promise<void>;
+  children?: ReactNode;
 };
 
 export const UnknownFileViewer = as<'div', UnknownFileViewerProps>(
-  ({ className, name, size, url, mimetype, encInfo, requestClose, ...props }, ref) => {
+  (
+    { className, name, size, url, mimetype, encInfo, requestClose, onDownload, children, ...props },
+    ref
+  ) => {
     const { t } = useTranslation();
-    const [downloadState, handleDownload] = useMediaDownload(url, mimetype, name, encInfo);
+    const [downloadState, download] = useMediaDownload(url, mimetype, name, encInfo);
+    const [customDownloading, setCustomDownloading] = useState(false);
 
-    const downloading = downloadState.status === 'loading';
+    const handleDownload = useCallback(async () => {
+      if (!onDownload) {
+        await download();
+        return;
+      }
+      setCustomDownloading(true);
+      try {
+        await onDownload();
+      } finally {
+        setCustomDownloading(false);
+      }
+    }, [download, onDownload]);
+
+    const downloading = customDownloading || downloadState.status === 'loading';
 
     return (
-      <Box className={classNames(css.UnknownFileViewer, className)} direction="Column" {...props} ref={ref}>
+      <Box
+        className={classNames(css.UnknownFileViewer, className)}
+        direction="Column"
+        {...props}
+        ref={ref}
+      >
         <Header className={css.UnknownFileViewerHeader} size="400">
           <Box grow="Yes" alignItems="Center" gap="200">
             <IconButton size="300" radii="300" onClick={requestClose}>
@@ -40,8 +64,10 @@ export const UnknownFileViewer = as<'div', UnknownFileViewerProps>(
           <Text size="T200" priority="300" truncate>
             {name}
           </Text>
-          <Text size="T200" priority="300">{bytesToSize(size)}</Text>
-          <Text size="T300">{t('viewer.noPreview')}</Text>
+          <Text size="T200" priority="300">
+            {bytesToSize(size)}
+          </Text>
+          {children ?? <Text size="T300">{t('viewer.noPreview')}</Text>}
           <Button
             variant="Primary"
             fill="Solid"

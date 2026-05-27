@@ -19,9 +19,9 @@ import { getMxIdLocalPart } from '../../utils/matrix';
 import { BreakWord, LineClamp3 } from '../../styles/Text.css';
 import { UserPresence } from '../../hooks/useUserPresence';
 import { AvatarPresence, PresenceBadge } from '../presence';
-import { ImageViewer } from '../image-viewer';
 import { stopPropagation } from '../../utils/keyboard';
 import { MxcImg } from '../MxcImg';
+import { DesktopImageViewer } from '../../features/media-preview/DesktopImageViewer';
 
 type UserHeroProps = {
   userId: string;
@@ -79,7 +79,7 @@ export function UserHero({ userId, avatarUrl, presence }: UserHeroProps) {
                 }}
               >
                 <Modal size="500" onContextMenu={(evt: any) => evt.stopPropagation()}>
-                  <ImageViewer
+                  <DesktopImageViewer
                     src={viewAvatar}
                     alt={userId}
                     requestClose={() => setViewAvatar(undefined)}

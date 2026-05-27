@@ -26,7 +26,12 @@ import * as css from './style.css';
 import { scaleYDimension } from '../../../utils/common';
 import { FALLBACK_MIMETYPE } from '../../../utils/mimeTypes';
 import { stopPropagation } from '../../../utils/keyboard';
-import { decryptFile, downloadEncryptedMedia, downloadMedia, mxcUrlToHttp } from '../../../utils/matrix';
+import {
+  decryptFile,
+  downloadEncryptedMedia,
+  downloadMedia,
+  mxcUrlToHttp,
+} from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { NO_SERVICE_WORKER } from '../../../utils/noServiceWorker';
 import { ModalWide } from '../../../styles/Modal.css';
@@ -54,6 +59,7 @@ export type ImageContentProps = {
   encInfo?: EncryptedAttachmentInfo;
   markedAsSpoiler?: boolean;
   spoilerReason?: string;
+  onOpenPreview?: (src: string) => Promise<boolean>;
   renderViewer: (props: RenderViewerProps) => ReactNode;
   renderImage: (props: RenderImageProps) => ReactNode;
 };
@@ -68,6 +74,7 @@ export const ImageContent = as<'div', ImageContentProps>(
       encInfo,
       markedAsSpoiler,
       spoilerReason,
+      onOpenPreview,
       renderViewer,
       renderImage,
       ...props
@@ -177,7 +184,10 @@ export const ImageContent = as<'div', ImageContentProps>(
               src: srcState.data,
               onLoad: handleLoad,
               onError: handleError,
-              onClick: () => setViewer(true),
+              onClick: async () => {
+                if (onOpenPreview && (await onOpenPreview(srcState.data))) return;
+                setViewer(true);
+              },
               tabIndex: 0,
             })}
           </div>
@@ -215,7 +225,8 @@ export const ImageContent = as<'div', ImageContentProps>(
             </TooltipProvider>
           </Box>
         )}
-        {!error && (srcState.status === AsyncStatus.Loading || srcState.status === AsyncStatus.Idle) &&
+        {!error &&
+          (srcState.status === AsyncStatus.Loading || srcState.status === AsyncStatus.Idle) &&
           !blurred && (
             <Box alignItems="Center" justifyContent="Center" style={{ width, height }}>
               <Spinner variant="Secondary" />
