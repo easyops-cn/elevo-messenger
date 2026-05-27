@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Box, Button, Header, Icon, Icons, Spinner, Text, varsClass } from 'folds';
+import { useTranslation } from 'react-i18next';
 import 'folds/dist/style.css';
 import './index.css';
 import './preview.css';
@@ -57,6 +58,7 @@ function PreviewTheme({ children }: { children: React.ReactNode }) {
 }
 
 function PreviewAudio({ payload }: { payload: DesktopPreviewPayload }) {
+  const { t } = useTranslation();
   const durationSec = ((payload.duration ?? 0) >= 0 ? payload.duration ?? 0 : 0) / 1000;
   const [src, setSrc] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -99,7 +101,7 @@ function PreviewAudio({ payload }: { payload: DesktopPreviewPayload }) {
           disabled={loading}
           before={loading ? <Spinner size="100" /> : <Icon size="200" src={Icons.ArrowRight} />}
         >
-          <Text>Play</Text>
+          <Text>{t('viewer.play')}</Text>
         </Button>
       )}
       {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
@@ -115,6 +117,7 @@ function HeaderViewer({
   payload: DesktopPreviewPayload;
   children: React.ReactNode;
 }) {
+  const { t } = useTranslation();
   const [downloading, setDownloading] = useState(false);
   const download = async () => {
     setDownloading(true);
@@ -143,7 +146,7 @@ function HeaderViewer({
           disabled={downloading}
           before={downloading ? <Spinner size="50" /> : <Icon size="50" src={Icons.Download} />}
         >
-          <Text size="B300">Download</Text>
+          <Text size="B300">{t('viewer.download')}</Text>
         </Button>
       </Header>
       <Box className={css.PreviewCenter} grow="Yes" alignItems="Center" justifyContent="Center">
@@ -154,6 +157,7 @@ function HeaderViewer({
 }
 
 function UnknownPreview({ payload }: { payload: DesktopPreviewPayload }) {
+  const { t } = useTranslation();
   const [downloading, setDownloading] = useState(false);
   const download = async () => {
     setDownloading(true);
@@ -188,13 +192,14 @@ function UnknownPreview({ payload }: { payload: DesktopPreviewPayload }) {
         disabled={downloading}
         before={downloading ? <Spinner size="100" /> : <Icon size="200" src={Icons.Download} />}
       >
-        <Text size="T300">Download</Text>
+        <Text size="T300">{t('viewer.download')}</Text>
       </Button>
     </Box>
   );
 }
 
 function BlobViewer({ payload }: { payload: DesktopPreviewPayload }) {
+  const { t } = useTranslation();
   const [src, setSrc] = useState<string>();
   const [text, setText] = useState<string>();
   const [error, setError] = useState(false);
@@ -231,7 +236,7 @@ function BlobViewer({ payload }: { payload: DesktopPreviewPayload }) {
   }, [payload]);
 
   if (error) {
-    return <Text>Failed to load preview.</Text>;
+    return <Text>{t('viewer.failedLoadPreview')}</Text>;
   }
 
   if (payload.viewerType === 'audio') {
