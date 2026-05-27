@@ -413,7 +413,6 @@ export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: 
           url={mxcUrl}
           info={audioInfo}
           encInfo={content.file}
-          name={filename}
           waveform={waveform}
         />
       </Box>

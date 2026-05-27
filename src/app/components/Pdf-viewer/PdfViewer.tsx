@@ -33,11 +33,12 @@ export type PdfViewerProps = {
   name: string;
   src: string;
   hideCloseButton?: boolean;
+  onDownload?: () => Promise<void>;
   requestClose: () => void;
 };
 
 export const PdfViewer = as<'div', PdfViewerProps>(
-  ({ className, name, src, hideCloseButton, requestClose, ...props }, ref) => {
+  ({ className, name, src, hideCloseButton, onDownload, requestClose, ...props }, ref) => {
     const { t } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -81,6 +82,10 @@ export const PdfViewer = as<'div', PdfViewerProps>(
     }, [docState, pageNo, zoom]);
 
     const handleDownload = async () => {
+      if (onDownload) {
+        await onDownload();
+        return;
+      }
       const blob = await fetch(src).then((r) => r.blob());
       await saveFile(blob, name);
     };

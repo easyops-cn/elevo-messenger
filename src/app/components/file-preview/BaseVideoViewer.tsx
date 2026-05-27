@@ -3,30 +3,19 @@ import classNames from 'classnames';
 import { Box, Chip, Header, Icon, IconButton, Icons, Text, as } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { Video } from '../media/Video';
-import * as css from './VideoViewer.css';
-import { downloadMedia } from '../../utils/matrix';
-import { saveFile } from '../../utils/file-saver';
+import * as css from '../video-viewer/VideoViewer.css';
 
-export type VideoViewerProps = {
+export type BaseVideoViewerProps = {
   name: string;
   src: string;
   hideCloseButton?: boolean;
-  onDownload?: () => Promise<void>;
   requestClose: () => void;
+  onDownload: () => Promise<void>;
 };
 
-export const VideoViewer = as<'div', VideoViewerProps>(
-  ({ className, name, src, hideCloseButton, onDownload, requestClose, ...props }, ref) => {
+export const BaseVideoViewer = as<'div', BaseVideoViewerProps>(
+  ({ className, name, src, hideCloseButton, requestClose, onDownload, ...props }, ref) => {
     const { t } = useTranslation();
-
-    const handleDownload = async () => {
-      if (onDownload) {
-        await onDownload();
-        return;
-      }
-      const fileContent = await downloadMedia(src);
-      await saveFile(fileContent, name);
-    };
 
     return (
       <Box
@@ -49,7 +38,7 @@ export const VideoViewer = as<'div', VideoViewerProps>(
           <Box shrink="No" alignItems="Center" gap="200">
             <Chip
               variant="Primary"
-              onClick={handleDownload}
+              onClick={onDownload}
               radii="300"
               before={<Icon size="50" src={Icons.Download} />}
             >
@@ -64,11 +53,7 @@ export const VideoViewer = as<'div', VideoViewerProps>(
           justifyContent="Center"
           alignItems="Center"
         >
-          <Video
-            title={name}
-            src={src}
-            controls
-          />
+          <Video title={name} src={src} controls />
         </Box>
       </Box>
     );
