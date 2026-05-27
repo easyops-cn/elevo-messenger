@@ -53,7 +53,10 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
   const useAuth = useMediaAuthentication();
 
   const content = fileEvent.getContent() ?? {};
-  const filename = (content.filename ?? content.body ?? 'Unnamed File') as string;
+  const filename = (content['org.matrix.msc1767.file']?.name ??
+    content.filename ??
+    content.body ??
+    'Unnamed File') as string;
   const mimetype = (content.info?.mimetype ?? '') as string;
   const fileSize = (content.info?.size ?? 0) as number;
   const url = (content.file?.url ?? content.url) as string | undefined;

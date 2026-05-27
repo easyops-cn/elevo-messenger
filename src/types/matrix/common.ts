@@ -71,6 +71,13 @@ export type IAudioContent = {
   url?: string;
   info?: IAudioInfo;
   file?: IEncryptedFile;
+  'org.matrix.msc1767.file'?: {
+    name?: string;
+    mimetype?: string;
+    size?: number;
+    url?: string;
+    file?: IEncryptedFile;
+  };
   'org.matrix.msc1767.audio'?: {
     duration?: number;
     waveform?: number[];

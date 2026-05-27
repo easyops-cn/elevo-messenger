@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { Box, Button, Header, Icon, IconButton, Icons, Spinner, Text, varsClass } from 'folds';
+import { Box, Button, Header, Icon, Icons, Spinner, Text, varsClass } from 'folds';
 import 'folds/dist/style.css';
 import './index.css';
 import './preview.css';
@@ -73,7 +73,7 @@ function PreviewAudio({ payload }: { payload: DesktopPreviewPayload }) {
 
   if (payload.waveform?.length) {
     return (
-      <Box style={{ width: 'min(720px, 90vw)' }}>
+      <Box style={{ width: 'min(720px, 90vw)' }} alignItems="Center" justifyContent="Center">
         <WaveformPlayer
           audioSrc={src}
           waveform={payload.waveform}
@@ -88,7 +88,7 @@ function PreviewAudio({ payload }: { payload: DesktopPreviewPayload }) {
   }
 
   return (
-    <Box style={{ width: 'min(720px, 90vw)' }}>
+    <Box style={{ width: 'min(720px, 90vw)' }} alignItems="Center" justifyContent="Center">
       {!src && (
         <Button
           variant="Primary"
@@ -128,11 +128,8 @@ function HeaderViewer({
 
   return (
     <Box className={css.PreviewShell} direction="Column">
-      <Header size="400">
+      <Header className={css.PreviewHeader} size="400">
         <Box grow="Yes" alignItems="Center" gap="200">
-          <IconButton size="300" radii="300" onClick={() => window.close()}>
-            <Icon size="50" src={Icons.Cross} />
-          </IconButton>
           <Text size="T300" truncate>
             {payload.name}
           </Text>
@@ -253,13 +250,20 @@ function BlobViewer({ payload }: { payload: DesktopPreviewPayload }) {
         text={text}
         langName={payload.langName ?? 'txt'}
         mimeType={payload.mimeType}
+        hideCloseButton
         requestClose={() => window.close()}
       />
     );
   }
 
   if (!src) {
-    return <Spinner variant="Secondary" size="600" />;
+    return (
+      <Box className={css.PreviewShell} direction="Column">
+        <Box className={css.PreviewCenter} grow="Yes" alignItems="Center" justifyContent="Center">
+          <Spinner variant="Secondary" size="600" />
+        </Box>
+      </Box>
+    );
   }
 
   if (payload.viewerType === 'image') {
@@ -280,6 +284,7 @@ function BlobViewer({ payload }: { payload: DesktopPreviewPayload }) {
         className={css.PreviewShell}
         name={payload.name}
         src={src}
+        hideCloseButton
         requestClose={() => window.close()}
       />
     );
@@ -291,6 +296,7 @@ function BlobViewer({ payload }: { payload: DesktopPreviewPayload }) {
         className={css.PreviewShell}
         name={payload.name}
         src={src}
+        hideCloseButton
         requestClose={() => window.close()}
       />
     );
@@ -313,11 +319,8 @@ function PreviewApp() {
       <Box className={css.PreviewShell} direction="Column">
         {payload?.viewerType === 'file' ? (
           <>
-            <Header size="400">
+            <Header className={css.PreviewHeader} size="400">
               <Box grow="Yes" alignItems="Center" gap="200">
-                <IconButton size="300" radii="300" onClick={() => window.close()}>
-                  <Icon size="50" src={Icons.Cross} />
-                </IconButton>
                 <Text size="T300" truncate>
                   {payload.name}
                 </Text>

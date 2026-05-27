@@ -3,10 +3,10 @@ import React, { ComponentProps, HTMLAttributes, Suspense, forwardRef, lazy } fro
 import classNames from 'classnames';
 import { Box, Chip, Header, Icon, IconButton, Icons, Scroll, Text, as } from 'folds';
 import { ErrorBoundary } from 'react-error-boundary';
+import { useTranslation } from 'react-i18next';
 import * as css from './TextViewer.css';
 import { copyToClipboard } from '../../utils/dom';
 import { saveFile } from '../../utils/file-saver';
-import { useTranslation } from 'react-i18next';
 
 const ReactPrism = lazy(() => import('../../plugins/react-prism/ReactPrism'));
 
@@ -38,11 +38,12 @@ export type TextViewerProps = {
   text: string;
   langName: string;
   mimeType?: string;
+  hideCloseButton?: boolean;
   requestClose: () => void;
 };
 
 export const TextViewer = as<'div', TextViewerProps>(
-  ({ className, name, text, langName, mimeType, requestClose, ...props }, ref) => {
+  ({ className, name, text, langName, mimeType, hideCloseButton, requestClose, ...props }, ref) => {
     const { t } = useTranslation();
 
     const handleCopy = () => {
@@ -62,9 +63,11 @@ export const TextViewer = as<'div', TextViewerProps>(
       >
         <Header className={css.TextViewerHeader} size="400">
           <Box grow="Yes" alignItems="Center" gap="200">
-            <IconButton size="300" radii="300" onClick={requestClose}>
-              <Icon size="50" src={Icons.ArrowLeft} />
-            </IconButton>
+            {!hideCloseButton && (
+              <IconButton size="300" radii="300" onClick={requestClose}>
+                <Icon size="50" src={Icons.ArrowLeft} />
+              </IconButton>
+            )}
             <Text size="T300" truncate>
               {name}
             </Text>

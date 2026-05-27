@@ -32,11 +32,12 @@ import { stopPropagation } from '../../utils/keyboard';
 export type PdfViewerProps = {
   name: string;
   src: string;
+  hideCloseButton?: boolean;
   requestClose: () => void;
 };
 
 export const PdfViewer = as<'div', PdfViewerProps>(
-  ({ className, name, src, requestClose, ...props }, ref) => {
+  ({ className, name, src, hideCloseButton, requestClose, ...props }, ref) => {
     const { t } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -111,9 +112,11 @@ export const PdfViewer = as<'div', PdfViewerProps>(
       <Box className={classNames(css.PdfViewer, className)} direction="Column" {...props} ref={ref}>
         <Header className={css.PdfViewerHeader} size="400">
           <Box grow="Yes" alignItems="Center" gap="200">
-            <IconButton size="300" radii="300" onClick={requestClose}>
-              <Icon size="50" src={Icons.ArrowLeft} />
-            </IconButton>
+            {!hideCloseButton && (
+              <IconButton size="300" radii="300" onClick={requestClose}>
+                <Icon size="50" src={Icons.ArrowLeft} />
+              </IconButton>
+            )}
             <Text size="T300" truncate>
               {name}
             </Text>
