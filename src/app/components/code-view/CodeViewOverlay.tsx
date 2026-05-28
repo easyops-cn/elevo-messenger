@@ -2,8 +2,8 @@ import React from 'react';
 import FocusTrap from 'focus-trap-react';
 import { Modal, Overlay, OverlayBackdrop, OverlayCenter } from 'folds';
 import { atom, useAtom } from 'jotai';
-import { ModalWide } from '../../styles/Modal.css';
 import { stopPropagation } from '../../utils/keyboard';
+import * as css from './CodeView.css';
 import { CodeView } from './CodeView';
 import type { CodeViewPayload } from './types';
 
@@ -30,7 +30,7 @@ export function CodeViewOverlay() {
           <Modal
             data-code-view-overlay
             tabIndex={-1}
-            className={ModalWide}
+            className={css.CodeViewModal}
             size="500"
             onContextMenu={(evt: React.MouseEvent) => evt.stopPropagation()}
           >

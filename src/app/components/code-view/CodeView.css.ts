@@ -1,4 +1,5 @@
-import { globalStyle, style } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
+import { recipe } from '@vanilla-extract/recipes';
 import { DefaultReset, color, config, toRem } from 'folds';
 import { elevoColor } from '../../../config.css';
 
@@ -13,6 +14,12 @@ export const CodeView = style([
     color: color.Background.OnContainer,
   },
 ]);
+
+export const CodeViewModal = style({
+  width: '85vw',
+  maxWidth: toRem(1200),
+  minHeight: '90vh',
+});
 
 export const Header = style([
   DefaultReset,
@@ -122,28 +129,80 @@ export const CodeBlock = style({
   backgroundColor: color.Background.Container,
 });
 
-export const Empty = style({
-  height: '100%',
-  minHeight: toRem(180),
-});
-
-globalStyle(`${CodeBlock} pre.shiki`, {
+export const CodePre = style({
   margin: 0,
   padding: `${config.space.S200} 0`,
   minWidth: 'fit-content',
-  backgroundColor: `${color.Background.Container} !important`,
+  backgroundColor: color.Background.Container,
   fontFamily: 'monospace',
   fontSize: toRem(13),
   lineHeight: toRem(20),
 });
 
-globalStyle(`${CodeBlock} pre.shiki code`, {
+export const CodeGrid = style({
   display: 'block',
 });
 
-globalStyle(`${CodeBlock} pre.shiki .line`, {
-  display: 'inline',
-  minHeight: toRem(20),
+export const CodeLine = recipe({
+  base: {
+    display: 'grid',
+    minHeight: toRem(20),
+  },
+  variants: {
+    lineNumbers: {
+      true: {
+        gridTemplateColumns: `${toRem(52)} ${toRem(52)} minmax(max-content, 1fr)`,
+      },
+      false: {
+        gridTemplateColumns: 'minmax(max-content, 1fr)',
+      },
+    },
+    diff: {
+      add: {
+        backgroundColor: 'color-mix(in srgb, #2da44e 16%, transparent)',
+      },
+      delete: {
+        backgroundColor: 'color-mix(in srgb, #cf222e 14%, transparent)',
+      },
+      context: {},
+    },
+  },
+});
+
+export const HunkSeparator = style({
+  display: 'block',
+  height: toRem(12),
+  padding: `${toRem(3)} 0`,
+  backgroundColor: color.Background.Container,
+  selectors: {
+    '&::before': {
+      content: '""',
+      display: 'block',
+      height: toRem(6),
+      backgroundColor: elevoColor.Border.Light,
+    },
+  },
+});
+
+export const LineNumber = style({
+  padding: `0 ${config.space.S200}`,
+  color: elevoColor.Text.Secondary,
+  textAlign: 'right',
+  userSelect: 'none',
+  borderRight: border,
+});
+
+export const LineCode = style({
   padding: `0 ${config.space.S300}`,
   whiteSpace: 'pre',
+});
+
+export const NoCode = style({
+  display: 'block',
+  padding: `${config.space.S300}`,
+});
+
+export const Empty = style({
+  height: '100%',
+  minHeight: toRem(180),
 });
