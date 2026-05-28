@@ -26,20 +26,20 @@ function getCodeHighlighter(): Promise<HighlighterCore> {
   if (!codeHighlighterPromise) {
     codeHighlighterPromise = Promise.all([
       import('shiki/core'),
-      import('shiki/engine/javascript'),
+      import('shiki/engine-oniguruma'),
       import('shiki/themes/github-dark.mjs'),
       import('shiki/themes/github-light.mjs'),
     ]).then(
       ([
         { createHighlighterCore },
-        { createJavaScriptRegexEngine },
+        { createOnigurumaEngine },
         { default: githubDarkTheme },
         { default: githubLightTheme },
       ]) =>
         createHighlighterCore({
           themes: [githubDarkTheme, githubLightTheme],
           langs: [],
-          engine: createJavaScriptRegexEngine(),
+          engine: createOnigurumaEngine(import("shiki/wasm")),
         })
     );
   }
