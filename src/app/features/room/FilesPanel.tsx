@@ -5,8 +5,16 @@ import { useTranslation } from 'react-i18next';
 
 import * as css from './RoomSidePanel.css';
 import { FileMenuItem } from './FileMenuItem';
-import { FileViewerOverlay } from './FileViewerOverlay';
+import {
+  createDesktopPreviewPayload,
+  getFileViewerInfo,
+  FileViewerOverlay,
+} from './FileViewerOverlay';
 import { useRoomFiles } from '../../hooks/useRoomFiles';
+import { useMatrixClient } from '../../hooks/useMatrixClient';
+import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
+import { mxcUrlToHttp } from '../../utils/matrix';
+import { openDesktopFilePreview } from '../../utils/desktopPreview';
 
 type FilesPanelProps = {
   room: Room;
@@ -14,10 +22,25 @@ type FilesPanelProps = {
 
 export function FilesPanel({ room }: FilesPanelProps) {
   const { t } = useTranslation();
+  const mx = useMatrixClient();
+  const useAuth = useMediaAuthentication();
   const [viewingFile, setViewingFile] = useState<MatrixEvent | null>(null);
 
   const { files, loading, error, retry } = useRoomFiles(room);
   const isSpaceRoom = room.isSpaceRoom();
+  const handleOpenFile = async (fileEvent: MatrixEvent) => {
+    const { url } = getFileViewerInfo(fileEvent);
+    const mediaUrl = url ? mxcUrlToHttp(mx, url, useAuth) : undefined;
+
+    if (
+      mediaUrl &&
+      (await openDesktopFilePreview(createDesktopPreviewPayload(fileEvent, mediaUrl)))
+    ) {
+      return;
+    }
+
+    setViewingFile(fileEvent);
+  };
 
   if (isSpaceRoom) return null;
 
@@ -58,7 +81,7 @@ export function FilesPanel({ room }: FilesPanelProps) {
               <FileMenuItem
                 key={fileEvent.getId()}
                 fileEvent={fileEvent}
-                onClick={() => setViewingFile(fileEvent)}
+                onClick={() => handleOpenFile(fileEvent)}
               />
             ))}
           </Box>

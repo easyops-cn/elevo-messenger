@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { MatrixEvent } from 'matrix-js-sdk';
 import { Modal, Overlay, OverlayBackdrop, OverlayCenter } from 'folds';
 import FocusTrap from 'focus-trap-react';
@@ -20,7 +20,7 @@ import {
   downloadMedia,
   mxcUrlToHttp,
 } from '../../utils/matrix';
-import { openDesktopFilePreview, type DesktopPreviewViewerType } from '../../utils/desktopPreview';
+import { type DesktopPreviewPayload, type DesktopPreviewViewerType } from '../../utils/desktopPreview';
 
 type ViewerType = 'image' | 'video' | 'audio' | 'text' | 'pdf';
 
@@ -43,10 +43,7 @@ function getFileType(mimetype: string, filename: string): ViewerType | null {
   return null;
 }
 
-export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlayProps) {
-  const mx = useMatrixClient();
-  const useAuth = useMediaAuthentication();
-
+export const getFileViewerInfo = (fileEvent: MatrixEvent) => {
   const content = fileEvent.getContent() ?? {};
   const filename = (content['org.matrix.msc1767.file']?.name ??
     content.filename ??
@@ -62,6 +59,68 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
     : undefined;
   const viewerType = getFileType(mimetype, filename);
   const desktopViewerType: DesktopPreviewViewerType = viewerType ?? 'file';
+
+  return {
+    filename,
+    mimetype,
+    fileSize,
+    url,
+    encInfo,
+    audioInfo,
+    audioWaveform,
+    viewerType,
+    desktopViewerType,
+  };
+};
+
+export const createDesktopPreviewPayload = (
+  fileEvent: MatrixEvent,
+  mediaUrl: string
+): DesktopPreviewPayload => {
+  const {
+    filename,
+    mimetype,
+    fileSize,
+    encInfo,
+    audioInfo,
+    audioWaveform,
+    viewerType,
+    desktopViewerType,
+  } = getFileViewerInfo(fileEvent);
+
+  return {
+    viewerType: desktopViewerType,
+    name: filename,
+    mimeType: mimetype,
+    size: fileSize,
+    duration: audioInfo.duration,
+    mediaUrl,
+    encInfo,
+    waveform: audioWaveform,
+    langName:
+      viewerType === 'text'
+        ? READABLE_TEXT_MIME_TYPES.includes(mimetype)
+          ? mimeTypeToExt(mimetype)
+          : mimeTypeToExt(READABLE_EXT_TO_MIME_TYPE[getFileNameExt(filename)] ?? mimetype)
+        : undefined,
+  };
+};
+
+export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlayProps) {
+  const mx = useMatrixClient();
+  const useAuth = useMediaAuthentication();
+
+  const {
+    filename,
+    mimetype,
+    fileSize,
+    url,
+    encInfo,
+    audioInfo,
+    audioWaveform,
+    viewerType,
+    desktopViewerType,
+  } = getFileViewerInfo(fileEvent);
   const mediaUrl = useMemo(() => {
     if (!url) return undefined;
     return mxcUrlToHttp(mx, url, useAuth);
@@ -100,25 +159,6 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
     mimetype,
     viewerType,
   ]);
-
-  useEffect(() => {
-    if (!mediaUrl || !previewItem) return;
-    const open = async () => {
-      const opened = await openDesktopFilePreview({
-        viewerType: previewItem.viewerType,
-        name: previewItem.name,
-        mimeType: previewItem.mimeType,
-        size: previewItem.size,
-        duration: previewItem.duration,
-        mediaUrl,
-        encInfo,
-        waveform: previewItem.waveform,
-        langName: previewItem.langName,
-      });
-      if (opened) requestClose();
-    };
-    open();
-  }, [encInfo, mediaUrl, previewItem, requestClose]);
 
   if (!previewItem) return null;
 
