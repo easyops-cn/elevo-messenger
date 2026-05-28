@@ -1,122 +1,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Chip, Header, Icon, IconButton, Icons, Scroll, Text, as } from 'folds';
-import type { HighlighterCore } from 'shiki/core';
-import type { BundledLanguage, ThemedToken } from 'shiki';
+import type { ThemedToken } from 'shiki';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import * as css from './CodeView.css';
 import type { CodeViewPayload } from './types';
 import { UNKNOWN_FILE } from '../message/elevo/diffSummary';
-import { useTheme, ThemeKind } from '../../hooks/useTheme';
-
-type LanguageBundle = typeof import('shiki/langs');
-
-let codeHighlighterPromise: Promise<HighlighterCore> | undefined;
-let languageBundlePromise: Promise<LanguageBundle> | undefined;
-
-function getLanguageBundle(): Promise<LanguageBundle> {
-  if (!languageBundlePromise) {
-    languageBundlePromise = import('shiki/langs');
-  }
-
-  return languageBundlePromise;
-}
-
-function getCodeHighlighter(): Promise<HighlighterCore> {
-  if (!codeHighlighterPromise) {
-    codeHighlighterPromise = Promise.all([
-      import('shiki/core'),
-      import('shiki/engine-oniguruma'),
-      import('shiki/themes/github-dark.mjs'),
-      import('shiki/themes/github-light.mjs'),
-    ]).then(
-      ([
-        { createHighlighterCore },
-        { createOnigurumaEngine },
-        { default: githubDarkTheme },
-        { default: githubLightTheme },
-      ]) =>
-        createHighlighterCore({
-          themes: [githubDarkTheme, githubLightTheme],
-          langs: [],
-          engine: createOnigurumaEngine(import("shiki/wasm")),
-        })
-    );
-  }
-
-  return codeHighlighterPromise;
-}
-
-const fileNameLanguageMap: Record<string, string> = {
-  dockerfile: 'dockerfile',
-  makefile: 'makefile',
-  rakefile: 'ruby',
-  gemfile: 'ruby',
-  cargo: 'toml',
-};
-
-function getPathLanguageCandidates(path: string): string[] {
-  const fileName = path.split('/').pop()?.toLowerCase() ?? '';
-  const candidates: string[] = [];
-  const mappedFileName = fileNameLanguageMap[fileName];
-  if (mappedFileName) candidates.push(mappedFileName);
-
-  if (fileName.endsWith('.d.ts')) candidates.push('typescript');
-
-  const parts = fileName.split('.').filter(Boolean);
-  if (parts.length > 1) {
-    const extension = parts[parts.length - 1];
-    candidates.push(extension);
-
-    if (extension === 'lock' && parts.length > 2) candidates.push(parts[parts.length - 2]);
-  }
-
-  return candidates;
-}
-
-function inferLanguage(path: string, bundle: LanguageBundle): BundledLanguage | 'text' {
-  const { bundledLanguages, bundledLanguagesAlias, bundledLanguagesInfo } = bundle;
-  const candidates = getPathLanguageCandidates(path);
-
-  const language = candidates.find((candidate) => {
-    if (candidate in bundledLanguages) return candidate as BundledLanguage;
-
-    const aliasTarget = bundledLanguagesAlias[candidate as keyof typeof bundledLanguagesAlias];
-    if (aliasTarget && aliasTarget in bundledLanguages) return aliasTarget as BundledLanguage;
-
-    const info = bundledLanguagesInfo.find(
-      (item) => item.id === candidate || item.aliases?.includes(candidate)
-    );
-    return Boolean(info?.id && info.id in bundledLanguages);
-  });
-
-  if (!language) return 'text';
-
-  if (language in bundledLanguages) return language as BundledLanguage;
-
-  const aliasTarget = bundledLanguagesAlias[language as keyof typeof bundledLanguagesAlias];
-  if (aliasTarget && aliasTarget in bundledLanguages) return aliasTarget as BundledLanguage;
-
-  const info = bundledLanguagesInfo.find(
-    (item) => item.id === language || item.aliases?.includes(language)
-  );
-  if (info?.id && info.id in bundledLanguages) return info.id as BundledLanguage;
-
-  return 'text';
-}
-
-async function ensureLanguage(
-  highlighter: HighlighterCore,
-  bundle: LanguageBundle,
-  lang: BundledLanguage | 'text'
-): Promise<void> {
-  if (lang === 'text' || highlighter.getLoadedLanguages().includes(lang)) return;
-
-  const loader = bundle.bundledLanguages[lang];
-  if (!loader) return;
-  const module = await loader();
-  highlighter.loadLanguageSync(module.default);
-}
+import { useTheme } from '../../hooks/useTheme';
+import {
+  codeToTokensBase,
+  getPlainTokenLines,
+  getShikiThemeName,
+  getTokenStyle,
+  type HighlightedTokenLines,
+} from '../../plugins/shiki';
 
 type DiffRowType = 'add' | 'delete' | 'context';
 
@@ -232,18 +129,6 @@ function getDiffDisplayRows(rows: DiffRow[]): DiffDisplayRow[] {
   );
 }
 
-function getTokenStyle(token: ThemedToken): React.CSSProperties {
-  const fontStyle = token.fontStyle ?? 0;
-  const hasStyle = (flag: number) => fontStyle > 0 && Math.floor(fontStyle / flag) % 2 === 1;
-
-  return {
-    color: token.color,
-    fontStyle: hasStyle(1) ? 'italic' : undefined,
-    fontWeight: hasStyle(2) ? 700 : undefined,
-    textDecoration: hasStyle(4) ? 'underline' : undefined,
-  };
-}
-
 type DiffLineCountProps = {
   added: number;
   deleted: number;
@@ -263,8 +148,6 @@ type HighlightedDiffProps = {
   lines: string[];
 };
 
-type HighlightedTokenLines = ThemedToken[][];
-
 function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
   const theme = useTheme();
   const { rows, showLineNumbers } = useMemo(() => parseDiffRows(lines), [lines]);
@@ -274,19 +157,14 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
   useEffect(() => {
     let alive = true;
     const code = rows.map((row) => row.code).join('\n');
-    const shikiTheme = theme.kind === ThemeKind.Dark ? 'github-dark' : 'github-light';
+    const shikiTheme = getShikiThemeName(theme.kind);
 
-    Promise.all([getCodeHighlighter(), getLanguageBundle()])
-      .then(async ([highlighter, bundle]) => {
-        const lang = inferLanguage(path, bundle);
-        await ensureLanguage(highlighter, bundle, lang);
-        return highlighter.codeToTokensBase(code, { lang, theme: shikiTheme });
-      })
+    codeToTokensBase({ code, path, theme: shikiTheme })
       .then((result) => {
         if (alive) setTokenLines(result);
       })
       .catch(() => {
-        if (alive) setTokenLines(rows.map((row) => [{ content: row.code } as ThemedToken]));
+        if (alive) setTokenLines(getPlainTokenLines(code));
       });
 
     return () => {

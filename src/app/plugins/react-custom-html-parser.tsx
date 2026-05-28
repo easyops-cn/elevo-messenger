@@ -2,8 +2,6 @@
 import React, {
   ComponentPropsWithoutRef,
   ReactEventHandler,
-  Suspense,
-  lazy,
   useMemo,
   useState,
 } from 'react';
@@ -19,7 +17,6 @@ import classNames from 'classnames';
 import { Box, Chip, color, config, Header, Icon, IconButton, Icons, Scroll, Text, toRem } from 'folds';
 import { IntermediateRepresentation, Opts as LinkifyOpts, OptFn } from 'linkifyjs';
 import Linkify from 'linkify-react';
-import { ErrorBoundary } from 'react-error-boundary';
 import { ChildNode } from 'domhandler';
 import { useTranslation } from 'react-i18next';
 import { TaskRefStatus } from '../components/editor/slate';
@@ -44,8 +41,7 @@ import {
 import { onEnterOrSpace } from '../utils/keyboard';
 import { copyToClipboard, tryDecodeURIComponent } from '../utils/dom';
 import { useTimeoutToggle } from '../hooks/useTimeoutToggle';
-
-const ReactPrism = lazy(() => import('./react-prism/ReactPrism'));
+import { ShikiCode, normalizeLanguageName } from './shiki';
 
 const EMOJI_REG_G = new RegExp(`${URL_NEG_LB}(${EMOJI_PATTERN})`, 'g');
 
@@ -449,22 +445,17 @@ export const getReactCustomHtmlParser = (
           if (parent && 'name' in parent && parent.name === 'pre') {
             const codeReact = domToReact(children, opts);
             if (typeof codeReact === 'string') {
-              let lang = props.className;
-              if (lang === 'language-rs') lang = 'language-rust';
-              else if (lang === 'language-js') lang = 'language-javascript';
-              else if (lang === 'language-ts') lang = 'language-typescript';
+              const lang =
+                typeof props.className === 'string'
+                  ? normalizeLanguageName(props.className)
+                  : undefined;
               return (
-                <ErrorBoundary fallback={<code {...props}>{codeReact}</code>}>
-                  <Suspense fallback={<code {...props}>{codeReact}</code>}>
-                    <ReactPrism>
-                      {(ref) => (
-                        <code ref={ref} {...props} className={lang}>
-                          {codeReact}
-                        </code>
-                      )}
-                    </ReactPrism>
-                  </Suspense>
-                </ErrorBoundary>
+                <ShikiCode
+                  {...props}
+                  code={codeReact}
+                  lang={lang}
+                  className={lang ? `language-${lang}` : props.className}
+                />
               );
             }
           } else {
