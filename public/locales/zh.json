@@ -945,6 +945,10 @@
     "copied": "已复制",
     "code": "代码"
   },
+  "planCard": {
+    "plan": "计划",
+    "writingPlan": "正在编写计划..."
+  },
   "emoji": {
     "recent": "最近",
     "personalPack": "个人表情包",

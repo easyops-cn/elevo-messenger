@@ -1,7 +1,6 @@
 import { style, keyframes } from '@vanilla-extract/css';
 import { recipe } from '@vanilla-extract/recipes';
 import { color, config, DefaultReset, toRem } from 'folds';
-import { ContainerColor } from './ContainerColor.css';
 
 export const MarginSpaced = style({
   marginBottom: config.space.S200,
@@ -45,7 +44,7 @@ const BaseCode = style({
   color: color.SurfaceVariant.OnContainer,
   background: color.SurfaceVariant.Container,
   border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
-  borderRadius: config.radii.R300,
+  borderRadius: config.radii.R400,
 });
 const CodeFont = style({
   fontFamily: 'monospace',
@@ -94,7 +93,6 @@ export const CodeBlock = style([
   },
 ]);
 export const CodeBlockHeader = style([
-  ContainerColor({ variant: 'Surface' }),
   {
     padding: `0 ${config.space.S200} 0 ${config.space.S300}`,
     borderBottomWidth: config.borderWidth.B300,
@@ -114,10 +112,17 @@ export const CodeBlockBottomShadow = style({
   bottom: 0,
   left: 0,
   right: 0,
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'flex-end',
+  height: config.space.S700,
+  padding: `0 ${config.space.S200} ${config.space.S200}`,
   pointerEvents: 'none',
 
-  height: config.space.S400,
-  background: `linear-gradient(to top, #00000022, #00000000)`,
+  background: `linear-gradient(to top, ${color.SurfaceVariant.Container} 0%, ${color.SurfaceVariant.Container} 20%, #00000000 100%)`,
+});
+export const CodeBlockExpandButton = style({
+  pointerEvents: 'auto',
 });
 
 export const List = style([

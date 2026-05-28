@@ -2,8 +2,6 @@
 import React, {
   ComponentPropsWithoutRef,
   ReactEventHandler,
-  Suspense,
-  lazy,
   useMemo,
   useState,
 } from 'react';
@@ -16,10 +14,9 @@ import {
 } from 'html-react-parser';
 import { MatrixClient } from 'matrix-js-sdk';
 import classNames from 'classnames';
-import { Box, Chip, color, config, Header, Icon, IconButton, Icons, Scroll, Text, toRem } from 'folds';
+import { Box, Button, Chip, color, Header, Icon, Icons, Scroll, Text, toRem } from 'folds';
 import { IntermediateRepresentation, Opts as LinkifyOpts, OptFn } from 'linkifyjs';
 import Linkify from 'linkify-react';
-import { ErrorBoundary } from 'react-error-boundary';
 import { ChildNode } from 'domhandler';
 import { useTranslation } from 'react-i18next';
 import { TaskRefStatus } from '../components/editor/slate';
@@ -44,10 +41,12 @@ import {
 import { onEnterOrSpace } from '../utils/keyboard';
 import { copyToClipboard, tryDecodeURIComponent } from '../utils/dom';
 import { useTimeoutToggle } from '../hooks/useTimeoutToggle';
-
-const ReactPrism = lazy(() => import('./react-prism/ReactPrism'));
+import { ShikiCode, normalizeLanguageName } from './shiki';
+import { CopyIcon } from '../icons/CopyIcon';
+import { CheckIcon } from '../icons/CheckIcon';
 
 const EMOJI_REG_G = new RegExp(`${URL_NEG_LB}(${EMOJI_PATTERN})`, 'g');
+const CODE_BLOCK_LINE_LIMIT = 10;
 
 export const LINKIFY_OPTS: LinkifyOpts = {
   attributes: {
@@ -225,10 +224,8 @@ const extractTextFromChildren = (nodes: ChildNode[]): string => {
 
 export function CodeBlock({
   children,
-  opts,
 }: {
   children: ChildNode[];
-  opts: HTMLReactParserOptions;
 }) {
   const { t } = useTranslation();
   const code = children[0];
@@ -240,17 +237,24 @@ export function CodeBlock({
       ? languageClass.replace('language-', '')
       : languageClass;
 
-  const LINE_LIMIT = 14;
-  const largeCodeBlock = useMemo(
-    () => extractTextFromChildren(children).split('\n').length > LINE_LIMIT,
-    [children],
-  );
-
   const [expanded, setExpand] = useState(false);
   const [copied, setCopied] = useTimeoutToggle();
 
+  const codeText = useMemo(() => extractTextFromChildren(children), [children]);
+  const largeCodeBlock = useMemo(
+    () => codeText.split('\n').length > CODE_BLOCK_LINE_LIMIT,
+    [codeText],
+  );
+  const visibleCodeText = useMemo(
+    () =>
+      largeCodeBlock && !expanded
+        ? codeText.split('\n').slice(0, CODE_BLOCK_LINE_LIMIT).join('\n')
+        : codeText,
+    [codeText, expanded, largeCodeBlock],
+  );
+
   const handleCopy = () => {
-    copyToClipboard(extractTextFromChildren(children));
+    copyToClipboard(codeText);
     setCopied();
   };
 
@@ -266,46 +270,52 @@ export function CodeBlock({
             {customLabel ?? language ?? t('common.code')}
           </Text>
         </Box>
-        <Box shrink="No" gap="200">
+        <Box shrink="No">
           <Chip
-            variant={copied ? 'Success' : 'Surface'}
+            variant="SurfaceVariant"
             fill="None"
             radii="Pill"
             onClick={handleCopy}
-            before={copied && <Icon size="50" src={Icons.Check} />}
+            aria-label={copied ? t('codeBlock.copied') : t('common.copy')}
+            title={copied ? t('codeBlock.copied') : t('common.copy')}
           >
-            <Text size="B300">{copied ? t('codeBlock.copied') : t('common.copy')}</Text>
+            <Icon size="50" src={copied ? CheckIcon : CopyIcon} />
           </Chip>
-          {largeCodeBlock && (
-            <IconButton
-              size="300"
-              variant="SurfaceVariant"
-              outlined
-              radii="300"
-              onClick={toggleExpand}
-              aria-label={expanded ? t('common.collapse') : t('common.expand')}
-            >
-              <Icon size="50" src={expanded ? Icons.ChevronTop : Icons.ChevronBottom} />
-            </IconButton>
-          )}
         </Box>
       </Header>
       <Scroll
-        style={{
-          maxHeight: largeCodeBlock && !expanded ? toRem(300) : undefined,
-          paddingBottom: largeCodeBlock ? config.space.S400 : undefined,
-        }}
-        direction="Both"
+        direction="Horizontal"
         variant="SurfaceVariant"
         size="300"
         visibility="Hover"
         hideTrack
       >
         <div id="code-block-content" className={css.CodeBlockInternal}>
-          {domToReact(children, opts)}
+          <ShikiCode
+            {...attributesToProps(attribs ?? {})}
+            code={visibleCodeText}
+            lang={language}
+            className={languageClass}
+          />
         </div>
       </Scroll>
-      {largeCodeBlock && !expanded && <Box className={css.CodeBlockBottomShadow} />}
+      {largeCodeBlock && (
+        <Box className={css.CodeBlockBottomShadow}>
+          <Button
+            className={css.CodeBlockExpandButton}
+            size="300"
+            variant="Secondary"
+            fill="Soft"
+            radii="Pill"
+            onClick={toggleExpand}
+            aria-expanded={expanded}
+            aria-controls="code-block-content"
+            after={<Icon size="50" src={expanded ? Icons.ChevronTop : Icons.ChevronBottom} />}
+          >
+            <Text size="B300">{expanded ? t('common.collapse') : t('common.expand')}</Text>
+          </Button>
+        </Box>
+      )}
     </Text>
   );
 }
@@ -384,7 +394,7 @@ export const getReactCustomHtmlParser = (
         }
 
         if (name === 'pre') {
-          return <CodeBlock opts={opts}>{children}</CodeBlock>;
+          return <CodeBlock>{children}</CodeBlock>;
         }
 
         if (name === 'blockquote') {
@@ -449,22 +459,17 @@ export const getReactCustomHtmlParser = (
           if (parent && 'name' in parent && parent.name === 'pre') {
             const codeReact = domToReact(children, opts);
             if (typeof codeReact === 'string') {
-              let lang = props.className;
-              if (lang === 'language-rs') lang = 'language-rust';
-              else if (lang === 'language-js') lang = 'language-javascript';
-              else if (lang === 'language-ts') lang = 'language-typescript';
+              const lang =
+                typeof props.className === 'string'
+                  ? normalizeLanguageName(props.className)
+                  : undefined;
               return (
-                <ErrorBoundary fallback={<code {...props}>{codeReact}</code>}>
-                  <Suspense fallback={<code {...props}>{codeReact}</code>}>
-                    <ReactPrism>
-                      {(ref) => (
-                        <code ref={ref} {...props} className={lang}>
-                          {codeReact}
-                        </code>
-                      )}
-                    </ReactPrism>
-                  </Suspense>
-                </ErrorBoundary>
+                <ShikiCode
+                  {...props}
+                  code={codeReact}
+                  lang={lang}
+                  className={lang ? `language-${lang}` : props.className}
+                />
               );
             }
           } else {

@@ -1,14 +1,12 @@
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
-import React, { ComponentProps, HTMLAttributes, Suspense, forwardRef, lazy } from 'react';
+import React, { ComponentProps, HTMLAttributes, forwardRef } from 'react';
 import classNames from 'classnames';
 import { Box, Chip, Header, Icon, IconButton, Icons, Scroll, Text, as } from 'folds';
-import { ErrorBoundary } from 'react-error-boundary';
 import { useTranslation } from 'react-i18next';
 import * as css from './TextViewer.css';
 import { copyToClipboard } from '../../utils/dom';
 import { saveFile } from '../../utils/file-saver';
-
-const ReactPrism = lazy(() => import('../../plugins/react-prism/ReactPrism'));
+import { ShikiCode } from '../../plugins/shiki';
 
 type TextViewerContentProps = {
   text: string;
@@ -24,11 +22,7 @@ export const TextViewerContent = forwardRef<HTMLPreElement, TextViewerContentPro
       {...props}
       ref={ref}
     >
-      <ErrorBoundary fallback={<code>{text}</code>}>
-        <Suspense fallback={<code>{text}</code>}>
-          <ReactPrism key={text}>{(codeRef) => <code ref={codeRef}>{text}</code>}</ReactPrism>
-        </Suspense>
-      </ErrorBoundary>
+      <ShikiCode code={text} lang={langName} />
     </Text>
   )
 );

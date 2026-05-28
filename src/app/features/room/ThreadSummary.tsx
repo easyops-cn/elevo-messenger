@@ -154,7 +154,7 @@ export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSum
               />
             </Avatar>
             <Text size="T200" truncate>
-              {threadLastReplySenderName}: {threadSummary ?? t('message.threadNoReplies')}
+              {threadLastReplySenderName}: {threadSummary}
             </Text>
           </>
         ) : (
