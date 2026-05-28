@@ -70,6 +70,17 @@ export const ToolCallSpinnerArc = style({
   strokeDashoffset: 10,
 });
 
+export const ApplyPatchTitleLink = style({
+  color: 'var(--tc-link)',
+  textDecoration: 'none',
+  // textUnderlineOffset: toRem(2),
+  selectors: {
+    '&:hover': {
+      textDecoration: 'underline',
+    },
+  },
+});
+
 export const ToolCallBody = style({
   backgroundColor: color.SurfaceVariant.Container,
   border: cardBorder,

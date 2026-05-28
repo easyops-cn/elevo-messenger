@@ -160,6 +160,11 @@ function parseApplyPatchText(patchText: string): ApplyPatchOperation[] | undefin
   return state.operations.length > 0 ? state.operations : undefined;
 }
 
+function getBaseName(path: string): string {
+  const parts = path.split('/');
+  return parts[parts.length - 1] || path;
+}
+
 function getApplyPatchForRender(data: ToolCallData): ApplyPatchOperation[] | undefined {
   if (data.name !== 'apply_patch') return undefined;
   const parsedInput = tryParseJson(data.input);
@@ -260,11 +265,13 @@ function ApplyPatchOperationCard({
 
   return (
     <Box direction="Column" gap="200">
+      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
       <div
         className={css.ToolCallHeader({ interactive: body !== null })}
         onClick={body !== null ? openDiff : undefined}
         onKeyDown={handleHeaderKeyDown}
         role={body !== null ? 'button' : undefined}
+        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
         tabIndex={body !== null ? 0 : undefined}
         aria-label={body !== null ? t('message.diffEditedOneFile', { path: codeViewPath }) : undefined}
       >
@@ -277,7 +284,10 @@ function ApplyPatchOperationCard({
         </div>
         <Text size="T300" truncate>
           <span style={{ fontWeight: 500 }}>{label}</span>
-          <span style={{ color: elevoColor.Text.Secondary }}> {operation.path}</span>
+          <span className={body !== null ? css.ApplyPatchTitleLink : undefined}>
+            {' '}
+            {body !== null ? getBaseName(operation.path) : operation.path}
+          </span>
         </Text>
         {moveTo && (
           <>
