@@ -17,18 +17,23 @@ import {
 
 type DiffRowType = 'add' | 'delete' | 'context';
 
-type DiffRow = {
+type DiffCodeRow = {
   type: DiffRowType;
   oldLine?: number;
   newLine?: number;
   code: string;
-  hunkStart?: boolean;
 };
 
-type DiffDisplayRow = DiffRow | { type: 'separator' };
+type DiffHunkRow = {
+  type: 'hunk';
+  header: string;
+};
+
+type DiffRow = DiffCodeRow | DiffHunkRow;
 
 type ParsedDiffRows = {
   rows: DiffRow[];
+  codeRows: DiffCodeRow[];
   showLineNumbers: boolean;
 };
 
@@ -56,11 +61,11 @@ function isDiffMetadataLine(line: string): boolean {
 
 function parseDiffRows(lines: string[]): ParsedDiffRows {
   const rows: DiffRow[] = [];
+  const codeRows: DiffCodeRow[] = [];
   let oldLine = 0;
   let newLine = 0;
   let hasParsedHunk = false;
   let showLineNumbers = false;
-  let nextCodeLineStartsHunk = false;
 
   lines.forEach((line) => {
     const hunkMatch = hunkHeaderRegex.exec(line);
@@ -69,64 +74,58 @@ function parseDiffRows(lines: string[]): ParsedDiffRows {
       newLine = Number(hunkMatch[2]);
       hasParsedHunk = true;
       showLineNumbers = true;
-      nextCodeLineStartsHunk = rows.length > 0;
+      rows.push({ type: 'hunk', header: line });
       return;
     }
 
     if (line.startsWith('@@')) {
       hasParsedHunk = false;
-      nextCodeLineStartsHunk = rows.length > 0;
+      rows.push({ type: 'hunk', header: line });
       return;
     }
 
     if (isDiffMetadataLine(line)) return;
 
     if (line.startsWith('+')) {
-      rows.push({
+      const row: DiffCodeRow = {
         type: 'add',
         newLine: hasParsedHunk ? newLine : undefined,
         code: line.slice(1),
-        hunkStart: nextCodeLineStartsHunk,
-      });
+      };
+      rows.push(row);
+      codeRows.push(row);
       if (hasParsedHunk) newLine += 1;
-      nextCodeLineStartsHunk = false;
       return;
     }
 
     if (line.startsWith('-')) {
-      rows.push({
+      const row: DiffCodeRow = {
         type: 'delete',
         oldLine: hasParsedHunk ? oldLine : undefined,
         code: line.slice(1),
-        hunkStart: nextCodeLineStartsHunk,
-      });
+      };
+      rows.push(row);
+      codeRows.push(row);
       if (hasParsedHunk) oldLine += 1;
-      nextCodeLineStartsHunk = false;
       return;
     }
 
     const code = line.startsWith(' ') ? line.slice(1) : line;
-    rows.push({
+    const row: DiffCodeRow = {
       type: 'context',
       oldLine: hasParsedHunk ? oldLine : undefined,
       newLine: hasParsedHunk ? newLine : undefined,
       code,
-      hunkStart: nextCodeLineStartsHunk,
-    });
+    };
+    rows.push(row);
+    codeRows.push(row);
     if (hasParsedHunk) {
       oldLine += 1;
       newLine += 1;
     }
-    nextCodeLineStartsHunk = false;
   });
 
-  return { rows, showLineNumbers };
-}
-
-function getDiffDisplayRows(rows: DiffRow[]): DiffDisplayRow[] {
-  return rows.flatMap((row, index) =>
-    index > 0 && row.hunkStart ? ([{ type: 'separator' }, row] as DiffDisplayRow[]) : [row]
-  );
+  return { rows, codeRows, showLineNumbers };
 }
 
 type DiffLineCountProps = {
@@ -150,13 +149,12 @@ type HighlightedDiffProps = {
 
 function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
   const theme = useTheme();
-  const { rows, showLineNumbers } = useMemo(() => parseDiffRows(lines), [lines]);
-  const displayRows = useMemo(() => getDiffDisplayRows(rows), [rows]);
+  const { rows, codeRows, showLineNumbers } = useMemo(() => parseDiffRows(lines), [lines]);
   const [tokenLines, setTokenLines] = useState<HighlightedTokenLines>([]);
 
   useEffect(() => {
     let alive = true;
-    const code = rows.map((row) => row.code).join('\n');
+    const code = codeRows.map((row) => row.code).join('\n');
     const shikiTheme = getShikiThemeName(theme.kind);
 
     codeToTokensBase({ code, path, theme: shikiTheme })
@@ -170,9 +168,9 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
     return () => {
       alive = false;
     };
-  }, [path, rows, theme.kind]);
+  }, [path, codeRows, theme.kind]);
 
-  if (rows.length === 0) {
+  if (codeRows.length === 0) {
     return (
       <div className={css.CodeBlock}>
         <Text className={css.NoCode} priority="300">
@@ -186,22 +184,30 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
     <div className={css.CodeBlock}>
       <pre className={css.CodePre}>
         <code className={css.CodeGrid}>
-          {displayRows.map((row, displayRowIndex) => {
-            if (row.type === 'separator') {
+          {rows.map((row, rowIndex) => {
+            if (row.type === 'hunk') {
               return (
                 <span
                   // eslint-disable-next-line react/no-array-index-key
-                  key={`separator:${displayRowIndex}`}
-                  className={css.HunkSeparator}
-                />
+                  key={`hunk:${rowIndex}`}
+                  className={css.HunkHeader({ lineNumbers: showLineNumbers })}
+                >
+                  {showLineNumbers && (
+                    <>
+                      <span className={css.LineNumber} />
+                      <span className={css.LineNumber} />
+                    </>
+                  )}
+                  <span className={css.LineCode}>{row.header}</span>
+                </span>
               );
             }
 
-            const rowIndex = rows.indexOf(row);
+            const codeRowIndex = codeRows.indexOf(row);
             return (
               <span
                 // eslint-disable-next-line react/no-array-index-key
-                key={`${row.oldLine ?? ''}:${row.newLine ?? ''}:${displayRowIndex}`}
+                key={`${row.oldLine ?? ''}:${row.newLine ?? ''}:${rowIndex}`}
                 className={css.CodeLine({
                   diff: row.type,
                   lineNumbers: showLineNumbers,
@@ -214,7 +220,7 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
                   </>
                 )}
                 <span className={css.LineCode}>
-                  {(tokenLines[rowIndex] ?? [{ content: row.code } as ThemedToken]).map(
+                  {(tokenLines[codeRowIndex] ?? [{ content: row.code } as ThemedToken]).map(
                     (token, tokenIndex) => (
                       <span
                         // eslint-disable-next-line react/no-array-index-key

@@ -169,17 +169,24 @@ export const CodeLine = recipe({
   },
 });
 
-export const HunkSeparator = style({
-  display: 'block',
-  height: toRem(12),
-  padding: `${toRem(3)} 0`,
-  backgroundColor: color.Background.Container,
-  selectors: {
-    '&::before': {
-      content: '""',
-      display: 'block',
-      height: toRem(6),
-      backgroundColor: elevoColor.Border.Light,
+export const HunkHeader = recipe({
+  base: {
+    display: 'grid',
+    minHeight: toRem(28),
+    alignItems: 'center',
+    backgroundColor: color.SurfaceVariant.Container,
+    color: elevoColor.Text.Secondary,
+    borderTop: border,
+    borderBottom: border,
+  },
+  variants: {
+    lineNumbers: {
+      true: {
+        gridTemplateColumns: `${toRem(52)} ${toRem(52)} minmax(max-content, 1fr)`,
+      },
+      false: {
+        gridTemplateColumns: 'minmax(max-content, 1fr)',
+      },
     },
   },
 });
