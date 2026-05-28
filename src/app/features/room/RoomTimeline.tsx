@@ -55,6 +55,7 @@ import {
   CompactPlaceholder,
   Reply,
   MessageBase,
+  MessageBrokenContent,
   MessageUnsupportedContent,
   Time,
   MessageNotDecryptedContent,
@@ -64,6 +65,7 @@ import {
   EventContent,
   isUserAnswerEvent,
 } from '../../components/message';
+import { DiffSummaryCard } from '../../components/message/elevo/DiffSummaryCard';
 import {
   factoryRenderLinkifyWithMention,
   getReactCustomHtmlParser,
@@ -1313,6 +1315,63 @@ export function RoomTimeline({
                   />
                 )}
               />
+            )}
+          </Message>
+        );
+      },
+      [MessageEvent.ElevoDiff]: (mEventId, mEvent, item, timelineSet, collapse) => {
+        const reactionRelations = getEventReactions(timelineSet, mEventId);
+        const reactions = reactionRelations && reactionRelations.getSortedAnnotationsByKey();
+        const hasReactions = reactions && reactions.length > 0;
+        const highlighted = focusItem?.eventId === mEventId && focusItem.highlight;
+        const { diff } = mEvent.getContent<{ diff?: unknown }>();
+
+        return (
+          <Message
+            key={mEvent.getId()}
+            data-message-item={item}
+            data-message-id={mEventId}
+            room={room}
+            mEvent={mEvent}
+            messageSpacing={messageSpacing}
+            messageLayout={messageLayout}
+            collapse={collapse}
+            highlight={highlighted}
+            canDelete={canRedact || (canDeleteOwn && mEvent.getSender() === mx.getUserId())}
+            canSendReaction={canSendReaction}
+            canPinEvent={false}
+            canReplyInThread={false}
+            imagePackRooms={imagePackRooms}
+            relations={hasReactions ? reactionRelations : undefined}
+            onUserClick={handleUserClick}
+            onUsernameClick={handleUsernameClick}
+            onReplyClick={handleReplyClick}
+            onReactionToggle={handleReactionToggle}
+            reactions={
+              reactionRelations && (
+                <Reactions
+                  style={{ marginTop: config.space.S200 }}
+                  room={room}
+                  relations={reactionRelations}
+                  mEventId={mEventId}
+                  canSendReaction={canSendReaction}
+                  onReactionToggle={handleReactionToggle}
+                />
+              )
+            }
+            hideReadReceipts={hideActivity}
+            showDeveloperTools={showDeveloperTools}
+            hour24Clock={hour24Clock}
+            dateFormatString={dateFormatString}
+          >
+            {mEvent.isRedacted() ? (
+              <RedactedContent reason={mEvent.getUnsigned().redacted_because?.content.reason} />
+            ) : typeof diff === 'string' && diff.length > 0 ? (
+              <DiffSummaryCard diff={diff} />
+            ) : (
+              <Text>
+                <MessageBrokenContent />
+              </Text>
             )}
           </Message>
         );
