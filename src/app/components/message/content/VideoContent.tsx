@@ -122,6 +122,10 @@ export const VideoContent = as<'div', VideoContentProps>(
       loadSrc();
     };
 
+    const handleOpenVideo = () => {
+      loadSrc();
+    };
+
     useEffect(() => {
       if (autoPlay) loadSrc();
     }, [autoPlay, loadSrc]);
@@ -158,7 +162,7 @@ export const VideoContent = as<'div', VideoContentProps>(
               size="500"
               radii="Pill"
               outlined
-              onClick={loadSrc}
+              onClick={handleOpenVideo}
             >
               <Icon src={PlayIcon} size="200" filled />
             </IconButton>

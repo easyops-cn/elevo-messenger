@@ -44,6 +44,10 @@ export function VoiceMessage({
   const infoDuration = info.duration ?? 0;
   const durationSec = (infoDuration >= 0 ? infoDuration : 0) / 1000;
 
+  const handlePlayClick = () => {
+    loadSrc();
+  };
+
   return (
     <WaveformPlayer
       audioSrc={srcState.status === AsyncStatus.Success ? srcState.data : null}
@@ -51,7 +55,7 @@ export function VoiceMessage({
       durationSec={durationSec}
       mimeType={mimeType}
       isLoading={srcState.status === AsyncStatus.Loading}
-      onPlayClick={loadSrc}
+      onPlayClick={handlePlayClick}
       autoPlay
     />
   );

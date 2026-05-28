@@ -982,7 +982,9 @@
   "viewer": {
     "zoomOut": "缩小",
     "zoomIn": "放大",
+    "play": "播放",
     "download": "下载",
+    "failedLoadPreview": "加载预览失败。",
     "failedLoadPdf": "加载 PDF 失败",
     "previous": "上一页",
     "jumpToPage": "跳转到页面",

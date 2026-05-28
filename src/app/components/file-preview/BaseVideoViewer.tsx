@@ -4,23 +4,18 @@ import { Box, Chip, Header, Icon, IconButton, Icons, Text, as } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { Video } from '../media/Video';
 import * as css from './VideoViewer.css';
-import { downloadMedia } from '../../utils/matrix';
-import { saveFile } from '../../utils/file-saver';
 
-export type VideoViewerProps = {
+export type BaseVideoViewerProps = {
   name: string;
   src: string;
+  hideCloseButton?: boolean;
   requestClose: () => void;
+  onDownload: () => Promise<void>;
 };
 
-export const VideoViewer = as<'div', VideoViewerProps>(
-  ({ className, name, src, requestClose, ...props }, ref) => {
+export const BaseVideoViewer = as<'div', BaseVideoViewerProps>(
+  ({ className, name, src, hideCloseButton, requestClose, onDownload, ...props }, ref) => {
     const { t } = useTranslation();
-
-    const handleDownload = async () => {
-      const fileContent = await downloadMedia(src);
-      await saveFile(fileContent, name);
-    };
 
     return (
       <Box
@@ -31,9 +26,11 @@ export const VideoViewer = as<'div', VideoViewerProps>(
       >
         <Header className={css.VideoViewerHeader} size="400">
           <Box grow="Yes" alignItems="Center" gap="200">
-            <IconButton size="300" radii="300" onClick={requestClose}>
-              <Icon size="50" src={Icons.ArrowLeft} />
-            </IconButton>
+            {!hideCloseButton && (
+              <IconButton size="300" radii="300" onClick={requestClose}>
+                <Icon size="50" src={Icons.ArrowLeft} />
+              </IconButton>
+            )}
             <Text size="T300" truncate>
               {name}
             </Text>
@@ -41,7 +38,7 @@ export const VideoViewer = as<'div', VideoViewerProps>(
           <Box shrink="No" alignItems="Center" gap="200">
             <Chip
               variant="Primary"
-              onClick={handleDownload}
+              onClick={onDownload}
               radii="300"
               before={<Icon size="50" src={Icons.Download} />}
             >
@@ -56,11 +53,7 @@ export const VideoViewer = as<'div', VideoViewerProps>(
           justifyContent="Center"
           alignItems="Center"
         >
-          <Video
-            title={name}
-            src={src}
-            controls
-          />
+          <Video title={name} src={src} controls />
         </Box>
       </Box>
     );

@@ -22,6 +22,7 @@ import { AvatarPresence, PresenceBadge } from '../presence';
 import { ImageViewer } from '../image-viewer';
 import { stopPropagation } from '../../utils/keyboard';
 import { MxcImg } from '../MxcImg';
+import { openDesktopFilePreview } from '../../utils/desktopPreview';
 
 type UserHeroProps = {
   userId: string;
@@ -30,6 +31,20 @@ type UserHeroProps = {
 };
 export function UserHero({ userId, avatarUrl, presence }: UserHeroProps) {
   const [viewAvatar, setViewAvatar] = useState<string>();
+  const handleAvatarClick = async () => {
+    if (!avatarUrl) return;
+    if (
+      await openDesktopFilePreview({
+        viewerType: 'image',
+        name: userId,
+        mimeType: 'image/*',
+        mediaUrl: avatarUrl,
+      })
+    ) {
+      return;
+    }
+    setViewAvatar(avatarUrl);
+  };
 
   return (
     <Box direction="Column" className={css.UserHero}>
@@ -53,7 +68,7 @@ export function UserHero({ userId, avatarUrl, presence }: UserHeroProps) {
         >
           <Avatar
             as={avatarUrl ? 'button' : 'div'}
-            onClick={avatarUrl ? () => setViewAvatar(avatarUrl) : undefined}
+            onClick={avatarUrl ? handleAvatarClick : undefined}
             className={css.UserHeroAvatar}
             size="500"
             radii="Pill"

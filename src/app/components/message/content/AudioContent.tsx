@@ -31,10 +31,12 @@ type RenderMediaControlProps = {
   children: ReactNode;
 };
 export type AudioContentProps = {
+  name?: string;
   mimeType: string;
   url: string;
   info: IAudioInfo;
   encInfo?: EncryptedAttachmentInfo;
+  waveform?: number[];
   renderMediaControl: (props: RenderMediaControlProps) => ReactNode;
 };
 export function AudioContent({

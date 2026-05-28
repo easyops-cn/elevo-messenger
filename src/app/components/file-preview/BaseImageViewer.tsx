@@ -3,34 +3,23 @@ import React from 'react';
 import classNames from 'classnames';
 import { Box, Chip, Header, Icon, IconButton, Icons, Text, as } from 'folds';
 import { useTranslation } from 'react-i18next';
-import { saveFile } from '../../utils/file-saver';
-import * as css from './ImageViewer.css';
-import { useZoom } from '../../hooks/useZoom';
 import { usePan } from '../../hooks/usePan';
-import { downloadMedia } from '../../utils/matrix';
+import { useZoom } from '../../hooks/useZoom';
+import * as css from '../image-viewer/ImageViewer.css';
 
-export type ImageViewerProps = {
+export type BaseImageViewerProps = {
   alt: string;
   src: string;
   hideCloseButton?: boolean;
-  onDownload?: () => Promise<void>;
   requestClose: () => void;
+  onDownload: () => Promise<void>;
 };
 
-export const ImageViewer = as<'div', ImageViewerProps>(
-  ({ className, alt, src, hideCloseButton, onDownload, requestClose, ...props }, ref) => {
+export const BaseImageViewer = as<'div', BaseImageViewerProps>(
+  ({ className, alt, src, hideCloseButton, requestClose, onDownload, ...props }, ref) => {
     const { t } = useTranslation();
     const { zoom, zoomIn, zoomOut, setZoom } = useZoom(0.2);
     const { pan, cursor, onMouseDown } = usePan(zoom !== 1);
-
-    const handleDownload = async () => {
-      if (onDownload) {
-        await onDownload();
-        return;
-      }
-      const fileContent = await downloadMedia(src);
-      await saveFile(fileContent, alt);
-    };
 
     return (
       <Box
@@ -76,7 +65,7 @@ export const ImageViewer = as<'div', ImageViewerProps>(
             </IconButton>
             <Chip
               variant="Primary"
-              onClick={handleDownload}
+              onClick={onDownload}
               radii="300"
               before={<Icon size="50" src={Icons.Download} />}
             >

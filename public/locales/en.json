@@ -982,7 +982,9 @@
   "viewer": {
     "zoomOut": "Zoom Out",
     "zoomIn": "Zoom In",
+    "play": "Play",
     "download": "Download",
+    "failedLoadPreview": "Failed to load preview.",
     "failedLoadPdf": "Failed to load PDF",
     "previous": "Previous",
     "jumpToPage": "Jump to Page",
