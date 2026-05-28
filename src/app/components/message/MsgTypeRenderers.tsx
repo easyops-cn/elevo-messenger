@@ -9,8 +9,6 @@ import { ReasoningCard } from './elevo/ReasoningCard';
 import { SseMarkdownBody, parseSseRender } from './elevo/SseMarkdownBody';
 import { OidcLoginCard, parseOidcLogin } from './elevo/OidcLoginCard';
 import { PlanCard, hasPlan } from './elevo/PlanCard';
-import { DiffSummaryCard } from './elevo/DiffSummaryCard';
-import { parseDiffContent } from './elevo/diffSummary';
 import { trimReplyFromBody } from '../../utils/room';
 import { MessageTextBody } from './layout';
 import {
@@ -107,7 +105,6 @@ export function MText({
   const oidcLogin = useMemo(() => parseOidcLogin(content), [content]);
   const sseRender = useMemo(() => parseSseRender(content), [content]);
   const toolCall = useMemo(() => parseToolCall(content), [content]);
-  const diff = useMemo(() => parseDiffContent(content), [content]);
   const plan = hasPlan(content);
 
   if (plan) {
@@ -122,10 +119,6 @@ export function MText({
   }
 
   if (typeof body !== 'string') return <BrokenContent />;
-
-  if (diff) {
-    return <DiffSummaryCard diff={diff} style={style} />;
-  }
 
   if (askUser) {
     if (askUser.answers) {

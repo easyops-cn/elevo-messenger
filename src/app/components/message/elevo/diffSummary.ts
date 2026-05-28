@@ -2,6 +2,7 @@ export type DiffFileSummary = {
   path: string;
   added: number;
   deleted: number;
+  lines: string[];
 };
 
 export type DiffSummary = {
@@ -10,11 +11,7 @@ export type DiffSummary = {
   deleted: number;
 };
 
-const UNKNOWN_FILE = 'Unknown files';
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
+export const UNKNOWN_FILE = 'Unknown files';
 
 function normalizeDiffFile(file: string): string | undefined {
   const trimmed = file.trim();
@@ -33,12 +30,13 @@ function parseGitDiffFile(line: string): string | undefined {
 export function summarizeUnifiedDiff(diff: string): DiffSummary {
   const files: DiffFileSummary[] = [];
   let currentFile: DiffFileSummary | undefined;
+  let pendingHeaderLines: string[] = [];
   let added = 0;
   let deleted = 0;
 
   const getCurrentFile = (): DiffFileSummary => {
     if (!currentFile) {
-      currentFile = { path: UNKNOWN_FILE, added: 0, deleted: 0 };
+      currentFile = { path: UNKNOWN_FILE, added: 0, deleted: 0, lines: [] };
       files.push(currentFile);
     }
     return currentFile;
@@ -49,25 +47,42 @@ export function summarizeUnifiedDiff(diff: string): DiffSummary {
 
     currentFile = files.find((file) => file.path === path);
     if (!currentFile) {
-      currentFile = { path, added: 0, deleted: 0 };
+      currentFile = { path, added: 0, deleted: 0, lines: [] };
       files.push(currentFile);
+    }
+    if (pendingHeaderLines.length > 0) {
+      currentFile.lines.push(...pendingHeaderLines);
+      pendingHeaderLines = [];
     }
   };
 
   diff.split('\n').forEach((line) => {
     if (line.startsWith('diff --git ')) {
       setCurrentFile(parseGitDiffFile(line));
+      getCurrentFile().lines.push(line);
       return;
     }
 
     if (line.startsWith('+++ ')) {
       setCurrentFile(normalizeDiffFile(line.slice(4)));
+      getCurrentFile().lines.push(line);
+      return;
+    }
+
+    if (line.startsWith('--- ')) {
+      const oldPath = normalizeDiffFile(line.slice(4));
+      if (!currentFile || !oldPath || oldPath !== currentFile.path) {
+        pendingHeaderLines = [line];
+      } else {
+        currentFile.lines.push(line);
+      }
       return;
     }
 
     if (line.startsWith('+') && !line.startsWith('+++ ')) {
       const file = getCurrentFile();
       file.added += 1;
+      file.lines.push(line);
       added += 1;
       return;
     }
@@ -75,21 +90,19 @@ export function summarizeUnifiedDiff(diff: string): DiffSummary {
     if (line.startsWith('-') && !line.startsWith('--- ')) {
       const file = getCurrentFile();
       file.deleted += 1;
+      file.lines.push(line);
       deleted += 1;
+      return;
+    }
+
+    if (currentFile || line.startsWith('@@')) {
+      getCurrentFile().lines.push(line);
     }
   });
 
   return {
-    files: files.length > 0 ? files : [{ path: UNKNOWN_FILE, added, deleted }],
+    files: files.length > 0 ? files : [{ path: UNKNOWN_FILE, added, deleted, lines: [] }],
     added,
     deleted,
   };
-}
-
-export function parseDiffContent(content: Record<string, unknown>): string | undefined {
-  const diffContent = content['vip.elevo.diff'];
-  if (!isRecord(diffContent)) return undefined;
-
-  const { diff } = diffContent;
-  return typeof diff === 'string' && diff.length > 0 ? diff : undefined;
 }

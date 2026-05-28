@@ -676,6 +676,7 @@ export type MessageProps = {
   canDelete?: boolean;
   canSendReaction?: boolean;
   canPinEvent?: boolean;
+  canReplyInThread?: boolean;
   imagePackRooms?: Room[];
   relations?: Relations;
   messageLayout: MessageLayout;
@@ -708,6 +709,7 @@ export const Message = as<'div', MessageProps>(
       canDelete,
       canSendReaction,
       canPinEvent,
+      canReplyInThread = true,
       imagePackRooms,
       relations,
       messageLayout,
@@ -981,7 +983,7 @@ export const Message = as<'div', MessageProps>(
                 >
                   <Icon src={ReplyIcon} size="100" />
                 </IconButton>
-                {!isThreadedMessage && (
+                {canReplyInThread && !isThreadedMessage && (
                   <IconButton
                     onClick={(ev) => onReplyClick(ev, true)}
                     data-event-id={mEvent.getId()}
@@ -1071,7 +1073,7 @@ export const Message = as<'div', MessageProps>(
                               {t('common.reply')}
                             </Text>
                           </MenuItem>
-                          {!isThreadedMessage && (
+                          {canReplyInThread && !isThreadedMessage && (
                             <MenuItem
                               size="300"
                               after={<Icon src={MessageSquarePlusIcon} size="100" />}
