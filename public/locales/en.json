@@ -945,6 +945,10 @@
     "copied": "Copied",
     "code": "Code"
   },
+  "planCard": {
+    "plan": "Plan",
+    "writingPlan": "Writing Plan..."
+  },
   "emoji": {
     "recent": "Recent",
     "personalPack": "Personal Pack",
