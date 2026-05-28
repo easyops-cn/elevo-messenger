@@ -44,7 +44,7 @@ const BaseCode = style({
   color: color.SurfaceVariant.OnContainer,
   background: color.SurfaceVariant.Container,
   border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
-  borderRadius: config.radii.R500,
+  borderRadius: config.radii.R400,
 });
 const CodeFont = style({
   fontFamily: 'monospace',

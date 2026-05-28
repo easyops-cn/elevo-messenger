@@ -77,7 +77,7 @@ export const FileList = style({
 
 export const FilePanel = style({
   border,
-  borderRadius: config.radii.R300,
+  borderRadius: config.radii.R400,
   backgroundColor: color.SurfaceVariant.Container,
   overflow: 'hidden',
 });

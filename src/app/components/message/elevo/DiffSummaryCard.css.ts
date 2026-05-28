@@ -8,7 +8,7 @@ export const DiffSummaryCard = style({
   backgroundColor: color.SurfaceVariant.Container,
   color: color.SurfaceVariant.OnContainer,
   border: cardBorder,
-  borderRadius: config.radii.R300,
+  borderRadius: config.radii.R400,
   padding: config.space.S300,
   maxWidth: toRem(600),
   overflow: 'hidden',
