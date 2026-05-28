@@ -79,10 +79,13 @@ export const FilePanel = style({
   border,
   borderRadius: config.radii.R400,
   backgroundColor: color.SurfaceVariant.Container,
-  overflow: 'hidden',
+  overflow: 'clip',
 });
 
 export const FileHeader = style({
+  position: 'sticky',
+  top: 0,
+  zIndex: 1,
   display: 'grid',
   gridTemplateColumns: 'minmax(0, 1fr) auto',
   alignItems: 'center',
@@ -90,7 +93,8 @@ export const FileHeader = style({
   width: '100%',
   padding: `${config.space.S200} ${config.space.S300}`,
   border: 0,
-  backgroundColor: 'transparent',
+  borderBottom: border,
+  backgroundColor: color.SurfaceVariant.Container,
   color: 'inherit',
   cursor: 'pointer',
   selectors: {
@@ -124,7 +128,6 @@ export const FileMeta = style({
 });
 
 export const CodeBlock = style({
-  borderTop: border,
   overflowX: 'auto',
   backgroundColor: color.Background.Container,
 });
