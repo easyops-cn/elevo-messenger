@@ -41,6 +41,7 @@ type RenderMessageContentProps = {
   msgType: string;
   ts: number;
   eventId?: string;
+  senderId?: string;
   edited?: boolean;
   getContent: <T>() => T;
   urlPreview?: boolean;
@@ -54,6 +55,7 @@ export function RenderMessageContent({
   msgType,
   ts,
   eventId,
+  senderId,
   edited,
   getContent,
   urlPreview,
@@ -94,6 +96,7 @@ export function RenderMessageContent({
           )}
           renderUrlsPreview={urlPreview ? renderUrlsPreview : undefined}
           eventId={eventId}
+          senderId={senderId}
         />
       );
     }
@@ -184,6 +187,7 @@ export function RenderMessageContent({
         )}
         renderUrlsPreview={urlPreview ? renderUrlsPreview : undefined}
         eventId={eventId}
+        senderId={senderId}
       />
     );
   }

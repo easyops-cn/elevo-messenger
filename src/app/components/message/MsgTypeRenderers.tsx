@@ -84,6 +84,7 @@ type MTextProps = {
   renderUrlsPreview?: (urls: string[]) => ReactNode;
   style?: CSSProperties;
   eventId?: string;
+  senderId?: string;
 };
 
 export function MText({
@@ -93,6 +94,7 @@ export function MText({
   renderUrlsPreview,
   style,
   eventId,
+  senderId,
 }: MTextProps) {
   const mx = useMatrixClient();
   const { body, formatted_body: customBody } = content;
@@ -137,6 +139,7 @@ export function MText({
         style={style}
         eventId={eventId}
         initialHumanSender={initialHumanSender}
+        questionSenderId={senderId}
       />
     );
   }

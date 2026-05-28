@@ -30,10 +30,12 @@ import {
 } from './AskUser.css';
 import { DisabledRadioIcon } from '../../../icons/DisabledRadioIcon';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
-import { getMemberDisplayName } from '../../../utils/room';
+import { getMemberDisplayName, getMentionContent } from '../../../utils/room';
 import { getMxIdLocalPart } from '../../../utils/matrix';
 import { MessageEvent } from '../../../../types/matrix/room';
 import { useRoomThread } from '../../../features/room/RoomThreadContext';
+import { sanitizeText } from '../../../utils/sanitize';
+import { getMatrixToUser } from '../../../plugins/matrix-to';
 
 // Schemas & Types
 
@@ -309,6 +311,7 @@ export function AskUserQuestionCard({
   threadRootId,
   agentMode,
   initialHumanSender,
+  questionSenderId,
   showOtherOption = true,
 }: {
   data: AskUserQuestionData;
@@ -319,6 +322,7 @@ export function AskUserQuestionCard({
   threadRootId?: string | null;
   agentMode?: string;
   initialHumanSender?: string;
+  questionSenderId?: string;
   showOtherOption?: boolean;
 }) {
   const { t } = useTranslation();
@@ -470,12 +474,22 @@ export function AskUserQuestionCard({
 
     setSubmitting(true);
     try {
-      const body = `${agentMode === 'plan' ? '/plan ' : ''}${Object.entries(answers)
+      const answerBody = `${agentMode === 'plan' ? '/plan ' : ''}${Object.entries(answers)
         .map(([questionId, ans]) => `${questionId}: ${getAnswerText(ans)}`)
         .join('\n')}`;
+      const body = questionSenderId ? `@${questionSenderId} ${answerBody}` : answerBody;
       const content = {
         msgtype: 'm.text',
         body,
+        ...(questionSenderId
+          ? {
+              format: 'org.matrix.custom.html',
+              formatted_body: `<a href="${encodeURI(getMatrixToUser(questionSenderId))}">@${sanitizeText(
+                questionSenderId
+              )}</a> ${sanitizeText(answerBody)}`,
+            }
+          : {}),
+        ...(questionSenderId ? { 'm.mentions': getMentionContent([questionSenderId], false) } : {}),
         'vip.elevo.ask_user_question_answers': {
           question_event_id: answerId,
           answers,
@@ -509,6 +523,7 @@ export function AskUserQuestionCard({
     answerThreadRootId,
     onSubmit,
     answerId,
+    questionSenderId,
     showOtherOption,
   ]);
 

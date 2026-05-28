@@ -105,6 +105,7 @@ export function SearchResultGroup({
             msgType={event.getContent().msgtype ?? ''}
             ts={event.getTs()}
             eventId={event.getId()!}
+            senderId={event.getSender()}
             getContent={getContent}
             urlPreview={urlPreview}
             htmlReactParserOptions={htmlReactParserOptions}
