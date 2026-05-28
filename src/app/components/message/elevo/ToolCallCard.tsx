@@ -9,6 +9,8 @@ import { SquareAsteriskIcon } from '../../../icons/SquareAsteriskIcon';
 import { elevoColor } from '../../../../config.css';
 import { MessageLayout, settingsAtom } from '../../../state/settings';
 import { useSetting } from '../../../state/hooks/settings';
+import { useOpenCodeView } from '../../../utils/codeView';
+import type { DiffFileSummary } from './diffSummary';
 
 const ToolCallSchema = z.object({
   name: z.string(),
@@ -198,24 +200,17 @@ function applyPatchOperationKey(op: ApplyPatchOperation): string {
   return `update:${op.path}:${op.moveTo ?? ''}:${op.diff.length}`;
 }
 
-type ApplyPatchDiffLineModel = {
-  key: string;
-  className: string | undefined;
-  line: string;
-};
+function buildApplyPatchFileSummary(path: string, body: string): DiffFileSummary {
+  let added = 0;
+  let deleted = 0;
+  const lines = body.split('\n');
 
-function buildApplyPatchDiffLines(text: string): ApplyPatchDiffLineModel[] {
-  const result: ApplyPatchDiffLineModel[] = [];
-  let offset = 0;
-  text.split('\n').forEach((line) => {
-    let className: string | undefined;
-    if (line.startsWith('+')) className = css.ApplyPatchDiffLineAdded;
-    else if (line.startsWith('-')) className = css.ApplyPatchDiffLineRemoved;
-    else if (line.startsWith('@@')) className = css.ApplyPatchDiffLineMeta;
-    result.push({ key: `${offset}`, className, line });
-    offset += line.length + 1;
+  lines.forEach((line) => {
+    if (line.startsWith('+') && !line.startsWith('+++ ')) added += 1;
+    if (line.startsWith('-') && !line.startsWith('--- ')) deleted += 1;
   });
-  return result;
+
+  return { path, added, deleted, lines };
 }
 
 type ApplyPatchOperationCardProps = {
@@ -224,14 +219,13 @@ type ApplyPatchOperationCardProps = {
   status: ToolCallData['status'];
 };
 
-const COLLAPSED_LINE_COUNT = 10;
-
 function ApplyPatchOperationCard({
   operation,
   iconClassName,
   status,
 }: ApplyPatchOperationCardProps) {
-  const [expanded, setExpanded] = useState(false);
+  const { t } = useTranslation();
+  const openCodeView = useOpenCodeView();
 
   const label = operation.kind === 'add' ? 'Add' : operation.kind === 'delete' ? 'Delete' : 'Edit';
 
@@ -242,16 +236,38 @@ function ApplyPatchOperationCard({
       ? operation.diff
       : null;
 
-  const diffLines = useMemo(() => (body !== null ? buildApplyPatchDiffLines(body) : []), [body]);
-
-  const isOverflow = diffLines.length > COLLAPSED_LINE_COUNT;
-  const visibleLines = expanded ? diffLines : diffLines.slice(0, COLLAPSED_LINE_COUNT);
-
   const moveTo = operation.kind === 'update' ? operation.moveTo : undefined;
+  const codeViewPath = moveTo ?? operation.path;
+
+  const openDiff = () => {
+    if (body === null) return;
+    const file = buildApplyPatchFileSummary(codeViewPath, body);
+    openCodeView({
+      title: t('message.diffEditedOneFile', { path: codeViewPath }),
+      files: [file],
+      added: file.added,
+      deleted: file.deleted,
+    });
+  };
+
+  const handleHeaderKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (body === null) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      openDiff();
+    }
+  };
 
   return (
     <Box direction="Column" gap="200">
-      <div className={css.ToolCallHeader()}>
+      <div
+        className={css.ToolCallHeader({ interactive: body !== null })}
+        onClick={body !== null ? openDiff : undefined}
+        onKeyDown={handleHeaderKeyDown}
+        role={body !== null ? 'button' : undefined}
+        tabIndex={body !== null ? 0 : undefined}
+        aria-label={body !== null ? t('message.diffEditedOneFile', { path: codeViewPath }) : undefined}
+      >
         <div className={iconClassName}>
           {status === 'inprogress' && (
             <svg viewBox="0 0 8 8" className={css.ToolCallSpinnerSvg}>
@@ -272,40 +288,6 @@ function ApplyPatchOperationCard({
           </>
         )}
       </div>
-      {body !== null && (
-        <div className={css.ApplyPatchBody}>
-          <div className={css.ApplyPatchDiffScrollContainer}>
-            <pre className={css.ApplyPatchDiff}>
-              {visibleLines.map((node) => (
-                <span
-                  key={node.key}
-                  className={`${css.ApplyPatchDiffLine}${
-                    node.className ? ` ${node.className}` : ''
-                  }`}
-                >
-                  {`${node.line}\n`}
-                </span>
-              ))}
-            </pre>
-          </div>
-          {isOverflow && !expanded && (
-            <div
-              className={css.ApplyPatchDiffCollapsedOverlay}
-              onClick={() => setExpanded(true)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setExpanded(true);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-              aria-label="Expand diff"
-              style={{ pointerEvents: 'auto', cursor: 'pointer' }}
-            />
-          )}
-        </div>
-      )}
     </Box>
   );
 }
