@@ -61,15 +61,19 @@ const groupSearchResult = (results: SearchResult[]): ResultGroup[] => {
   return groups;
 };
 
-const parseSearchResult = (mx: MatrixClient, result: ISearchResponse, query: ISearchRequestBody): CustomSearchResult => {
+const parseSearchResult = (
+  mx: MatrixClient,
+  result: ISearchResponse,
+  query: ISearchRequestBody,
+): CustomSearchResult => {
   // The js-sdk method backPaginateRoomEventsSearch() uses _query internally
   // so we're reusing the concept here since we want to delegate the
   // pagination back to backPaginateRoomEventsSearch() in some cases.
   const searchResults: ISearchResults = {
-      // abortSignal,
-      _query: query,
-      results: [],
-      highlights: [],
+    // abortSignal,
+    _query: query,
+    results: [],
+    highlights: [],
   };
 
   const events = mx.processRoomEventsSearch(searchResults, result);
@@ -128,7 +132,7 @@ export const useMessageSearch = (params: MessageSearchParams) => {
       });
       return parseSearchResult(mx, r, requestBody);
     },
-    [mx, term, order, rooms, senders]
+    [mx, term, order, rooms, senders],
   );
 
   return searchMessages;

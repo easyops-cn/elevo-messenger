@@ -52,14 +52,14 @@ export function EmoticonAutocomplete({
     const list: Array<EmoticonSearchItem> = [];
     return list.concat(
       imagePacks.flatMap((pack) => pack.getImages(ImageUsage.Emoticon)),
-      emojis
+      emojis,
     );
   }, [imagePacks]);
 
   const [result, search, resetSearch] = useAsyncSearch(
     searchList,
     getEmoticonSearchStr,
-    SEARCH_OPTIONS
+    SEARCH_OPTIONS,
   );
   const autoCompleteEmoticon = result ? result.items.slice(0, 20) : recentEmoji;
 
@@ -105,7 +105,12 @@ export function EmoticonAutocomplete({
                 <MxcImg
                   src={customEmojiUrl}
                   alt={emoticon.shortcode}
-                  style={{ width: toRem(24), height: toRem(24), objectFit: 'contain', flexShrink: 0 }}
+                  style={{
+                    width: toRem(24),
+                    height: toRem(24),
+                    objectFit: 'contain',
+                    flexShrink: 0,
+                  }}
                 />
               ) : (
                 <Box

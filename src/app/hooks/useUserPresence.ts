@@ -54,5 +54,5 @@ export const usePresenceLabel = (): Record<Presence, string> =>
       [Presence.Unavailable]: 'Busy',
       [Presence.Offline]: 'Away',
     }),
-    []
+    [],
   );

@@ -41,5 +41,5 @@ export const ImageOverlay = as<'div', ImageOverlayProps>(
         </FocusTrap>
       </OverlayCenter>
     </Overlay>
-  )
+  ),
 );

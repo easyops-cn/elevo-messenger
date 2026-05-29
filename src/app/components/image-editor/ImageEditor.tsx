@@ -47,5 +47,5 @@ export const ImageEditor = as<'div', ImageEditorProps>(
         </Box>
       </Box>
     );
-  }
+  },
 );

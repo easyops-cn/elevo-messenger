@@ -146,7 +146,7 @@ export function MembersPanel({ room }: MembersPanelProps) {
 
   const filteredMembers = useMemo(
     () => members.filter(MembershipFilter.filterJoined).sort(MemberSort.Oldest),
-    [members]
+    [members],
   );
 
   const [result, search] = useAsyncSearch(filteredMembers, getRoomMemberStr, SEARCH_OPTIONS);

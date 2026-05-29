@@ -43,9 +43,9 @@ const initial: UpdateState = {
 
 const UpdateCheckerContext = React.createContext<UpdateCheckerContextValue>({
   ...initial,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+
   checkAndPrepare: async () => {},
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+
   applyUpdate: async () => {},
 });
 
@@ -131,7 +131,7 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
         event:
           | { event: 'Started'; data: { contentLength?: number } }
           | { event: 'Progress'; data: { chunkLength: number } }
-          | { event: 'Finished' }
+          | { event: 'Finished' },
       ) => {
         switch (event.event) {
           case 'Started':
@@ -215,9 +215,12 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
       checkAndPrepare();
     }, 5000);
 
-    const interval = setInterval(() => {
-      checkAndPrepare();
-    }, 4 * 60 * 60 * 1000);
+    const interval = setInterval(
+      () => {
+        checkAndPrepare();
+      },
+      4 * 60 * 60 * 1000,
+    );
 
     return () => {
       clearTimeout(timer);
@@ -229,15 +232,21 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
   useEffect(() => {
     if (!isDesktopTauri) return;
 
-    const ready = state.updateDownloaded
-      || (state.updateAvailable && !state.downloading && !state.error);
+    const ready =
+      state.updateDownloaded || (state.updateAvailable && !state.downloading && !state.error);
     const disabled = state.checking || state.downloading;
     invoke('update_menu_state', {
       apply: ready,
       downloaded: state.updateDownloaded,
       disabled,
     });
-  }, [state.checking, state.downloading, state.updateAvailable, state.updateDownloaded, state.error]);
+  }, [
+    state.checking,
+    state.downloading,
+    state.updateAvailable,
+    state.updateDownloaded,
+    state.error,
+  ]);
 
   // Listen for "check-for-updates" / "apply-update" events from Rust (menu click).
   useEffect(() => {
@@ -277,7 +286,7 @@ export function UpdateCheckerProvider({ children }: { children: React.ReactNode 
       checkAndPrepare,
       applyUpdate,
     }),
-    [checkAndPrepare, applyUpdate, state]
+    [checkAndPrepare, applyUpdate, state],
   );
 
   return <UpdateCheckerContext.Provider value={value}>{children}</UpdateCheckerContext.Provider>;

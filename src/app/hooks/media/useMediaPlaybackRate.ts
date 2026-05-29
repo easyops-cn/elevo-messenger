@@ -8,7 +8,7 @@ export type MediaPlaybackRateControl = {
 };
 
 export const useMediaPlaybackRate = (
-  getTargetElement: () => HTMLMediaElement | null
+  getTargetElement: () => HTMLMediaElement | null,
 ): MediaPlaybackRateData & MediaPlaybackRateControl => {
   const [rate, setRate] = useState(1.0);
 
@@ -18,7 +18,7 @@ export const useMediaPlaybackRate = (
       if (!targetEl) return;
       targetEl.playbackRate = playbackRate;
     },
-    [getTargetElement]
+    [getTargetElement],
   );
 
   useEffect(() => {

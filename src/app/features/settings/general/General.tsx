@@ -32,12 +32,7 @@ import { SUPPORTED_LANGUAGES } from '../../../i18n';
 import { Page, PageContent, PageHeader } from '../../../components/page';
 import { SequenceCard } from '../../../components/sequence-card';
 import { useSetting } from '../../../state/hooks/settings';
-import {
-  DateFormat,
-  MessageLayout,
-  MessageSpacing,
-  settingsAtom,
-} from '../../../state/settings';
+import { DateFormat, MessageLayout, MessageSpacing, settingsAtom } from '../../../state/settings';
 import { SettingTile } from '../../../components/setting-tile';
 import { KeySymbol } from '../../../utils/key-symbol';
 import { isMacOS } from '../../../utils/user-agent';
@@ -755,11 +750,11 @@ function Messages() {
   const { t } = useTranslation();
   const [hideMembershipEvents, setHideMembershipEvents] = useSetting(
     settingsAtom,
-    'hideMembershipEvents'
+    'hideMembershipEvents',
   );
   const [hideNickAvatarEvents, setHideNickAvatarEvents] = useSetting(
     settingsAtom,
-    'hideNickAvatarEvents'
+    'hideNickAvatarEvents',
   );
   const [urlPreview, setUrlPreview] = useSetting(settingsAtom, 'urlPreview');
   const [encUrlPreview, setEncUrlPreview] = useSetting(settingsAtom, 'encUrlPreview');

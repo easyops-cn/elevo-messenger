@@ -23,5 +23,5 @@ export const MediaControl = as<'div', MediaControlProps>(
       {after && <Box direction="Column">{after}</Box>}
       {children}
     </Box>
-  )
+  ),
 );

@@ -23,12 +23,7 @@ type ThreadMenuItemProps = {
   onClick: MouseEventHandler<HTMLButtonElement>;
 };
 
-export function ThreadMenuItem({
-  useAuthentication,
-  room,
-  thread,
-  onClick,
-}: ThreadMenuItemProps) {
+export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: ThreadMenuItemProps) {
   const mx = useMatrixClient();
   const { t } = useTranslation();
   const mEventId = thread.id;
@@ -56,7 +51,9 @@ export function ThreadMenuItem({
       : undefined;
     const rIsRedacted = threadEvent?.isRedacted() ?? false;
     const rSenderId = rIsRedacted ? threadEvent?.getSender() : undefined;
-    const rSenderName = rSenderId ? getMemberDisplayName(room, rSenderId) ?? getMxIdLocalPart(rSenderId) ?? rSenderId : undefined;
+    const rSenderName = rSenderId
+      ? (getMemberDisplayName(room, rSenderId) ?? getMxIdLocalPart(rSenderId) ?? rSenderId)
+      : undefined;
     const latestReplyId = threadLastReply?.getId();
     const editedLastReply =
       latestReplyId && threadLastReply
@@ -73,14 +70,14 @@ export function ThreadMenuItem({
             false,
             t,
             false,
-            false
+            false,
           )
         : threadLastReply
           ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t, false)
           : undefined;
     const senderId = threadLastReply?.getSender();
     const senderName = senderId
-      ? getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId
+      ? (getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId)
       : undefined;
     const avatarMxcUrl = senderId ? room.getMember(senderId)?.getMxcAvatarUrl() : undefined;
     const avatarUrl = avatarMxcUrl
@@ -110,40 +107,42 @@ export function ThreadMenuItem({
     >
       <Box grow="Yes" direction="Column" gap="100">
         <Text size="T300" truncate>
-          {rootIsRedacted
-            ? <MessageDeletedContent before={`${rootSenderName}: `} />
-            : (rootSummary ?? t('message.threadLatestReplyFallback'))}
+          {rootIsRedacted ? (
+            <MessageDeletedContent before={`${rootSenderName}: `} />
+          ) : (
+            (rootSummary ?? t('message.threadLatestReplyFallback'))
+          )}
         </Text>
-          <Box alignItems="Center" gap="100">
-            {latestReplySenderId && (
-              <Box shrink="No" style={{ position: 'relative' }}>
-                <Avatar size="100" radii="Pill">
-                  <UserAvatar
-                    userId={latestReplySenderId}
-                    src={latestReplyAvatarUrl ?? undefined}
-                    alt={latestReplySenderName ?? latestReplySenderId}
-                    renderFallback={() => <Icon size="50" src={Icons.User} filled />}
-                  />
-                </Avatar>
-                {hasThreadUnreadBadge && (
-                  <Badge
-                    variant="Critical"
-                    fill="Solid"
-                    size="200"
-                    radii="Pill"
-                    style={{ position: 'absolute', top: toRem(-3), right: toRem(-3) }}
-                  />
-                )}
-              </Box>
-            )}
-            <Text size="T200" priority="300" truncate style={{ flexGrow: 1 }}>
-              {latestReplySenderId ? (latestReplySummary ?? '...'): t('message.threadNoReplies')}
+        <Box alignItems="Center" gap="100">
+          {latestReplySenderId && (
+            <Box shrink="No" style={{ position: 'relative' }}>
+              <Avatar size="100" radii="Pill">
+                <UserAvatar
+                  userId={latestReplySenderId}
+                  src={latestReplyAvatarUrl ?? undefined}
+                  alt={latestReplySenderName ?? latestReplySenderId}
+                  renderFallback={() => <Icon size="50" src={Icons.User} filled />}
+                />
+              </Avatar>
+              {hasThreadUnreadBadge && (
+                <Badge
+                  variant="Critical"
+                  fill="Solid"
+                  size="200"
+                  radii="Pill"
+                  style={{ position: 'absolute', top: toRem(-3), right: toRem(-3) }}
+                />
+              )}
+            </Box>
+          )}
+          <Text size="T200" priority="300" truncate style={{ flexGrow: 1 }}>
+            {latestReplySenderId ? (latestReplySummary ?? '...') : t('message.threadNoReplies')}
+          </Text>
+          {latestTs && (
+            <Text size="T200" style={{ flexShrink: 0, opacity: 0.5 }}>
+              <RelativeTime ts={latestTs} />
             </Text>
-            {latestTs && (
-              <Text size="T200" style={{ flexShrink: 0, opacity: 0.5 }}>
-                <RelativeTime ts={latestTs} />
-              </Text>
-            )}
+          )}
         </Box>
       </Box>
     </MenuItem>

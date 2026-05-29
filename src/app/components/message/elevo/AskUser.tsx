@@ -88,22 +88,17 @@ const AskUserQuestionSchema = z.object({
       z.union([
         z.object({ answers: z.array(z.string()) }),
         z.object({ fields: z.record(z.string(), z.string()) }),
-      ])
+      ]),
     )
     .optional(),
 });
 
 export type AskUserQuestionData = z.infer<typeof AskUserQuestionSchema>;
 
-const QuestionAnswersSchema = z.record(
-  z.string(),
-  z.union([
-    z.object({ answers: z.array(z.string()) }),
-    z.object({ fields: z.record(z.string(), z.string()) }),
-  ])
-);
-
-export type AskUserQuestionAnswers = z.infer<typeof QuestionAnswersSchema>;
+export type AskUserQuestionAnswers = Record<
+  string,
+  { answers: string[] } | { fields: Record<string, string> }
+>;
 
 export function isUserAnswerEvent(mEvent: MatrixEvent) {
   const content = mEvent.getContent();
@@ -123,7 +118,7 @@ export function parseAskUser(content: Record<string, unknown>): AskUserQuestionD
   if (result.success) {
     return result.data;
   }
-  // eslint-disable-next-line no-console
+
   console.error('Failed to parse ask user content:', result.error);
 }
 
@@ -190,13 +185,12 @@ function AskUserSelect({
       ? DisabledCheckboxIcon
       : CheckboxIcon
     : disabled
-    ? DisabledRadioIcon
-    : RadioIcon;
+      ? DisabledRadioIcon
+      : RadioIcon;
 
   const renderOption = (option: AskUserSelectOption, isOther = false) => {
     const isSelected = isOther ? hasOtherSelected : selectedValues.includes(option.label);
     return (
-      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
       <div
         key={option.label}
         className={OptionItem({
@@ -238,7 +232,6 @@ function AskUserSelect({
               placeholder={otherPlaceholder}
               disabled={disabled}
               className={OtherInput}
-              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
             />
           )}
@@ -272,7 +265,7 @@ export function QuestionAnsweredCard({
   const { t } = useTranslation();
   const questionById = useMemo(
     () => new Map((questions ?? []).map((question) => [question.id, question.question])),
-    [questions]
+    [questions],
   );
 
   return (
@@ -346,9 +339,9 @@ export function AskUserQuestionCard({
   const isAssignedUser = !!assignedUserId && mx.getUserId() === assignedUserId;
   const isDisabled = !isAssignedUser || submitted || readOnly;
   const assignedDisplayName = assignedUserId
-    ? getMemberDisplayName(room, assignedUserId) ??
+    ? (getMemberDisplayName(room, assignedUserId) ??
       getMxIdLocalPart(assignedUserId) ??
-      assignedUserId
+      assignedUserId)
     : undefined;
 
   const answerId = eventId;
@@ -382,7 +375,7 @@ export function AskUserQuestionCard({
         return false;
       return true;
     },
-    [data.questions, formAnswers, formOtherTexts, selections, otherTexts, showOtherOption]
+    [data.questions, formAnswers, formOtherTexts, selections, otherTexts, showOtherOption],
   );
 
   const canSubmit = useMemo(() => {
@@ -430,7 +423,7 @@ export function AskUserQuestionCard({
         return { ...prev, [qIndex]: [...current, label] };
       });
     },
-    [data.questions, isDisabled]
+    [data.questions, isDisabled],
   );
 
   const handleFormOptionToggle = useCallback(
@@ -444,7 +437,7 @@ export function AskUserQuestionCard({
         },
       }));
     },
-    [isDisabled]
+    [isDisabled],
   );
 
   const handleSubmit = useCallback(async () => {
@@ -485,7 +478,7 @@ export function AskUserQuestionCard({
           ? {
               format: 'org.matrix.custom.html',
               formatted_body: `<a href="${encodeURI(getMatrixToUser(questionSenderId))}">@${sanitizeText(
-                questionSenderId
+                questionSenderId,
               )}</a> ${sanitizeText(answerBody)}`,
             }
           : {}),
@@ -504,7 +497,6 @@ export function AskUserQuestionCard({
       setLocalSubmitted(true);
       onSubmit?.();
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('Failed to submit question answers:', err);
     } finally {
       setSubmitting(false);

@@ -74,7 +74,7 @@ const elementToCustomHtml = (node: CustomElement, children: string): string => {
     case BlockType.Emoticon:
       return node.key.startsWith('mxc://')
         ? `<img data-mx-emoticon src="${node.key}" alt="${sanitizeText(
-            node.shortcode
+            node.shortcode,
           )}" title="${sanitizeText(node.shortcode)}" height="32" />`
         : sanitizeText(node.key);
     case BlockType.Link:
@@ -96,12 +96,12 @@ const ignoreHTMLParseInlineMD = (text: string): string =>
     text,
     HTML_TAG_REG_G,
     (match) => match[0],
-    (txt) => parseInlineMD(txt)
+    (txt) => parseInlineMD(txt),
   ).join('');
 
 export const toMatrixCustomHTML = (
   node: Descendant | Descendant[],
-  opts: OutputOptions
+  opts: OutputOptions,
 ): string => {
   let markdownLines = '';
   const parseNode = (n: Descendant, index: number, targetNodes: Descendant[]) => {
@@ -223,7 +223,7 @@ export const getMentions = (mx: MatrixClient, roomId: string, editor: Editor): M
       if (node.name === '@room') {
         mentionData.room = true;
       }
-      
+
       if (isUserId(node.id) && node.id !== mx.getUserId()) {
         mentionData.users.add(node.id);
       }
@@ -250,7 +250,7 @@ export const getFileReference = (editor: Editor): FileRefData | null => {
     if (node.type === BlockType.FileRef) {
       return { path: node.path, workspaceId: node.workspaceId, workspaceName: node.workspaceName };
     }
-    // eslint-disable-next-line no-restricted-syntax
+
     for (const child of node.children) {
       const found = collect(child);
       if (found) return found;
@@ -258,7 +258,6 @@ export const getFileReference = (editor: Editor): FileRefData | null => {
     return null;
   };
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const child of editor.children) {
     const found = collect(child);
     if (found) return found;
@@ -277,7 +276,7 @@ export const getTaskReference = (editor: Editor): TaskRefData | null => {
     if (node.type === BlockType.TaskRef) {
       return { id: node.id, title: node.title, workspaceId: node.workspaceId };
     }
-    // eslint-disable-next-line no-restricted-syntax
+
     for (const child of node.children) {
       const found = collect(child);
       if (found) return found;
@@ -285,7 +284,6 @@ export const getTaskReference = (editor: Editor): TaskRefData | null => {
     return null;
   };
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const child of editor.children) {
     const found = collect(child);
     if (found) return found;

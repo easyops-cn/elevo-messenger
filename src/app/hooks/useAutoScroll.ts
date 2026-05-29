@@ -1,14 +1,8 @@
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  type RefObject,
-} from "react";
+import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 
 export function useAutoScroll(
   scrollContainerRef: RefObject<HTMLDivElement>,
-  scrollContentRef: RefObject<HTMLDivElement>
+  scrollContentRef: RefObject<HTMLDivElement>,
 ) {
   const detectScrolledUpRef = useRef(false);
   const manualScrolledRef = useRef(false);
@@ -33,16 +27,15 @@ export function useAutoScroll(
     const handleScroll = () => {
       setScrollable(
         scrollContainer.scrollTop + scrollContainer.clientHeight + 24 <
-          scrollContainer.scrollHeight
+          scrollContainer.scrollHeight,
       );
       if (!detectScrolledUpRef.current) {
         return;
       }
       manualScrolledRef.current =
-        scrollContainer.scrollTop + scrollContainer.clientHeight + 6 <
-        scrollContainer.scrollHeight;
+        scrollContainer.scrollTop + scrollContainer.clientHeight + 6 < scrollContainer.scrollHeight;
     };
-    scrollContainer.addEventListener("scroll", handleScroll);
+    scrollContainer.addEventListener('scroll', handleScroll);
 
     const observer = new ResizeObserver(() => {
       if (manualScrolledRef.current) {
@@ -52,7 +45,7 @@ export function useAutoScroll(
       // Scroll to the bottom of the content container
       scrollContainer.scrollTo({
         top: contentContainer.scrollHeight,
-        behavior: "instant",
+        behavior: 'instant',
       });
       disableScrollUpDetectionForAWhile();
     });
@@ -60,28 +53,34 @@ export function useAutoScroll(
 
     return () => {
       observer.disconnect();
-      scrollContainer.removeEventListener("scroll", handleScroll);
+      scrollContainer.removeEventListener('scroll', handleScroll);
     };
     // Auto scroll after the conversation becomes available
   }, [disableScrollUpDetectionForAWhile, scrollContainerRef, scrollContentRef]);
 
-  const scrollToBottom = useCallback((behavior?: "auto" | "smooth" | "instant") => {
-    manualScrolledRef.current = false;
-    detectScrolledUpRef.current = false;
-    const scrollContainer = scrollContainerRef.current;
-    scrollContainer?.scrollTo({
-      top: scrollContainer?.scrollHeight,
-      behavior: behavior ?? "instant",
-    });
-    disableScrollUpDetectionForAWhile();
-  }, [scrollContainerRef, disableScrollUpDetectionForAWhile]);
+  const scrollToBottom = useCallback(
+    (behavior?: 'auto' | 'smooth' | 'instant') => {
+      manualScrolledRef.current = false;
+      detectScrolledUpRef.current = false;
+      const scrollContainer = scrollContainerRef.current;
+      scrollContainer?.scrollTo({
+        top: scrollContainer?.scrollHeight,
+        behavior: behavior ?? 'instant',
+      });
+      disableScrollUpDetectionForAWhile();
+    },
+    [scrollContainerRef, disableScrollUpDetectionForAWhile],
+  );
 
-  const toggleAutoScroll = useCallback((enabled: boolean, resetDelay?: number) => {
-    manualScrolledRef.current = !enabled;
-    if (!enabled) {
-      disableScrollUpDetectionForAWhile(resetDelay);
-    }
-  }, [disableScrollUpDetectionForAWhile]);
+  const toggleAutoScroll = useCallback(
+    (enabled: boolean, resetDelay?: number) => {
+      manualScrolledRef.current = !enabled;
+      if (!enabled) {
+        disableScrollUpDetectionForAWhile(resetDelay);
+      }
+    },
+    [disableScrollUpDetectionForAWhile],
+  );
 
   return { scrollable, scrollToBottom, toggleAutoScroll };
 }

@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 import { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { MessageEvent } from '../../types/matrix/room';
 import { reactionOrEditEvent } from './room';
@@ -57,7 +56,7 @@ export function getRoomLastActivityTimestamp(room: Room): number {
 
 export function sortRoomIdsByActivity(
   roomIds: string[],
-  getRoom: (id: string) => Room | undefined
+  getRoom: (id: string) => Room | undefined,
 ): string[] {
   const cache = new Map<string, number>();
 

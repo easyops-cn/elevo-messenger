@@ -6,7 +6,7 @@ export type MediaLoadingData = {
 };
 
 export const useMediaLoading = (
-  getTargetElement: () => HTMLMediaElement | null
+  getTargetElement: () => HTMLMediaElement | null,
 ): MediaLoadingData => {
   const [loadingData, setLoadingData] = useState<MediaLoadingData>({
     loading: false,

@@ -23,7 +23,7 @@ export function RoomTombstone({ roomId, body, replacementRoomId }: RoomTombstone
       return mx.joinRoom(replacementRoomId, {
         viaServers: via,
       });
-    }, [mx, roomId, replacementRoomId])
+    }, [mx, roomId, replacementRoomId]),
   );
   const replacementRoom = mx.getRoom(replacementRoomId);
 

@@ -22,7 +22,12 @@ import { useAtomValue } from 'jotai';
 import { NavItem, NavItemContent, NavItemOptions, NavLink } from '../../components/nav';
 import { UnreadBadge } from '../../components/unread-badge';
 import { RoomAvatar, RoomIcon } from '../../components/room-avatar';
-import { getDirectRoomAvatarUrl, getRoomAvatarUrl, getStateEvent, getLatestMessageText } from '../../utils/room';
+import {
+  getDirectRoomAvatarUrl,
+  getRoomAvatarUrl,
+  getStateEvent,
+  getLatestMessageText,
+} from '../../utils/room';
 import { nameInitials } from '../../utils/common';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useRoomUnread } from '../../state/hooks/unread';
@@ -216,7 +221,7 @@ const RoomNavItemMenu = forwardRef<HTMLDivElement, RoomNavItemMenuProps>(
         </Box>
       </Menu>
     );
-  }
+  },
 );
 
 type RoomNavItemProps = {
@@ -239,7 +244,7 @@ export function RoomNavItem({
   const [menuAnchor, setMenuAnchor] = useState<RectCords>();
   const unread = useRoomUnread(room.roomId, roomToUnreadAtom);
   const typingMember = useRoomTypingMember(room.roomId).filter(
-    (receipt) => receipt.userId !== mx.getUserId()
+    (receipt) => receipt.userId !== mx.getUserId(),
   );
 
   const roomName = useRoomName(room);
@@ -277,7 +282,7 @@ export function RoomNavItem({
 
     const hasCallPermission = permissions.event(
       StateEvent.GroupCallMemberPrefix,
-      mx.getSafeUserId()
+      mx.getSafeUserId(),
     );
 
     // Do not join if missing permissions or no livekit support and call is not started by others
@@ -352,11 +357,23 @@ export function RoomNavItem({
                 </Box>
               )}
             </Box>
-            <Box as="span" grow="Yes" direction="Column" gap="0" justifyContent="Center" style={{ gap: 2}}>
-              <Text as="span" size="Inherit" truncate style={{ lineHeight: toRem(17)}}>
+            <Box
+              as="span"
+              grow="Yes"
+              direction="Column"
+              gap="0"
+              justifyContent="Center"
+              style={{ gap: 2 }}
+            >
+              <Text as="span" size="Inherit" truncate style={{ lineHeight: toRem(17) }}>
                 {roomName}
               </Text>
-              <Text as="span" size="T200" truncate style={{ color: elevoColor.Text.Muted, height: toRem(14), lineHeight: toRem(14) }}>
+              <Text
+                as="span"
+                size="T200"
+                truncate
+                style={{ color: elevoColor.Text.Muted, height: toRem(14), lineHeight: toRem(14) }}
+              >
                 {typingMember.length > 0 && direct ? t('room.typing') : latestMessageText}
               </Text>
             </Box>

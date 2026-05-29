@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import React, {
   ClipboardEventHandler,
   KeyboardEventHandler,
@@ -29,9 +28,14 @@ const withInline = (editor: Editor): Editor => {
   const { isInline } = editor;
 
   editor.isInline = (element) =>
-    [BlockType.Mention, BlockType.Emoticon, BlockType.Link, BlockType.Command, BlockType.FileRef, BlockType.TaskRef].includes(
-      element.type
-    ) || isInline(element);
+    [
+      BlockType.Mention,
+      BlockType.Emoticon,
+      BlockType.Link,
+      BlockType.Command,
+      BlockType.FileRef,
+      BlockType.TaskRef,
+    ].includes(element.type) || isInline(element);
 
   return editor;
 };
@@ -40,8 +44,13 @@ const withVoid = (editor: Editor): Editor => {
   const { isVoid } = editor;
 
   editor.isVoid = (element) =>
-    [BlockType.Mention, BlockType.Emoticon, BlockType.Command, BlockType.FileRef, BlockType.TaskRef].includes(element.type) ||
-    isVoid(element);
+    [
+      BlockType.Mention,
+      BlockType.Emoticon,
+      BlockType.Command,
+      BlockType.FileRef,
+      BlockType.TaskRef,
+    ].includes(element.type) || isVoid(element);
 
   return editor;
 };
@@ -67,7 +76,7 @@ type CustomEditorProps = {
   onPaste?: ClipboardEventHandler;
 };
 export const CustomEditor = forwardRef<HTMLDivElement, CustomEditorProps>(
-  (
+  function LegacyCustomEditor(
     {
       editableName,
       top,
@@ -82,11 +91,11 @@ export const CustomEditor = forwardRef<HTMLDivElement, CustomEditorProps>(
       onChange,
       onPaste,
     },
-    ref
-  ) => {
+    ref,
+  ) {
     const renderElement = useCallback(
       (props: RenderElementProps) => <RenderElement {...props} />,
-      []
+      [],
     );
 
     const renderLeaf = useCallback((props: RenderLeafProps) => <RenderLeaf {...props} />, []);
@@ -97,7 +106,7 @@ export const CustomEditor = forwardRef<HTMLDivElement, CustomEditorProps>(
         const shortcutToggled = toggleKeyboardShortcut(editor, evt);
         if (shortcutToggled) evt.preventDefault();
       },
-      [editor, onKeyDown]
+      [editor, onKeyDown],
     );
 
     const renderPlaceholder = useCallback(
@@ -109,15 +118,18 @@ export const CustomEditor = forwardRef<HTMLDivElement, CustomEditorProps>(
           </Text>
         </span>
       ),
-      []
+      [],
     );
 
-    const initialValue = useMemo<CustomElement[]>(() => [
-      {
-        type: BlockType.Paragraph,
-        children: [{ text: '' }],
-      },
-    ], []);
+    const initialValue = useMemo<CustomElement[]>(
+      () => [
+        {
+          type: BlockType.Paragraph,
+          children: [{ text: '' }],
+        },
+      ],
+      [],
+    );
 
     return (
       <div className={css.Editor} ref={ref}>
@@ -162,5 +174,5 @@ export const CustomEditor = forwardRef<HTMLDivElement, CustomEditorProps>(
         </Slate>
       </div>
     );
-  }
+  },
 );

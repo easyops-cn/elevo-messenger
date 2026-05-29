@@ -18,7 +18,7 @@ const useRoomNotificationModes = (): RoomNotificationMode[] =>
       RoomNotificationMode.SpecialMessages,
       RoomNotificationMode.Mute,
     ],
-    []
+    [],
   );
 
 const useRoomNotificationModeStr = (): Record<RoomNotificationMode, string> => {
@@ -30,7 +30,7 @@ const useRoomNotificationModeStr = (): Record<RoomNotificationMode, string> => {
       [RoomNotificationMode.SpecialMessages]: t('room.notifMentionKeywords'),
       [RoomNotificationMode.Mute]: t('room.notifMute'),
     }),
-    [t]
+    [t],
   );
 };
 
@@ -40,7 +40,7 @@ type NotificationModeSwitcherProps = {
   children: (
     handleOpen: MouseEventHandler<HTMLButtonElement>,
     opened: boolean,
-    changing: boolean
+    changing: boolean,
   ) => ReactNode;
 };
 export function RoomNotificationModeSwitcher({

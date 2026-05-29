@@ -108,7 +108,7 @@ const makeInviteData = (mx: MatrixClient, room: Room, useAuthentication: boolean
   const senderId = memberEvent?.getSender();
 
   const senderName = senderId
-    ? getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId
+    ? (getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId)
     : undefined;
   const inviteTs = memberEvent?.getTs();
   const reason =
@@ -172,10 +172,10 @@ function InviteCard({
         await addRoomIdToMDirect(mx, invite.roomId, dmUserId);
       }
       onNavigate(invite.roomId, invite.isSpace);
-    }, [mx, invite, userId, onNavigate])
+    }, [mx, invite, userId, onNavigate]),
   );
   const [leaveState, leave] = useAsyncCallback<Record<string, never>, MatrixError, []>(
-    useCallback(() => mx.leave(invite.roomId), [mx, invite])
+    useCallback(() => mx.leave(invite.roomId), [mx, invite]),
   );
 
   const joining =
@@ -478,7 +478,7 @@ function UnknownInvites({
       const roomIds = invites.map((invite) => invite.roomId);
 
       await rateLimitedActions(roomIds, (roomId) => mx.leave(roomId));
-    }, [mx, invites])
+    }, [mx, invites]),
   );
 
   const declining = declineAllStatus.status === AsyncStatus.Loading;
@@ -555,7 +555,7 @@ function SpamInvites({
       const roomIds = invites.map((invite) => invite.roomId);
 
       await rateLimitedActions(roomIds, (roomId) => mx.leave(roomId));
-    }, [mx, invites])
+    }, [mx, invites]),
   );
 
   const [reportAllStatus, reportAll] = useAsyncCallback(
@@ -563,18 +563,18 @@ function SpamInvites({
       const roomIds = invites.map((invite) => invite.roomId);
 
       await rateLimitedActions(roomIds, (roomId) => mx.reportRoom(roomId, 'Spam Invite'));
-    }, [mx, invites])
+    }, [mx, invites]),
   );
 
   const ignoredUsers = useIgnoredUsers();
   const unignoredUsers = Array.from(new Set(invites.map((invite) => invite.senderId))).filter(
-    (user) => !ignoredUsers.includes(user)
+    (user) => !ignoredUsers.includes(user),
   );
   const [blockAllStatus, blockAll] = useAsyncCallback(
     useCallback(
       () => mx.setIgnoredUsers([...ignoredUsers, ...unignoredUsers]),
-      [mx, ignoredUsers, unignoredUsers]
-    )
+      [mx, ignoredUsers, unignoredUsers],
+    ),
   );
 
   const declining = declineAllStatus.status === AsyncStatus.Loading;
@@ -730,7 +730,7 @@ export function Invites() {
   const [compact, setCompact] = useState(document.body.clientWidth <= COMPACT_CARD_WIDTH);
   useElementSizeObserver(
     useCallback(() => containerRef.current, []),
-    useCallback((width) => setCompact(width <= COMPACT_CARD_WIDTH), [])
+    useCallback((width) => setCompact(width <= COMPACT_CARD_WIDTH), []),
   );
   const screenSize = useScreenSizeContext();
 
@@ -749,78 +749,78 @@ export function Invites() {
     <PageMain>
       <Page>
         <PageHeader balance>
-        <Box grow="Yes" gap="200">
-          <Box grow="Yes" basis="No">
-            {screenSize === ScreenSize.Mobile && (
-              <BackRouteHandler>
-                {(onBack) => (
-                  <IconButton size="300" fill="None" onClick={onBack}>
-                    <Icon size="100" src={Icons.ArrowLeft} />
-                  </IconButton>
-                )}
-              </BackRouteHandler>
-            )}
+          <Box grow="Yes" gap="200">
+            <Box grow="Yes" basis="No">
+              {screenSize === ScreenSize.Mobile && (
+                <BackRouteHandler>
+                  {(onBack) => (
+                    <IconButton size="300" fill="None" onClick={onBack}>
+                      <Icon size="100" src={Icons.ArrowLeft} />
+                    </IconButton>
+                  )}
+                </BackRouteHandler>
+              )}
+            </Box>
+            <Box alignItems="Center" gap="200">
+              {screenSize !== ScreenSize.Mobile && <Icon size="300" src={Icons.Mail} />}
+              <Text size="H5" truncate>
+                {t('inbox.invites')}
+              </Text>
+            </Box>
+            <Box grow="Yes" basis="No" />
           </Box>
-          <Box alignItems="Center" gap="200">
-            {screenSize !== ScreenSize.Mobile && <Icon size="300" src={Icons.Mail} />}
-            <Text size="H5" truncate>
-              {t('inbox.invites')}
-            </Text>
-          </Box>
-          <Box grow="Yes" basis="No" />
-        </Box>
-      </PageHeader>
-      <Box grow="Yes">
-        <Scroll hideTrack visibility="Hover">
-          <PageContent>
-            <PageContentCenter>
-              <Box ref={containerRef} direction="Column" gap="600">
-                <Box direction="Column" gap="100">
-                  <span data-spacing-node />
-                  <Text size="L400">{t('inbox.filter')}</Text>
-                  <InviteFilters
-                    filter={filter}
-                    onFilter={setFilter}
-                    knownInvites={knownInvites}
-                    unknownInvites={unknownInvites}
-                    spamInvites={spamInvites}
-                  />
+        </PageHeader>
+        <Box grow="Yes">
+          <Scroll hideTrack visibility="Hover">
+            <PageContent>
+              <PageContentCenter>
+                <Box ref={containerRef} direction="Column" gap="600">
+                  <Box direction="Column" gap="100">
+                    <span data-spacing-node />
+                    <Text size="L400">{t('inbox.filter')}</Text>
+                    <InviteFilters
+                      filter={filter}
+                      onFilter={setFilter}
+                      knownInvites={knownInvites}
+                      unknownInvites={unknownInvites}
+                      spamInvites={spamInvites}
+                    />
+                  </Box>
+                  {filter === InviteFilter.Known && (
+                    <KnownInvites
+                      invites={knownInvites}
+                      compact={compact}
+                      hour24Clock={hour24Clock}
+                      dateFormatString={dateFormatString}
+                      handleNavigate={handleNavigate}
+                    />
+                  )}
+
+                  {filter === InviteFilter.Unknown && (
+                    <UnknownInvites
+                      invites={unknownInvites}
+                      compact={compact}
+                      hour24Clock={hour24Clock}
+                      dateFormatString={dateFormatString}
+                      handleNavigate={handleNavigate}
+                    />
+                  )}
+
+                  {filter === InviteFilter.Spam && (
+                    <SpamInvites
+                      invites={spamInvites}
+                      compact={compact}
+                      hour24Clock={hour24Clock}
+                      dateFormatString={dateFormatString}
+                      handleNavigate={handleNavigate}
+                    />
+                  )}
                 </Box>
-                {filter === InviteFilter.Known && (
-                  <KnownInvites
-                    invites={knownInvites}
-                    compact={compact}
-                    hour24Clock={hour24Clock}
-                    dateFormatString={dateFormatString}
-                    handleNavigate={handleNavigate}
-                  />
-                )}
-
-                {filter === InviteFilter.Unknown && (
-                  <UnknownInvites
-                    invites={unknownInvites}
-                    compact={compact}
-                    hour24Clock={hour24Clock}
-                    dateFormatString={dateFormatString}
-                    handleNavigate={handleNavigate}
-                  />
-                )}
-
-                {filter === InviteFilter.Spam && (
-                  <SpamInvites
-                    invites={spamInvites}
-                    compact={compact}
-                    hour24Clock={hour24Clock}
-                    dateFormatString={dateFormatString}
-                    handleNavigate={handleNavigate}
-                  />
-                )}
-              </Box>
-            </PageContentCenter>
-          </PageContent>
-        </Scroll>
-      </Box>
-    </Page>
+              </PageContentCenter>
+            </PageContent>
+          </Scroll>
+        </Box>
+      </Page>
     </PageMain>
   );
 }

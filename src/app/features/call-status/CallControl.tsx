@@ -159,7 +159,7 @@ export function CallControl({
   const setCallEmbed = useSetAtom(callEmbedAtom);
 
   const [hangupState, hangup] = useAsyncCallback(
-    useCallback(() => callEmbed.hangup(), [callEmbed])
+    useCallback(() => callEmbed.hangup(), [callEmbed]),
   );
   const exiting =
     hangupState.status === AsyncStatus.Loading || hangupState.status === AsyncStatus.Success;

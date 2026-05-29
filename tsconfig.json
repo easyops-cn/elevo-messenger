@@ -7,9 +7,10 @@
     "allowJs": true,
     "strict": true,
     "esModuleInterop": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "outDir": "dist",
+    "rootDir": "src",
     "skipLibCheck": true,
     "lib": ["ES2020", "DOM"]
   },

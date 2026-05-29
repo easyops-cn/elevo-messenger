@@ -188,7 +188,6 @@ export function WaveformPlayer({
 
           return (
             <div
-            // eslint-disable-next-line react/no-array-index-key
               key={index}
               className={css.WaveformBar}
               style={{
@@ -204,7 +203,6 @@ export function WaveformPlayer({
         {secondsToMinutesAndSeconds(displayTime)}
       </Text>
 
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio controls={false} autoPlay={autoPlay} ref={audioRef}>
         {audioSrc && <source src={audioSrc} type={mimeType} />}
       </audio>

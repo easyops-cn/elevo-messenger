@@ -45,7 +45,10 @@ export const useCallMembers = (room: Room, session: MatrixRTCSession): CallMembe
       const currentRequestId = requestId;
 
       try {
-        const nextMemberships = await MatrixRTCSession.sessionMembershipsForSlot(room, session.slotDescription);
+        const nextMemberships = await MatrixRTCSession.sessionMembershipsForSlot(
+          room,
+          session.slotDescription,
+        );
 
         if (!disposed && currentRequestId === requestId) {
           setMemberships(nextMemberships);

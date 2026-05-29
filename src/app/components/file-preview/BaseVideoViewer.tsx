@@ -57,5 +57,5 @@ export const BaseVideoViewer = as<'div', BaseVideoViewerProps>(
         </Box>
       </Box>
     );
-  }
+  },
 );

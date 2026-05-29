@@ -1,10 +1,4 @@
-/* eslint-disable jsx-a11y/alt-text */
-import React, {
-  ComponentPropsWithoutRef,
-  ReactEventHandler,
-  useMemo,
-  useState,
-} from 'react';
+import React, { ComponentPropsWithoutRef, ReactEventHandler, useMemo, useState } from 'react';
 import {
   Element,
   Text as DOMText,
@@ -84,12 +78,7 @@ export const renderMatrixMention = (
     const currentRoom = mx.getRoom(currentRoomId);
 
     return (
-      <a
-        href={href}
-        {...customProps}
-        className={css.Mention()}
-        data-mention-id={userId}
-      >
+      <a href={href} {...customProps} className={css.Mention()} data-mention-id={userId}>
         {`@${
           (currentRoom && getMemberDisplayName(currentRoom, userId)) ?? getMxIdLocalPart(userId)
         }`}
@@ -222,11 +211,7 @@ const extractTextFromChildren = (nodes: ChildNode[]): string => {
   return text;
 };
 
-export function CodeBlock({
-  children,
-}: {
-  children: ChildNode[];
-}) {
+export function CodeBlock({ children }: { children: ChildNode[] }) {
   const { t } = useTranslation();
   const code = children[0];
   const attribs = code instanceof Element && code.name === 'code' ? code.attribs : undefined;
@@ -434,11 +419,7 @@ export const getReactCustomHtmlParser = (
           );
         }
         if (name === 'tbody') {
-          return (
-            <tbody {...props}>
-              {domToReact(children, opts)}
-            </tbody>
-          );
+          return <tbody {...props}>{domToReact(children, opts)}</tbody>;
         }
         if (name === 'th') {
           return (
@@ -530,11 +511,12 @@ export const getReactCustomHtmlParser = (
           const taskStatus = attribs['data-task-status'] as TaskRefStatus | undefined;
           const rawText = extractTextFromChildren(children);
           const taskTitle = rawText.replace(/^\[/, '').replace(/\]$/, '');
-          const statusColor = taskStatus === 'in_progress'
-            ? color.Primary.Main
-            : taskStatus === 'done'
-              ? color.Success.Main
-              : color.SurfaceVariant.ContainerLine;
+          const statusColor =
+            taskStatus === 'in_progress'
+              ? color.Primary.Main
+              : taskStatus === 'done'
+                ? color.Success.Main
+                : color.SurfaceVariant.ContainerLine;
           return (
             <span className={css.TaskRef()} title={taskTitle || taskId}>
               <span
@@ -581,7 +563,6 @@ export const getReactCustomHtmlParser = (
           const parentName = domNode.parent.name;
           // Whitespace text nodes cannot appear as a child of these elements.
           if (!domNode.data.trim() && ['table', 'thead', 'tbody', 'tr'].includes(parentName)) {
-            // eslint-disable-next-line react/jsx-no-useless-fragment
             return <></>;
           }
           linkify = parentName !== 'code' && parentName !== 'a';

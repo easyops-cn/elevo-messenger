@@ -14,7 +14,6 @@ export const useOpenCodeView = (): ((payload: CodeViewPayload) => Promise<boolea
           await invoke('open_code_view_window', { payload });
           return true;
         } catch (error) {
-          // eslint-disable-next-line no-console
           console.error('[codeView] open_code_view_window failed:', error);
         }
       }
@@ -22,6 +21,6 @@ export const useOpenCodeView = (): ((payload: CodeViewPayload) => Promise<boolea
       setCodeViewPayload(payload);
       return true;
     },
-    [setCodeViewPayload]
+    [setCodeViewPayload],
   );
 };

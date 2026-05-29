@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { IPreviewUrlResponse } from 'matrix-js-sdk';
 import { Box, Icon, IconButton, Icons, Scroll, Spinner, Text, as, color, config } from 'folds';
 import { ImageOverlay } from '../ImageOverlay';
@@ -25,7 +25,7 @@ export const UrlPreviewCard = as<'div', { url: string; ts: number }>(
     const useAuthentication = useMediaAuthentication();
     const [viewer, setViewer] = useState(false);
     const [previewStatus, loadPreview] = useAsyncCallback(
-      useCallback(() => mx.getUrlPreview(url, ts), [url, ts, mx])
+      useCallback(() => mx.getUrlPreview(url, ts), [url, ts, mx]),
     );
 
     useEffect(() => {
@@ -42,7 +42,7 @@ export const UrlPreviewCard = as<'div', { url: string; ts: number }>(
         256,
         256,
         'scale',
-        false
+        false,
       );
 
       const imgUrl = mxcUrlToHttp(mx, prev['og:image'] || '', useAuthentication);
@@ -69,7 +69,7 @@ export const UrlPreviewCard = as<'div', { url: string; ts: number }>(
               alt={prev['og:title']}
               title={prev['og:title']}
               tabIndex={0}
-              onKeyDown={(evt) => onEnterOrSpace(openImage)(evt)}
+              onKeyDown={(evt: KeyboardEvent<HTMLElement>) => onEnterOrSpace(openImage)(evt)}
               onClick={openImage}
             />
           )}
@@ -120,7 +120,7 @@ export const UrlPreviewCard = as<'div', { url: string; ts: number }>(
         )}
       </UrlPreview>
     );
-  }
+  },
 );
 
 export const UrlPreviewHolder = as<'div'>(({ children, ...props }, ref) => {
@@ -148,8 +148,8 @@ export const UrlPreviewHolder = as<'div'>(({ children, ...props }, ref) => {
         root: scrollRef.current,
         rootMargin: '10px',
       }),
-      []
-    )
+      [],
+    ),
   );
 
   useEffect(() => {

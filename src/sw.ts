@@ -62,7 +62,7 @@ function requestSession(client: Client): Promise<SessionInfo | undefined> {
 
 async function requestSessionWithTimeout(
   clientId: string,
-  timeoutMs = 3000
+  timeoutMs = 3000,
 ): Promise<SessionInfo | undefined> {
   const client = await self.clients.get(clientId);
   if (!client) return undefined;
@@ -85,7 +85,7 @@ self.addEventListener('activate', (event: ExtendableEvent) => {
     (async () => {
       await self.clients.claim();
       await cleanupDeadClients();
-    })()
+    })(),
   );
 });
 
@@ -153,6 +153,6 @@ self.addEventListener('fetch', (event: FetchEvent) => {
         return fetch(url, fetchConfig(s.accessToken));
       }
       return fetch(event.request);
-    })
+    }),
   );
 });

@@ -178,10 +178,10 @@ export const ModernOwnContent = recipe({
         backgroundColor: color.Primary.Container,
         padding: `${config.space.S100} ${config.space.S200}`,
       },
-    }
+    },
   },
   defaultVariants: {
-    transparent: false
+    transparent: false,
   },
 });
 
@@ -230,9 +230,9 @@ export const Username = recipe({
     variant: {
       Secondary: {
         color: elevoColor.Text.Secondary,
-      }
-    }
-  }
+      },
+    },
+  },
 });
 
 export const UsernameBold = style({

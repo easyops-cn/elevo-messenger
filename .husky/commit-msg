@@ -1,0 +1,14 @@
+#!/bin/sh
+set -eu
+
+GLOBAL_HOOK_PATH="$(git config --global --get core.hooksPath || true)"
+
+if [ -n "$GLOBAL_HOOK_PATH" ]; then
+  GLOBAL_HOOK="$GLOBAL_HOOK_PATH/commit-msg"
+else
+  GLOBAL_HOOK=""
+fi
+
+if [ -x "$GLOBAL_HOOK" ]; then
+  exec "$GLOBAL_HOOK" "$@"
+fi

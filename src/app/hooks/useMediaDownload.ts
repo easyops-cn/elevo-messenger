@@ -10,7 +10,7 @@ export const useMediaDownload = (
   url: string,
   mimeType: string,
   fileName: string,
-  encInfo?: EncryptedAttachmentInfo
+  encInfo?: EncryptedAttachmentInfo,
 ) => {
   const mx = useMatrixClient();
   const useAuth = useMediaAuthentication();
@@ -25,6 +25,6 @@ export const useMediaDownload = (
         : await downloadMedia(mediaUrl);
 
       await saveFile(fileContent, fileName);
-    }, [mx, url, useAuth, mimeType, encInfo, fileName])
+    }, [mx, url, useAuth, mimeType, encInfo, fileName]),
   );
 };

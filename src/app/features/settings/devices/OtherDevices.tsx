@@ -39,7 +39,7 @@ export function OtherDevices({ devices, refreshDeviceList, showVerification }: O
       withSearchParam(authUrl, {
         action: accountManagementActions.sessionsList,
       }),
-      '_blank'
+      '_blank',
     );
   }, [authMetadata, accountManagementActions]);
 
@@ -53,10 +53,10 @@ export function OtherDevices({ devices, refreshDeviceList, showVerification }: O
           action: accountManagementActions.sessionEnd,
           device_id: deviceId,
         }),
-        '_blank'
+        '_blank',
       );
     },
-    [authMetadata, accountManagementActions]
+    [authMetadata, accountManagementActions],
   );
 
   const handleToggleDelete = useCallback((deviceId: string) => {
@@ -80,7 +80,7 @@ export function OtherDevices({ devices, refreshDeviceList, showVerification }: O
       async (authDict?: AuthDict) => {
         await mx.deleteMultipleDevices(Array.from(deleted), authDict);
       },
-      [mx, deleted]
+      [mx, deleted],
     ),
     useCallback(
       (state: typeof deleteState) => {
@@ -90,11 +90,11 @@ export function OtherDevices({ devices, refreshDeviceList, showVerification }: O
         }
         setDeleteState(state);
       },
-      [refreshDeviceList]
-    )
+      [refreshDeviceList],
+    ),
   );
   const [authData, deleteError] = useUIAMatrixError(
-    deleteState.status === AsyncStatus.Error ? deleteState.error : undefined
+    deleteState.status === AsyncStatus.Error ? deleteState.error : undefined,
   );
   const deleting = deleteState.status === AsyncStatus.Loading || authData !== undefined;
 

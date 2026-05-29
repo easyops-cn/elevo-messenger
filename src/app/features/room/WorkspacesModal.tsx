@@ -44,7 +44,14 @@ type AddWorkspaceModalProps = {
   requestClose: () => void;
 };
 
-export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAdd, requestClose }: AddWorkspaceModalProps) {
+export function AddWorkspaceModal({
+  linkedIds,
+  baseUrl,
+  token,
+  tenantNames,
+  onAdd,
+  requestClose,
+}: AddWorkspaceModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation();
@@ -64,7 +71,7 @@ export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAd
       try {
         const res = await fetch(
           `${baseUrl}/api/v1/me/accessible-shares?page=${page}&page_size=${PAGE_SIZE}`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          { headers: { Authorization: `Bearer ${token}` } },
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
@@ -77,7 +84,7 @@ export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAd
         setLoadingAvailable(false);
       }
     },
-    [baseUrl, token, t]
+    [baseUrl, token, t],
   );
 
   useEffect(() => {
@@ -86,12 +93,11 @@ export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAd
 
   const totalPages = Math.ceil(availableTotal / PAGE_SIZE);
 
-  const filteredWorkspaces = availableWorkspaces
-    .filter((ws) => {
-      if (!query.trim()) return true;
-      const q = query.trim().toLowerCase();
-      return ws.name.toLowerCase().includes(q) || ws.description?.toLowerCase().includes(q);
-    });
+  const filteredWorkspaces = availableWorkspaces.filter((ws) => {
+    if (!query.trim()) return true;
+    const q = query.trim().toLowerCase();
+    return ws.name.toLowerCase().includes(q) || ws.description?.toLowerCase().includes(q);
+  });
 
   return (
     <Overlay open>
@@ -110,7 +116,12 @@ export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAd
           }}
         >
           <Modal size="400" style={{ maxHeight: toRem(480), borderRadius: config.radii.R500 }}>
-            <Box shrink="No" style={{ padding: config.space.S400, paddingBottom: 0 }} direction="Column" gap="200">
+            <Box
+              shrink="No"
+              style={{ padding: config.space.S400, paddingBottom: 0 }}
+              direction="Column"
+              gap="200"
+            >
               <Input
                 ref={inputRef}
                 size="500"
@@ -125,28 +136,66 @@ export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAd
             </Box>
             <Box grow="Yes">
               {!token ? (
-                <Box justifyContent="Center" alignItems="Center" grow="Yes" direction="Column" gap="100" style={{ padding: config.space.S700 }}>
-                  <Text size="H6" align="Center">{t('workspaces.notConfigured')}</Text>
-                  <Text size="T200" align="Center">{t('workspaces.notConfiguredDesc')}</Text>
+                <Box
+                  justifyContent="Center"
+                  alignItems="Center"
+                  grow="Yes"
+                  direction="Column"
+                  gap="100"
+                  style={{ padding: config.space.S700 }}
+                >
+                  <Text size="H6" align="Center">
+                    {t('workspaces.notConfigured')}
+                  </Text>
+                  <Text size="T200" align="Center">
+                    {t('workspaces.notConfiguredDesc')}
+                  </Text>
                 </Box>
               ) : (
                 <>
                   {loadingAvailable && (
-                    <Box justifyContent="Center" alignItems="Center" grow="Yes" style={{ padding: config.space.S700 }}>
+                    <Box
+                      justifyContent="Center"
+                      alignItems="Center"
+                      grow="Yes"
+                      style={{ padding: config.space.S700 }}
+                    >
                       <Spinner size="200" variant="Secondary" />
                     </Box>
                   )}
                   {availableError && (
-                    <Box justifyContent="Center" alignItems="Center" grow="Yes" direction="Column" gap="100" style={{ padding: config.space.S700 }}>
-                      <Text size="H6" align="Center">{t('workspaces.failedToLoad')}</Text>
-                      <Text size="T200" align="Center">{availableError}</Text>
+                    <Box
+                      justifyContent="Center"
+                      alignItems="Center"
+                      grow="Yes"
+                      direction="Column"
+                      gap="100"
+                      style={{ padding: config.space.S700 }}
+                    >
+                      <Text size="H6" align="Center">
+                        {t('workspaces.failedToLoad')}
+                      </Text>
+                      <Text size="T200" align="Center">
+                        {availableError}
+                      </Text>
                     </Box>
                   )}
                   {!loadingAvailable && !availableError && filteredWorkspaces.length === 0 && (
-                    <Box justifyContent="Center" alignItems="Center" grow="Yes" direction="Column" gap="100" style={{ padding: config.space.S700 }}>
-                      <Text size="H6" align="Center">{query.trim() ? t('workspaces.noMatchFound') : t('workspaces.noWorkspaces')}</Text>
+                    <Box
+                      justifyContent="Center"
+                      alignItems="Center"
+                      grow="Yes"
+                      direction="Column"
+                      gap="100"
+                      style={{ padding: config.space.S700 }}
+                    >
+                      <Text size="H6" align="Center">
+                        {query.trim() ? t('workspaces.noMatchFound') : t('workspaces.noWorkspaces')}
+                      </Text>
                       <Text size="T200" align="Center">
-                        {query.trim() ? t('workspaces.noMatchFoundDesc', { query: query.trim() }) : t('workspaces.noWorkspacesDesc')}
+                        {query.trim()
+                          ? t('workspaces.noMatchFoundDesc', { query: query.trim() })
+                          : t('workspaces.noWorkspacesDesc')}
                       </Text>
                     </Box>
                   )}
@@ -162,12 +211,16 @@ export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAd
                             disabled={adding || linkedIds.has(ws.id)}
                             onClick={() => {
                               setAdding(true);
-                              onAdd(ws).then(requestClose).finally(() => setAdding(false));
+                              onAdd(ws)
+                                .then(requestClose)
+                                .finally(() => setAdding(false));
                             }}
                             before={
-                              linkedIds.has(ws.id)
-                                ? <Icon size="200" src={Icons.Check} />
-                                : <span style={{ display: 'inline-block', width: toRem(20) }} />
+                              linkedIds.has(ws.id) ? (
+                                <Icon size="200" src={Icons.Check} />
+                              ) : (
+                                <span style={{ display: 'inline-block', width: toRem(20) }} />
+                              )
                             }
                             after={
                               tenantNames.has(ws.owner_tenant_id) ? (
@@ -178,9 +231,13 @@ export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAd
                             }
                           >
                             <Box grow="Yes" direction="Column" style={{ minWidth: 0 }}>
-                              <Text size="T300" truncate>{ws.name}</Text>
+                              <Text size="T300" truncate>
+                                {ws.name}
+                              </Text>
                               {ws.description ? (
-                                <Text size="T200" priority="300" truncate>{ws.description}</Text>
+                                <Text size="T200" priority="300" truncate>
+                                  {ws.description}
+                                </Text>
                               ) : null}
                             </Box>
                           </MenuItem>
@@ -194,7 +251,13 @@ export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAd
             {totalPages > 1 && (
               <>
                 <Line size="300" />
-                <Box shrink="No" gap="200" justifyContent="Center" alignItems="Center" style={{ padding: config.space.S200 }}>
+                <Box
+                  shrink="No"
+                  gap="200"
+                  justifyContent="Center"
+                  alignItems="Center"
+                  style={{ padding: config.space.S200 }}
+                >
                   <Button
                     size="300"
                     variant="Secondary"
@@ -206,7 +269,9 @@ export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAd
                   >
                     <Text size="B300">{t('workspaces.prev')}</Text>
                   </Button>
-                  <Text size="T300">{availablePage} / {totalPages}</Text>
+                  <Text size="T300">
+                    {availablePage} / {totalPages}
+                  </Text>
                   <Button
                     size="300"
                     variant="Secondary"
@@ -233,5 +298,3 @@ export function AddWorkspaceModal({ linkedIds, baseUrl, token, tenantNames, onAd
     </Overlay>
   );
 }
-
-

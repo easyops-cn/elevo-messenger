@@ -32,12 +32,10 @@ export const ReplyLayout = as<'div', ReplyLayoutProps>(
             {`${t('common.replyTo', { name: username ?? '' })}:`}
           </Text>
         </Box>
-        <Box grow="Yes">
-          {children}
-        </Box>
+        <Box grow="Yes">{children}</Box>
       </Box>
     );
-  }
+  },
 );
 
 export const ThreadIndicator = as<'div'>(({ ...props }, ref) => (
@@ -63,28 +61,18 @@ type ReplyProps = {
 };
 
 export const Reply = as<'div', ReplyProps>(
-  (
-    {
-      room,
-      timelineSet,
-      eventId,
-      replyEventId,
-      onClick,
-      ...props
-    },
-    ref
-  ) => {
+  ({ room, timelineSet, eventId, replyEventId, onClick, ...props }, ref) => {
     const { t } = useTranslation();
     const placeholderWidth = useMemo(() => randomNumberBetween(40, 400), []);
     const getFromLocalTimeline = useCallback(
       () => timelineSet?.findEventById(replyEventId),
-      [timelineSet, replyEventId]
+      [timelineSet, replyEventId],
     );
     const replyEvent = useRoomEvent(room, replyEventId, getFromLocalTimeline);
     const mainEvent = useRoomEvent(room, eventId);
 
     if (mainEvent) {
-      const inReplyTo = mainEvent.getWireContent()?.["m.relates_to"]?.["m.in_reply_to"];
+      const inReplyTo = mainEvent.getWireContent()?.['m.relates_to']?.['m.in_reply_to'];
       if (!inReplyTo) {
         return null;
       }
@@ -109,7 +97,7 @@ export const Reply = as<'div', ReplyProps>(
       body = t('message.sticker');
     } else {
       body = typeof content.body === 'string' ? content.body : '';
-  }
+    }
 
     const fallbackBody = replyEvent?.isRedacted() ? (
       <MessageDeletedContent />
@@ -125,7 +113,9 @@ export const Reply = as<'div', ReplyProps>(
         <Line size="500" variant="Primary" direction="Vertical" style={{ height: toRem(14) }} />
         <ReplyLayout
           as="button"
-          username={sender ? (getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender)) : undefined}
+          username={
+            sender ? (getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender)) : undefined
+          }
           data-event-id={replyEventId}
           onClick={onClick}
         >
@@ -145,5 +135,5 @@ export const Reply = as<'div', ReplyProps>(
         </ReplyLayout>
       </Box>
     );
-  }
+  },
 );

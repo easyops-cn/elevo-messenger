@@ -62,7 +62,7 @@ export function DeveloperTools({ requestClose }: DeveloperToolsProps) {
     async (type, content) => {
       await mx.setRoomAccountData(room.roomId, type, content);
     },
-    [mx, room.roomId]
+    [mx, room.roomId],
   );
 
   if (accountDataType !== undefined) {
@@ -202,7 +202,9 @@ export function DeveloperTools({ requestClose }: DeveloperToolsProps) {
                             />
                           }
                         >
-                          <Text size="B300">{expandState ? t('roomSettings.collapse') : t('roomSettings.expand')}</Text>
+                          <Text size="B300">
+                            {expandState ? t('roomSettings.collapse') : t('roomSettings.expand')}
+                          </Text>
                         </Button>
                       }
                     />
@@ -339,7 +341,11 @@ export function DeveloperTools({ requestClose }: DeveloperToolsProps) {
                             />
                           }
                         >
-                          <Text size="B300">{expandAccountData ? t('roomSettings.collapse') : t('roomSettings.expand')}</Text>
+                          <Text size="B300">
+                            {expandAccountData
+                              ? t('roomSettings.collapse')
+                              : t('roomSettings.expand')}
+                          </Text>
                         </Button>
                       }
                     />
@@ -347,7 +353,9 @@ export function DeveloperTools({ requestClose }: DeveloperToolsProps) {
                       <Box direction="Column" gap="100">
                         <Box justifyContent="SpaceBetween">
                           <Text size="L400">{t('devTools.events')}</Text>
-                          <Text size="L400">{t('devTools.total', { count: accountData.size })}</Text>
+                          <Text size="L400">
+                            {t('devTools.total', { count: accountData.size })}
+                          </Text>
                         </Box>
                         <CutoutCard>
                           <MenuItem

@@ -244,5 +244,5 @@ export const FilePreview = as<'div', FilePreviewProps>(
         ref={ref}
       />
     );
-  }
+  },
 );

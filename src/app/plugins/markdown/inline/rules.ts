@@ -8,7 +8,7 @@ const BOLD_MD_1 = '**';
 const BOLD_PREFIX_1 = `${ESC_NEG_LB}\\*{2}`;
 const BOLD_NEG_LA_1 = '(?!\\*)';
 const BOLD_REG_1 = new RegExp(
-  `${URL_NEG_LB}${BOLD_PREFIX_1}${MIN_ANY}${BOLD_PREFIX_1}${BOLD_NEG_LA_1}`
+  `${URL_NEG_LB}${BOLD_PREFIX_1}${MIN_ANY}${BOLD_PREFIX_1}${BOLD_NEG_LA_1}`,
 );
 export const BoldRule: InlineMDRule = {
   match: (text) => text.match(BOLD_REG_1),
@@ -22,7 +22,7 @@ const ITALIC_MD_1 = '*';
 const ITALIC_PREFIX_1 = `${ESC_NEG_LB}\\*`;
 const ITALIC_NEG_LA_1 = '(?!\\*)';
 const ITALIC_REG_1 = new RegExp(
-  `${URL_NEG_LB}${ITALIC_PREFIX_1}${MIN_ANY}${ITALIC_PREFIX_1}${ITALIC_NEG_LA_1}`
+  `${URL_NEG_LB}${ITALIC_PREFIX_1}${MIN_ANY}${ITALIC_PREFIX_1}${ITALIC_NEG_LA_1}`,
 );
 export const ItalicRule1: InlineMDRule = {
   match: (text) => text.match(ITALIC_REG_1),
@@ -42,7 +42,7 @@ const WORD_BOUNDARY_LB = '(?<![\\p{L}\\p{N}])';
 const WORD_BOUNDARY_LA = '(?![\\p{L}\\p{N}])';
 const ITALIC_REG_2 = new RegExp(
   `${URL_NEG_LB}${WORD_BOUNDARY_LB}${ITALIC_PREFIX_2}${MIN_ANY}${ITALIC_PREFIX_2}${WORD_BOUNDARY_LA}${ITALIC_NEG_LA_2}`,
-  'u'
+  'u',
 );
 export const ItalicRule2: InlineMDRule = {
   match: (text) => text.match(ITALIC_REG_2),
@@ -57,7 +57,7 @@ const UNDERLINE_PREFIX_1 = `${ESC_NEG_LB}_{2}`;
 const UNDERLINE_NEG_LA_1 = '(?!_)';
 const UNDERLINE_REG_1 = new RegExp(
   `${URL_NEG_LB}${WORD_BOUNDARY_LB}${UNDERLINE_PREFIX_1}${MIN_ANY}${UNDERLINE_PREFIX_1}${WORD_BOUNDARY_LA}${UNDERLINE_NEG_LA_1}`,
-  'u'
+  'u',
 );
 export const UnderlineRule: InlineMDRule = {
   match: (text) => text.match(UNDERLINE_REG_1),
@@ -71,7 +71,7 @@ const STRIKE_MD_1 = '~~';
 const STRIKE_PREFIX_1 = `${ESC_NEG_LB}~{2}`;
 const STRIKE_NEG_LA_1 = '(?!~)';
 const STRIKE_REG_1 = new RegExp(
-  `${URL_NEG_LB}${STRIKE_PREFIX_1}${MIN_ANY}${STRIKE_PREFIX_1}${STRIKE_NEG_LA_1}`
+  `${URL_NEG_LB}${STRIKE_PREFIX_1}${MIN_ANY}${STRIKE_PREFIX_1}${STRIKE_NEG_LA_1}`,
 );
 export const StrikeRule: InlineMDRule = {
   match: (text) => text.match(STRIKE_REG_1),
@@ -97,7 +97,7 @@ const SPOILER_MD_1 = '||';
 const SPOILER_PREFIX_1 = `${ESC_NEG_LB}\\|{2}`;
 const SPOILER_NEG_LA_1 = '(?!\\|)';
 const SPOILER_REG_1 = new RegExp(
-  `${URL_NEG_LB}${SPOILER_PREFIX_1}${MIN_ANY}${SPOILER_PREFIX_1}${SPOILER_NEG_LA_1}`
+  `${URL_NEG_LB}${SPOILER_PREFIX_1}${MIN_ANY}${SPOILER_PREFIX_1}${SPOILER_NEG_LA_1}`,
 );
 export const SpoilerRule: InlineMDRule = {
   match: (text) => text.match(SPOILER_REG_1),

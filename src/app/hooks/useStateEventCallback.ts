@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 export type StateEventCallback = (
   event: MatrixEvent,
   state: RoomState,
-  lastStateEvent: MatrixEvent | null
+  lastStateEvent: MatrixEvent | null,
 ) => void;
 
 export const useStateEventCallback = (mx: MatrixClient, onStateEvent: StateEventCallback) => {

@@ -4,15 +4,15 @@ import classNames from 'classnames';
 import * as css from './Attachment.css';
 
 export const Attachment = as<'div', css.AttachmentVariants>(
-  ({ className, outlined, image, ...props }, ref) => (
+  ({ className, outlined, ...props }, ref) => (
     <Box
       display="InlineFlex"
       direction="Column"
-      className={classNames(css.Attachment({ outlined, image }), className)}
+      className={classNames(css.Attachment({ outlined }), className)}
       {...props}
       ref={ref}
     />
-  )
+  ),
 );
 
 export const AttachmentHeader = as<'div'>(({ className, ...props }, ref) => (
@@ -25,14 +25,16 @@ export const AttachmentHeader = as<'div'>(({ className, ...props }, ref) => (
   />
 ));
 
-export const AttachmentBox = as<'div', css.AttachmentBoxVariants>(({ className, image, ...props }, ref) => (
-  <Box
-    direction="Column"
-    className={classNames(css.AttachmentBox({ image }), className)}
-    {...props}
-    ref={ref}
-  />
-));
+export const AttachmentBox = as<'div', css.AttachmentBoxVariants>(
+  ({ className, image, ...props }, ref) => (
+    <Box
+      direction="Column"
+      className={classNames(css.AttachmentBox({ image }), className)}
+      {...props}
+      ref={ref}
+    />
+  ),
+);
 
 export const AttachmentContent = as<'div'>(({ className, ...props }, ref) => (
   <Box

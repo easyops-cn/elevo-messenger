@@ -30,7 +30,7 @@ const baseRoomIdToTypingMembersAtom = atom<IRoomIdToTypingMembers>(new Map());
 
 const putTypingMember = (
   roomToMembers: IRoomIdToTypingMembers,
-  action: TypingMemberPutAction
+  action: TypingMemberPutAction,
 ): IRoomIdToTypingMembers => {
   let typingMembers = roomToMembers.get(action.roomId) ?? [];
 
@@ -45,7 +45,7 @@ const putTypingMember = (
 
 const deleteTypingMember = (
   roomToMembers: IRoomIdToTypingMembers,
-  action: TypingMemberDeleteAction
+  action: TypingMemberDeleteAction,
 ): IRoomIdToTypingMembers => {
   let typingMembers = roomToMembers.get(action.roomId) ?? [];
 
@@ -70,7 +70,7 @@ export const roomIdToTypingMembersAtom = atom<
     if (action.type === 'PUT') {
       set(
         baseRoomIdToTypingMembersAtom,
-        produce(rToTyping, (draft) => putTypingMember(draft, action))
+        produce(rToTyping, (draft) => putTypingMember(draft, action)),
       );
     }
 
@@ -80,15 +80,15 @@ export const roomIdToTypingMembersAtom = atom<
     ) {
       set(
         baseRoomIdToTypingMembersAtom,
-        produce(rToTyping, (draft) => deleteTypingMember(draft, action))
+        produce(rToTyping, (draft) => deleteTypingMember(draft, action)),
       );
     }
-  }
+  },
 );
 
 export const useBindRoomIdToTypingMembersAtom = (
   mx: MatrixClient,
-  typingMembersAtom: typeof roomIdToTypingMembersAtom
+  typingMembersAtom: typeof roomIdToTypingMembersAtom,
 ) => {
   const setTypingMembers = useSetAtom(typingMembersAtom);
   const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
@@ -96,7 +96,7 @@ export const useBindRoomIdToTypingMembersAtom = (
   useEffect(() => {
     const handleTypingEvent: RoomMemberEventHandlerMap[RoomMemberEvent.Typing] = (
       event,
-      member
+      member,
     ) => {
       if (hideActivity) {
         return;

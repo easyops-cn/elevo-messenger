@@ -3,13 +3,7 @@ import { type Thread } from 'matrix-js-sdk';
 
 const RoomThreadContext = createContext<Thread | undefined>(undefined);
 
-export function RoomThreadProvider({
-  thread,
-  children,
-}: {
-  thread?: Thread;
-  children: ReactNode;
-}) {
+export function RoomThreadProvider({ thread, children }: { thread?: Thread; children: ReactNode }) {
   return <RoomThreadContext.Provider value={thread}>{children}</RoomThreadContext.Provider>;
 }
 

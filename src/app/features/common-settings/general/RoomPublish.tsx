@@ -25,7 +25,7 @@ export function RoomPublish({ permissions }: RoomPublishProps) {
 
   const canEditCanonical = permissions.stateEvent(
     StateEvent.RoomCanonicalAlias,
-    mx.getSafeUserId()
+    mx.getSafeUserId(),
   );
   const joinRuleEvent = useStateEvent(room, StateEvent.RoomJoinRules);
   const content = joinRuleEvent?.getContent<RoomJoinRulesEventContent>();

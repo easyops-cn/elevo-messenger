@@ -46,8 +46,8 @@ export const PowerSelector = forwardRef<HTMLDivElement, PowerSelectorProps>(
           </Scroll>
         </Box>
       </Menu>
-    )
-  }
+    );
+  },
 );
 
 type PowerSwitcherProps = PowerSelectorProps & {

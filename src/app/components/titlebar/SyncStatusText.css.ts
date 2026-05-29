@@ -19,9 +19,7 @@ export const positionLeft = style({
   left: toRem(90),
 });
 
-export const positionCenter = style({
-  
-});
+export const positionCenter = style({});
 
 export const success = style({
   color: color.Success.Main,

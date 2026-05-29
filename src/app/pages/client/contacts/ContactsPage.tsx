@@ -27,7 +27,13 @@ import {
 import { MatrixClient, Room, RoomMember } from 'matrix-js-sdk';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import classNames from 'classnames';
-import { Page, PageContent, PageContentCenter, PageHeader, PageMain } from '../../../components/page';
+import {
+  Page,
+  PageContent,
+  PageContentCenter,
+  PageHeader,
+  PageMain,
+} from '../../../components/page';
 import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';
 import { ContainerColor } from '../../../styles/ContainerColor.css';
@@ -170,13 +176,13 @@ export function ContactsMemberList({ room, members, filterRole }: ContactsMember
 
   const filteredMembers = useMemo(
     () => members.filter(membershipFilter.filterFn).sort(memberSort.sortFn),
-    [members, membershipFilter, memberSort]
+    [members, membershipFilter, memberSort],
   );
 
   const [result, search, resetSearch] = useAsyncSearch(
     filteredMembers,
     getRoomMemberStr,
-    SEARCH_OPTIONS
+    SEARCH_OPTIONS,
   );
   if (!result && searchInputRef.current?.value) search(searchInputRef.current.value);
 
@@ -234,9 +240,9 @@ export function ContactsMemberList({ room, members, filterRole }: ContactsMember
         if (evt.target.value) search(evt.target.value);
         else resetSearch();
       },
-      [search, resetSearch]
+      [search, resetSearch],
     ),
-    { wait: 200 }
+    { wait: 200 },
   );
 
   const handleMemberClick: MouseEventHandler<HTMLButtonElement> = (evt) => {
@@ -283,7 +289,7 @@ export function ContactsMemberList({ room, members, filterRole }: ContactsMember
                       >
                         <Text size="B300">
                           {result.items.length
-                            ? t('contacts.resultCount_other', { count: result.items.length })
+                            ? t('contacts.resultCount', { count: result.items.length })
                             : t('contacts.noResults')}
                         </Text>
                       </Chip>
@@ -311,7 +317,7 @@ export function ContactsMemberList({ room, members, filterRole }: ContactsMember
                         onClick={
                           ((evt) =>
                             setAnchor(
-                              evt.currentTarget.getBoundingClientRect()
+                              evt.currentTarget.getBoundingClientRect(),
                             )) as MouseEventHandler<HTMLButtonElement>
                         }
                         variant="Background"
@@ -343,7 +349,7 @@ export function ContactsMemberList({ room, members, filterRole }: ContactsMember
                         onClick={
                           ((evt) =>
                             setAnchor(
-                              evt.currentTarget.getBoundingClientRect()
+                              evt.currentTarget.getBoundingClientRect(),
                             )) as MouseEventHandler<HTMLButtonElement>
                         }
                         variant="Background"
@@ -423,9 +429,7 @@ export function ContactsMemberList({ room, members, filterRole }: ContactsMember
                         member={member}
                         onClick={handleMemberClick}
                         pressed={openProfileUserId === member.userId}
-                        typing={typingMembers.some(
-                          (receipt) => receipt.userId === member.userId
-                        )}
+                        typing={typingMembers.some((receipt) => receipt.userId === member.userId)}
                       />
                     </div>
                   );

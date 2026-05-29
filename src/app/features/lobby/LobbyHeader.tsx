@@ -136,7 +136,7 @@ const LobbyMenu = forwardRef<HTMLDivElement, LobbyMenuProps>(
         </Box>
       </Menu>
     );
-  }
+  },
 );
 
 type LobbyHeaderProps = {
@@ -155,7 +155,7 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
   const name = useRoomName(space);
   const avatarMxc = useRoomAvatar(space);
   const avatarUrl = avatarMxc
-    ? mxcUrlToHttp(mx, avatarMxc, useAuthentication, 96, 96, 'crop') ?? undefined
+    ? (mxcUrlToHttp(mx, avatarMxc, useAuthentication, 96, 96, 'crop') ?? undefined)
     : undefined;
 
   const handleOpenMenu: MouseEventHandler<HTMLButtonElement> = (evt) => {
@@ -261,10 +261,14 @@ export function LobbyHeader({ showProfile, powerLevels }: LobbyHeaderProps) {
 
           {screenSize !== ScreenSize.Mobile && (
             <>
-              <Line direction="Vertical" size="300" style={{
-                height: toRem(16),
-                margin: `0 ${toRem(6)}`,
-              }} />
+              <Line
+                direction="Vertical"
+                size="300"
+                style={{
+                  height: toRem(16),
+                  margin: `0 ${toRem(6)}`,
+                }}
+              />
               <TooltipProvider
                 position="Bottom"
                 offset={4}

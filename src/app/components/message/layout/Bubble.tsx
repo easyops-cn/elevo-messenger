@@ -59,7 +59,20 @@ type BubbleLayoutProps = {
 };
 
 export const BubbleLayout = as<'div', BubbleLayoutProps>(
-  ({ isOwn, hideBubble, transparent, before, header, beforeContent, afterContent, children, ...props }, ref) => {
+  (
+    {
+      isOwn,
+      hideBubble,
+      transparent,
+      before,
+      header,
+      beforeContent,
+      afterContent,
+      children,
+      ...props
+    },
+    ref,
+  ) => {
     const screenSize = useScreenSize();
     const isMobile = screenSize === ScreenSize.Mobile;
     const padding = isMobile ? 16 : 56;
@@ -67,26 +80,42 @@ export const BubbleLayout = as<'div', BubbleLayoutProps>(
     const inMainTimeline = !thread;
 
     return (
-      <Box gap="300" direction={isOwn ? 'RowReverse' : 'Row'} {...props} style={inMainTimeline ? {
-        ...props.style,
-        width: `calc(100% - ${toRem(padding)})`,
-        maxWidth: isMobile ? undefined : `max(50vw, ${toRem(800)})`,
-        [isOwn ? 'marginLeft' : 'marginRight']: 'auto',
-      } : props.style} ref={ref}>
+      <Box
+        gap="300"
+        direction={isOwn ? 'RowReverse' : 'Row'}
+        {...props}
+        style={
+          inMainTimeline
+            ? {
+                ...props.style,
+                width: `calc(100% - ${toRem(padding)})`,
+                maxWidth: isMobile ? undefined : `max(50vw, ${toRem(800)})`,
+                [isOwn ? 'marginLeft' : 'marginRight']: 'auto',
+              }
+            : props.style
+        }
+        ref={ref}
+      >
         <Box className={css.BubbleBefore} shrink="No">
           {before}
         </Box>
         <Box grow="Yes" direction="Column">
           {header}
           {beforeContent && (
-            <Box alignSelf={isOwn ? 'End' : undefined} style={isOwn ? { maxWidth: '100%' } : undefined}>
+            <Box
+              alignSelf={isOwn ? 'End' : undefined}
+              style={isOwn ? { maxWidth: '100%' } : undefined}
+            >
               {beforeContent}
             </Box>
           )}
           {hideBubble ? (
             children
           ) : (
-            <Box alignSelf={isOwn ? 'End' : undefined} style={isOwn ? { maxWidth: '100%' } : undefined}>
+            <Box
+              alignSelf={isOwn ? 'End' : undefined}
+              style={isOwn ? { maxWidth: '100%' } : undefined}
+            >
               <Box
                 className={
                   hideBubble
@@ -97,22 +126,32 @@ export const BubbleLayout = as<'div', BubbleLayoutProps>(
                           ? isOwn
                             ? css.BubbleContentArrowRight
                             : css.BubbleContentArrowLeft
-                          : undefined
+                          : undefined,
                       )
                 }
                 direction="Column"
               >
-                {before && !transparent ? (isOwn ? <BubbleRightArrow variant="Primary" /> : <BubbleLeftArrow variant="SurfaceVariant" />) : null}
+                {before && !transparent ? (
+                  isOwn ? (
+                    <BubbleRightArrow variant="Primary" />
+                  ) : (
+                    <BubbleLeftArrow variant="SurfaceVariant" />
+                  )
+                ) : null}
                 {children}
               </Box>
             </Box>
           )}
           {afterContent && (
-            <Box alignSelf={isOwn ? 'End' : undefined} style={isOwn ? { maxWidth: '100%' } : undefined}>
+            <Box
+              alignSelf={isOwn ? 'End' : undefined}
+              style={isOwn ? { maxWidth: '100%' } : undefined}
+            >
               {afterContent}
             </Box>
           )}
         </Box>
       </Box>
     );
-});
+  },
+);

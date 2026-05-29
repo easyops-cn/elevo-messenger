@@ -11,5 +11,5 @@ export const CutoutCard = as<'div', { variant?: TContainerColor }>(
       {...props}
       ref={ref}
     />
-  )
+  ),
 );

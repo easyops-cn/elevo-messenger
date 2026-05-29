@@ -8,7 +8,6 @@ import { pushSessionToSW } from '../../sw-session';
  * so they survive page reloads.
  */
 export class ElevoOidcTokenRefresher extends OidcTokenRefresher {
-  // eslint-disable-next-line class-methods-use-this
   public override async persistTokens({
     accessToken,
     refreshToken,

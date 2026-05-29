@@ -34,7 +34,7 @@ const useLoginSearchParams = (searchParams: URLSearchParams): LoginPathSearchPar
       email: searchParams.get('email') ?? undefined,
       loginToken: searchParams.get('loginToken') ?? undefined,
     }),
-    [searchParams]
+    [searchParams],
   );
 
 export function Login() {
@@ -55,7 +55,7 @@ export function Login() {
     window.location.replace(
       withSearchParam(absoluteLoginPath, {
         loginToken: loginTokenForHashRouter,
-      })
+      }),
     );
   }
 

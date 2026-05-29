@@ -26,7 +26,12 @@ import * as css from './style.css';
 import { scaleYDimension } from '../../../utils/common';
 import { FALLBACK_MIMETYPE } from '../../../utils/mimeTypes';
 import { stopPropagation } from '../../../utils/keyboard';
-import { decryptFile, downloadEncryptedMedia, downloadMedia, mxcUrlToHttp } from '../../../utils/matrix';
+import {
+  decryptFile,
+  downloadEncryptedMedia,
+  downloadMedia,
+  mxcUrlToHttp,
+} from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { NO_SERVICE_WORKER } from '../../../utils/noServiceWorker';
 import { ModalWide } from '../../../styles/Modal.css';
@@ -73,7 +78,7 @@ export const ImageContent = as<'div', ImageContentProps>(
       renderImage,
       ...props
     },
-    ref
+    ref,
   ) => {
     const mx = useMatrixClient();
     const useAuthentication = useMediaAuthentication();
@@ -104,7 +109,7 @@ export const ImageContent = as<'div', ImageContentProps>(
         if (!mediaUrl) throw new Error('Invalid media URL');
         if (encInfo) {
           const fileContent = await downloadEncryptedMedia(mediaUrl, (encBuf) =>
-            decryptFile(encBuf, mimeType ?? FALLBACK_MIMETYPE, encInfo)
+            decryptFile(encBuf, mimeType ?? FALLBACK_MIMETYPE, encInfo),
           );
           return URL.createObjectURL(fileContent);
         }
@@ -113,7 +118,7 @@ export const ImageContent = as<'div', ImageContentProps>(
           return URL.createObjectURL(blob);
         }
         return mediaUrl;
-      }, [mx, url, useAuthentication, mimeType, encInfo])
+      }, [mx, url, useAuthentication, mimeType, encInfo]),
     );
 
     const handleLoad = () => {
@@ -152,11 +157,16 @@ export const ImageContent = as<'div', ImageContentProps>(
     }, [loadSrc]);
 
     return (
-      <Box className={classNames(css.RelativeBase, className)} {...props} style={{
-        width,
-        height,
-        ...props.style,
-      }} ref={ref}>
+      <Box
+        className={classNames(css.RelativeBase, className)}
+        {...props}
+        style={{
+          width,
+          height,
+          ...props.style,
+        }}
+        ref={ref}
+      >
         {srcState.status === AsyncStatus.Success && (
           <Overlay open={viewer} backdrop={<OverlayBackdrop />}>
             <OverlayCenter>
@@ -242,12 +252,22 @@ export const ImageContent = as<'div', ImageContentProps>(
         {(srcState.status === AsyncStatus.Loading || srcState.status === AsyncStatus.Idle) &&
           !load &&
           !blurred && (
-            <Box className={css.AbsoluteContainer} alignItems="Center" justifyContent="Center" style={{ width, height }}>
+            <Box
+              className={css.AbsoluteContainer}
+              alignItems="Center"
+              justifyContent="Center"
+              style={{ width, height }}
+            >
               <Spinner variant="Secondary" />
             </Box>
           )}
         {(error || srcState.status === AsyncStatus.Error) && (
-          <Box className={css.AbsoluteContainer} alignItems="Center" justifyContent="Center" style={{ width, height }}>
+          <Box
+            className={css.AbsoluteContainer}
+            alignItems="Center"
+            justifyContent="Center"
+            style={{ width, height }}
+          >
             <TooltipProvider
               tooltip={
                 <Tooltip variant="Critical">
@@ -276,5 +296,5 @@ export const ImageContent = as<'div', ImageContentProps>(
         )}
       </Box>
     );
-  }
+  },
 );

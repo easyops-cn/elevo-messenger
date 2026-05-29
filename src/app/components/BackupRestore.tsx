@@ -89,7 +89,9 @@ function BackupProgress({ total, downloaded }: BackupProgressProps) {
   return (
     <Box grow="Yes" gap="200" alignItems="Center">
       <Badge variant="Secondary" fill="Solid" radii="300">
-        <Text size="L400">{t('backup.restoring', { percentage: Math.round(percent(0, total, downloaded)) })}</Text>
+        <Text size="L400">
+          {t('backup.restoring', { percentage: Math.round(percent(0, total, downloaded)) })}
+        </Text>
       </Badge>
       <Box grow="Yes" direction="Column">
         <ProgressBar variant="Secondary" size="300" min={0} max={total} value={downloaded} />
@@ -164,7 +166,7 @@ export function BackupRestoreTile({ crypto }: BackupRestoreTileProps) {
           setRestoreProgress(progress);
         },
       });
-    }, [crypto, setRestoreProgress])
+    }, [crypto, setRestoreProgress]),
   );
 
   const handleRestore = () => {

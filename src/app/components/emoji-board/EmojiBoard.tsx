@@ -70,7 +70,7 @@ type StickerGroupItem = {
 
 const useGroups = (
   tab: EmojiBoardTab,
-  imagePacks: ImagePack[]
+  imagePacks: ImagePack[],
 ): [EmojiGroupItem[], StickerGroupItem[]] => {
   const mx = useMatrixClient();
   const { t } = useTranslation();
@@ -202,7 +202,8 @@ function EmojiSidebar({ activeGroupAtom, packs, onScrollToGroup }: EmojiSidebarP
           <SidebarDivider />
           {packs.map((pack) => {
             let label = pack.meta.name;
-            if (!label) label = isUserId(pack.id) ? t('emoji.personalPack') : mx.getRoom(pack.id)?.name;
+            if (!label)
+              label = isUserId(pack.id) ? t('emoji.personalPack') : mx.getRoom(pack.id)?.name;
 
             const url =
               mxcUrlToHttp(mx, pack.getAvatarUrl(usage) ?? '', useAuthentication) ?? undefined;
@@ -266,7 +267,8 @@ function StickerSidebar({ activeGroupAtom, packs, onScrollToGroup }: StickerSide
       <SidebarStack>
         {packs.map((pack) => {
           let label = pack.meta.name;
-          if (!label) label = isUserId(pack.id) ? t('emoji.personalPack') : mx.getRoom(pack.id)?.name;
+          if (!label)
+            label = isUserId(pack.id) ? t('emoji.personalPack') : mx.getRoom(pack.id)?.name;
 
           const url =
             mxcUrlToHttp(mx, pack.getAvatarUrl(usage) ?? '', useAuthentication) ?? undefined;
@@ -311,7 +313,7 @@ function EmojiGroupHolder({
         shortcode: emojiInfo.shortcode,
       });
     },
-    [setPreviewData]
+    [setPreviewData],
   );
 
   const throttleEmojiHover = useThrottle(handleEmojiPreview, {
@@ -390,7 +392,7 @@ export function EmojiBoard({
 
   const previewAtom = useMemo(
     () => createPreviewDataAtom(emojiTab ? DefaultEmojiPreview : undefined),
-    [emojiTab]
+    [emojiTab],
   );
   const activeGroupIdAtom = useMemo(() => atom<string | undefined>(undefined), []);
   const setActiveGroupId = useSetAtom(activeGroupIdAtom);
@@ -409,7 +411,7 @@ export function EmojiBoard({
   const [result, search, resetSearch] = useAsyncSearch(
     searchList,
     getEmoticonSearchStr,
-    SEARCH_OPTIONS
+    SEARCH_OPTIONS,
   );
 
   const searchedItems = result?.items.slice(0, 100);
@@ -421,9 +423,9 @@ export function EmojiBoard({
         if (term) search(term);
         else resetSearch();
       },
-      [search, resetSearch]
+      [search, resetSearch],
     ),
-    { wait: 200 }
+    { wait: 200 },
   );
 
   const contentScrollRef = useRef<HTMLDivElement>(null);
@@ -512,7 +514,9 @@ export function EmojiBoard({
       <EmojiBoardLayout
         header={
           <Box direction="Column" gap="200">
-            {onTabChange && <EmojiBoardTabs tab={tab} allowSticker={allowSticker} onTabChange={onTabChange} />}
+            {onTabChange && (
+              <EmojiBoardTabs tab={tab} allowSticker={allowSticker} onTabChange={onTabChange} />
+            )}
             <SearchInput
               key={tab}
               query={result?.query}

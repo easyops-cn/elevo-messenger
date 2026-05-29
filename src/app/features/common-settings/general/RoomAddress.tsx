@@ -46,7 +46,7 @@ export function RoomPublishedAddresses({ permissions }: RoomPublishedAddressesPr
 
   const canEditCanonical = permissions.stateEvent(
     StateEvent.RoomCanonicalAlias,
-    mx.getSafeUserId()
+    mx.getSafeUserId(),
   );
 
   const [canonicalAlias, publishedAliases] = usePublishedAliases(room);
@@ -241,12 +241,12 @@ function LocalAddressesList({
       async (aliases: string[]) => {
         for (let i = 0; i < aliases.length; i += 1) {
           const alias = aliases[i];
-          // eslint-disable-next-line no-await-in-loop
+
           await removeLocalAlias(alias);
         }
       },
-      [removeLocalAlias]
-    )
+      [removeLocalAlias],
+    ),
   );
   const [publishState, publish] = useAsyncCallback(publishAliases);
   const [unpublishState, unpublish] = useAsyncCallback(unpublishAliases);
@@ -275,7 +275,9 @@ function LocalAddressesList({
       {selectedAliases.length > 0 && (
         <Box gap="200">
           <Box grow="Yes">
-            <Text size="L400">{selectedAliases.length} {t('roomSettings.selected')}</Text>
+            <Text size="L400">
+              {selectedAliases.length} {t('roomSettings.selected')}
+            </Text>
           </Box>
           <Box shrink="No" gap="Inherit">
             {canEditCanonical &&
@@ -370,7 +372,7 @@ export function RoomLocalAddresses({ permissions }: { permissions: RoomPermissio
 
   const canEditCanonical = permissions.stateEvent(
     StateEvent.RoomCanonicalAlias,
-    mx.getSafeUserId()
+    mx.getSafeUserId(),
   );
 
   const [expand, setExpand] = useState(false);

@@ -320,9 +320,9 @@ export function MutualRoomsChip({ userId }: { userId: string }) {
               }
               alt={room.name}
               fallbackAsIcon={
-                dm || room.isSpaceRoom()
-                  ? undefined
-                  : <RoomIcon size="100" joinRule={room.getJoinRule()} roomType={room.getType()} />
+                dm || room.isSpaceRoom() ? undefined : (
+                  <RoomIcon size="100" joinRule={room.getJoinRule()} roomType={room.getType()} />
+                )
               }
               renderFallback={() => (
                 <Text as="span" size="H6">
@@ -461,7 +461,7 @@ export function OptionsChip({ userId }: { userId: string }) {
       const users = ignoredUsers.filter((u) => u !== userId);
       if (!ignored) users.push(userId);
       await mx.setIgnoredUsers(users);
-    }, [mx, ignoredUsers, userId, ignored])
+    }, [mx, ignoredUsers, userId, ignored]),
   );
   const ignoring = ignoreState.status === AsyncStatus.Loading;
 

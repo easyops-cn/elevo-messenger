@@ -141,13 +141,13 @@ function SelectRoomButton({ roomList, selectedRooms, onChange }: SelectRoomButto
 
   const getRoomNameStr: SearchItemStrGetter<string> = useCallback(
     (rId) => mx.getRoom(rId)?.name ?? rId,
-    [mx]
+    [mx],
   );
 
   const [searchResult, _searchRoom, resetSearch] = useAsyncSearch(
     roomList,
     getRoomNameStr,
-    SEARCH_OPTS
+    SEARCH_OPTS,
   );
   const rooms = Array.from(searchResult?.items ?? roomList).sort(factoryRoomIdByAtoZ(mx));
 

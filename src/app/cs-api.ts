@@ -28,13 +28,13 @@ export type AutoDiscoveryInfo = Record<string, unknown> & {
     {
       livekit_service_url: string;
       type: 'livekit';
-    }
+    },
   ];
 };
 
 export const autoDiscovery = async (
   request: typeof fetch,
-  server: string
+  server: string,
 ): Promise<[AutoDiscoveryError, undefined] | [undefined, AutoDiscoveryInfo]> => {
   const host = /^https?:\/\//.test(server) ? trimTrailingSlash(server) : `https://${server}`;
   const autoDiscoveryUrl = `${host}/.well-known/matrix/client`;
@@ -99,7 +99,7 @@ export const autoDiscovery = async (
   content['m.homeserver'].base_url = trimTrailingSlash(baseUrl);
   if (content['m.identity_server']) {
     content['m.identity_server'].base_url = trimTrailingSlash(
-      content['m.identity_server'].base_url
+      content['m.identity_server'].base_url,
     );
   }
 
@@ -112,7 +112,7 @@ export type SpecVersions = {
 };
 export const specVersions = async (
   request: typeof fetch,
-  baseUrl: string
+  baseUrl: string,
 ): Promise<SpecVersions> => {
   const res = await request(`${trimTrailingSlash(baseUrl)}/_matrix/client/versions`);
 

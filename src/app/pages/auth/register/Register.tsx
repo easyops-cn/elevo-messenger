@@ -24,7 +24,7 @@ const useRegisterSearchParams = (searchParams: URLSearchParams): RegisterPathSea
       email: searchParams.get('email') ?? undefined,
       token: searchParams.get('token') ?? undefined,
     }),
-    [searchParams]
+    [searchParams],
   );
 
 export function Register() {

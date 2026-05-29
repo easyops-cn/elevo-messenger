@@ -24,7 +24,7 @@ const applyTheme = (themeKind: ThemeKind) => {
   document.body.className = '';
   document.body.classList.add(elevoConfig, varsClass, css.PreviewBody);
   document.body.classList.add(
-    ...(themeKind === ThemeKind.Dark ? DarkTheme.classNames : LightTheme.classNames)
+    ...(themeKind === ThemeKind.Dark ? DarkTheme.classNames : LightTheme.classNames),
   );
 };
 
@@ -34,7 +34,7 @@ const closeCodeViewWindow = () => {
 
 function CodeViewTheme({ children }: { children: React.ReactNode }) {
   const [themeKind, setThemeKind] = useState<ThemeKind>(
-    window.__ElevoCodeView_initialTheme__ === ThemeKind.Dark ? ThemeKind.Dark : ThemeKind.Light
+    window.__ElevoCodeView_initialTheme__ === ThemeKind.Dark ? ThemeKind.Dark : ThemeKind.Light,
   );
   const theme = themeKind === ThemeKind.Dark ? DarkTheme : LightTheme;
 
@@ -55,7 +55,7 @@ function CodeViewTheme({ children }: { children: React.ReactNode }) {
 
 function CodeViewApp() {
   const [payload, setPayload] = useState<CodeViewPayload | undefined>(
-    window.__ElevoCodeView_initialPayload__
+    window.__ElevoCodeView_initialPayload__,
   );
 
   useEffect(() => {

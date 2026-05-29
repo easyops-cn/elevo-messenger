@@ -58,14 +58,14 @@ export const PageNavHeader = as<'header', css.PageNavHeaderVariants>(
     <Header
       className={classNames(
         css.PageNavHeader({ modal, isDesktopMac: isDesktopTauri && isMacOS() }),
-        className
+        className,
       )}
       variant="Background"
       size="600"
       {...props}
       ref={ref}
     />
-  )
+  ),
 );
 
 export function PageNavContent({
@@ -91,7 +91,15 @@ export function PageNavContent({
   );
 }
 
-export function PageMain({ children, isSidePanel, style }: { children: ReactNode; isSidePanel?: boolean; style?: React.CSSProperties }) {
+export function PageMain({
+  children,
+  isSidePanel,
+  style,
+}: {
+  children: ReactNode;
+  isSidePanel?: boolean;
+  style?: React.CSSProperties;
+}) {
   const screenSize = useScreenSizeContext();
 
   return (
@@ -132,13 +140,13 @@ export const PageHeader = as<'div', css.PageHeaderVariants>(
             outlined,
             isMobileMac: isDesktopTauri && isMacOS() && screenSize === ScreenSize.Mobile,
           }),
-          className
+          className,
         )}
         {...props}
         ref={ref}
       />
     );
-  }
+  },
 );
 
 export const PageContent = as<'div'>(({ className, ...props }, ref) => (
@@ -167,7 +175,7 @@ export const PageHeroSection = as<'div', ComponentProps<typeof Box>>(
       {...props}
       ref={ref}
     />
-  )
+  ),
 );
 
 export function PageHero({
@@ -190,9 +198,11 @@ export function PageHero({
         <Text align="Center" size="H2">
           {title}
         </Text>
-        {subTitle ? <Text align="Center" priority="400">
-          {subTitle}
-        </Text> : null}
+        {subTitle ? (
+          <Text align="Center" priority="400">
+            {subTitle}
+          </Text>
+        ) : null}
       </Box>
       {children}
     </Box>

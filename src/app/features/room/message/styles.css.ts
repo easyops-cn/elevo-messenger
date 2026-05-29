@@ -32,7 +32,7 @@ export const MessageBaseNonCompact = recipe({
   },
   defaultVariants: {
     isOwn: false,
-  }
+  },
 });
 
 export const MessageOptionsBase = style([

@@ -27,7 +27,6 @@ export function useTauriSettingsSync(): void {
           await setTauriSettings(currentSettings);
         }
       } catch (err) {
-        // eslint-disable-next-line no-console
         console.error('[settings] Tauri Store hydration failed:', err);
       }
     })();

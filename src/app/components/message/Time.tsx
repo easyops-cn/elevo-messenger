@@ -43,5 +43,5 @@ export const Time = as<'span', TimeProps & ComponentProps<typeof Text>>(
         {time}
       </Text>
     );
-  }
+  },
 );

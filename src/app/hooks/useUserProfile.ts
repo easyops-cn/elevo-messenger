@@ -36,7 +36,7 @@ export const useUserProfile = (userId: string): UserProfile => {
       setProfile({
         avatarUrl: info.avatar_url,
         displayName: info.displayname,
-      })
+      }),
     );
 
     user?.on(UserEvent.AvatarUrl, onAvatarChange);

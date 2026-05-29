@@ -25,13 +25,13 @@ export const LogoutDialog = forwardRef<HTMLDivElement, LogoutDialogProps>(
     const verificationStatus = useDeviceVerificationStatus(
       mx.getCrypto(),
       mx.getSafeUserId(),
-      mx.getDeviceId() ?? undefined
+      mx.getDeviceId() ?? undefined,
     );
 
     const [logoutState, logout] = useAsyncCallback<void, Error, []>(
       useCallback(async () => {
         await logoutClient(mx, authMetadata?.revocation_endpoint);
-      }, [mx, authMetadata?.revocation_endpoint])
+      }, [mx, authMetadata?.revocation_endpoint]),
     );
 
     const ongoingLogout = logoutState.status === AsyncStatus.Loading;
@@ -89,5 +89,5 @@ export const LogoutDialog = forwardRef<HTMLDivElement, LogoutDialogProps>(
         </Box>
       </Dialog>
     );
-  }
+  },
 );

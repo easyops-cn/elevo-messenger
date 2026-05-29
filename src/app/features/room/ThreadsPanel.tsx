@@ -23,15 +23,18 @@ export function ThreadsPanel({ room }: ThreadsPanelProps) {
 
   const { threads, loading, error, retry } = useRoomThreads(room);
 
-  const sortedThreads = useMemo(() => (
-    [...threads].sort((a, b) => {
-      const aTs = a.replyToEvent?.getTs() ?? a.rootEvent?.getTs() ?? 0;
-      const bTs = b.replyToEvent?.getTs() ?? b.rootEvent?.getTs() ?? 0;
-      return bTs - aTs;
-    })
-  ), [threads]);
+  const sortedThreads = useMemo(
+    () =>
+      [...threads].sort((a, b) => {
+        const aTs = a.replyToEvent?.getTs() ?? a.rootEvent?.getTs() ?? 0;
+        const bTs = b.replyToEvent?.getTs() ?? b.rootEvent?.getTs() ?? 0;
+        return bTs - aTs;
+      }),
+    [threads],
+  );
 
-  const shouldShowThreadsPreview = !showAllThreads && sortedThreads.length > THREAD_PREVIEW_THRESHOLD;
+  const shouldShowThreadsPreview =
+    !showAllThreads && sortedThreads.length > THREAD_PREVIEW_THRESHOLD;
   const displayThreads = shouldShowThreadsPreview
     ? sortedThreads.slice(0, THREAD_PREVIEW_THRESHOLD - 1)
     : sortedThreads;
@@ -43,7 +46,7 @@ export function ThreadsPanel({ room }: ThreadsPanelProps) {
 
       setThreadChat({ open: true, threadRootId: rootId });
     },
-    [setThreadChat]
+    [setThreadChat],
   );
 
   if (!loading && !error && sortedThreads.length === 0) return null;

@@ -5,7 +5,7 @@ export const useDocumentFocusChange = (onChange: (focus: boolean) => void) => {
     const handleFocus = () => {
       onChange(true);
     };
-    
+
     const handleBlur = () => {
       onChange(false);
     };

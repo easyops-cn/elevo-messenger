@@ -61,7 +61,9 @@ function CreateRoomModal({ state }: CreateRoomModalProps) {
                 >
                   <Box grow="Yes">
                     <Text size="H4">
-                      {type === CreateRoomType.VoiceRoom ? t('create.newVoiceRoom') : t('create.newChatRoom')}
+                      {type === CreateRoomType.VoiceRoom
+                        ? t('create.newVoiceRoom')
+                        : t('create.newChatRoom')}
                     </Text>
                   </Box>
                   <Box shrink="No">

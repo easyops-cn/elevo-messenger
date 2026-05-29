@@ -26,9 +26,7 @@ type LiveWaveformProps = {
 
 function LiveWaveform({ bars }: LiveWaveformProps) {
   const padding = Math.max(0, MAX_LIVE_BARS - bars.length);
-  const displayBars = bars.length > 0
-    ? Array(padding).fill(-1).concat(bars)
-    : [];
+  const displayBars = bars.length > 0 ? Array(padding).fill(-1).concat(bars) : [];
   return (
     <div className={css.WaveformContainer}>
       {displayBars.map((value, index) => {
@@ -37,7 +35,6 @@ function LiveWaveform({ bars }: LiveWaveformProps) {
         const height = Math.max(MIN_BAR_HEIGHT, Math.sqrt(h) * MAX_BAR_HEIGHT);
         return (
           <div
-            // eslint-disable-next-line react/no-array-index-key
             key={index}
             className={css.WaveformBar}
             style={{
@@ -65,7 +62,10 @@ type VoiceRecordingBoardProps = {
   onClose: () => void;
 };
 
-export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, VoiceRecordingBoardProps>(({ roomId, room, onClose }, ref) => {
+export const VoiceRecordingBoard = forwardRef<
+  VoiceRecordingBoardHandlers,
+  VoiceRecordingBoardProps
+>(function LegacyVoiceRecordingBoard({ roomId, room, onClose }, ref) {
   const mx = useMatrixClient();
   const { t } = useTranslation();
 
@@ -99,25 +99,31 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const startedRef = useRef(false);
 
-  useImperativeHandle(ref, () => ({
-    stopRecording: () => {
-      if (recorderState === 'recording') {
-        recorderStop();
-        return true;
-      }
-      return false;
-    },
-  }), [recorderState, recorderStop]);
+  useImperativeHandle(
+    ref,
+    () => ({
+      stopRecording: () => {
+        if (recorderState === 'recording') {
+          recorderStop();
+          return true;
+        }
+        return false;
+      },
+    }),
+    [recorderState, recorderStop],
+  );
 
   // Auto-start recording when board opens
   useEffect(() => {
     if (startedRef.current) return;
     startedRef.current = true;
-    recorderStart().then(() => {
-      if (speechSupported) speechStart();
-    }).catch((err: Error) => {
-      setError(t(err.message) || t('voiceRecording.error.unknown'));
-    });
+    recorderStart()
+      .then(() => {
+        if (speechSupported) speechStart();
+      })
+      .catch((err: Error) => {
+        setError(t(err.message) || t('voiceRecording.error.unknown'));
+      });
   }, [recorderStart, speechSupported, speechStart, t]);
 
   // Stop speech recognition when recording stops
@@ -160,7 +166,7 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
       recorderCancel();
       speechReset();
     },
-    [recorderCancel, speechReset]
+    [recorderCancel, speechReset],
   );
 
   const handleSendText = async () => {
@@ -174,7 +180,7 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
       } as any);
       setRecognizedText('');
       onClose();
-    } catch (err) {
+    } catch {
       setError('Failed to send text message.');
     } finally {
       setSendingText(false);
@@ -207,15 +213,10 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
 
       if (!mxc) throw new Error('Upload failed');
 
-      const content = getVoiceMsgContent(
-        { file, encInfo },
-        mxc,
-        durationMs,
-        finalWaveform
-      );
+      const content = getVoiceMsgContent({ file, encInfo }, mxc, durationMs, finalWaveform);
       mx.sendMessage(roomId, content as any);
       onClose();
-    } catch (err) {
+    } catch {
       setError('Failed to send voice message. Please try again.');
       setSending(false);
     }
@@ -242,12 +243,28 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
           {/* Recording phase */}
           {(recorderState === 'idle' || isRecording) && (
             <Box alignItems="Center" gap="200">
-              {isRecording && <div className={css.RecordingDot}><div className={css.RecordingDotInner} /></div>}
-              {!isRecording && !error && <div className={css.IdleDot}><div className={css.IdleDotInner} /></div>}
+              {isRecording && (
+                <div className={css.RecordingDot}>
+                  <div className={css.RecordingDotInner} />
+                </div>
+              )}
+              {!isRecording && !error && (
+                <div className={css.IdleDot}>
+                  <div className={css.IdleDotInner} />
+                </div>
+              )}
 
               <LiveWaveform bars={liveWaveform} />
 
-              <Text size="T200" style={{ minWidth: toRem(48), marginLeft: 'auto', textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>
+              <Text
+                size="T200"
+                style={{
+                  minWidth: toRem(48),
+                  marginLeft: 'auto',
+                  textAlign: 'right',
+                  fontVariantNumeric: 'tabular-nums',
+                }}
+              >
                 {secondsToMinutesAndSeconds(elapsedSeconds)}
               </Text>
             </Box>
@@ -289,7 +306,9 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
               >
                 <Text size="B300">{t('voiceRecording.sendText')}</Text>
               </Chip>
-            ) : <div />}
+            ) : (
+              <div />
+            )}
 
             {/* Right: voice controls */}
             {(recorderState === 'idle' || isRecording) && (
@@ -306,12 +325,7 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
             )}
             {isStopped && (
               <div className={css.ActionBarRight}>
-                <Chip
-                  as="button"
-                  onClick={handleCancel}
-                  variant="SurfaceVariant"
-                  radii="Pill"
-                >
+                <Chip as="button" onClick={handleCancel} variant="SurfaceVariant" radii="Pill">
                   <Text size="B300">{t('voiceRecording.cancel')}</Text>
                 </Chip>
                 <Chip
@@ -321,7 +335,13 @@ export const VoiceRecordingBoard = forwardRef<VoiceRecordingBoardHandlers, Voice
                   radii="Pill"
                   outlined
                   disabled={sending}
-                  after={sending ? <Spinner size="50" variant="Primary" /> : <Icon src={Icons.Send} size="50" filled />}
+                  after={
+                    sending ? (
+                      <Spinner size="50" variant="Primary" />
+                    ) : (
+                      <Icon src={Icons.Send} size="50" filled />
+                    )
+                  }
                 >
                   <Text size="B300">{t('voiceRecording.send')}</Text>
                 </Chip>

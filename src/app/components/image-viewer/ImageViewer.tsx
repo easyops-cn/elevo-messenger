@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React from 'react';
 import classNames from 'classnames';
 import { Box, Chip, Header, Icon, IconButton, Icons, Text, as } from 'folds';
@@ -103,5 +102,5 @@ export const ImageViewer = as<'div', ImageViewerProps>(
         </Box>
       </Box>
     );
-  }
+  },
 );

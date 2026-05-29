@@ -23,7 +23,7 @@ type ThreadSummaryProps = {
   onOpenThread: React.MouseEventHandler;
 };
 
-export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSummaryProps) {
+export function ThreadSummary({ mEvent, room, thread, onOpenThread }: ThreadSummaryProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const { t } = useTranslation();
@@ -78,7 +78,7 @@ export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSum
             false,
             t,
             false,
-            false
+            false,
           )
         : threadLastReply
           ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t, false)
@@ -86,9 +86,9 @@ export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSum
 
     const lastReplySenderId = threadLastReply?.getSender();
     const lastReplySenderName = lastReplySenderId
-      ? getMemberDisplayName(room, lastReplySenderId) ??
+      ? (getMemberDisplayName(room, lastReplySenderId) ??
         getMxIdLocalPart(lastReplySenderId) ??
-        lastReplySenderId
+        lastReplySenderId)
       : undefined;
 
     const threadLastReplyAvatarMxcUrl = lastReplySenderId
@@ -102,7 +102,7 @@ export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSum
           'crop',
           undefined,
           false,
-          useAuthentication
+          useAuthentication,
         )
       : undefined;
     return {
@@ -140,7 +140,11 @@ export function ThreadSummary({ mEvent, room, thread,  onOpenThread }: ThreadSum
         </>
       }
       onClick={onOpenThread}
-      style={{ marginTop: config.space.S200, width: 'fit-content', maxWidth: `min(${toRem(600)}, 100%)` }}
+      style={{
+        marginTop: config.space.S200,
+        width: 'fit-content',
+        maxWidth: `min(${toRem(600)}, 100%)`,
+      }}
     >
       <Box alignItems="Center" gap="100" grow="Yes">
         {threadLastReplySenderId ? (

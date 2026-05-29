@@ -27,11 +27,11 @@ export const useMemberEventParser = (room: Room): MemberEventParser => {
       };
 
     const senderName = getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId);
-    const userName = getMemberDisplayName(room, userId) ?? (
-      typeof content.displayname === 'string' && content.displayname
+    const userName =
+      getMemberDisplayName(room, userId) ??
+      (typeof content.displayname === 'string' && content.displayname
         ? content.displayname
-        : getMxIdLocalPart(userId)
-    );
+        : getMxIdLocalPart(userId));
 
     if (isMembershipChanged(mEvent)) {
       if (content.membership === Membership.Invite) {

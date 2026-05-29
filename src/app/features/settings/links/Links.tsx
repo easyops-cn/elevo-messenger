@@ -41,14 +41,14 @@ export function Links({ requestClose }: LinksProps) {
     React.useCallback(async () => {
       setError(null);
       await connect();
-    }, [connect])
+    }, [connect]),
   );
 
   const [disconnectState, startDisconnect] = useAsyncCallback(
     React.useCallback(async () => {
       setError(null);
       await disconnect();
-    }, [disconnect])
+    }, [disconnect]),
   );
 
   const isLoading =
@@ -123,11 +123,7 @@ export function Links({ requestClose }: LinksProps) {
                         <Box alignItems="Center" gap="200">
                           <Box as="span" gap="100" alignItems="Center">
                             <Badge variant="Success" fill="Solid" size="200" radii="Pill" />
-                            <Text
-                              as="span"
-                              size="L400"
-                              style={{ color: color.Success.Main }}
-                            >
+                            <Text as="span" size="L400" style={{ color: color.Success.Main }}>
                               {t('links.connected')}
                             </Text>
                           </Box>
@@ -184,11 +180,7 @@ export function Links({ requestClose }: LinksProps) {
                       ) : refreshing ? (
                         <Box as="span" gap="100" alignItems="Center">
                           <Spinner size="200" variant="Secondary" />
-                          <Text
-                            as="span"
-                            size="L400"
-                            style={{ color: color.Warning.Main }}
-                          >
+                          <Text as="span" size="L400" style={{ color: color.Warning.Main }}>
                             {t('links.refreshing')}
                           </Text>
                         </Box>
@@ -196,11 +188,7 @@ export function Links({ requestClose }: LinksProps) {
                         <Box alignItems="Center" gap="200">
                           <Box as="span" gap="100" alignItems="Center">
                             <Badge variant="Critical" fill="Solid" size="200" radii="Pill" />
-                            <Text
-                              as="span"
-                              size="L400"
-                              style={{ color: color.Critical.Main }}
-                            >
+                            <Text as="span" size="L400" style={{ color: color.Critical.Main }}>
                               {t('links.expired')}
                             </Text>
                           </Box>

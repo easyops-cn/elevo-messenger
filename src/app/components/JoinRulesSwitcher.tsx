@@ -34,7 +34,7 @@ export const useJoinRuleIcons = (): JoinRuleIcons =>
       [JoinRule.Public]: getAccessIconSrc(JoinRule.Public),
       [JoinRule.Private]: getAccessIconSrc(JoinRule.Private),
     }),
-    []
+    [],
   );
 
 type JoinRuleLabels = Record<ExtendedJoinRules, string>;
@@ -49,7 +49,7 @@ export const useRoomJoinRuleLabel = (): JoinRuleLabels => {
       [JoinRule.Public]: t('roomSettings.public'),
       [JoinRule.Private]: t('roomSettings.inviteOnly'),
     }),
-    [t]
+    [t],
   );
 };
 
@@ -83,7 +83,7 @@ export function JoinRulesSwitcher<T extends ExtendedJoinRules[]>({
       setCords(undefined);
       onChange(selectedRule);
     },
-    [onChange]
+    [onChange],
   );
 
   return (

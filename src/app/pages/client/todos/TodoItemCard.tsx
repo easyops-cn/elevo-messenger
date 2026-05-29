@@ -5,7 +5,13 @@ import { RoomProvider } from '../../../hooks/useRoom';
 import { AskUserQuestionCard } from '../../../components/message/elevo/AskUser';
 import { SequenceCard } from '../../../components/sequence-card';
 import { UserAvatar } from '../../../components/user-avatar';
-import { AvatarBase, ModernLayout, Time, Username, UsernameBold } from '../../../components/message';
+import {
+  AvatarBase,
+  ModernLayout,
+  Time,
+  Username,
+  UsernameBold,
+} from '../../../components/message';
 import { getMemberAvatarMxc, getMemberDisplayName } from '../../../utils/room';
 import { mxcUrlToHttp, getMxIdLocalPart } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
@@ -19,7 +25,13 @@ type TodoItemCardProps = {
   onOpen: (roomId: string, eventId: string) => void;
 };
 
-export function TodoItemCard({ item, hour24Clock, dateFormatString, onSubmit, onOpen }: TodoItemCardProps) {
+export function TodoItemCard({
+  item,
+  hour24Clock,
+  dateFormatString,
+  onSubmit,
+  onOpen,
+}: TodoItemCardProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
 
@@ -34,7 +46,11 @@ export function TodoItemCard({ item, hour24Clock, dateFormatString, onSubmit, on
   const room = mx.getRoom(item.room_id);
   if (!room) {
     return (
-      <SequenceCard variant="SurfaceVariant" direction="Column" style={{ padding: config.space.S400 }}>
+      <SequenceCard
+        variant="SurfaceVariant"
+        direction="Column"
+        style={{ padding: config.space.S400 }}
+      >
         <Text size="T300" priority="300">
           Room not available
         </Text>
@@ -62,8 +78,8 @@ export function TodoItemCard({ item, hour24Clock, dateFormatString, onSubmit, on
                   userId={item.sender}
                   src={
                     senderAvatarMxc
-                      ? mxcUrlToHttp(mx, senderAvatarMxc, useAuthentication, 48, 48, 'crop') ??
-                        undefined
+                      ? (mxcUrlToHttp(mx, senderAvatarMxc, useAuthentication, 48, 48, 'crop') ??
+                        undefined)
                       : undefined
                   }
                   alt={displayName}
@@ -82,7 +98,11 @@ export function TodoItemCard({ item, hour24Clock, dateFormatString, onSubmit, on
                   </Text>
                 </Username>
               </Box>
-              <Time ts={item.created_at * 1000} hour24Clock={hour24Clock} dateFormatString={dateFormatString} />
+              <Time
+                ts={item.created_at * 1000}
+                hour24Clock={hour24Clock}
+                dateFormatString={dateFormatString}
+              />
             </Box>
             <Chip onClick={handleOpenClick} variant="Secondary" radii="400">
               <Text size="T200">Open</Text>

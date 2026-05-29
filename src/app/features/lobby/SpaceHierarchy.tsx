@@ -64,7 +64,7 @@ export const SpaceHierarchy = forwardRef<HTMLDivElement, SpaceHierarchyProps>(
       onOpenRoom,
       onSpacesFound,
     },
-    ref
+    ref,
   ) => {
     const { t } = useTranslation();
     const mx = useMatrixClient();
@@ -230,5 +230,5 @@ export const SpaceHierarchy = forwardRef<HTMLDivElement, SpaceHierarchyProps>(
         )}
       </Box>
     );
-  }
+  },
 );

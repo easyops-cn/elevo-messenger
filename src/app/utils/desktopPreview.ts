@@ -16,16 +16,13 @@ export type DesktopPreviewPayload = {
   duration?: number;
 };
 
-export const openDesktopFilePreview = async (
-  payload: DesktopPreviewPayload
-): Promise<boolean> => {
+export const openDesktopFilePreview = async (payload: DesktopPreviewPayload): Promise<boolean> => {
   if (!isDesktopTauri) return false;
 
   try {
     await invoke('open_preview_window', { payload });
     return true;
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('[desktopPreview] open_preview_window failed:', error);
     return false;
   }

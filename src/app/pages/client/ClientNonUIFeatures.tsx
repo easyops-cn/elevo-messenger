@@ -91,7 +91,7 @@ function InviteNotifications() {
         },
       });
     },
-    [navigate]
+    [navigate],
   );
 
   const playSound = useCallback(() => {
@@ -114,7 +114,6 @@ function InviteNotifications() {
   }, [mx, invites, perviousInviteLen, showNotifications, notificationSound, notify, playSound]);
 
   return (
-    // eslint-disable-next-line jsx-a11y/media-has-caption
     <audio ref={audioRef} style={{ display: 'none' }}>
       <source src={InviteSound} type="audio/ogg" />
     </audio>
@@ -173,7 +172,7 @@ function MessageNotifications() {
         },
       });
     },
-    [mx, navigateRoom, t]
+    [mx, navigateRoom, t],
   );
 
   const playSound = useCallback(() => {
@@ -187,7 +186,7 @@ function MessageNotifications() {
       room,
       toStartOfTimeline,
       removed,
-      data
+      data,
     ) => {
       if (mx.getSyncState() !== 'SYNCING') return;
       if (document.hasFocus() && (selectedRoomId === room?.roomId || notificationSelected)) return;
@@ -223,7 +222,7 @@ function MessageNotifications() {
         notify({
           roomName: room.name ?? 'Unknown',
           roomAvatar: avatarMxc
-            ? mxcUrlToHttp(mx, avatarMxc, useAuthentication, 96, 96, 'crop') ?? undefined
+            ? (mxcUrlToHttp(mx, avatarMxc, useAuthentication, 96, 96, 'crop') ?? undefined)
             : undefined,
           username: getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender) ?? sender,
           room,
@@ -255,7 +254,6 @@ function MessageNotifications() {
   ]);
 
   return (
-    // eslint-disable-next-line jsx-a11y/media-has-caption
     <audio ref={audioRef} style={{ display: 'none' }}>
       <source src={NotificationSound} type="audio/ogg" />
     </audio>
@@ -271,7 +269,7 @@ function ClientToolSdkHandler() {
 
   // Track registered tools per webview label: Map<label, Map<toolName, { roomId, data }>>
   const registeredToolsRef = useRef<Map<string, Map<string, { roomId: string; data: unknown }>>>(
-    new Map()
+    new Map(),
   );
 
   useSdkMessageListener('client_tool_register', (payload: SdkMessagePayload) => {
@@ -285,7 +283,7 @@ function ClientToolSdkHandler() {
     registeredToolsRef.current.get(source)?.set(toolName, { roomId, data });
 
     mx.sendEvent(roomId, 'vip.elevo.client_tool.register' as any, data)
-      // eslint-disable-next-line no-console
+
       .catch(console.error);
   });
 
@@ -297,13 +295,13 @@ function ClientToolSdkHandler() {
     registeredToolsRef.current.get(source)?.delete(toolName);
 
     mx.sendEvent(roomId, 'vip.elevo.client_tool.unregister' as any, data)
-      // eslint-disable-next-line no-console
+
       .catch(console.error);
   });
 
   useSdkMessageListener('client_tool_output', (payload: SdkMessagePayload) => {
     mx.sendEvent(payload.roomId, 'vip.elevo.client_tool.output' as any, payload.data)
-      // eslint-disable-next-line no-console
+
       .catch(console.error);
   });
 
@@ -321,7 +319,7 @@ function ClientToolSdkHandler() {
       // Send unregister events for all tools, then clear tracking
       Array.from(tools.entries()).forEach(([toolName, { roomId }]) => {
         mx.sendEvent(roomId, 'vip.elevo.client_tool.unregister' as any, { name: toolName })
-          // eslint-disable-next-line no-console
+
           .catch(console.error);
       });
       registeredToolsRef.current.delete(label);
@@ -341,13 +339,12 @@ function ClientToolSdkHandler() {
       eventRoom,
       _toStart,
       _removed,
-      data
+      data,
     ) => {
       if (!eventRoom?.roomId || !data.liveEvent) return;
       if (mEvent.getType() === 'vip.elevo.client_tool.execute') {
         const content = mEvent.getContent();
 
-        // eslint-disable-next-line no-console
         console.log('[elevo] client_tool.execute event:', content);
 
         invoke('send_to_all_webviews', {
@@ -355,7 +352,6 @@ function ClientToolSdkHandler() {
           channel: 'client_tool_execute',
           data: content,
         }).catch((err) => {
-          // eslint-disable-next-line no-console
           console.error('Failed to send message to webview:', err);
         });
       }

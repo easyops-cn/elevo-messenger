@@ -5,21 +5,22 @@ import { useTranslation } from 'react-i18next';
 const warningStyle = { color: color.Warning.Main, opacity: config.opacity.P400 };
 const criticalStyle = { color: color.Critical.Main, opacity: config.opacity.P400 };
 
-export const MessageDeletedContent = as<'div', { children?: never; reason?: string; before?: ReactNode; }>(
-  ({ reason, before, ...props }, ref) => {
-    const { t } = useTranslation();
-    return (
-      <Box as="span" alignItems="Center" gap="100" {...props} ref={ref}>
-        {before}
-        {reason ? (
-          <i style={warningStyle}>{t('message.deletedWithReason', { reason })}</i>
-        ) : (
-          <i style={warningStyle}>{t('message.deleted')}</i>
-        )}
-      </Box>
-    );
-  }
-);
+export const MessageDeletedContent = as<
+  'div',
+  { children?: never; reason?: string; before?: ReactNode }
+>(({ reason, before, ...props }, ref) => {
+  const { t } = useTranslation();
+  return (
+    <Box as="span" alignItems="Center" gap="100" {...props} ref={ref}>
+      {before}
+      {reason ? (
+        <i style={warningStyle}>{t('message.deletedWithReason', { reason })}</i>
+      ) : (
+        <i style={warningStyle}>{t('message.deleted')}</i>
+      )}
+    </Box>
+  );
+});
 
 export const MessageUnsupportedContent = as<'div', { children?: never }>(({ ...props }, ref) => {
   const { t } = useTranslation();

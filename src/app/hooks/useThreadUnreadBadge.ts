@@ -1,5 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Room, RoomEvent, RoomEventHandlerMap, type NotificationCount, type Thread } from 'matrix-js-sdk';
+import {
+  Room,
+  RoomEvent,
+  RoomEventHandlerMap,
+  type NotificationCount,
+  type Thread,
+} from 'matrix-js-sdk';
 import { threadHaveNotification, threadHaveUnread } from '../utils/room';
 import { useMatrixClient } from './useMatrixClient';
 

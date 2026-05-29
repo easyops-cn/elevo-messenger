@@ -46,12 +46,10 @@ const fillMissingPowers = (powerLevels: IPowerLevels): IPowerLevels =>
     const keys = Object.keys(DEFAULT_POWER_LEVELS) as unknown as (keyof IPowerLevels)[];
     keys.forEach((key) => {
       if (draftPl[key] === undefined) {
-        // eslint-disable-next-line no-param-reassign
         draftPl[key] = DEFAULT_POWER_LEVELS[key] as any;
       }
     });
     if (draftPl.notifications && typeof draftPl.notifications.room !== 'number') {
-      // eslint-disable-next-line no-param-reassign
       draftPl.notifications.room = DEFAULT_POWER_LEVELS.notifications.room;
     }
     return draftPl;
@@ -69,7 +67,7 @@ export function usePowerLevels(room: Room): IPowerLevels {
   const powerLevelsEvent = useStateEvent(room, StateEvent.RoomPowerLevels);
   const powerLevels: IPowerLevels = useMemo(
     () => getPowersLevelFromMatrixEvent(powerLevelsEvent),
-    [powerLevelsEvent]
+    [powerLevelsEvent],
   );
 
   return powerLevels;
@@ -114,8 +112,8 @@ export const useRoomsPowerLevels = (rooms: Room[]): Map<string, IPowerLevels> =>
           setRoomToPowerLevels(getRoomsPowerLevels());
         }
       },
-      [rooms, getRoomsPowerLevels]
-    )
+      [rooms, getRoomsPowerLevels],
+    ),
   );
 
   return roomToPowerLevels;
@@ -171,7 +169,7 @@ export const readPowerLevel: ReadPowerLevelAPI = {
 export const useGetMemberPowerLevel = (powerLevels: IPowerLevels) => {
   const callback = useCallback(
     (userId?: string): number => readPowerLevel.user(powerLevels, userId),
-    [powerLevels]
+    [powerLevels],
   );
 
   return callback;
@@ -209,7 +207,7 @@ export type PermissionLocation =
 
 export const getPermissionPower = (
   powerLevels: IPowerLevels,
-  location: PermissionLocation
+  location: PermissionLocation,
 ): number => {
   if ('user' in location) {
     return readPowerLevel.user(powerLevels, location.key);
@@ -230,29 +228,28 @@ export const getPermissionPower = (
 export const applyPermissionPower = (
   powerLevels: IPowerLevels,
   location: PermissionLocation,
-  power: number
+  power: number,
 ): IPowerLevels => {
   if ('user' in location) {
     if (typeof location.key === 'string') {
       const users = powerLevels.users ?? {};
       users[location.key] = power;
-      // eslint-disable-next-line no-param-reassign
+
       powerLevels.users = users;
       return powerLevels;
     }
-    // eslint-disable-next-line no-param-reassign
+
     powerLevels.users_default = power;
     return powerLevels;
   }
   if ('action' in location) {
-    // eslint-disable-next-line no-param-reassign
     powerLevels[location.key] = power;
     return powerLevels;
   }
   if ('notification' in location) {
     const notifications = powerLevels.notifications ?? {};
     notifications[location.key] = power;
-    // eslint-disable-next-line no-param-reassign
+
     powerLevels.notifications = notifications;
     return powerLevels;
   }
@@ -260,11 +257,11 @@ export const applyPermissionPower = (
     if (typeof location.key === 'string') {
       const events = powerLevels.events ?? {};
       events[location.key] = power;
-      // eslint-disable-next-line no-param-reassign
+
       powerLevels.events = events;
       return powerLevels;
     }
-    // eslint-disable-next-line no-param-reassign
+
     powerLevels.state_default = power;
     return powerLevels;
   }
@@ -272,11 +269,11 @@ export const applyPermissionPower = (
   if (typeof location.key === 'string') {
     const events = powerLevels.events ?? {};
     events[location.key] = power;
-    // eslint-disable-next-line no-param-reassign
+
     powerLevels.events = events;
     return powerLevels;
   }
-  // eslint-disable-next-line no-param-reassign
+
   powerLevels.events_default = power;
   return powerLevels;
 };

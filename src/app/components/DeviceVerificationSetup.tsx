@@ -32,7 +32,7 @@ import { withSearchParam } from '../pages/pathUtils';
 import { useAccountManagementActions } from '../hooks/useAccountManagement';
 
 type UIACallback<T> = (
-  authDict: AuthDict | null
+  authDict: AuthDict | null,
 ) => Promise<[IAuthData, undefined] | [undefined, T]>;
 
 type PerformAction<T> = (authDict: AuthDict | null) => Promise<T>;
@@ -47,7 +47,7 @@ function makeUIAAction<T>(
   authData: IAuthData,
   performAction: PerformAction<T>,
   resolve: (data: T) => void,
-  reject: (error?: any) => void
+  reject: (error?: any) => void,
 ): UIAAction<T> {
   const action: UIAAction<T> = {
     authData,
@@ -97,7 +97,7 @@ function SetupVerification({ onComplete }: SetupVerificationProps) {
         setNextAuthData(authData);
       }
     },
-    [uiaAction, alive]
+    [uiaAction, alive],
   );
 
   const resetUIA = useCallback(() => {
@@ -124,7 +124,7 @@ function SetupVerification({ onComplete }: SetupVerificationProps) {
                 (err) => {
                   resetUIA();
                   reject(err);
-                }
+                },
               );
               if (alive()) {
                 setUIAAction(action);
@@ -136,7 +136,7 @@ function SetupVerification({ onComplete }: SetupVerificationProps) {
             reject(error);
           });
       }),
-    [alive, resetUIA]
+    [alive, resetUIA],
   );
 
   const [setupState, setup] = useAsyncCallback<void, Error, [string | undefined]>(
@@ -165,8 +165,8 @@ function SetupVerification({ onComplete }: SetupVerificationProps) {
 
         onComplete(recoveryKeyData.encodedPrivateKey);
       },
-      [mx, onComplete, authUploadDeviceSigningKeys]
-    )
+      [mx, onComplete, authUploadDeviceSigningKeys],
+    ),
   );
 
   const loading = setupState.status === AsyncStatus.Loading;
@@ -187,9 +187,7 @@ function SetupVerification({ onComplete }: SetupVerificationProps) {
 
   return (
     <Box as="form" onSubmit={handleSubmit} direction="Column" gap="400">
-      <Text size="T300">
-        {t('verification.generateRecoveryKeyDesc')}
-      </Text>
+      <Text size="T300">{t('verification.generateRecoveryKeyDesc')}</Text>
       <Box direction="Column" gap="100">
         <Text size="L400">{t('verification.passphraseOptional')}</Text>
         <PasswordInput name="passphraseInput" size="400" readOnly={loading} />
@@ -209,11 +207,7 @@ function SetupVerification({ onComplete }: SetupVerificationProps) {
       {nextAuthData !== null && uiaAction && (
         <ActionUIAFlowsLoader
           authData={nextAuthData ?? uiaAction.authData}
-          unsupported={() => (
-            <Text size="T200">
-              {t('verification.authNotSupported')}
-            </Text>
-          )}
+          unsupported={() => <Text size="T200">{t('verification.authNotSupported')}</Text>}
         >
           {(ongoingFlow) => (
             <ActionUIA
@@ -253,9 +247,7 @@ function RecoveryKeyDisplay({ recoveryKey }: RecoveryKeyDisplayProps) {
 
   return (
     <Box direction="Column" gap="400">
-      <Text size="T300">
-        {t('verification.storeRecoveryKey')}
-      </Text>
+      <Text size="T300">{t('verification.storeRecoveryKey')}</Text>
       <Box direction="Column" gap="100">
         <Text size="L400">{t('verification.recoveryKey')}</Text>
         <Box
@@ -322,7 +314,7 @@ export const DeviceVerificationSetup = forwardRef<HTMLDivElement, DeviceVerifica
         </Box>
       </Dialog>
     );
-  }
+  },
 );
 type DeviceVerificationResetProps = {
   onCancel: () => void;
@@ -342,7 +334,7 @@ export const DeviceVerificationReset = forwardRef<HTMLDivElement, DeviceVerifica
           withSearchParam(authUrl, {
             action: accountManagementActions.crossSigningReset,
           }),
-          '_blank'
+          '_blank',
         );
         setOAuthWindow(newWindow);
         return;
@@ -353,11 +345,7 @@ export const DeviceVerificationReset = forwardRef<HTMLDivElement, DeviceVerifica
 
     useEffect(() => {
       const handleMessage = (evt: MessageEvent) => {
-        if (
-          oauthWindow &&
-          evt.data === 'authDone' &&
-          evt.source === oauthWindow
-        ) {
+        if (oauthWindow && evt.data === 'authDone' && evt.source === oauthWindow) {
           oauthWindow.close();
           setOAuthWindow(undefined);
           setReset(true);
@@ -404,9 +392,7 @@ export const DeviceVerificationReset = forwardRef<HTMLDivElement, DeviceVerifica
             <Box direction="Column" gap="200">
               <Text size="H1">✋🧑‍🚒🤚</Text>
               <Text size="T300">{t('verification.resetPermanent')}</Text>
-              <Text size="T300">
-                {t('verification.resetWarning')}
-              </Text>
+              <Text size="T300">{t('verification.resetWarning')}</Text>
             </Box>
             <Button variant="Critical" onClick={handleReset}>
               <Text size="B400">{t('verification.reset')}</Text>
@@ -415,5 +401,5 @@ export const DeviceVerificationReset = forwardRef<HTMLDivElement, DeviceVerifica
         )}
       </Dialog>
     );
-  }
+  },
 );

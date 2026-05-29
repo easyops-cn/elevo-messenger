@@ -22,7 +22,8 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
     if (!threadRootId) return;
     setThread(null);
     setReady(false);
-    room.createThreadsTimelineSets()
+    room
+      .createThreadsTimelineSets()
       .then(() => room.fetchRoomThreads())
       .then(async () => {
         const newThread = room.getThread(threadRootId);
@@ -38,7 +39,10 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
       return;
     }
 
-    const handleTimelineReset: RoomEventHandlerMap[RoomEvent.TimelineReset] = async (_room, timelineSet) => {
+    const handleTimelineReset: RoomEventHandlerMap[RoomEvent.TimelineReset] = async (
+      _room,
+      timelineSet,
+    ) => {
       if (timelineSet !== thread.timelineSet) return;
       if (thread.events.length === 0) {
         await mx.paginateEventTimeline(thread.liveTimeline, {
@@ -90,7 +94,9 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
         <Box grow="Yes" direction="Column">
           {thread && ready ? (
             <RoomView key={thread.id} thread={thread} eventId={eventId} />
-          ) : <PageSpinner />}
+          ) : (
+            <PageSpinner />
+          )}
         </Box>
       </Page>
     </PageMain>

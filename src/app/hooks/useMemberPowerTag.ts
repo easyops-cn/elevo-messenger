@@ -10,7 +10,7 @@ export type GetMemberPowerTag = (userId: string) => MemberPowerTag;
 export const useGetMemberPowerTag = (
   room: Room,
   creators: Set<string>,
-  powerLevels: IPowerLevels
+  powerLevels: IPowerLevels,
 ) => {
   const creatorsTag = useRoomCreatorsTag();
   const powerLevelTags = usePowerLevelTags(room, powerLevels);
@@ -24,7 +24,7 @@ export const useGetMemberPowerTag = (
       const power = readPowerLevel.user(powerLevels, userId);
       return getPowerLevelTag(powerLevelTags, power);
     },
-    [creators, creatorsTag, powerLevels, powerLevelTags]
+    [creators, creatorsTag, powerLevels, powerLevelTags],
   );
 
   return getMemberPowerTag;
@@ -32,7 +32,7 @@ export const useGetMemberPowerTag = (
 
 export const useFlattenPowerTagMembers = (
   members: RoomMember[],
-  getTag: GetMemberPowerTag
+  getTag: GetMemberPowerTag,
 ): Array<MemberPowerTag | RoomMember> => {
   const PLTagOrRoomMember = useMemo(() => {
     let prevTag: MemberPowerTag | undefined;

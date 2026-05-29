@@ -58,13 +58,7 @@ type BaseAudioContentProps = {
   onPlayClick?: () => void;
 };
 
-function BaseAudioContent({
-  mimeType,
-  src,
-  info,
-  isLoading,
-  onPlayClick,
-}: BaseAudioContentProps) {
+function BaseAudioContent({ mimeType, src, info, isLoading, onPlayClick }: BaseAudioContentProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentTime, setCurrentTime] = useState(0);
   const infoDuration = info.duration ?? 0;
@@ -134,7 +128,7 @@ function BaseAudioContent({
           </Chip>
 
           <Text size="T200">{`${secondsToMinutesAndSeconds(
-            currentTime
+            currentTime,
           )} / ${secondsToMinutesAndSeconds(duration)}`}</Text>
         </>
       }
@@ -224,7 +218,6 @@ function BaseAudioContent({
         />
       }
     >
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio controls={false} autoPlay ref={audioRef}>
         {src && <source src={src} type={mimeType} />}
       </audio>
@@ -249,7 +242,7 @@ export const BaseAudioViewer = as<'div', BaseAudioViewerProps>(
       onPlayClick,
       ...props
     },
-    ref
+    ref,
   ) => {
     const { t } = useTranslation();
     const hasWaveform = Array.isArray(waveform) && waveform.length > 0;
@@ -328,5 +321,5 @@ export const BaseAudioViewer = as<'div', BaseAudioViewerProps>(
         </Box>
       </Box>
     );
-  }
+  },
 );

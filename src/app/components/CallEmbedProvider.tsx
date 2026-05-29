@@ -1,6 +1,5 @@
 import React, { ReactNode, useCallback, useRef } from 'react';
 import { useAtomValue, useSetAtom } from 'jotai';
-import { config } from 'folds';
 import {
   CallEmbedContextProvider,
   CallEmbedRefContextProvider,
@@ -23,7 +22,7 @@ function CallUtils({ embed }: { embed: CallEmbed }) {
     embed,
     useCallback(() => {
       setCallEmbed(undefined);
-    }, [setCallEmbed])
+    }, [setCallEmbed]),
   );
 
   return null;

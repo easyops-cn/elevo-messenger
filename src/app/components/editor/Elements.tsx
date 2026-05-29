@@ -9,7 +9,15 @@ import {
 } from 'slate-react';
 
 import * as css from '../../styles/CustomHtml.css';
-import { CommandElement, EmoticonElement, FileRefElement, LinkElement, MentionElement, TaskRefElement, type TaskRefStatus } from './slate';
+import {
+  CommandElement,
+  EmoticonElement,
+  FileRefElement,
+  LinkElement,
+  MentionElement,
+  TaskRefElement,
+  type TaskRefStatus,
+} from './slate';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { getBeginCommand } from './utils';
 import { BlockType } from './types';

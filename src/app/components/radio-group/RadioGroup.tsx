@@ -35,7 +35,12 @@ export function RadioGroup({ value, options, onChange, disabled, name }: RadioGr
             disabled={optionDisabled}
             onClick={() => onChange(option.value)}
           >
-            <Icon src={RadioIcon} filled={checked} size="200" className={checked ? css.RadioIconSelected : undefined} />
+            <Icon
+              src={RadioIcon}
+              filled={checked}
+              size="200"
+              className={checked ? css.RadioIconSelected : undefined}
+            />
             <Text size="T300" priority={checked ? '400' : '300'}>
               {option.label}
             </Text>

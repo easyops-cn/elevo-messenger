@@ -51,7 +51,7 @@ export function UploadBoardHeader({
 
   const hasUploads = uploads.length > 0;
   const hasPendingOrCompleteUploads = uploads.some(
-    (upload) => upload.status === UploadStatus.Idle || upload.status === UploadStatus.Success
+    (upload) => upload.status === UploadStatus.Idle || upload.status === UploadStatus.Success,
   );
   const isUploading = uploads.some((upload) => upload.status === UploadStatus.Loading);
   const isError = uploads.some((upload) => upload.status === UploadStatus.Error);
@@ -66,7 +66,7 @@ export function UploadBoardHeader({
       }
       return acc;
     },
-    { loaded: 0, total: 0 }
+    { loaded: 0, total: 0 },
   );
 
   const handleSend = async () => {

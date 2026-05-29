@@ -1,5 +1,3 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React, { FormEventHandler, MouseEventHandler, useEffect, useRef, useState } from 'react';
 import classNames from 'classnames';
 import {
@@ -47,7 +45,7 @@ export const PdfViewer = as<'div', PdfViewerProps>(
     const [pdfJSState, loadPdfJS] = usePdfJSLoader();
     const [docState, loadPdfDocument] = usePdfDocumentLoader(
       pdfJSState.status === AsyncStatus.Success ? pdfJSState.data : undefined,
-      src
+      src,
     );
     const isLoading =
       pdfJSState.status === AsyncStatus.Loading || docState.status === AsyncStatus.Loading;
@@ -269,5 +267,5 @@ export const PdfViewer = as<'div', PdfViewerProps>(
         )}
       </Box>
     );
-  }
+  },
 );

@@ -25,9 +25,7 @@ import { RoomProvider } from '../../hooks/useRoom';
 type MessageSearchProps = {
   scrollRef: RefObject<HTMLDivElement>;
 };
-export function MessageSearch({
-  scrollRef,
-}: MessageSearchProps) {
+export function MessageSearch({ scrollRef }: MessageSearchProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const allRooms = useAllHomeRooms();
@@ -48,9 +46,7 @@ export function MessageSearch({
 
   const searchParamRooms = useMemo(() => {
     if (roomsParam) {
-      return decodeSearchParamValueArray(roomsParam).filter(
-        (rId) => allRooms.includes(rId)
-      );
+      return decodeSearchParamValueArray(roomsParam).filter((rId) => allRooms.includes(rId));
     }
     return undefined;
   }, [allRooms, roomsParam]);
@@ -61,12 +57,15 @@ export function MessageSearch({
     return undefined;
   }, [sendersParam]);
 
-  const msgSearchParams: MessageSearchParams = useMemo(() => ({
-    term,
-    order: order ?? SearchOrderBy.Recent,
-    rooms: searchParamRooms,
-    senders: searchParamsSenders,
-  }), [term, order, searchParamRooms, searchParamsSenders]);
+  const msgSearchParams: MessageSearchParams = useMemo(
+    () => ({
+      term,
+      order: order ?? SearchOrderBy.Recent,
+      rooms: searchParamRooms,
+      senders: searchParamsSenders,
+    }),
+    [term, order, searchParamRooms, searchParamsSenders],
+  );
 
   const searchMessages = useMessageSearch(msgSearchParams);
 

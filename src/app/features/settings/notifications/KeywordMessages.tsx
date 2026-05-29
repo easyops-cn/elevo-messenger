@@ -35,8 +35,8 @@ function KeywordInput() {
         });
         setKeyword('');
       },
-      [mx]
-    )
+      [mx],
+    ),
   );
   const addingKeyword = keywordState.status === AsyncStatus.Loading;
 
@@ -114,8 +114,8 @@ function KeywordCross({ pushRule }: PushRulesProps) {
   const [removeState, remove] = useAsyncCallback(
     useCallback(
       () => mx.deletePushRule('global', PushRuleKind.ContentSpecific, pushRule.rule_id),
-      [mx, pushRule]
-    )
+      [mx, pushRule],
+    ),
   );
 
   const removing = removeState.status === AsyncStatus.Loading;
@@ -138,10 +138,10 @@ function KeywordModeSwitcher({ pushRule }: PushRulesProps) {
         'global',
         PushRuleKind.ContentSpecific,
         pushRule.rule_id,
-        actions
+        actions,
       );
     },
-    [mx, getModeActions, pushRule]
+    [mx, getModeActions, pushRule],
   );
 
   return <NotificationModeSwitcher pushRule={pushRule} onChange={handleChange} />;
@@ -152,13 +152,13 @@ export function KeywordMessagesNotifications() {
   const pushRulesEvt = useAccountData(AccountDataEvent.PushRules);
   const pushRules = useMemo(
     () => pushRulesEvt?.getContent<IPushRules>() ?? { global: {} },
-    [pushRulesEvt]
+    [pushRulesEvt],
   );
 
   const keywordPushRules = useMemo(() => {
     const content = pushRules.global.content ?? [];
     return content.filter(
-      (pushRule) => pushRule.default === false && typeof pushRule.pattern === 'string'
+      (pushRule) => pushRule.default === false && typeof pushRule.pattern === 'string',
     );
   }, [pushRules]);
 

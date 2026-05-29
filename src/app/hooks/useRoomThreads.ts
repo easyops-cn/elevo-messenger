@@ -30,7 +30,9 @@ export const useRoomThreads = (room: Room): UseRoomThreadsResult => {
 
     const syncThreads = () => {
       if (!alive) return;
-      setThreads(room.getThreads().filter((thread) => thread.events.some((evt) => !evt.isRedacted())));
+      setThreads(
+        room.getThreads().filter((thread) => thread.events.some((evt) => !evt.isRedacted())),
+      );
     };
 
     const loadThreads = async () => {

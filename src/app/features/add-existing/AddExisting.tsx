@@ -99,13 +99,13 @@ export function AddExistingModal({ parentId, space, requestClose }: AddExistingM
 
   const getRoomNameStr: SearchItemStrGetter<string> = useCallback(
     (rId) => getRoom(rId)?.name ?? rId,
-    [getRoom]
+    [getRoom],
   );
 
   const [searchResult, searchRoom, resetSearch] = useAsyncSearch(
     allItems,
     getRoomNameStr,
-    SEARCH_OPTS
+    SEARCH_OPTS,
   );
   const queryHighlighRegex = searchResult?.query
     ? makeHighlightRegex(searchResult.query.split(' '))
@@ -144,12 +144,12 @@ export function AddExistingModal({ parentId, space, requestClose }: AddExistingM
               suggested: false,
               via,
             },
-            room.roomId
+            room.roomId,
           );
         });
       },
-      [mx, parentId]
-    )
+      [mx, parentId],
+    ),
   );
   const applyingChanges = applyState.status === AsyncStatus.Loading;
 
@@ -291,15 +291,13 @@ export function AddExistingModal({ parentId, space, requestClose }: AddExistingM
                                     }
                                     alt={room.name}
                                     fallbackAsIcon={
-                                      dm || room.isSpaceRoom()
-                                        ? undefined
-                                        : (
-                                            <RoomIcon
-                                              size="200"
-                                              joinRule={room.getJoinRule()}
-                                              roomType={room.getType()}
-                                            />
-                                          )
+                                      dm || room.isSpaceRoom() ? undefined : (
+                                        <RoomIcon
+                                          size="200"
+                                          joinRule={room.getJoinRule()}
+                                          roomType={room.getType()}
+                                        />
+                                      )
                                     }
                                     renderFallback={() => (
                                       <Text as="span" size="H6">

@@ -11,7 +11,7 @@ export function ContactInformation() {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const [threePIdsState, loadThreePIds] = useAsyncCallback(
-    useCallback(() => mx.getThreePids(), [mx])
+    useCallback(() => mx.getThreePids(), [mx]),
   );
   const threePIds =
     threePIdsState.status === AsyncStatus.Success ? threePIdsState.data.threepids : undefined;

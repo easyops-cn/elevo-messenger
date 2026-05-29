@@ -77,7 +77,7 @@ export function InviteUserPrompt({ room, requestClose, createRoomOnInvite }: Inv
 
   const contactsMembersMap = useMemo(
     () => new Map(contactsMembers.map((m) => [m.userId, m.name])),
-    [contactsMembers]
+    [contactsMembers],
   );
 
   const filteredUsers = useMemo(() => {
@@ -94,7 +94,7 @@ export function InviteUserPrompt({ room, requestClose, createRoomOnInvite }: Inv
       const displayName = contactsMembersMap.get(userId);
       return displayName ? [localPart, displayName] : localPart;
     },
-    [contactsMembersMap]
+    [contactsMembersMap],
   );
 
   const [result, search, resetSearch] = useAsyncSearch(filteredUsers, getSearchStr, SEARCH_OPTIONS);
@@ -139,8 +139,8 @@ export function InviteUserPrompt({ room, requestClose, createRoomOnInvite }: Inv
         await mx.invite(room.roomId, userId, reason);
         return undefined;
       },
-      [createRoomOnInvite, elevoConfig.features.encryption, mx, room]
-    )
+      [createRoomOnInvite, elevoConfig.features.encryption, mx, room],
+    ),
   );
 
   const inviting = inviteState.status === AsyncStatus.Loading;

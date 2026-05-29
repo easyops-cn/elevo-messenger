@@ -9,10 +9,7 @@ type FileMenuItemProps = {
   onClick?: MouseEventHandler<HTMLButtonElement>;
 };
 
-export function FileMenuItem({
-  fileEvent,
-  onClick,
-}: FileMenuItemProps) {
+export function FileMenuItem({ fileEvent, onClick }: FileMenuItemProps) {
   const content = fileEvent.getContent();
   const filename = content.filename ?? content.body ?? 'Unnamed File';
   const mimetype = content.info?.mimetype ?? '';

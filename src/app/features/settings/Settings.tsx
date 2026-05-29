@@ -104,7 +104,7 @@ const useSettingsMenuItems = (showLinks: boolean): SettingsMenuItem[] =>
         icon: Icons.Info,
       },
     ],
-    [showLinks]
+    [showLinks],
   );
 
 type SettingsProps = {
@@ -119,7 +119,7 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
   const profile = useUserProfile(userId);
   const displayName = profile.displayName ?? getMxIdLocalPart(userId) ?? userId;
   const avatarUrl = profile.avatarUrl
-    ? mxcUrlToHttp(mx, profile.avatarUrl, useAuthentication, 96, 96, 'crop') ?? undefined
+    ? (mxcUrlToHttp(mx, profile.avatarUrl, useAuthentication, 96, 96, 'crop') ?? undefined)
     : undefined;
 
   const screenSize = useScreenSizeContext();
@@ -195,7 +195,13 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
                         {t(item.nameKey)}
                       </Text>
                       {item.page === SettingsPages.AboutPage && updateAvailable && (
-                        <Badge variant="Critical" size="200" fill="Solid" radii="Pill" style={{ marginLeft: 'auto' }} />
+                        <Badge
+                          variant="Critical"
+                          size="200"
+                          fill="Solid"
+                          radii="Pill"
+                          style={{ marginLeft: 'auto' }}
+                        />
                       )}
                     </MenuItem>
                   ))}
@@ -257,9 +263,7 @@ export function Settings({ initialPage, requestClose }: SettingsProps) {
       {activePage === SettingsPages.DeveloperToolsPage && (
         <DeveloperTools requestClose={handlePageRequestClose} />
       )}
-      {activePage === SettingsPages.LinksPage && (
-        <Links requestClose={handlePageRequestClose} />
-      )}
+      {activePage === SettingsPages.LinksPage && <Links requestClose={handlePageRequestClose} />}
       {activePage === SettingsPages.AboutPage && <About requestClose={handlePageRequestClose} />}
     </PageRoot>
   );

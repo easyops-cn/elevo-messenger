@@ -39,7 +39,7 @@ const useFetchEvent = (room: Room, eventId: string | undefined) => {
 export const useRoomEvent = (
   room: Room,
   eventId: string | undefined,
-  getLocally?: () => MatrixEvent | undefined
+  getLocally?: () => MatrixEvent | undefined,
 ) => {
   const event = useMemo(() => {
     if (getLocally) return getLocally();

@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 import React, { ComponentProps, HTMLAttributes, forwardRef } from 'react';
 import classNames from 'classnames';
 import { Box, Chip, Header, Icon, IconButton, Icons, Scroll, Text, as } from 'folds';
@@ -14,17 +13,19 @@ type TextViewerContentProps = {
   size?: ComponentProps<typeof Text>['size'];
 } & HTMLAttributes<HTMLPreElement>;
 export const TextViewerContent = forwardRef<HTMLPreElement, TextViewerContentProps>(
-  ({ text, langName, size, className, ...props }, ref) => (
-    <Text
-      as="pre"
-      size={size}
-      className={classNames(css.TextViewerPre, `language-${langName}`, className)}
-      {...props}
-      ref={ref}
-    >
-      <ShikiCode code={text} lang={langName} />
-    </Text>
-  )
+  function LegacyTextViewerContent({ text, langName, size, className, ...props }, ref) {
+    return (
+      <Text
+        as="pre"
+        size={size}
+        className={classNames(css.TextViewerPre, `language-${langName}`, className)}
+        {...props}
+        ref={ref}
+      >
+        <ShikiCode code={text} lang={langName} />
+      </Text>
+    );
+  },
 );
 
 export type TextViewerProps = {
@@ -97,5 +98,5 @@ export const TextViewer = as<'div', TextViewerProps>(
         </Box>
       </Box>
     );
-  }
+  },
 );

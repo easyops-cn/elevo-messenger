@@ -45,7 +45,7 @@ export const AttachmentBox = recipe({
         maxHeight: 'initial',
       },
     },
-  }
+  },
 });
 
 export type AttachmentBoxVariants = RecipeVariants<typeof AttachmentBox>;

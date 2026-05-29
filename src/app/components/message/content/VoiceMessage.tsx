@@ -20,13 +20,7 @@ export type VoiceMessageProps = {
   waveform: number[];
 };
 
-export function VoiceMessage({
-  mimeType,
-  url,
-  info,
-  encInfo,
-  waveform,
-}: VoiceMessageProps) {
+export function VoiceMessage({ mimeType, url, info, encInfo, waveform }: VoiceMessageProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
 
@@ -38,7 +32,7 @@ export function VoiceMessage({
         ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
         : await downloadMedia(mediaUrl);
       return URL.createObjectURL(fileContent);
-    }, [mx, url, useAuthentication, mimeType, encInfo])
+    }, [mx, url, useAuthentication, mimeType, encInfo]),
   );
 
   const infoDuration = info.duration ?? 0;

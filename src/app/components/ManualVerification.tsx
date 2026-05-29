@@ -57,7 +57,8 @@ export function ManualVerificationMethodSwitcher({
         onClick={handleMenu}
       >
         <Text as="span" size="B300">
-          {value === ManualVerificationMethod.RecoveryPassphrase && t('verification.recoveryPassphrase')}
+          {value === ManualVerificationMethod.RecoveryPassphrase &&
+            t('verification.recoveryPassphrase')}
           {value === ManualVerificationMethod.RecoveryKey && t('verification.recoveryKey')}
         </Text>
       </Chip>
@@ -129,7 +130,7 @@ export function ManualVerificationTile({
   const [method, setMethod] = useState(
     hasPassphrase
       ? ManualVerificationMethod.RecoveryPassphrase
-      : ManualVerificationMethod.RecoveryKey
+      : ManualVerificationMethod.RecoveryKey,
   );
 
   const verifyAndRestoreBackup = useCallback(
@@ -146,11 +147,11 @@ export function ManualVerificationTile({
 
       await crypto.loadSessionBackupPrivateKeyFromSecretStorage();
     },
-    [mx, secretStorageKeyId]
+    [mx, secretStorageKeyId],
   );
 
   const [verifyState, handleDecodedRecoveryKey] = useAsyncCallback<void, Error, [Uint8Array]>(
-    verifyAndRestoreBackup
+    verifyAndRestoreBackup,
   );
   const verifying = verifyState.status === AsyncStatus.Loading;
 
@@ -158,7 +159,9 @@ export function ManualVerificationTile({
     <Box direction="Column" gap="200">
       <SettingTile
         title={t('verification.verifyManually')}
-        description={hasPassphrase ? t('verification.selectMethod') : t('verification.provideRecoveryKey')}
+        description={
+          hasPassphrase ? t('verification.selectMethod') : t('verification.provideRecoveryKey')
+        }
         after={
           <Box alignItems="Center" gap="200">
             {hasPassphrase && (

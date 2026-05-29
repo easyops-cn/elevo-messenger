@@ -1,4 +1,3 @@
-/* eslint-disable react/no-array-index-key */
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge, Box, Button, Chip, config, Icon, Icons, Menu, Spinner, Text } from 'folds';
 import produce from 'immer';
@@ -13,7 +12,12 @@ import {
   PermissionLocation,
 } from '../../../hooks/usePowerLevels';
 import { PermissionGroup } from './types';
-import { POWER_TAG_KEYS, getPowerLevelTag, getPowers, usePowerLevelTags } from '../../../hooks/usePowerLevelTags';
+import {
+  POWER_TAG_KEYS,
+  getPowerLevelTag,
+  getPowers,
+  usePowerLevelTags,
+} from '../../../hooks/usePowerLevelTags';
 import { useRoom } from '../../../hooks/useRoom';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { StateEvent } from '../../../../types/matrix/room';
@@ -44,7 +48,7 @@ export function PermissionGroups({
   const maxPower = useMemo(() => Math.max(...getPowers(powerLevelTags)), [powerLevelTags]);
 
   const [permissionUpdate, setPermissionUpdate] = useState<Map<PermissionLocation, number>>(
-    new Map()
+    new Map(),
   );
 
   useEffect(() => {
@@ -56,7 +60,7 @@ export function PermissionGroups({
   const handleChangePermission = (
     location: PermissionLocation,
     newPower: number,
-    currentPower: number
+    currentPower: number,
   ) => {
     setPermissionUpdate((p) => {
       const up: typeof p = new Map();
@@ -79,16 +83,16 @@ export function PermissionGroups({
           group.items.forEach((item) => {
             const power = getPermissionPower(powerLevels, item.location);
             applyPermissionPower(draftPowerLevels, item.location, power);
-          })
+          }),
         );
         permissionUpdate.forEach((power, location) =>
-          applyPermissionPower(draftPowerLevels, location, power)
+          applyPermissionPower(draftPowerLevels, location, power),
         );
 
         return draftPowerLevels;
       });
       await mx.sendStateEvent(room.roomId, StateEvent.RoomPowerLevels as any, editedPowerLevels);
-    }, [mx, room, powerLevels, permissionUpdate, permissionGroups])
+    }, [mx, room, powerLevels, permissionUpdate, permissionGroups]),
   );
 
   const resetChanges = useCallback(() => {

@@ -4,7 +4,7 @@ import { decryptFile, downloadEncryptedMedia, downloadMedia } from './matrix';
 export const loadMediaBlob = async (
   mediaUrl: string,
   mimeType: string,
-  encInfo?: EncryptedAttachmentInfo
+  encInfo?: EncryptedAttachmentInfo,
 ): Promise<Blob> =>
   encInfo
     ? downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
@@ -13,7 +13,7 @@ export const loadMediaBlob = async (
 export const loadMediaBlobUrl = async (
   mediaUrl: string,
   mimeType: string,
-  encInfo?: EncryptedAttachmentInfo
+  encInfo?: EncryptedAttachmentInfo,
 ): Promise<string> => {
   const blob = await loadMediaBlob(mediaUrl, mimeType, encInfo);
   return URL.createObjectURL(blob);

@@ -64,7 +64,7 @@ function TodosApiSync() {
     () => () => {
       setTodos({ type: 'RESET' });
     },
-    [setTodos]
+    [setTodos],
   );
 
   return null;
@@ -100,7 +100,6 @@ export function useFetchTodosNextPage() {
         append: true,
       });
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('Failed to fetch todos next page:', err);
     } finally {
       fetchingRef.current = false;
@@ -119,7 +118,7 @@ function TodosTimelineSync() {
       room,
       _toStart,
       _removed,
-      data
+      data,
     ) => {
       if (!data.liveEvent || !room) return;
 

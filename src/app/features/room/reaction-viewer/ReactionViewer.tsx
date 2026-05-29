@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { MouseEvent, useCallback, useState } from 'react';
 import classNames from 'classnames';
 import {
   Avatar,
@@ -41,7 +41,7 @@ export const ReactionViewer = as<'div', ReactionViewerProps>(
     const useAuthentication = useMediaAuthentication();
     const reactions = useRelations(
       relations,
-      useCallback((rel) => [...(rel.getSortedAnnotationsByKey() ?? [])], [])
+      useCallback((rel) => [...(rel.getSortedAnnotationsByKey() ?? [])], []),
     );
     const space = useSpaceOptionally();
     const openProfile = useOpenUserRoomProfile();
@@ -123,7 +123,7 @@ export const ReactionViewer = as<'div', ReactionViewerProps>(
                         'crop',
                         undefined,
                         false,
-                        useAuthentication
+                        useAuthentication,
                       )
                     : undefined;
 
@@ -132,13 +132,13 @@ export const ReactionViewer = as<'div', ReactionViewerProps>(
                       key={senderId}
                       style={{ padding: `0 ${config.space.S200}` }}
                       radii="400"
-                      onClick={(event) => {
+                      onClick={(event: MouseEvent<HTMLElement>) => {
                         openProfile(
                           room.roomId,
                           space?.roomId,
                           senderId,
                           getMouseEventCords(event.nativeEvent),
-                          'Bottom'
+                          'Bottom',
                         );
                       }}
                       before={
@@ -166,5 +166,5 @@ export const ReactionViewer = as<'div', ReactionViewerProps>(
         </Box>
       </Box>
     );
-  }
+  },
 );

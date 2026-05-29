@@ -36,7 +36,7 @@ type SettingsModalState = {
   open: boolean;
   initialPage?: SettingsPages;
   requestId: number;
-}
+};
 
 export function BottomNav() {
   const { t } = useTranslation();
@@ -83,14 +83,17 @@ export function BottomNav() {
   const closeSettings = () => setSettingsModal((prev) => ({ ...prev, open: false }));
 
   // BottomNav is persistent, so handle native "open about" requests here.
-  useEffect(() =>
-    onOpenAbout(() => {
-      setSettingsModal((prev) => ({
-        open: true,
-        initialPage: SettingsPages.AboutPage,
-        requestId: prev.requestId + 1,
-      }));
-    }), [setSettingsModal]);
+  useEffect(
+    () =>
+      onOpenAbout(() => {
+        setSettingsModal((prev) => ({
+          open: true,
+          initialPage: SettingsPages.AboutPage,
+          requestId: prev.requestId + 1,
+        }));
+      }),
+    [setSettingsModal],
+  );
 
   const openSettings = () => {
     setSettingsModal((prev) => ({
@@ -103,10 +106,7 @@ export function BottomNav() {
   return (
     <>
       <div className={css.BottomNavContainer}>
-        <TooltipProvider
-          position="Top"
-          tooltip={<Tooltip>{t('home.title')}</Tooltip>}
-        >
+        <TooltipProvider position="Top" tooltip={<Tooltip>{t('home.title')}</Tooltip>}>
           {(triggerRef) => (
             <button
               ref={triggerRef}
@@ -125,22 +125,19 @@ export function BottomNav() {
           )}
         </TooltipProvider>
         {showContacts && (
-        <TooltipProvider
-          position="Top"
-          tooltip={<Tooltip>{t('contacts.title')}</Tooltip>}
-        >
-          {(triggerRef) => (
-            <button
-              ref={triggerRef}
-              className={css.BottomNavItem({ active: contactsSelected })}
-              onClick={handleContactsClick}
-              aria-label={t('contacts.title')}
-              type="button"
-            >
-              <Icon src={ContactIcon} filled={contactsSelected} size="300" />
-            </button>
-          )}
-        </TooltipProvider>
+          <TooltipProvider position="Top" tooltip={<Tooltip>{t('contacts.title')}</Tooltip>}>
+            {(triggerRef) => (
+              <button
+                ref={triggerRef}
+                className={css.BottomNavItem({ active: contactsSelected })}
+                onClick={handleContactsClick}
+                aria-label={t('contacts.title')}
+                type="button"
+              >
+                <Icon src={ContactIcon} filled={contactsSelected} size="300" />
+              </button>
+            )}
+          </TooltipProvider>
         )}
         <TooltipProvider
           position="Top"
@@ -162,10 +159,7 @@ export function BottomNav() {
             </button>
           )}
         </TooltipProvider>
-        <TooltipProvider
-          position="Top"
-          tooltip={<Tooltip>{t('common.me')}</Tooltip>}
-        >
+        <TooltipProvider position="Top" tooltip={<Tooltip>{t('common.me')}</Tooltip>}>
           {(triggerRef) => (
             <button
               ref={triggerRef}

@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import produce from 'immer';
 import { atom } from 'jotai';
 import type { TodoItem } from '../../pages/client/todos/useTodosApi';
@@ -48,7 +47,7 @@ export const todosAtom = atom<TodosAtomState, [TodosAtomAction], undefined>(
               draft.apiItems = action.items.filter((i) => !liveIds.has(i.question_event_id));
             }
             draft.nextCursor = action.nextCursor;
-          })
+          }),
         );
         return;
       }
@@ -62,7 +61,7 @@ export const todosAtom = atom<TodosAtomState, [TodosAtomAction], undefined>(
             if (!alreadyInApi && !alreadyInLive) {
               draft.liveItems.unshift(action.item);
             }
-          })
+          }),
         );
         return;
       }
@@ -70,9 +69,13 @@ export const todosAtom = atom<TodosAtomState, [TodosAtomAction], undefined>(
         set(
           baseTodosAtom,
           produce(get(baseTodosAtom), (draft) => {
-            draft.apiItems = draft.apiItems.filter((i) => i.question_event_id !== action.questionId);
-            draft.liveItems = draft.liveItems.filter((i) => i.question_event_id !== action.questionId);
-          })
+            draft.apiItems = draft.apiItems.filter(
+              (i) => i.question_event_id !== action.questionId,
+            );
+            draft.liveItems = draft.liveItems.filter(
+              (i) => i.question_event_id !== action.questionId,
+            );
+          }),
         );
         return;
       }
@@ -81,23 +84,38 @@ export const todosAtom = atom<TodosAtomState, [TodosAtomAction], undefined>(
           baseTodosAtom,
           produce(get(baseTodosAtom), (draft) => {
             draft.apiItems = draft.apiItems.filter(
-              (i) => !(i.room_id === action.roomId && i.question_event_id === action.eventId)
+              (i) => !(i.room_id === action.roomId && i.question_event_id === action.eventId),
             );
             draft.liveItems = draft.liveItems.filter(
-              (i) => !(i.room_id === action.roomId && i.question_event_id === action.eventId)
+              (i) => !(i.room_id === action.roomId && i.question_event_id === action.eventId),
             );
-          })
+          }),
         );
         return;
       }
       case 'SET_INITIALIZED':
-        set(baseTodosAtom, produce(get(baseTodosAtom), (d) => { d.initialized = true; }));
+        set(
+          baseTodosAtom,
+          produce(get(baseTodosAtom), (d) => {
+            d.initialized = true;
+          }),
+        );
         return;
       case 'SET_FETCHING':
-        set(baseTodosAtom, produce(get(baseTodosAtom), (d) => { d.isFetching = action.isFetching; }));
+        set(
+          baseTodosAtom,
+          produce(get(baseTodosAtom), (d) => {
+            d.isFetching = action.isFetching;
+          }),
+        );
         return;
       case 'SET_ERROR':
-        set(baseTodosAtom, produce(get(baseTodosAtom), (d) => { d.error = action.error; }));
+        set(
+          baseTodosAtom,
+          produce(get(baseTodosAtom), (d) => {
+            d.error = action.error;
+          }),
+        );
         return;
       case 'RESET':
         set(baseTodosAtom, {
@@ -109,5 +127,5 @@ export const todosAtom = atom<TodosAtomState, [TodosAtomAction], undefined>(
           error: null,
         });
     }
-  }
+  },
 );

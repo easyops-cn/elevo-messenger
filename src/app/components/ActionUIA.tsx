@@ -1,7 +1,12 @@
 import React, { ReactNode } from 'react';
 import { AuthDict, AuthType, IAuthData, UIAFlow } from 'matrix-js-sdk';
 import { getUIAFlowForStages } from '../utils/matrix-uia';
-import { useSupportedUIAFlows, useUIACompleted, useUIAFlow, type AuthStageData } from '../hooks/useUIAFlows';
+import {
+  useSupportedUIAFlows,
+  useUIACompleted,
+  useUIAFlow,
+  type AuthStageData,
+} from '../hooks/useUIAFlows';
 import { UIAFlowOverlay } from './UIAFlowOverlay';
 import { OAuthStage, PasswordStage, SSOStage } from './uia-stages';
 import { useMatrixClient } from '../hooks/useMatrixClient';
@@ -50,7 +55,7 @@ export function ActionUIA({ authData, ongoingFlow, action, onCancel }: ActionUIA
   const stageToComplete = getStageToComplete();
 
   if (!stageToComplete) return null;
-  
+
   return (
     <UIAFlowOverlay
       currentStep={completed.length + 1}

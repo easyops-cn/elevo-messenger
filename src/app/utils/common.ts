@@ -62,7 +62,7 @@ export const fulfilledPromiseSettledResult = <T>(prs: PromiseSettledResult<T>[])
   }, []);
 
 export const promiseFulfilledResult = <T>(
-  settledResult: PromiseSettledResult<T>
+  settledResult: PromiseSettledResult<T>,
 ): T | undefined => {
   if (settledResult.status === 'fulfilled') return settledResult.value;
   return undefined;

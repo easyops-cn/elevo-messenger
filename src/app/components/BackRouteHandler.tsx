@@ -1,10 +1,6 @@
 import { ReactNode, useCallback } from 'react';
 import { matchPath, useLocation, useNavigate } from 'react-router-dom';
-import {
-  getExplorePath,
-  getHomePath,
-  getInboxPath,
-} from '../pages/pathUtils';
+import { getExplorePath, getHomePath, getInboxPath } from '../pages/pathUtils';
 import { EXPLORE_PATH, HOME_PATH, INBOX_PATH, TODOS_PATH } from '../pages/paths';
 
 type BackRouteHandlerProps = {
@@ -22,7 +18,7 @@ export function BackRouteHandler({ children }: BackRouteHandlerProps) {
           caseSensitive: true,
           end: false,
         },
-        location.pathname
+        location.pathname,
       )
     ) {
       navigate(getHomePath());
@@ -35,7 +31,7 @@ export function BackRouteHandler({ children }: BackRouteHandlerProps) {
           caseSensitive: true,
           end: false,
         },
-        location.pathname
+        location.pathname,
       )
     ) {
       navigate(getExplorePath());
@@ -48,7 +44,7 @@ export function BackRouteHandler({ children }: BackRouteHandlerProps) {
           caseSensitive: true,
           end: false,
         },
-        location.pathname
+        location.pathname,
       )
     ) {
       navigate(getInboxPath());
@@ -61,7 +57,7 @@ export function BackRouteHandler({ children }: BackRouteHandlerProps) {
           caseSensitive: true,
           end: false,
         },
-        location.pathname
+        location.pathname,
       )
     ) {
       navigate(getHomePath());

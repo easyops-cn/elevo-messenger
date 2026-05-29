@@ -37,6 +37,6 @@ export const useMessageSpacingItems = (): MessageSpacingItem[] => {
         name: t('settings.messages.messageSpacingOptions.large'),
       },
     ],
-    [t]
+    [t],
   );
 };

@@ -22,7 +22,7 @@ export class CallControl extends EventEmitter implements CallControlState {
 
   private get screenshareButton(): HTMLElement | undefined {
     const screenshareBtn = this.document?.querySelector(
-      '[data-testid="incall_screenshare"]'
+      '[data-testid="incall_screenshare"]',
     ) as HTMLElement | null;
 
     return screenshareBtn ?? undefined;
@@ -44,7 +44,7 @@ export class CallControl extends EventEmitter implements CallControlState {
 
   private get spotlightButton(): HTMLInputElement | undefined {
     const spotlightButton = this.document?.querySelector(
-      'input[value="spotlight"]'
+      'input[value="spotlight"]',
     ) as HTMLInputElement | null;
 
     return spotlightButton ?? undefined;
@@ -52,7 +52,7 @@ export class CallControl extends EventEmitter implements CallControlState {
 
   private get gridButton(): HTMLInputElement | undefined {
     const gridButton = this.document?.querySelector(
-      'input[value="grid"]'
+      'input[value="grid"]',
     ) as HTMLInputElement | null;
 
     return gridButton ?? undefined;
@@ -133,7 +133,6 @@ export class CallControl extends EventEmitter implements CallControlState {
     const callDocument = this.iframe.contentDocument ?? this.iframe.contentWindow?.document;
     if (callDocument) {
       callDocument.querySelectorAll('audio').forEach((el) => {
-        // eslint-disable-next-line no-param-reassign
         el.muted = !sound;
       });
     }
@@ -148,7 +147,7 @@ export class CallControl extends EventEmitter implements CallControlState {
       data.video_enabled ?? this.video,
       this.sound,
       this.screenshare,
-      this.spotlight
+      this.spotlight,
     );
 
     this.state = state;
@@ -168,7 +167,7 @@ export class CallControl extends EventEmitter implements CallControlState {
       this.video,
       this.sound,
       screenshare,
-      spotlight
+      spotlight,
     );
     this.emitStateUpdate();
   }
@@ -199,7 +198,7 @@ export class CallControl extends EventEmitter implements CallControlState {
       this.video,
       sound,
       this.screenshare,
-      this.spotlight
+      this.spotlight,
     );
     this.state = state;
     this.emitStateUpdate();

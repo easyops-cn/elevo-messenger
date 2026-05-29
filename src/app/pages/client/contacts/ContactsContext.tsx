@@ -42,21 +42,14 @@ export function ContactsProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room, stateVersion]);
 
-  const roles = useMemo(
-    () => [...new Set(Object.values(javisRoleMap))].sort(),
-    [javisRoleMap]
-  );
+  const roles = useMemo(() => [...new Set(Object.values(javisRoleMap))].sort(), [javisRoleMap]);
 
   const contextValue = useMemo(
     () => ({ contactsRoomId: elevoContactsRoomId, room, javisRoleMap, roles }),
-    [elevoContactsRoomId, room, javisRoleMap, roles]
+    [elevoContactsRoomId, room, javisRoleMap, roles],
   );
 
-  return (
-    <ContactsContext.Provider value={contextValue}>
-      {children}
-    </ContactsContext.Provider>
-  );
+  return <ContactsContext.Provider value={contextValue}>{children}</ContactsContext.Provider>;
 }
 
 export const useContactsContext = () => useContext(ContactsContext);

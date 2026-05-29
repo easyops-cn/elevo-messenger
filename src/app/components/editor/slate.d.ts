@@ -65,7 +65,14 @@ export type TaskRefElement = {
   children: Text[];
 };
 
-export type InlineElement = Text | LinkElement | MentionElement | EmoticonElement | CommandElement | FileRefElement | TaskRefElement;
+export type InlineElement =
+  | Text
+  | LinkElement
+  | MentionElement
+  | EmoticonElement
+  | CommandElement
+  | FileRefElement
+  | TaskRefElement;
 
 export type ParagraphElement = {
   type: BlockType.Paragraph;

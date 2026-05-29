@@ -31,7 +31,7 @@ export function UsageSelector({ selected, onChange }: UsageSelectorProps) {
 
   const allUsages: ImageUsage[][] = useMemo(
     () => [[ImageUsage.Emoticon], [ImageUsage.Sticker], [ImageUsage.Sticker, ImageUsage.Emoticon]],
-    []
+    [],
   );
 
   return (

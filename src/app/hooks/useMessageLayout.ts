@@ -25,6 +25,6 @@ export const useMessageLayoutItems = (): MessageLayoutItem[] => {
         name: t('settings.messages.messageLayoutOptions.bubble'),
       },
     ],
-    [t]
+    [t],
   );
 };

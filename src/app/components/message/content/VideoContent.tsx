@@ -24,7 +24,11 @@ import {
 import * as css from './style.css';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
-import { bytesToSize, millisecondsToMinutesAndSeconds, scaleYDimension } from '../../../utils/common';
+import {
+  bytesToSize,
+  millisecondsToMinutesAndSeconds,
+  scaleYDimension,
+} from '../../../utils/common';
 import {
   decryptFile,
   downloadEncryptedMedia,
@@ -71,7 +75,7 @@ export const VideoContent = as<'div', VideoContentProps>(
       renderVideo,
       ...props
     },
-    ref
+    ref,
   ) => {
     const mx = useMatrixClient();
     const useAuthentication = useMediaAuthentication();
@@ -102,11 +106,11 @@ export const VideoContent = as<'div', VideoContentProps>(
         if (!mediaUrl) throw new Error('Invalid media URL');
         const fileContent = encInfo
           ? await downloadEncryptedMedia(mediaUrl, (encBuf) =>
-              decryptFile(encBuf, mimeType, encInfo)
+              decryptFile(encBuf, mimeType, encInfo),
             )
           : await downloadMedia(mediaUrl);
         return URL.createObjectURL(fileContent);
-      }, [mx, url, useAuthentication, mimeType, encInfo])
+      }, [mx, url, useAuthentication, mimeType, encInfo]),
     );
 
     const handleLoad = () => {
@@ -262,5 +266,5 @@ export const VideoContent = as<'div', VideoContentProps>(
         )}
       </Box>
     );
-  }
+  },
 );

@@ -36,7 +36,7 @@ import { highlightText, makeHighlightRegex } from '../../plugins/react-custom-ht
 export const useAdditionalCreators = (defaultCreators?: string[]) => {
   const mx = useMatrixClient();
   const [additionalCreators, setAdditionalCreators] = useState<string[]>(
-    () => defaultCreators?.filter((id) => id !== mx.getSafeUserId()) ?? []
+    () => defaultCreators?.filter((id) => id !== mx.getSafeUserId()) ?? [],
   );
 
   const addAdditionalCreator = (userId: string) => {
@@ -92,12 +92,12 @@ export function AdditionalCreatorInput({
   const [validUserId, setValidUserId] = useState<string>();
   const filteredUsers = useMemo(
     () => directUsers.filter((userId) => !additionalCreators.includes(userId)),
-    [directUsers, additionalCreators]
+    [directUsers, additionalCreators],
   );
   const [result, search, resetSearch] = useAsyncSearch(
     filteredUsers,
     getUserIdString,
-    SEARCH_OPTIONS
+    SEARCH_OPTIONS,
   );
   const queryHighlighRegex = result?.query ? makeHighlightRegex([result.query]) : undefined;
 
@@ -151,10 +151,7 @@ export function AdditionalCreatorInput({
   };
 
   return (
-    <SettingTile
-      title={t('create.creators')}
-      description={t('create.creatorsDesc')}
-    >
+    <SettingTile title={t('create.creators')} description={t('create.creatorsDesc')}>
       <Box shrink="No" direction="Column" gap="100">
         <Box gap="200" wrap="Wrap">
           <Chip type="button" variant="Primary" radii="Pill" outlined>

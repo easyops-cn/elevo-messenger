@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/media-has-caption */
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { Badge, Chip, Icon, IconButton, Icons, ProgressBar, Spinner, Text, toRem } from 'folds';
 import { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
@@ -22,7 +21,6 @@ import {
   mxcUrlToHttp,
 } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
-
 
 type RenderMediaControlProps = {
   after: ReactNode;
@@ -57,7 +55,7 @@ export function AudioContent({
         ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
         : await downloadMedia(mediaUrl);
       return URL.createObjectURL(fileContent);
-    }, [mx, url, useAuthentication, mimeType, encInfo])
+    }, [mx, url, useAuthentication, mimeType, encInfo]),
   );
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -168,7 +166,7 @@ export function AudioContent({
         </Chip>
 
         <Text size="T200">{`${secondsToMinutesAndSeconds(
-          currentTime
+          currentTime,
         )} / ${secondsToMinutesAndSeconds(duration)}`}</Text>
       </>
     ),

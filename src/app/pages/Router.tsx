@@ -131,7 +131,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           if (!session) {
             const afterLoginPath = getAppPathFromHref(
               getOriginBaseUrl(hashRouter),
-              window.location.href
+              window.location.href,
             );
             if (afterLoginPath) setAfterLoginRedirectPath(afterLoginPath);
             return redirect(getLoginPath());
@@ -212,8 +212,8 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
             return redirect(
               getHomeRoomPath(
                 decodeURIComponent(roomIdOrAlias),
-                eventId ? decodeURIComponent(eventId) : undefined
-              )
+                eventId ? decodeURIComponent(eventId) : undefined,
+              ),
             );
           }}
         />
@@ -234,10 +234,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           {mobile ? (
             <Route index element={<div />} />
           ) : (
-            <Route
-              index
-              loader={() => redirect(getExploreFeaturedPath())}
-            />
+            <Route index loader={() => redirect(getExploreFeaturedPath())} />
           )}
           <Route path={_FEATURED_PATH} element={<FeaturedRooms />} />
           <Route path={_SERVER_PATH} element={<PublicRooms />} />
@@ -286,10 +283,7 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
           {mobile ? (
             <Route index element={<div />} />
           ) : (
-            <Route
-              index
-              loader={() => redirect(getContactsContactsPath())}
-            />
+            <Route index loader={() => redirect(getContactsContactsPath())} />
           )}
           <Route path={_CONTACTS_CONTACTS_PATH} element={<ContactsPage />} />
           <Route path={_CONTACTS_ROLE_PATH} element={<ContactsRolePage />} />
@@ -297,12 +291,15 @@ export const createRouter = (clientConfig: ClientConfig, screenSize: ScreenSize)
         <Route path={ME_NOTIFICATIONS_PATH} loader={() => redirect(getMePath())} />
         <Route path={ME_INVITES_PATH} loader={() => redirect(getHomeInvitesPath())} />
       </Route>
-      <Route path="/*" element={
-        <AuthRouteThemeManager>
-          <PageNotFound />
-        </AuthRouteThemeManager>
-      } />
-    </Route>
+      <Route
+        path="/*"
+        element={
+          <AuthRouteThemeManager>
+            <PageNotFound />
+          </AuthRouteThemeManager>
+        }
+      />
+    </Route>,
   );
 
   if (hashRouter?.enabled) {

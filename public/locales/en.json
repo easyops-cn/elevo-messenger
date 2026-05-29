@@ -154,7 +154,7 @@
     "notifMentionKeywords": "Mentions & Keywords",
     "notifMute": "Mute",
     "editMessage": "Edit message...",
-    "membersCount": "{{count}} Members",
+    "membersCount": "{{formattedCount}} Members",
     "typeNamePlaceholder": "Type name...",
     "resultCount_one": "{{count}} Result",
     "resultCount_other": "{{count}} Results",

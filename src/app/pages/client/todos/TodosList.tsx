@@ -3,7 +3,16 @@ import { useTranslation } from 'react-i18next';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { Box, Icon, Icons, IconButton, Scroll, Spinner, Text, config } from 'folds';
-import { Page, PageContent, PageContentCenter, PageHeader, PageHero, PageHeroEmpty, PageHeroSection, PageMain } from '../../../components/page';
+import {
+  Page,
+  PageContent,
+  PageContentCenter,
+  PageHeader,
+  PageHero,
+  PageHeroEmpty,
+  PageHeroSection,
+  PageMain,
+} from '../../../components/page';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';
 import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { VirtualTile } from '../../../components/virtualizer';
@@ -31,7 +40,7 @@ export function TodosList() {
 
   const allItems = useMemo(
     () => [...todosState.liveItems, ...todosState.apiItems],
-    [todosState.liveItems, todosState.apiItems]
+    [todosState.liveItems, todosState.apiItems],
   );
 
   const hasNextPage = !!todosState.nextCursor;
@@ -42,7 +51,7 @@ export function TodosList() {
     (roomId: string, eventId: string) => {
       setTodos({ type: 'REMOVE_BY_EVENT', roomId, eventId });
     },
-    [setTodos]
+    [setTodos],
   );
 
   const virtualizer = useVirtualizer({
@@ -60,7 +69,12 @@ export function TodosList() {
   const lastItemIndex = allItems.length - 1;
 
   useEffect(() => {
-    if (lastItemIndex > -1 && lastItemIndex === lastVItemIndex && !isFetchingNextPage && hasNextPage) {
+    if (
+      lastItemIndex > -1 &&
+      lastItemIndex === lastVItemIndex &&
+      !isFetchingNextPage &&
+      hasNextPage
+    ) {
       fetchNextPage();
     }
   }, [lastVItemIndex, lastItemIndex, fetchNextPage, isFetchingNextPage, hasNextPage]);
@@ -108,9 +122,7 @@ export function TodosList() {
                     </PageHeroEmpty>
                   )}
 
-                  {status === 'pending' && allItems.length === 0 && (
-                    <PageSpinner />
-                  )}
+                  {status === 'pending' && allItems.length === 0 && <PageSpinner />}
 
                   <Box direction="Column" gap="200">
                     <div

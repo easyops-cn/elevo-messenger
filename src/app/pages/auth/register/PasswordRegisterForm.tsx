@@ -113,7 +113,7 @@ function RegisterUIAFlow({
         initial_device_display_name: 'Elevo Messenger Web',
       });
     },
-    [onRegister, formData]
+    [onRegister, formData],
   );
 
   const handleCancel = useCallback(() => {
@@ -298,9 +298,7 @@ export function PasswordRegisterForm({
                   required
                 />
                 {registerError?.errcode === RegisterError.PasswordWeak && (
-                  <FieldError
-                    message={registerError.data.error ?? t('auth.errors.passwordWeak')}
-                  />
+                  <FieldError message={registerError.data.error ?? t('auth.errors.passwordWeak')} />
                 )}
                 {registerError?.errcode === RegisterError.PasswordShort && (
                   <FieldError

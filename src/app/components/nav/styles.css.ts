@@ -100,8 +100,8 @@ export const NavItem = recipe({
       },
       Normal: {
         minHeight: toRem(36),
-      }
-    }
+      },
+    },
   },
   defaultVariants: {
     variant: 'Surface',

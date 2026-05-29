@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { Descendant, Text } from 'slate';
 import parse from 'html-dom-parser';
 import { ChildNode, Element, isText, isTag } from 'domhandler';
@@ -21,7 +20,12 @@ import {
   type TaskRefStatus,
   UnorderedListElement,
 } from './slate';
-import { createEmoticonElement, createFileRefElement, createMentionElement, createTaskRefElement } from './utils';
+import {
+  createEmoticonElement,
+  createFileRefElement,
+  createMentionElement,
+  createTaskRefElement,
+} from './utils';
 import {
   parseMatrixToRoom,
   parseMatrixToRoomEvent,
@@ -80,7 +84,7 @@ const getInlineNodeMarkType = (node: Element): MarkType | undefined => {
 const getInlineMarkElement = (
   markType: MarkType,
   node: Element,
-  getChild: (child: ChildNode) => InlineElement[]
+  getChild: (child: ChildNode) => InlineElement[],
 ): InlineElement[] => {
   const children = node.children.flatMap(getChild);
   const mdSequence = node.attribs['data-md'];
@@ -97,7 +101,9 @@ const getInlineMarkElement = (
   return children;
 };
 
-const getInlineNonMarkElement = (node: Element): MentionElement | EmoticonElement | FileRefElement | TaskRefElement | undefined => {
+const getInlineNonMarkElement = (
+  node: Element,
+): MentionElement | EmoticonElement | FileRefElement | TaskRefElement | undefined => {
   if (node.name === 'span' && node.attribs['data-file-ref'] !== undefined) {
     const path = node.attribs['data-file-ref'];
     const rawText = getText(node);
@@ -131,7 +137,7 @@ const getInlineNonMarkElement = (node: Element): MentionElement | EmoticonElemen
           getText(node) || roomMention.roomIdOrAlias,
           false,
           undefined,
-          roomMention.viaServers
+          roomMention.viaServers,
         );
       }
       const eventMention = parseMatrixToRoomEvent(href);
@@ -141,7 +147,7 @@ const getInlineNonMarkElement = (node: Element): MentionElement | EmoticonElemen
           getText(node) || eventMention.roomIdOrAlias,
           false,
           eventMention.eventId,
-          eventMention.viaServers
+          eventMention.viaServers,
         );
       }
     }
@@ -181,7 +187,7 @@ const getInlineElement = (node: ChildNode, processText: ProcessTextCallback): In
 
 const parseBlockquoteNode = (
   node: Element,
-  processText: ProcessTextCallback
+  processText: ProcessTextCallback,
 ): BlockQuoteElement[] | ParagraphElement[] => {
   const quoteLines: Array<InlineElement[]> = [];
   let lineHolder: InlineElement[] = [];
@@ -271,7 +277,7 @@ const parseCodeBlockNode = (node: Element): CodeBlockElement[] | ParagraphElemen
 };
 const parseListNode = (
   node: Element,
-  processText: ProcessTextCallback
+  processText: ProcessTextCallback,
 ): OrderedListElement[] | UnorderedListElement[] | ParagraphElement[] => {
   const listLines: Array<InlineElement[]> = [];
   let lineHolder: InlineElement[] = [];
@@ -343,7 +349,7 @@ const parseListNode = (
 };
 const parseHeadingNode = (
   node: Element,
-  processText: ProcessTextCallback
+  processText: ProcessTextCallback,
 ): HeadingElement | ParagraphElement => {
   const children = node.children.flatMap((child) => getInlineElement(child, processText));
 
@@ -369,7 +375,7 @@ const parseHeadingNode = (
 export const domToEditorInput = (
   domNodes: ChildNode[],
   processText: ProcessTextCallback,
-  processLineStartText: ProcessTextCallback
+  processLineStartText: ProcessTextCallback,
 ): Descendant[] => {
   const children: Descendant[] = [];
 

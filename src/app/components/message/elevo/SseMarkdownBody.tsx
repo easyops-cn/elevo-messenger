@@ -36,7 +36,13 @@ export type SseMarkdownBodyProps = {
   style?: CSSProperties;
 };
 
-export function SseMarkdownBody({ sseData, reasoning, renderBody, renderUrlsPreview, style }: SseMarkdownBodyProps) {
+export function SseMarkdownBody({
+  sseData,
+  reasoning,
+  renderBody,
+  renderUrlsPreview,
+  style,
+}: SseMarkdownBodyProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const homeserverBaseUrl = mx.getHomeserverUrl();
@@ -63,7 +69,7 @@ export function SseMarkdownBody({ sseData, reasoning, renderBody, renderUrlsPrev
               Accept: 'text/event-stream',
             },
             signal: abortController.signal,
-          }
+          },
         );
 
         if (!response.ok || !response.body) {
@@ -113,7 +119,7 @@ export function SseMarkdownBody({ sseData, reasoning, renderBody, renderUrlsPrev
       } catch (error) {
         if (!abortController.signal.aborted) {
           setStreamError(true);
-          // eslint-disable-next-line no-console
+
           console.error('Failed to consume step SSE stream:', error);
         }
       } finally {
@@ -129,22 +135,25 @@ export function SseMarkdownBody({ sseData, reasoning, renderBody, renderUrlsPrev
   }, [homeserverBaseUrl, sseData.bridgeId, sseData.stepId]);
 
   const markdownBody = !streamError ? streamedBody : 'Error loading streaming content.';
-  
+
   const sanitizedHtml = useMemo(() => {
     const trimmedBody = trimReplyFromBody(markdownBody);
     const parsed = marked.parse(trimmedBody, { gfm: true, breaks: true }) as string;
     return DOMPurify.sanitize(typeof parsed === 'string' ? parsed : '');
   }, [markdownBody]);
 
-  const content = useMemo(() => ({
-    body: markdownBody,
-    formatted_body: sanitizedHtml,
-    ...(reasoning ? { 'vip.elevo.reasoning': { streaming: !streamDone } } : null),
-  }), [markdownBody, sanitizedHtml, reasoning, streamDone]);
+  const content = useMemo(
+    () => ({
+      body: markdownBody,
+      formatted_body: sanitizedHtml,
+      ...(reasoning ? { 'vip.elevo.reasoning': { streaming: !streamDone } } : null),
+    }),
+    [markdownBody, sanitizedHtml, reasoning, streamDone],
+  );
 
   if (!markdownBody && !streamDone) {
     return (
-      <MessageTextBody style={{...style, fontStyle: 'italic', opacity: config.opacity.P300 }}>
+      <MessageTextBody style={{ ...style, fontStyle: 'italic', opacity: config.opacity.P300 }}>
         {t('message.thinking')}
       </MessageTextBody>
     );
@@ -155,7 +164,7 @@ export function SseMarkdownBody({ sseData, reasoning, renderBody, renderUrlsPrev
       content={content}
       renderBody={renderBody}
       renderUrlsPreview={renderUrlsPreview}
-      style={streamError ? {...style, color: color.Critical.Main, fontStyle: 'italic' } : style}
+      style={streamError ? { ...style, color: color.Critical.Main, fontStyle: 'italic' } : style}
     />
   );
 }

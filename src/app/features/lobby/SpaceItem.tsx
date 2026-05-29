@@ -115,7 +115,7 @@ function UnjoinedSpaceProfile({
   const mx = useMatrixClient();
 
   const [joinState, join] = useAsyncCallback<Room, MatrixError, []>(
-    useCallback(() => mx.joinRoom(roomId, { viaServers: via }), [mx, roomId, via])
+    useCallback(() => mx.joinRoom(roomId, { viaServers: via }), [mx, roomId, via]),
   );
 
   const { t } = useTranslation();
@@ -430,7 +430,7 @@ export const SpaceItemCard = as<'div', SpaceItemCardProps>(
       getRoom,
       ...props
     },
-    ref
+    ref,
   ) => {
     const mx = useMatrixClient();
     const useAuthentication = useMediaAuthentication();
@@ -491,8 +491,14 @@ export const SpaceItemCard = as<'div', SpaceItemCardProps>(
                     name={summary.name || summary.canonical_alias || roomId}
                     avatarUrl={
                       summary?.avatar_url
-                        ? mxcUrlToHttp(mx, summary.avatar_url, useAuthentication, 96, 96, 'crop') ??
-                          undefined
+                        ? (mxcUrlToHttp(
+                            mx,
+                            summary.avatar_url,
+                            useAuthentication,
+                            96,
+                            96,
+                            'crop',
+                          ) ?? undefined)
                         : undefined
                     }
                     suggested={content.suggested}
@@ -512,5 +518,5 @@ export const SpaceItemCard = as<'div', SpaceItemCardProps>(
         {after}
       </Box>
     );
-  }
+  },
 );

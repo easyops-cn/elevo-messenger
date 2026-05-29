@@ -3,7 +3,7 @@ name: Build pull request
 on:
   pull_request:
     types: ['opened', 'synchronize']
-    branches: [ 'main' ]
+    branches: ['main']
 
 jobs:
   build:
@@ -29,13 +29,19 @@ jobs:
           NODE_OPTIONS: '--max_old_space_size=4096'
         run: npm run build
 
+      - name: Install Playwright browsers
+        run: npm run test:e2e:install
+
+      - name: Run e2e smoke tests
+        run: npm run test:e2e
+
       - name: Deploy to Netlify
         id: netlify-deploy
         uses: nwtgck/actions-netlify@v3.0
         with:
           publish-dir: ./dist
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: "${{ github.event.pull_request.title }}"
+          deploy-message: '${{ github.event.pull_request.title }}'
           alias: pr-${{ github.event.number }}
           netlify-config-path: ./netlify.toml
         env:
