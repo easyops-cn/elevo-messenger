@@ -92,4 +92,12 @@ export default [
       'no-undef': 'off',
     },
   },
+  {
+    files: ['vite.config.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
 ];
