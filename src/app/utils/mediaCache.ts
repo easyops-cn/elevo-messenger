@@ -18,17 +18,27 @@ export type CachedMediaEntry = {
   lastAccessedAt: number;
 };
 
-type CachedMediaIndex = {
-  entries: Record<string, CachedMediaEntry>;
+type CachedMediaRow = {
+  key: string;
+  relative_path: string;
+  mime_type: string;
+  size: number;
+  created_at: number;
+  last_accessed_at: number;
+};
+
+type TotalSizeRow = {
+  total_size: number | null;
 };
 
 type TauriFs = typeof import('@tauri-apps/plugin-fs');
 type TauriPath = typeof import('@tauri-apps/api/path');
 type TauriCore = typeof import('@tauri-apps/api/core');
+type SqlDatabase = import('@tauri-apps/plugin-sql').default;
 
 const MEDIA_CACHE_DIR = 'media-cache';
 const MEDIA_CACHE_OBJECTS_DIR = `${MEDIA_CACHE_DIR}/objects`;
-const MEDIA_CACHE_INDEX_PATH = `${MEDIA_CACHE_DIR}/index.json`;
+const MEDIA_CACHE_DB_NAME = 'index.sqlite3';
 const DEFAULT_MAX_BYTES = 2 * 1024 * 1024 * 1024;
 const CLEANUP_TARGET_RATIO = 0.9;
 
@@ -39,10 +49,10 @@ let tauriModulesPromise: Promise<
       fs: TauriFs;
       path: TauriPath;
       core: TauriCore;
+      db: SqlDatabase;
     }
   | undefined
 > | null = null;
-let indexWriteQueue = Promise.resolve();
 let cleanupPromise: Promise<void> | null = null;
 const requestPromises = new Map<string, Promise<Blob>>();
 
@@ -57,62 +67,43 @@ const getTauriModules = async () => {
       import('@tauri-apps/plugin-fs'),
       import('@tauri-apps/api/path'),
       import('@tauri-apps/api/core'),
+      import('@tauri-apps/plugin-sql'),
     ])
-      .then(([fs, path, core]) => ({ fs, path, core }))
+      .then(async ([fs, path, core, sql]) => {
+        await ensureCacheDirs(fs);
+        const appDataDir = await path.appDataDir();
+        const dbPath = await path.join(appDataDir, MEDIA_CACHE_DIR, MEDIA_CACHE_DB_NAME);
+        const db = await sql.default.load(`sqlite:${dbPath}`);
+        await initDatabase(db);
+        return { fs, path, core, db };
+      })
       .catch((error) => {
-        warn('Failed to load Tauri modules', error);
+        warn('Failed to load Tauri cache modules', error);
         return undefined;
       });
   }
   return tauriModulesPromise;
 };
 
-const ensureCacheDirs = async (fs: TauriFs) => {
-  const options = { baseDir: fs.BaseDirectory.AppData, recursive: true };
-  await fs.mkdir(MEDIA_CACHE_OBJECTS_DIR, options);
+const ensureCacheDirs = async (fs: TauriFs, relativeDir = MEDIA_CACHE_OBJECTS_DIR) => {
+  await fs.mkdir(relativeDir, { baseDir: fs.BaseDirectory.AppData, recursive: true });
 };
 
-const safeJsonParse = <T>(json: string, fallback: T): T => {
-  try {
-    return JSON.parse(json) as T;
-  } catch {
-    return fallback;
-  }
-};
-
-const readIndex = async (fs: TauriFs): Promise<CachedMediaIndex> => {
-  try {
-    const indexText = await fs.readTextFile(MEDIA_CACHE_INDEX_PATH, {
-      baseDir: fs.BaseDirectory.AppData,
-    });
-    const parsed = safeJsonParse<Partial<CachedMediaIndex>>(indexText, { entries: {} });
-    return parsed && typeof parsed.entries === 'object'
-      ? { entries: parsed.entries ?? {} }
-      : { entries: {} };
-  } catch {
-    return { entries: {} };
-  }
-};
-
-const writeIndexNow = async (fs: TauriFs, index: CachedMediaIndex): Promise<void> => {
-  await ensureCacheDirs(fs);
-  await fs.writeTextFile(MEDIA_CACHE_INDEX_PATH, JSON.stringify(index), {
-    baseDir: fs.BaseDirectory.AppData,
-  });
-};
-
-const updateIndex = async (
-  fs: TauriFs,
-  updater: (index: CachedMediaIndex) => void | Promise<void>,
-): Promise<void> => {
-  indexWriteQueue = indexWriteQueue
-    .catch(() => undefined)
-    .then(async () => {
-      const index = await readIndex(fs);
-      await updater(index);
-      await writeIndexNow(fs, index);
-    });
-  await indexWriteQueue;
+const initDatabase = async (db: SqlDatabase): Promise<void> => {
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS media_cache_entries (
+      key TEXT PRIMARY KEY,
+      relative_path TEXT NOT NULL,
+      mime_type TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      created_at INTEGER NOT NULL,
+      last_accessed_at INTEGER NOT NULL
+    )
+  `);
+  await db.execute(`
+    CREATE INDEX IF NOT EXISTS idx_media_cache_entries_last_accessed_at
+    ON media_cache_entries(last_accessed_at)
+  `);
 };
 
 const stableStringify = (value: unknown): string => {
@@ -139,6 +130,15 @@ const safeExt = (mimeType: string): string => {
   return ext || 'bin';
 };
 
+const toEntry = (row: CachedMediaRow): CachedMediaEntry => ({
+  key: row.key,
+  relativePath: row.relative_path,
+  mimeType: row.mime_type,
+  size: Number(row.size),
+  createdAt: Number(row.created_at),
+  lastAccessedAt: Number(row.last_accessed_at),
+});
+
 const getCacheKey = async (request: CachedMediaRequest): Promise<string> =>
   sha256(
     stableStringify({
@@ -149,12 +149,59 @@ const getCacheKey = async (request: CachedMediaRequest): Promise<string> =>
     }),
   );
 
-const getRelativePath = (key: string, mimeType: string): string =>
-  `${MEDIA_CACHE_OBJECTS_DIR}/${key}.${safeExt(mimeType)}`;
+const getObjectDir = (createdAt: number): string => {
+  const date = new Date(createdAt);
+  const year = String(date.getUTCFullYear());
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
+  return `${MEDIA_CACHE_OBJECTS_DIR}/${year}/${month}/${day}`;
+};
+
+const getRelativePath = (key: string, mimeType: string, createdAt: number): string =>
+  `${getObjectDir(createdAt)}/${key}.${safeExt(mimeType)}`;
+
+const getCachedEntry = async (
+  db: SqlDatabase,
+  key: string,
+): Promise<CachedMediaEntry | undefined> => {
+  const rows = await db.select<CachedMediaRow[]>(
+    `SELECT key, relative_path, mime_type, size, created_at, last_accessed_at
+     FROM media_cache_entries
+     WHERE key = $1
+     LIMIT 1`,
+    [key],
+  );
+  return rows[0] ? toEntry(rows[0]) : undefined;
+};
+
+const upsertCachedEntry = async (db: SqlDatabase, entry: CachedMediaEntry): Promise<void> => {
+  await db.execute(
+    `INSERT INTO media_cache_entries
+      (key, relative_path, mime_type, size, created_at, last_accessed_at)
+     VALUES ($1, $2, $3, $4, $5, $6)
+     ON CONFLICT(key) DO UPDATE SET
+      relative_path = excluded.relative_path,
+      mime_type = excluded.mime_type,
+      size = excluded.size,
+      last_accessed_at = excluded.last_accessed_at`,
+    [
+      entry.key,
+      entry.relativePath,
+      entry.mimeType,
+      entry.size,
+      entry.createdAt,
+      entry.lastAccessedAt,
+    ],
+  );
+};
+
+const deleteCachedEntry = async (db: SqlDatabase, key: string): Promise<void> => {
+  await db.execute('DELETE FROM media_cache_entries WHERE key = $1', [key]);
+};
 
 const readCachedBlob = async (
   fs: TauriFs,
-  index: CachedMediaIndex,
+  db: SqlDatabase,
   entry: CachedMediaEntry,
 ): Promise<Blob | undefined> => {
   try {
@@ -162,11 +209,10 @@ const readCachedBlob = async (
     if (!exists) return undefined;
     const bytes = await fs.readFile(entry.relativePath, { baseDir: fs.BaseDirectory.AppData });
     const lastAccessedAt = Date.now();
-    entry.lastAccessedAt = lastAccessedAt;
-    await updateIndex(fs, (latestIndex) => {
-      const latestEntry = latestIndex.entries[entry.key];
-      if (latestEntry) latestEntry.lastAccessedAt = lastAccessedAt;
-    });
+    await db.execute('UPDATE media_cache_entries SET last_accessed_at = $1 WHERE key = $2', [
+      lastAccessedAt,
+      entry.key,
+    ]);
     return new Blob([bytes], { type: entry.mimeType || FALLBACK_MIMETYPE });
   } catch (error) {
     warn('Failed to read cached media', error);
@@ -187,31 +233,28 @@ const downloadRequestBlob = async (request: CachedMediaRequest): Promise<Blob> =
 
 const writeCachedBlob = async (
   fs: TauriFs,
+  db: SqlDatabase,
   request: CachedMediaRequest,
   key: string,
   blob: Blob,
 ): Promise<void> => {
-  try {
-    await ensureCacheDirs(fs);
-    const relativePath = getRelativePath(key, request.mimeType || blob.type || FALLBACK_MIMETYPE);
-    const bytes = new Uint8Array(await blob.arrayBuffer());
-    await fs.writeFile(relativePath, bytes, { baseDir: fs.BaseDirectory.AppData });
+  const mimeType = request.mimeType || blob.type || FALLBACK_MIMETYPE;
+  const existing = await getCachedEntry(db, key);
+  const createdAt = existing?.createdAt ?? Date.now();
+  const relativePath = existing?.relativePath ?? getRelativePath(key, mimeType, createdAt);
+  const bytes = new Uint8Array(await blob.arrayBuffer());
 
-    const now = Date.now();
-    await updateIndex(fs, (index) => {
-      index.entries[key] = {
-        key,
-        relativePath,
-        mimeType: request.mimeType || blob.type || FALLBACK_MIMETYPE,
-        size: bytes.byteLength,
-        createdAt: index.entries[key]?.createdAt ?? now,
-        lastAccessedAt: now,
-      };
-    });
-    void cleanupMediaCache().catch((error) => warn('Cache cleanup failed', error));
-  } catch (error) {
-    warn('Failed to write cached media', error);
-  }
+  await ensureCacheDirs(fs, getObjectDir(createdAt));
+  await fs.writeFile(relativePath, bytes, { baseDir: fs.BaseDirectory.AppData });
+
+  await upsertCachedEntry(db, {
+    key,
+    relativePath,
+    mimeType,
+    size: bytes.byteLength,
+    createdAt,
+    lastAccessedAt: Date.now(),
+  });
 };
 
 const loadFromCacheOrDownload = async (request: CachedMediaRequest, key: string): Promise<Blob> => {
@@ -219,22 +262,23 @@ const loadFromCacheOrDownload = async (request: CachedMediaRequest, key: string)
   if (!modules) return downloadRequestBlob(request);
 
   try {
-    await ensureCacheDirs(modules.fs);
-    const index = await readIndex(modules.fs);
-    const entry = index.entries[key];
+    const entry = await getCachedEntry(modules.db, key);
     if (entry) {
-      const cachedBlob = await readCachedBlob(modules.fs, index, entry);
+      const cachedBlob = await readCachedBlob(modules.fs, modules.db, entry);
       if (cachedBlob) return cachedBlob;
-      await updateIndex(modules.fs, (latestIndex) => {
-        delete latestIndex.entries[key];
-      });
+      await deleteCachedEntry(modules.db, key);
     }
   } catch (error) {
     warn('Failed to inspect cached media', error);
   }
 
   const blob = await downloadRequestBlob(request);
-  await writeCachedBlob(modules.fs, request, key, blob);
+  try {
+    await writeCachedBlob(modules.fs, modules.db, request, key, blob);
+    void cleanupMediaCache().catch((error) => warn('Cache cleanup failed', error));
+  } catch (error) {
+    warn('Failed to write cached media', error);
+  }
   return blob;
 };
 
@@ -260,8 +304,7 @@ export const loadCachedMediaUrl = async (request: CachedMediaRequest): Promise<s
   const key = await getCacheKey(request);
   await loadCachedMediaBlob(request);
 
-  const index = await readIndex(modules.fs);
-  const entry = index.entries[key];
+  const entry = await getCachedEntry(modules.db, key);
   if (!entry) {
     const blob = await loadCachedMediaBlob(request);
     return URL.createObjectURL(blob);
@@ -285,57 +328,30 @@ export const cleanupMediaCache = async (maxBytes = DEFAULT_MAX_BYTES): Promise<v
     const modules = await getTauriModules();
     if (!modules) return;
 
-    const index = await readIndex(modules.fs);
-    const entries = Object.values(index.entries);
-    let totalSize = 0;
-
-    await Promise.all(
-      entries.map(async (entry) => {
-        try {
-          const exists = await modules.fs.exists(entry.relativePath, {
-            baseDir: modules.fs.BaseDirectory.AppData,
-          });
-          if (!exists) {
-            delete index.entries[entry.key];
-            return;
-          }
-          const info = await modules.fs.stat(entry.relativePath, {
-            baseDir: modules.fs.BaseDirectory.AppData,
-          });
-          entry.size = info.size;
-          totalSize += info.size;
-        } catch {
-          delete index.entries[entry.key];
-        }
-      }),
+    const totalRows = await modules.db.select<TotalSizeRow[]>(
+      'SELECT COALESCE(SUM(size), 0) AS total_size FROM media_cache_entries',
     );
-
-    if (totalSize <= maxBytes) {
-      await updateIndex(modules.fs, (latestIndex) => {
-        latestIndex.entries = index.entries;
-      });
-      return;
-    }
+    let totalSize = Number(totalRows[0]?.total_size ?? 0);
+    if (totalSize <= maxBytes) return;
 
     const targetBytes = Math.floor(maxBytes * CLEANUP_TARGET_RATIO);
-    const removable = Object.values(index.entries).sort(
-      (a, b) => a.lastAccessedAt - b.lastAccessedAt,
+    const rows = await modules.db.select<CachedMediaRow[]>(
+      `SELECT key, relative_path, mime_type, size, created_at, last_accessed_at
+       FROM media_cache_entries
+       ORDER BY last_accessed_at ASC`,
     );
 
-    for (const entry of removable) {
+    for (const row of rows) {
       if (totalSize <= targetBytes) break;
+      const entry = toEntry(row);
       try {
         await modules.fs.remove(entry.relativePath, { baseDir: modules.fs.BaseDirectory.AppData });
       } catch {
-        // Missing files are handled by dropping their index entries.
+        // Missing files are handled by dropping their SQLite entries.
       }
+      await deleteCachedEntry(modules.db, entry.key);
       totalSize -= entry.size;
-      delete index.entries[entry.key];
     }
-
-    await updateIndex(modules.fs, (latestIndex) => {
-      latestIndex.entries = index.entries;
-    });
   })().finally(() => {
     cleanupPromise = null;
   });
