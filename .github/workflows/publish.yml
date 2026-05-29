@@ -26,6 +26,12 @@ jobs:
           NODE_OPTIONS: '--max_old_space_size=4096'
         run: npm run build
 
+      - name: Install Playwright browsers
+        run: npm run test:e2e:install
+
+      - name: Run e2e smoke tests
+        run: npm run test:e2e
+
       - name: Deploy to Netlify
         id: netlify-deploy
         uses: nwtgck/actions-netlify@v3.0
