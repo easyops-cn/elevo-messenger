@@ -119,6 +119,9 @@ export default defineConfig({
   ],
   optimizeDeps: {
     esbuildOptions: {
+      supported: {
+        'top-level-await': true,
+      },
       define: {
         global: 'globalThis',
       },
@@ -131,9 +134,13 @@ export default defineConfig({
       ],
     },
   },
+  esbuild: {
+    supported: {
+      'top-level-await': true,
+    },
+  },
   build: {
     outDir: 'dist',
-    target: 'esnext',
     sourcemap: true,
     copyPublicDir: false,
     rollupOptions: {
