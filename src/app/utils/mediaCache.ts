@@ -39,6 +39,7 @@ type SqlDatabase = import('@tauri-apps/plugin-sql').default;
 const MEDIA_CACHE_DIR = 'media-cache';
 const MEDIA_CACHE_OBJECTS_DIR = `${MEDIA_CACHE_DIR}/objects`;
 const MEDIA_CACHE_DB_NAME = 'index.sqlite3';
+const MEDIA_CACHE_BASE_DIR = 'AppLocalData';
 const DEFAULT_MAX_BYTES = 2 * 1024 * 1024 * 1024;
 const CLEANUP_TARGET_RATIO = 0.9;
 
@@ -71,8 +72,8 @@ const getTauriModules = async () => {
     ])
       .then(async ([fs, path, core, sql]) => {
         await ensureCacheDirs(fs);
-        const appDataDir = await path.appDataDir();
-        const dbPath = await path.join(appDataDir, MEDIA_CACHE_DIR, MEDIA_CACHE_DB_NAME);
+        const appLocalDataDir = await path.appLocalDataDir();
+        const dbPath = await path.join(appLocalDataDir, MEDIA_CACHE_DIR, MEDIA_CACHE_DB_NAME);
         const db = await sql.default.load(`sqlite:${dbPath}`);
         await initDatabase(db);
         return { fs, path, core, db };
@@ -86,7 +87,7 @@ const getTauriModules = async () => {
 };
 
 const ensureCacheDirs = async (fs: TauriFs, relativeDir = MEDIA_CACHE_OBJECTS_DIR) => {
-  await fs.mkdir(relativeDir, { baseDir: fs.BaseDirectory.AppData, recursive: true });
+  await fs.mkdir(relativeDir, { baseDir: fs.BaseDirectory[MEDIA_CACHE_BASE_DIR], recursive: true });
 };
 
 const initDatabase = async (db: SqlDatabase): Promise<void> => {
@@ -205,9 +206,13 @@ const readCachedBlob = async (
   entry: CachedMediaEntry,
 ): Promise<Blob | undefined> => {
   try {
-    const exists = await fs.exists(entry.relativePath, { baseDir: fs.BaseDirectory.AppData });
+    const exists = await fs.exists(entry.relativePath, {
+      baseDir: fs.BaseDirectory[MEDIA_CACHE_BASE_DIR],
+    });
     if (!exists) return undefined;
-    const bytes = await fs.readFile(entry.relativePath, { baseDir: fs.BaseDirectory.AppData });
+    const bytes = await fs.readFile(entry.relativePath, {
+      baseDir: fs.BaseDirectory[MEDIA_CACHE_BASE_DIR],
+    });
     const lastAccessedAt = Date.now();
     await db.execute('UPDATE media_cache_entries SET last_accessed_at = $1 WHERE key = $2', [
       lastAccessedAt,
@@ -245,7 +250,7 @@ const writeCachedBlob = async (
   const bytes = new Uint8Array(await blob.arrayBuffer());
 
   await ensureCacheDirs(fs, getObjectDir(createdAt));
-  await fs.writeFile(relativePath, bytes, { baseDir: fs.BaseDirectory.AppData });
+  await fs.writeFile(relativePath, bytes, { baseDir: fs.BaseDirectory[MEDIA_CACHE_BASE_DIR] });
 
   await upsertCachedEntry(db, {
     key,
@@ -311,14 +316,32 @@ export const loadCachedMediaUrl = async (request: CachedMediaRequest): Promise<s
   }
 
   try {
-    const appDataDir = await modules.path.appDataDir();
-    const filePath = await modules.path.join(appDataDir, entry.relativePath);
+    const appLocalDataDir = await modules.path.appLocalDataDir();
+    const filePath = await modules.path.join(appLocalDataDir, entry.relativePath);
     return modules.core.convertFileSrc(filePath);
   } catch (error) {
     warn('Failed to create cached media asset URL', error);
     const blob = await loadCachedMediaBlob(request);
     return URL.createObjectURL(blob);
   }
+};
+
+export const loadCachedMediaFilePath = async (request: CachedMediaRequest): Promise<string> => {
+  const modules = await getTauriModules();
+  if (!modules) {
+    throw new Error('Cached media file paths are only available in Tauri.');
+  }
+
+  const key = await getCacheKey(request);
+  await loadCachedMediaBlob(request);
+
+  const entry = await getCachedEntry(modules.db, key);
+  if (!entry) {
+    throw new Error('Cached media entry was not found after loading media.');
+  }
+
+  const appLocalDataDir = await modules.path.appLocalDataDir();
+  return modules.path.join(appLocalDataDir, entry.relativePath);
 };
 
 export const cleanupMediaCache = async (maxBytes = DEFAULT_MAX_BYTES): Promise<void> => {
@@ -345,7 +368,9 @@ export const cleanupMediaCache = async (maxBytes = DEFAULT_MAX_BYTES): Promise<v
       if (totalSize <= targetBytes) break;
       const entry = toEntry(row);
       try {
-        await modules.fs.remove(entry.relativePath, { baseDir: modules.fs.BaseDirectory.AppData });
+        await modules.fs.remove(entry.relativePath, {
+          baseDir: modules.fs.BaseDirectory[MEDIA_CACHE_BASE_DIR],
+        });
       } catch {
         // Missing files are handled by dropping their SQLite entries.
       }

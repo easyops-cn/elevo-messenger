@@ -1,5 +1,5 @@
 import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
-import { loadCachedMediaBlob, loadCachedMediaUrl } from './mediaCache';
+import { loadCachedMediaBlob, loadCachedMediaFilePath, loadCachedMediaUrl } from './mediaCache';
 
 export const loadMediaBlob = async (
   mediaUrl: string,
@@ -18,6 +18,17 @@ export const loadMediaBlobUrl = async (
   encInfo?: EncryptedAttachmentInfo,
 ): Promise<string> =>
   loadCachedMediaUrl({
+    mediaUrl,
+    mimeType,
+    encInfo,
+  });
+
+export const loadMediaFilePath = async (
+  mediaUrl: string,
+  mimeType: string,
+  encInfo?: EncryptedAttachmentInfo,
+): Promise<string> =>
+  loadCachedMediaFilePath({
     mediaUrl,
     mimeType,
     encInfo,

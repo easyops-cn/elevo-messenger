@@ -4,6 +4,7 @@ import { Box, Button, Header, Icon, IconButton, Icons, Spinner, Text, as, config
 import { useTranslation } from 'react-i18next';
 import { bytesToSize, getFileTypeIcon, secondsToMinutesAndSeconds } from '../../utils/common';
 import * as css from './UnknownFileViewer.css';
+import type { FilePreviewDownloadAction } from './types';
 
 export type BaseUnknownFileViewerProps = {
   name: string;
@@ -13,7 +14,7 @@ export type BaseUnknownFileViewerProps = {
   hideCloseButton?: boolean;
   downloading?: boolean;
   requestClose: () => void;
-  onDownload: () => Promise<void>;
+  downloadAction: FilePreviewDownloadAction;
 };
 
 export const BaseUnknownFileViewer = as<'div', BaseUnknownFileViewerProps>(
@@ -27,7 +28,7 @@ export const BaseUnknownFileViewer = as<'div', BaseUnknownFileViewerProps>(
       hideCloseButton,
       downloading,
       requestClose,
-      onDownload,
+      downloadAction,
       ...props
     },
     ref,
@@ -74,12 +75,18 @@ export const BaseUnknownFileViewer = as<'div', BaseUnknownFileViewerProps>(
             fill="Solid"
             size="400"
             radii="300"
-            onClick={onDownload}
+            onClick={downloadAction.onClick}
             disabled={downloading}
-            before={downloading ? <Spinner size="100" /> : <Icon size="200" src={Icons.Download} />}
+            before={
+              downloading ? (
+                <Spinner size="100" />
+              ) : (
+                <Icon size="200" src={downloadAction.icon ?? Icons.Download} />
+              )
+            }
             style={{ marginTop: config.space.S400 }}
           >
-            <Text size="T300">{t('viewer.download')}</Text>
+            <Text size="T300">{downloadAction.label}</Text>
           </Button>
         </Box>
       </Box>

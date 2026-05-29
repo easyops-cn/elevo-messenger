@@ -988,6 +988,7 @@
     "zoomIn": "Zoom In",
     "play": "Play",
     "download": "Download",
+    "openFolder": "Open Folder",
     "failedLoadPreview": "Failed to load preview.",
     "failedLoadPdf": "Failed to load PDF",
     "previous": "Previous",

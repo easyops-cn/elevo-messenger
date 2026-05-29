@@ -16,7 +16,6 @@ import {
   config,
   toRem,
 } from 'folds';
-import { useTranslation } from 'react-i18next';
 import { Range } from 'react-range';
 import {
   PlayTimeCallback,
@@ -30,6 +29,7 @@ import { secondsToMinutesAndSeconds } from '../../utils/common';
 import { MediaControl } from '../media/MediaControls';
 import { WaveformPlayer } from '../media/WaveformPlayer';
 import * as css from './AudioViewer.css';
+import type { FilePreviewDownloadAction } from './types';
 
 export type BaseAudioInfo = {
   size?: number;
@@ -46,7 +46,7 @@ type BaseAudioViewerProps = {
   downloading?: boolean;
   hideCloseButton?: boolean;
   requestClose: () => void;
-  onDownload: () => Promise<void>;
+  downloadAction: FilePreviewDownloadAction;
   onPlayClick?: () => void;
 };
 
@@ -238,13 +238,12 @@ export const BaseAudioViewer = as<'div', BaseAudioViewerProps>(
       downloading = false,
       hideCloseButton,
       requestClose,
-      onDownload,
+      downloadAction,
       onPlayClick,
       ...props
     },
     ref,
   ) => {
-    const { t } = useTranslation();
     const hasWaveform = Array.isArray(waveform) && waveform.length > 0;
     const infoDuration = info.duration ?? 0;
     const durationSec = (infoDuration >= 0 ? infoDuration : 0) / 1000;
@@ -272,11 +271,15 @@ export const BaseAudioViewer = as<'div', BaseAudioViewerProps>(
               variant="Primary"
               size="300"
               radii="300"
-              onClick={onDownload}
+              onClick={downloadAction.onClick}
               disabled={downloading}
-              aria-label={t('viewer.download')}
+              aria-label={downloadAction.label}
             >
-              {downloading ? <Spinner size="50" /> : <Icon size="50" src={Icons.Download} />}
+              {downloading ? (
+                <Spinner size="50" />
+              ) : (
+                <Icon size="50" src={downloadAction.icon ?? Icons.Download} />
+              )}
             </IconButton>
           </Box>
         </Header>

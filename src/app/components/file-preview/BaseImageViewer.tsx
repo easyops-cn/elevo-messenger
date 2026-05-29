@@ -5,17 +5,18 @@ import { useTranslation } from 'react-i18next';
 import { usePan } from '../../hooks/usePan';
 import { useZoom } from '../../hooks/useZoom';
 import * as css from '../image-viewer/ImageViewer.css';
+import type { FilePreviewDownloadAction } from './types';
 
 export type BaseImageViewerProps = {
   alt: string;
   src: string;
   hideCloseButton?: boolean;
   requestClose: () => void;
-  onDownload: () => Promise<void>;
+  downloadAction: FilePreviewDownloadAction;
 };
 
 export const BaseImageViewer = as<'div', BaseImageViewerProps>(
-  ({ className, alt, src, hideCloseButton, requestClose, onDownload, ...props }, ref) => {
+  ({ className, alt, src, hideCloseButton, requestClose, downloadAction, ...props }, ref) => {
     const { t } = useTranslation();
     const { zoom, zoomIn, zoomOut, setZoom } = useZoom(0.2);
     const { pan, cursor, onMouseDown } = usePan(zoom !== 1);
@@ -64,11 +65,11 @@ export const BaseImageViewer = as<'div', BaseImageViewerProps>(
             </IconButton>
             <Chip
               variant="Primary"
-              onClick={onDownload}
+              onClick={downloadAction.onClick}
               radii="300"
-              before={<Icon size="50" src={Icons.Download} />}
+              before={<Icon size="50" src={downloadAction.icon ?? Icons.Download} />}
             >
-              <Text size="B300">{t('viewer.download')}</Text>
+              <Text size="B300">{downloadAction.label}</Text>
             </Chip>
           </Box>
         </Header>
