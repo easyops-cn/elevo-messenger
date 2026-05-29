@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import { Box, Icons, Spinner, Text, as } from 'folds';
 import { useTranslation } from 'react-i18next';
+import { platform } from '@tauri-apps/plugin-os';
 import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { PdfViewer } from '../Pdf-viewer/PdfViewer';
 import { TextViewer } from '../text-viewer';
@@ -66,8 +67,10 @@ export const FilePreview = as<'div', FilePreviewProps>(
       }
     }, [item, downloadAction]);
 
+    const openFolderLabelKey =
+      platform() === 'macos' ? 'viewer.showInFinder' : 'viewer.openContainingFolder';
     const actionLabel =
-      downloadAction === 'open-folder' ? t('viewer.openFolder') : t('viewer.download');
+      downloadAction === 'open-folder' ? t(openFolderLabelKey) : t('viewer.download');
     const actionIcon = downloadAction === 'open-folder' ? FolderOpenIcon : Icons.Download;
     const viewerDownloadAction: FilePreviewDownloadAction = {
       label: actionLabel,
