@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ReactNode, useMemo } from 'react';
 import parse, { HTMLReactParserOptions } from 'html-react-parser';
 import Linkify from 'linkify-react';
 import { Opts } from 'linkifyjs';
@@ -21,16 +21,30 @@ export function RenderBody({
   htmlReactParserOptions,
   linkifyOpts,
 }: RenderBodyProps) {
-  if (body === '') <MessageEmptyContent />;
-  if (customBody) {
-    if (customBody === '') <MessageEmptyContent />;
+  const customBodyContent = useMemo<ReactNode>(() => {
+    if (customBody === undefined) return undefined;
+    if (customBody === '') return <MessageEmptyContent />;
     return parse(sanitizeCustomHtml(customBody), htmlReactParserOptions);
-  }
-  return (
-    <Linkify options={linkifyOpts}>
-      {highlightRegex
-        ? highlightText(highlightRegex, scaleSystemEmoji(body))
-        : scaleSystemEmoji(body)}
-    </Linkify>
+  }, [customBody, htmlReactParserOptions]);
+
+  const plainBodyContent = useMemo<ReactNode>(
+    () => (
+      <Linkify options={linkifyOpts}>
+        {highlightRegex
+          ? highlightText(highlightRegex, scaleSystemEmoji(body))
+          : scaleSystemEmoji(body)}
+      </Linkify>
+    ),
+    [body, highlightRegex, linkifyOpts],
   );
+
+  if (customBody !== undefined) {
+    return customBodyContent;
+  }
+
+  if (body === '') {
+    return <MessageEmptyContent />;
+  }
+
+  return plainBodyContent;
 }
