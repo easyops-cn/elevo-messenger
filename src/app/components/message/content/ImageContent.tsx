@@ -55,6 +55,7 @@ export type ImageContentProps = {
   url: string;
   info?: IImageInfo;
   encInfo?: EncryptedAttachmentInfo;
+  createdAt?: number;
   markedAsSpoiler?: boolean;
   spoilerReason?: string;
   renderViewer: (props: RenderViewerProps) => ReactNode;
@@ -69,6 +70,7 @@ export const ImageContent = as<'div', ImageContentProps>(
       url,
       info,
       encInfo,
+      createdAt,
       markedAsSpoiler,
       spoilerReason,
       renderViewer,
@@ -105,8 +107,8 @@ export const ImageContent = as<'div', ImageContentProps>(
         const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
         if (!mediaUrl) throw new Error('Invalid media URL');
         if (!encInfo && !NO_SERVICE_WORKER && !isDesktopTauri) return mediaUrl;
-        return loadMediaBlobUrl(mediaUrl, mimeType ?? FALLBACK_MIMETYPE, encInfo);
-      }, [mx, url, useAuthentication, mimeType, encInfo]),
+        return loadMediaBlobUrl(mediaUrl, mimeType ?? FALLBACK_MIMETYPE, encInfo, createdAt);
+      }, [mx, url, useAuthentication, mimeType, encInfo, createdAt]),
     );
 
     const handleLoad = () => {
@@ -133,6 +135,7 @@ export const ImageContent = as<'div', ImageContentProps>(
           size: info?.size,
           mediaUrl,
           encInfo,
+          createdAt,
         }))
       ) {
         return;

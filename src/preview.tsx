@@ -69,8 +69,10 @@ function PreviewApp() {
       duration: payload.duration,
       waveform: payload.waveform,
       langName: payload.langName,
-      loadBlob: () => loadMediaBlob(payload.mediaUrl, payload.mimeType, payload.encInfo),
-      loadFilePath: () => loadMediaFilePath(payload.mediaUrl, payload.mimeType, payload.encInfo),
+      loadBlob: () =>
+        loadMediaBlob(payload.mediaUrl, payload.mimeType, payload.encInfo, payload.createdAt),
+      loadFilePath: () =>
+        loadMediaFilePath(payload.mediaUrl, payload.mimeType, payload.encInfo, payload.createdAt),
     };
   }, [payload]);
 

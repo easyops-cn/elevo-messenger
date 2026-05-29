@@ -30,6 +30,7 @@ export type AudioContentProps = {
   url: string;
   info: IAudioInfo;
   encInfo?: EncryptedAttachmentInfo;
+  createdAt?: number;
   waveform?: number[];
   renderMediaControl: (props: RenderMediaControlProps) => ReactNode;
 };
@@ -38,6 +39,7 @@ export function AudioContent({
   url,
   info,
   encInfo,
+  createdAt,
   renderMediaControl,
 }: AudioContentProps) {
   const mx = useMatrixClient();
@@ -47,8 +49,8 @@ export function AudioContent({
     useCallback(async () => {
       const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
-      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo);
-    }, [mx, url, useAuthentication, mimeType, encInfo]),
+      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo, createdAt);
+    }, [mx, url, useAuthentication, mimeType, encInfo, createdAt]),
   );
 
   const audioRef = useRef<HTMLAudioElement | null>(null);

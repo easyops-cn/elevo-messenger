@@ -13,10 +13,18 @@ export type VoiceMessageProps = {
   url: string;
   info: IAudioInfo;
   encInfo?: EncryptedAttachmentInfo;
+  createdAt?: number;
   waveform: number[];
 };
 
-export function VoiceMessage({ mimeType, url, info, encInfo, waveform }: VoiceMessageProps) {
+export function VoiceMessage({
+  mimeType,
+  url,
+  info,
+  encInfo,
+  createdAt,
+  waveform,
+}: VoiceMessageProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
 
@@ -24,8 +32,8 @@ export function VoiceMessage({ mimeType, url, info, encInfo, waveform }: VoiceMe
     useCallback(async () => {
       const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
-      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo);
-    }, [mx, url, useAuthentication, mimeType, encInfo]),
+      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo, createdAt);
+    }, [mx, url, useAuthentication, mimeType, encInfo, createdAt]),
   );
 
   const infoDuration = info.duration ?? 0;

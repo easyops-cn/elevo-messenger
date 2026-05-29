@@ -303,14 +303,16 @@ type RenderImageContentProps = {
   mimeType?: string;
   url: string;
   encInfo?: IEncryptedFile;
+  createdAt?: number;
   markedAsSpoiler?: boolean;
   spoilerReason?: string;
 };
 type MImageProps = {
   content: IImageContent;
+  createdAt?: number;
   renderImageContent: (props: RenderImageContentProps) => ReactNode;
 };
-export function MImage({ content, renderImageContent }: MImageProps) {
+export function MImage({ content, createdAt, renderImageContent }: MImageProps) {
   const imgInfo = content?.info;
   const mxcUrl = content.file?.url ?? content.url;
   if (typeof mxcUrl !== 'string') {
@@ -325,6 +327,7 @@ export function MImage({ content, renderImageContent }: MImageProps) {
         mimeType: imgInfo?.mimetype,
         url: mxcUrl,
         encInfo: content.file,
+        createdAt,
         markedAsSpoiler: content[MATRIX_SPOILER_PROPERTY_NAME],
         spoilerReason: content[MATRIX_SPOILER_REASON_PROPERTY_NAME],
       })}
@@ -338,15 +341,17 @@ type RenderVideoContentProps = {
   mimeType: string;
   url: string;
   encInfo?: IEncryptedFile;
+  createdAt?: number;
   markedAsSpoiler?: boolean;
   spoilerReason?: string;
 };
 type MVideoProps = {
   content: IVideoContent;
+  createdAt?: number;
   renderAsFile: () => ReactNode;
   renderVideoContent: (props: RenderVideoContentProps) => ReactNode;
 };
-export function MVideo({ content, renderAsFile, renderVideoContent }: MVideoProps) {
+export function MVideo({ content, createdAt, renderAsFile, renderVideoContent }: MVideoProps) {
   const videoInfo = content?.info;
   const mxcUrl = content.file?.url ?? content.url;
   const safeMimeType = getBlobSafeMimeType(videoInfo?.mimetype ?? '');
@@ -366,6 +371,7 @@ export function MVideo({ content, renderAsFile, renderVideoContent }: MVideoProp
         mimeType: safeMimeType,
         url: mxcUrl,
         encInfo: content.file,
+        createdAt,
         markedAsSpoiler: content[MATRIX_SPOILER_PROPERTY_NAME],
         spoilerReason: content[MATRIX_SPOILER_REASON_PROPERTY_NAME],
       })}
@@ -379,15 +385,23 @@ type RenderAudioContentProps = {
   mimeType: string;
   url: string;
   encInfo?: IEncryptedFile;
+  createdAt?: number;
   waveform?: number[];
 };
 type MAudioProps = {
   content: IAudioContent;
+  createdAt?: number;
   renderAsFile: () => ReactNode;
   renderAudioContent: (props: RenderAudioContentProps) => ReactNode;
   outlined?: boolean;
 };
-export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: MAudioProps) {
+export function MAudio({
+  content,
+  createdAt,
+  renderAsFile,
+  renderAudioContent,
+  outlined,
+}: MAudioProps) {
   const audioInfo = content?.info;
   const mxcUrl = content.file?.url ?? content.url;
   const safeMimeType = getBlobSafeMimeType(audioInfo?.mimetype ?? '');
@@ -423,6 +437,7 @@ export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: 
           url={mxcUrl}
           info={audioInfo}
           encInfo={content.file}
+          createdAt={createdAt}
           waveform={waveform}
         />
       </Box>
@@ -441,6 +456,7 @@ export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: 
               url={mxcUrl}
               mimeType={safeMimeType}
               encInfo={content.file}
+              createdAt={createdAt}
             />
           }
         />
@@ -453,6 +469,7 @@ export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: 
             mimeType: safeMimeType,
             url: mxcUrl,
             encInfo: content.file,
+            createdAt,
             waveform,
           })}
         </AttachmentContent>
@@ -533,9 +550,10 @@ export function MLocation({ content }: MLocationProps) {
 
 type MStickerProps = {
   content: IImageContent;
+  createdAt?: number;
   renderImageContent: (props: RenderImageContentProps) => ReactNode;
 };
-export function MSticker({ content, renderImageContent }: MStickerProps) {
+export function MSticker({ content, createdAt, renderImageContent }: MStickerProps) {
   const imgInfo = content?.info;
   const mxcUrl = content.file?.url ?? content.url;
   if (typeof mxcUrl !== 'string') {
@@ -550,6 +568,7 @@ export function MSticker({ content, renderImageContent }: MStickerProps) {
         mimeType: imgInfo?.mimetype,
         url: mxcUrl,
         encInfo: content.file,
+        createdAt,
       })}
     </AttachmentBox>
   );

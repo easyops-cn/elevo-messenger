@@ -49,6 +49,7 @@ type VideoContentProps = {
   url: string;
   info: IVideoInfo & IThumbnailContent;
   encInfo?: EncryptedAttachmentInfo;
+  createdAt?: number;
   autoPlay?: boolean;
   markedAsSpoiler?: boolean;
   spoilerReason?: string;
@@ -64,6 +65,7 @@ export const VideoContent = as<'div', VideoContentProps>(
       url,
       info,
       encInfo,
+      createdAt,
       autoPlay,
       markedAsSpoiler,
       spoilerReason,
@@ -98,8 +100,8 @@ export const VideoContent = as<'div', VideoContentProps>(
       useCallback(async () => {
         const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
         if (!mediaUrl) throw new Error('Invalid media URL');
-        return loadMediaBlobUrl(mediaUrl, mimeType, encInfo);
-      }, [mx, url, useAuthentication, mimeType, encInfo]),
+        return loadMediaBlobUrl(mediaUrl, mimeType, encInfo, createdAt);
+      }, [mx, url, useAuthentication, mimeType, encInfo, createdAt]),
     );
 
     const handleLoad = () => {

@@ -1214,6 +1214,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
                   return (
                     <MSticker
                       content={mEvent.getContent()}
+                      createdAt={mEvent.getTs()}
                       renderImageContent={(props) => (
                         <ImageContent
                           {...props}
@@ -1312,6 +1313,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
             ) : (
               <MSticker
                 content={mEvent.getContent()}
+                createdAt={mEvent.getTs()}
                 renderImageContent={(props) => (
                   <ImageContent
                     {...props}

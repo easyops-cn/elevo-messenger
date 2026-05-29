@@ -12,6 +12,7 @@ export const useMediaDownload = (
   mimeType: string,
   fileName: string,
   encInfo?: EncryptedAttachmentInfo,
+  createdAt?: number,
 ) => {
   const mx = useMatrixClient();
   const useAuth = useMediaAuthentication();
@@ -21,9 +22,9 @@ export const useMediaDownload = (
       const mediaUrl = mxcUrlToHttp(mx, url, useAuth);
       if (!mediaUrl) throw new Error('Invalid media URL');
 
-      const fileContent = await loadMediaBlob(mediaUrl, mimeType, encInfo);
+      const fileContent = await loadMediaBlob(mediaUrl, mimeType, encInfo, createdAt);
 
       await saveFile(fileContent, fileName);
-    }, [mx, url, useAuth, mimeType, encInfo, fileName]),
+    }, [mx, url, useAuth, mimeType, encInfo, createdAt, fileName]),
   );
 };

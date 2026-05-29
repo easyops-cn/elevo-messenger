@@ -11,9 +11,10 @@ import { isDesktopTauri } from '../../../plugins/useTauriOpener';
 
 export type ThumbnailContentProps = {
   info: IThumbnailContent;
+  createdAt?: number;
   renderImage: (src: string) => ReactNode;
 };
-export function ThumbnailContent({ info, renderImage }: ThumbnailContentProps) {
+export function ThumbnailContent({ info, createdAt, renderImage }: ThumbnailContentProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
 
@@ -29,8 +30,13 @@ export function ThumbnailContent({ info, renderImage }: ThumbnailContentProps) {
       const mediaUrl = mxcUrlToHttp(mx, thumbMxcUrl, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
       if (!encInfo && !NO_SERVICE_WORKER && !isDesktopTauri) return mediaUrl;
-      return loadMediaBlobUrl(mediaUrl, thumbInfo.mimetype ?? FALLBACK_MIMETYPE, encInfo);
-    }, [mx, info, useAuthentication]),
+      return loadMediaBlobUrl(
+        mediaUrl,
+        thumbInfo.mimetype ?? FALLBACK_MIMETYPE,
+        encInfo,
+        createdAt,
+      );
+    }, [mx, info, useAuthentication, createdAt]),
   );
 
   useEffect(() => {

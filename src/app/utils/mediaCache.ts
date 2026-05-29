@@ -7,6 +7,7 @@ export type CachedMediaRequest = {
   mimeType: string;
   encInfo?: EncryptedAttachmentInfo;
   cacheVariant?: string;
+  createdAt?: number;
 };
 
 export type CachedMediaEntry = {
@@ -140,15 +141,23 @@ const toEntry = (row: CachedMediaRow): CachedMediaEntry => ({
   lastAccessedAt: Number(row.last_accessed_at),
 });
 
-const getCacheKey = async (request: CachedMediaRequest): Promise<string> =>
-  sha256(
-    stableStringify({
-      mediaUrl: request.mediaUrl,
-      mimeType: request.mimeType,
-      encInfo: request.encInfo,
-      cacheVariant: request.cacheVariant,
-    }),
-  );
+const getCacheKey = async (request: CachedMediaRequest): Promise<string> => {
+  const payload: Record<string, unknown> = {
+    mediaUrl: request.mediaUrl,
+    mimeType: request.mimeType,
+    encInfo: request.encInfo,
+    cacheVariant: request.cacheVariant,
+  };
+  if (typeof request.createdAt === 'number' && Number.isFinite(request.createdAt)) {
+    payload.createdAt = request.createdAt;
+  }
+  return sha256(stableStringify(payload));
+};
+
+const getCreatedAt = (request: CachedMediaRequest): number =>
+  typeof request.createdAt === 'number' && Number.isFinite(request.createdAt)
+    ? request.createdAt
+    : Date.now();
 
 const getObjectDir = (createdAt: number): string => {
   const date = new Date(createdAt);
@@ -245,7 +254,7 @@ const writeCachedBlob = async (
 ): Promise<void> => {
   const mimeType = request.mimeType || blob.type || FALLBACK_MIMETYPE;
   const existing = await getCachedEntry(db, key);
-  const createdAt = existing?.createdAt ?? Date.now();
+  const createdAt = existing?.createdAt ?? getCreatedAt(request);
   const relativePath = existing?.relativePath ?? getRelativePath(key, mimeType, createdAt);
   const bytes = new Uint8Array(await blob.arrayBuffer());
 
@@ -287,8 +296,11 @@ const loadFromCacheOrDownload = async (request: CachedMediaRequest, key: string)
   return blob;
 };
 
-export const loadCachedMediaBlob = async (request: CachedMediaRequest): Promise<Blob> => {
-  const key = await getCacheKey(request);
+export const loadCachedMediaBlob = async (
+  request: CachedMediaRequest,
+  cacheKey?: string,
+): Promise<Blob> => {
+  const key = cacheKey ?? (await getCacheKey(request));
   const existing = requestPromises.get(key);
   if (existing) return existing;
 
@@ -307,11 +319,11 @@ export const loadCachedMediaUrl = async (request: CachedMediaRequest): Promise<s
   }
 
   const key = await getCacheKey(request);
-  await loadCachedMediaBlob(request);
+  await loadCachedMediaBlob(request, key);
 
   const entry = await getCachedEntry(modules.db, key);
   if (!entry) {
-    const blob = await loadCachedMediaBlob(request);
+    const blob = await loadCachedMediaBlob(request, key);
     return URL.createObjectURL(blob);
   }
 
@@ -321,7 +333,7 @@ export const loadCachedMediaUrl = async (request: CachedMediaRequest): Promise<s
     return modules.core.convertFileSrc(filePath);
   } catch (error) {
     warn('Failed to create cached media asset URL', error);
-    const blob = await loadCachedMediaBlob(request);
+    const blob = await loadCachedMediaBlob(request, key);
     return URL.createObjectURL(blob);
   }
 };
@@ -333,7 +345,7 @@ export const loadCachedMediaFilePath = async (request: CachedMediaRequest): Prom
   }
 
   const key = await getCacheKey(request);
-  await loadCachedMediaBlob(request);
+  await loadCachedMediaBlob(request, key);
 
   const entry = await getCachedEntry(modules.db, key);
   if (!entry) {

@@ -96,6 +96,7 @@ export const createDesktopPreviewPayload = (
     name: filename,
     mimeType: mimetype,
     size: fileSize,
+    createdAt: fileEvent.getTs(),
     duration: audioInfo.duration,
     mediaUrl,
     encInfo,

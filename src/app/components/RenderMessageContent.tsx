@@ -117,6 +117,7 @@ export function RenderMessageContent({
                 mimeType={mimeType}
                 url={url}
                 encInfo={encInfo}
+                createdAt={ts}
                 onOpenDesktop={async () => {
                   const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
                   return !!(
@@ -128,6 +129,7 @@ export function RenderMessageContent({
                       size: info.size,
                       mediaUrl,
                       encInfo,
+                      createdAt: ts,
                     }))
                   );
                 }}
@@ -140,6 +142,7 @@ export function RenderMessageContent({
                 mimeType={mimeType}
                 url={url}
                 encInfo={encInfo}
+                createdAt={ts}
                 onOpenDesktop={async () => {
                   const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
                   return !!(
@@ -151,6 +154,7 @@ export function RenderMessageContent({
                       size: info.size,
                       mediaUrl,
                       encInfo,
+                      createdAt: ts,
                     }))
                   );
                 }}
@@ -158,7 +162,14 @@ export function RenderMessageContent({
               />
             )}
           >
-            <DownloadFile body={body} mimeType={mimeType} url={url} encInfo={encInfo} info={info} />
+            <DownloadFile
+              body={body}
+              mimeType={mimeType}
+              url={url}
+              encInfo={encInfo}
+              createdAt={ts}
+              info={info}
+            />
           </FileContent>
         )}
       />
@@ -228,6 +239,7 @@ export function RenderMessageContent({
       <>
         <MImage
           content={getContent()}
+          createdAt={ts}
           renderImageContent={(props) => (
             <ImageContent
               {...props}
@@ -246,6 +258,7 @@ export function RenderMessageContent({
       <>
         <MVideo
           content={getContent()}
+          createdAt={ts}
           renderAsFile={renderFile}
           renderVideoContent={({ body, info, ...props }) => (
             <VideoContent
@@ -255,6 +268,7 @@ export function RenderMessageContent({
               renderThumbnail={() => (
                 <ThumbnailContent
                   info={info}
+                  createdAt={ts}
                   renderImage={(src) => <Image alt={body} title={body} src={src} loading="lazy" />}
                 />
               )}
@@ -272,6 +286,7 @@ export function RenderMessageContent({
       <>
         <MAudio
           content={getContent()}
+          createdAt={ts}
           renderAsFile={renderFile}
           renderAudioContent={(props) => (
             <AudioContent {...props} renderMediaControl={(p) => <MediaControl {...p} />} />
