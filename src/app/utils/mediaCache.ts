@@ -289,7 +289,7 @@ const loadFromCacheOrDownload = async (request: CachedMediaRequest, key: string)
   const blob = await downloadRequestBlob(request);
   try {
     await writeCachedBlob(modules.fs, modules.db, request, key, blob);
-    void cleanupMediaCache().catch((error) => warn('Cache cleanup failed', error));
+    // void cleanupMediaCache().catch((error) => warn('Cache cleanup failed', error));
   } catch (error) {
     warn('Failed to write cached media', error);
   }
