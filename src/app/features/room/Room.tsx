@@ -60,8 +60,8 @@ export function Room() {
           markAsRead(mx, room.roomId, hideActivity);
         }
       },
-      [mx, room.roomId, hideActivity]
-    )
+      [mx, room.roomId, hideActivity],
+    ),
   );
 
   const callView = room.isCallRoom();
@@ -96,9 +96,7 @@ export function Room() {
           </PageMain>
         )}
         {showThreadPanel && <ThreadChatView eventId={threadEventId} />}
-        {callView && chat && (
-          <CallChatView />
-        )}
+        {callView && chat && <CallChatView />}
         {!callView && screenSize === ScreenSize.Desktop && showSidePanel && !showThreadPanel && (
           <RoomSidePanel key={room.roomId} room={room} />
         )}

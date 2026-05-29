@@ -68,8 +68,8 @@ function RoomUpgradeDialog({ requestClose }: { requestClose: () => void }) {
           additional_creators: newAdditionalCreators,
         });
       },
-      [mx, room]
-    )
+      [mx, room],
+    ),
   );
 
   const upgrading = upgradeState.status === AsyncStatus.Loading;
@@ -105,7 +105,11 @@ function RoomUpgradeDialog({ requestClose }: { requestClose: () => void }) {
               size="500"
             >
               <Box grow="Yes">
-                <Text size="H4">{room.isSpaceRoom() ? t('roomSettings.spaceUpgrade') : t('roomSettings.roomUpgrade')}</Text>
+                <Text size="H4">
+                  {room.isSpaceRoom()
+                    ? t('roomSettings.spaceUpgrade')
+                    : t('roomSettings.roomUpgrade')}
+                </Text>
               </Box>
               <IconButton size="300" onClick={requestClose} radii="300">
                 <Icon src={Icons.Cross} />
@@ -150,7 +154,11 @@ function RoomUpgradeDialog({ requestClose }: { requestClose: () => void }) {
                 disabled={upgrading}
                 before={upgrading && <Spinner size="200" variant="Secondary" fill="Solid" />}
               >
-                <Text size="B400">{room.isSpaceRoom() ? t('roomSettings.spaceUpgrade') : t('roomSettings.roomUpgrade')}</Text>
+                <Text size="B400">
+                  {room.isSpaceRoom()
+                    ? t('roomSettings.spaceUpgrade')
+                    : t('roomSettings.roomUpgrade')}
+                </Text>
               </Button>
             </Box>
           </Dialog>
@@ -171,14 +179,14 @@ export function RoomUpgrade({ permissions, requestClose }: RoomUpgradeProps) {
   const { navigateRoom, navigateSpace } = useRoomNavigate();
   const createContent = useStateEvent(
     room,
-    StateEvent.RoomCreate
+    StateEvent.RoomCreate,
   )?.getContent<IRoomCreateContent>();
   const roomVersion = createContent?.room_version ?? '1';
   const predecessorRoomId = createContent?.predecessor?.room_id;
 
   const tombstoneContent = useStateEvent(
     room,
-    StateEvent.RoomTombstone
+    StateEvent.RoomTombstone,
   )?.getContent<RoomTombstoneEventContent>();
   const replacementRoom = tombstoneContent?.replacement_room;
 
@@ -234,7 +242,9 @@ export function RoomUpgrade({ permissions, requestClose }: RoomUpgradeProps) {
                 radii="300"
                 onClick={handleOpenOldRoom}
               >
-                <Text size="B300">{room.isSpaceRoom() ? t('roomSettings.oldSpace') : t('roomSettings.oldRoom')}</Text>
+                <Text size="B300">
+                  {room.isSpaceRoom() ? t('roomSettings.oldSpace') : t('roomSettings.oldRoom')}
+                </Text>
               </Button>
             )}
             {replacementRoom ? (
@@ -245,7 +255,11 @@ export function RoomUpgrade({ permissions, requestClose }: RoomUpgradeProps) {
                 radii="300"
                 onClick={handleOpenRoom}
               >
-                <Text size="B300">{room.isSpaceRoom() ? t('roomSettings.openNewSpace') : t('roomSettings.openNewRoom')}</Text>
+                <Text size="B300">
+                  {room.isSpaceRoom()
+                    ? t('roomSettings.openNewSpace')
+                    : t('roomSettings.openNewRoom')}
+                </Text>
               </Button>
             ) : (
               <Button

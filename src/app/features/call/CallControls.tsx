@@ -43,11 +43,11 @@ export function CallControls({ callEmbed }: CallControlsProps) {
       if (!element) return;
       setCompact(element.clientWidth < 500);
     }, []),
-    useCallback(() => controlRef.current, [])
+    useCallback(() => controlRef.current, []),
   );
 
   const { microphone, video, sound, screenshare, spotlight } = useCallControlState(
-    callEmbed.control
+    callEmbed.control,
   );
 
   const [cords, setCords] = useState<RectCords>();
@@ -72,7 +72,7 @@ export function CallControls({ callEmbed }: CallControlsProps) {
   };
 
   const [hangupState, hangup] = useAsyncCallback(
-    useCallback(() => callEmbed.hangup(), [callEmbed])
+    useCallback(() => callEmbed.hangup(), [callEmbed]),
   );
   const exiting =
     hangupState.status === AsyncStatus.Loading || hangupState.status === AsyncStatus.Success;

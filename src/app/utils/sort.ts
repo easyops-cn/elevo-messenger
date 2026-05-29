@@ -57,7 +57,7 @@ export function getRoomLastActivityTimestamp(room: Room): number {
 
 export function sortRoomIdsByActivity(
   roomIds: string[],
-  getRoom: (id: string) => Room | undefined
+  getRoom: (id: string) => Room | undefined,
 ): string[] {
   const cache = new Map<string, number>();
 

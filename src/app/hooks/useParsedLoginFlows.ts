@@ -25,7 +25,7 @@ export const useParsedLoginFlows = (loginFlows: LoginFlow[]) => {
       token: getTokenFlow(loginFlows),
       sso: getSSOFlow(loginFlows),
     }),
-    [loginFlows]
+    [loginFlows],
   );
 
   return parsedFlow;

@@ -11,7 +11,7 @@ export type MediaVolumeControl = {
 };
 
 export const useMediaVolume = (
-  getTargetElement: () => HTMLMediaElement | null
+  getTargetElement: () => HTMLMediaElement | null,
 ): MediaVolumeData & MediaVolumeControl => {
   const [volumeData, setVolumeData] = useState<MediaVolumeData>({
     volume: 1,
@@ -24,7 +24,7 @@ export const useMediaVolume = (
       if (!targetEl) return;
       targetEl.muted = mute;
     },
-    [getTargetElement]
+    [getTargetElement],
   );
 
   const setVolume = useCallback(
@@ -33,7 +33,7 @@ export const useMediaVolume = (
       if (!targetEl) return;
       targetEl.volume = volume;
     },
-    [getTargetElement]
+    [getTargetElement],
   );
 
   useEffect(() => {

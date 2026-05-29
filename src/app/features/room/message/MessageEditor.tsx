@@ -81,7 +81,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
     const getPrevBodyAndFormattedBody = useCallback((): [
       string | undefined,
       string | undefined,
-      IMentions | undefined
+      IMentions | undefined,
     ] => {
       const evtId = mEvent.getId()!;
       const evtTimeline = room.getTimelineForEvent(evtId);
@@ -108,7 +108,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
             allowTextFormatting: true,
             allowBlockMarkdown: isMarkdown,
             allowInlineMarkdown: isMarkdown,
-          })
+          }),
         );
 
         const [prevBody, prevCustomHtml, prevMentions] = getPrevBodyAndFormattedBody();
@@ -157,7 +157,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
         };
 
         return mx.sendMessage(roomId, content as RoomMessageEventContent);
-      }, [mx, editor, roomId, mEvent, isMarkdown, getPrevBodyAndFormattedBody])
+      }, [mx, editor, roomId, mEvent, isMarkdown, getPrevBodyAndFormattedBody]),
     );
 
     const handleSave = useCallback(() => {
@@ -180,7 +180,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
           onCancel();
         }
       },
-      [onCancel, handleSave, enterForNewline]
+      [onCancel, handleSave, enterForNewline],
     );
 
     const handleKeyUp: KeyboardEventHandler = useCallback(
@@ -196,7 +196,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
           : undefined;
         setAutocompleteQuery(query);
       },
-      [editor]
+      [editor],
     );
 
     const handleCloseAutocomplete = useCallback(() => {
@@ -263,12 +263,14 @@ export const MessageEditor = as<'div', MessageEditorProps>(
           placeholder={t('room.editMessage')}
           onKeyDown={handleKeyDown}
           onKeyUp={handleKeyUp}
-          top={toolbar && (
-            <div>
-              <Toolbar />
-              <Line variant="Surface" size="300" />
-            </div>
-          )}
+          top={
+            toolbar && (
+              <div>
+                <Toolbar />
+                <Line variant="Surface" size="300" />
+              </div>
+            )
+          }
           bottom={
             <Box
               style={{ padding: config.space.S200, paddingTop: 0 }}
@@ -336,7 +338,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
                         onClick={
                           ((evt) =>
                             setAnchor(
-                              evt.currentTarget.getBoundingClientRect()
+                              evt.currentTarget.getBoundingClientRect(),
                             )) as MouseEventHandler<HTMLButtonElement>
                         }
                         variant="Surface"
@@ -355,5 +357,5 @@ export const MessageEditor = as<'div', MessageEditorProps>(
         />
       </div>
     );
-  }
+  },
 );

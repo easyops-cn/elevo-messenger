@@ -69,7 +69,7 @@ export const BADGE_LABEL_KEYS: Record<string, string> = {
   Moderator: 'room.powerTagModerator',
 };
 
-export const POWER_TAG_KEYS:  Record<string, string> = {
+export const POWER_TAG_KEYS: Record<string, string> = {
   ...BADGE_LABEL_KEYS,
   Member: 'room.powerTagMember',
   Muted: 'room.powerTagMuted',
@@ -105,7 +105,7 @@ export const usePowerLevelTags = (room: Room, powerLevels: IPowerLevels): PowerL
 
 export const getPowerLevelTag = (
   powerLevelTags: PowerLevelTags,
-  powerLevel: number
+  powerLevel: number,
 ): MemberPowerTag => {
   const tag: MemberPowerTag | undefined = powerLevelTags[powerLevel];
   return tag ?? generateFallbackTag(powerLevelTags, powerLevel);

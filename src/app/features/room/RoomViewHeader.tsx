@@ -290,7 +290,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
 
   const firstWorkspace = linkedWorkspaces[0];
   const firstTenant = (elevoConfig.workspaces?.tenants ?? []).find(
-    (tenant) => tenant.id === firstWorkspace?.owner_tenant_id
+    (tenant) => tenant.id === firstWorkspace?.owner_tenant_id,
   );
   const tasksUrlTemplate = firstTenant
     ? isDesktopTauri

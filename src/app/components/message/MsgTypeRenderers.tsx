@@ -398,7 +398,8 @@ export function MAudio({ content, renderAsFile, renderAudioContent, outlined }: 
 
   const msc1767Audio = content['org.matrix.msc1767.audio'];
   const waveform = msc1767Audio?.waveform;
-  const filename = content['org.matrix.msc1767.file']?.name ?? content.filename ?? content.body ?? 'Audio';
+  const filename =
+    content['org.matrix.msc1767.file']?.name ?? content.filename ?? content.body ?? 'Audio';
   if (Array.isArray(waveform) && waveform.length > 0) {
     return (
       <Box

@@ -42,7 +42,7 @@ export function SendRoomEvent({ type, stateKey, requestClose }: SendRoomEventPro
   const [jsonError, setJSONError] = useState<SyntaxError>();
   const { handleKeyDown, operations, getTarget } = useTextAreaCodeEditor(
     textAreaRef,
-    EDITOR_INTENT_SPACE_COUNT
+    EDITOR_INTENT_SPACE_COUNT,
   );
 
   const [submitState, submit] = useAsyncCallback<
@@ -57,8 +57,8 @@ export function SendRoomEvent({ type, stateKey, requestClose }: SendRoomEventPro
         }
         return mx.sendEvent(room.roomId, evtType as any, evtContent);
       },
-      [mx, room]
-    )
+      [mx, room],
+    ),
   );
   const submitting = submitState.status === AsyncStatus.Loading;
 
@@ -137,7 +137,9 @@ export function SendRoomEvent({ type, stateKey, requestClose }: SendRoomEventPro
           aria-disabled={submitting}
         >
           <Box shrink="No" direction="Column" gap="100">
-            <Text size="L400">{composeStateEvent ? t('devTools.stateEventType') : t('devTools.messageEventType')}</Text>
+            <Text size="L400">
+              {composeStateEvent ? t('devTools.stateEventType') : t('devTools.messageEventType')}
+            </Text>
             <Box gap="300">
               <Box grow="Yes" direction="Column">
                 <Input

@@ -22,15 +22,23 @@ function formatBytes(bytes: number): string {
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return `${(bytes / k**i).toFixed(1)} ${sizes[i]}`;
+  return `${(bytes / k ** i).toFixed(1)} ${sizes[i]}`;
 }
 
 export function About({ requestClose }: AboutProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const {
-    checking, downloading, updateAvailable, updateDownloaded, checked,
-    version, progress, error, checkAndPrepare, applyUpdate,
+    checking,
+    downloading,
+    updateAvailable,
+    updateDownloaded,
+    checked,
+    version,
+    progress,
+    error,
+    checkAndPrepare,
+    applyUpdate,
   } = useUpdateChecker();
   const [autoUpdateCheck, setAutoUpdateCheck] = useSetting(settingsAtom, 'autoUpdateCheck');
 
@@ -137,15 +145,16 @@ export function About({ requestClose }: AboutProps) {
                             {updateDownloaded
                               ? t('settings.aboutPage.updateReady', { version })
                               : downloading
-                                ? (progress?.total
-                                    ? t('settings.aboutPage.downloadingUpdate', {
-                                        downloaded: formatBytes(progress.downloaded),
-                                        total: formatBytes(progress.total),
-                                      })
-                                    : t('settings.aboutPage.downloading'))
+                                ? progress?.total
+                                  ? t('settings.aboutPage.downloadingUpdate', {
+                                      downloaded: formatBytes(progress.downloaded),
+                                      total: formatBytes(progress.total),
+                                    })
+                                  : t('settings.aboutPage.downloading')
                                 : checking
                                   ? t('settings.aboutPage.checkingForUpdates')
-                                  : error || (updateAvailable
+                                  : error ||
+                                    (updateAvailable
                                       ? t('settings.aboutPage.updateAvailable', { version })
                                       : checked
                                         ? t('settings.aboutPage.noUpdatesAvailable')

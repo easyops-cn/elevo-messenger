@@ -9,7 +9,7 @@ export type MediaPlayControl = {
 };
 
 export const useMediaPlay = (
-  getTargetElement: () => HTMLMediaElement | null
+  getTargetElement: () => HTMLMediaElement | null,
 ): MediaPlayData & MediaPlayControl => {
   const [playing, setPlay] = useState(false);
 
@@ -20,7 +20,7 @@ export const useMediaPlay = (
       if (play) targetEl.play();
       else targetEl.pause();
     },
-    [getTargetElement]
+    [getTargetElement],
   );
 
   useEffect(() => {

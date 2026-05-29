@@ -41,7 +41,7 @@ export const createCallEmbed = (
   dm: boolean,
   themeKind: ElementCallThemeKind,
   container: HTMLElement,
-  pref?: CallPreferences
+  pref?: CallPreferences,
 ): CallEmbed => {
   const rtcSession = mx.matrixRTC.getRoomSession(room);
   const ongoing = rtcSession.memberships.length > 0;
@@ -71,7 +71,7 @@ export const useCallStart = (dm = false) => {
 
       setCallEmbed(callEmbed);
     },
-    [mx, dm, theme, setCallEmbed, callEmbedRef]
+    [mx, dm, theme, setCallEmbed, callEmbedRef],
   );
 
   return startCall;
@@ -85,7 +85,7 @@ export const useCallJoined = (embed?: CallEmbed): boolean => {
     ElementWidgetActions.JoinCall,
     useCallback(() => {
       setJoined(true);
-    }, [])
+    }, []),
   );
 
   useEffect(() => {
@@ -105,7 +105,7 @@ export const useCallMemberSoundSync = (embed: CallEmbed) => {
   const callSession = useCallSession(embed.room);
   useCallMembersChange(
     callSession,
-    useCallback(() => embed.control.applySound(), [embed])
+    useCallback(() => embed.control.applySound(), [embed]),
   );
 };
 
@@ -135,6 +135,6 @@ export const useCallEmbedPlacementSync = (containerViewRef: RefObject<HTMLDivEle
 
   useResizeObserver(
     syncCallEmbedPlacement,
-    useCallback(() => containerViewRef.current, [containerViewRef])
+    useCallback(() => containerViewRef.current, [containerViewRef]),
   );
 };

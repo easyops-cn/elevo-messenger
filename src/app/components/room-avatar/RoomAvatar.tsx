@@ -1,6 +1,13 @@
 import { JoinRule } from 'matrix-js-sdk';
 import { AvatarFallback, AvatarImage, Icon, Icons, color } from 'folds';
-import React, { ComponentProps, ReactEventHandler, ReactNode, forwardRef, useMemo, useState } from 'react';
+import React, {
+  ComponentProps,
+  ReactEventHandler,
+  ReactNode,
+  forwardRef,
+  useMemo,
+  useState,
+} from 'react';
 import { useAtomValue } from 'jotai';
 import * as css from './RoomAvatar.css';
 import { getRoomIconSrc } from '../../utils/room';

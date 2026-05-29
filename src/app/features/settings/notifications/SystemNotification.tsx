@@ -45,8 +45,8 @@ function EmailNotification() {
           kind: null,
         } as unknown as IPusherRequest);
       },
-      [mx]
-    )
+      [mx],
+    ),
   );
 
   const handleChange = (value: boolean) => {
@@ -101,7 +101,7 @@ export function SystemNotification() {
   const [showNotifications, setShowNotifications] = useSetting(settingsAtom, 'showNotifications');
   const [isNotificationSounds, setIsNotificationSounds] = useSetting(
     settingsAtom,
-    'isNotificationSounds'
+    'isNotificationSounds',
   );
 
   const handleRequestNotificationPermission = () => {

@@ -57,7 +57,7 @@ export function OidcLogin({ clientId }: OidcLoginProps) {
       } else {
         window.location.href = authUrl;
       }
-    }, [clientId, redirectUri, baseUrl])
+    }, [clientId, redirectUri, baseUrl]),
   );
 
   // Listen for OAuth callback events from the Rust backend (Tauri only).
@@ -119,13 +119,13 @@ export function OidcLogin({ clientId }: OidcLoginProps) {
               navigate(getHomePath(), { replace: true });
             } catch (err) {
               setCallbackError(
-                err instanceof Error ? err.message : 'An unexpected error occurred during login.'
+                err instanceof Error ? err.message : 'An unexpected error occurred during login.',
               );
             } finally {
               setOauthPending(false);
             }
-          }
-        )
+          },
+        ),
       );
 
       // Handle user manually closing the OAuth window.
@@ -134,7 +134,7 @@ export function OidcLogin({ clientId }: OidcLoginProps) {
           if (settledRef.current) return;
           settledRef.current = true;
           setOauthPending(false);
-        })
+        }),
       );
     };
 

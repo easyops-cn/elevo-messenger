@@ -68,7 +68,9 @@ function CurrentDeviceInfo({ device }: { device: IMyDevice }) {
             {t('settings.deviceSettings.lastActivity')}
             {today(activeTs) && t('settings.deviceSettings.today')}
             {yesterday(activeTs) && t('settings.deviceSettings.yesterday')}
-            {!today(activeTs) && !yesterday(activeTs) && timeDayMonYear(activeTs, dateFormatString)}{' '}
+            {!today(activeTs) &&
+              !yesterday(activeTs) &&
+              timeDayMonYear(activeTs, dateFormatString)}{' '}
             {timeHourMinute(activeTs, hour24Clock)}
           </Text>
         )}
@@ -82,7 +84,7 @@ function VerificationGateScreen() {
   const mx = useMatrixClient();
   const defaultSecretStorageKeyId = useSecretStorageDefaultKeyId();
   const defaultSecretStorageKeyContent = useSecretStorageKeyContent(
-    defaultSecretStorageKeyId ?? ''
+    defaultSecretStorageKeyId ?? '',
   );
 
   const [devices] = useDeviceList();
@@ -147,9 +149,7 @@ function VerificationGateScreen() {
                 </Text>
               </InfoCard>
 
-              {currentDevice && (
-                <CurrentDeviceInfo device={currentDevice} />
-              )}
+              {currentDevice && <CurrentDeviceInfo device={currentDevice} />}
 
               <Button
                 variant="Critical"
@@ -186,7 +186,7 @@ export function DeviceVerificationGate({ children }: DeviceVerificationGateProps
   const verificationStatus = useDeviceVerificationStatus(
     crypto,
     mx.getSafeUserId(),
-    mx.getDeviceId() ?? undefined
+    mx.getDeviceId() ?? undefined,
   );
 
   const shouldAllow =

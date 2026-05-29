@@ -151,5 +151,5 @@ export const TimePicker = forwardRef<HTMLDivElement, TimePickerProps>(
         </Box>
       </Menu>
     );
-  }
+  },
 );

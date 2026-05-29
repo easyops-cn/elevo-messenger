@@ -188,7 +188,7 @@ export function WaveformPlayer({
 
           return (
             <div
-            // eslint-disable-next-line react/no-array-index-key
+              // eslint-disable-next-line react/no-array-index-key
               key={index}
               className={css.WaveformBar}
               style={{

@@ -43,7 +43,7 @@ export function CommandAutocomplete({
   const [result, search, resetSearch] = useAsyncSearch(
     commandNames,
     useCallback((commandName: string) => commandName, []),
-    SEARCH_OPTIONS
+    SEARCH_OPTIONS,
   );
 
   const autoCompleteNames = result ? result.items : commandNames;

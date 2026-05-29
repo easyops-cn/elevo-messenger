@@ -24,9 +24,7 @@ export function SpecVersions({ baseUrl, children }: { baseUrl: string; children:
           <Box direction="Column" grow="Yes" alignItems="Center" justifyContent="Center" gap="400">
             <Dialog>
               <Box direction="Column" gap="400" style={{ padding: config.space.S400 }}>
-                <Text>
-                  {t('auth.failedConnectHomeserverDown')}
-                </Text>
+                <Text>{t('auth.failedConnectHomeserverDown')}</Text>
                 <Button variant="Critical" onClick={retry}>
                   <Text as="span" size="B400">
                     {t('common.retry')}

@@ -1,17 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
-import {
-  Badge,
-  Box,
-  Text,
-  Icon,
-  Icons,
-  IconButton,
-  Button,
-  Spinner,
-  Scroll,
-  color,
-} from 'folds';
+import { Badge, Box, Text, Icon, Icons, IconButton, Button, Spinner, Scroll, color } from 'folds';
 import { Page, PageContent, PageHeader } from '../../../components/page';
 import { SequenceCard } from '../../../components/sequence-card';
 import { SequenceCardStyle } from '../styles.css';
@@ -42,7 +31,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
   const elevoConfig = useElevoConfig();
   const baseUrl = elevoConfig.workspaces?.apiBaseUrl ?? '';
   const tenantsById = new Map(
-    (elevoConfig.workspaces?.tenants ?? []).map((tenant) => [tenant.id, tenant.name])
+    (elevoConfig.workspaces?.tenants ?? []).map((tenant) => [tenant.id, tenant.name]),
   );
 
   const userId = mx.getSafeUserId();
@@ -60,7 +49,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
     React.useCallback(async () => {
       setConnectError(null);
       await connect();
-    }, [connect])
+    }, [connect]),
   );
 
   const showAddModalState = useState(false);
@@ -76,7 +65,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
       room.roomId,
       ELEVO_WORKSPACES_STATE_KEY as any,
       { workspaces: [...linkedWorkspaces, ws] },
-      ''
+      '',
     );
   };
 
@@ -85,7 +74,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
       room.roomId,
       ELEVO_WORKSPACES_STATE_KEY as any,
       { workspaces: linkedWorkspaces.filter((w) => w.id !== id) },
-      ''
+      '',
     );
   };
 
@@ -104,7 +93,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
         room.roomId,
         ELEVO_WORKSPACES_STATE_KEY as any,
         { workspaces: linkedWorkspaces.map((w) => (w.id === ws.id ? fresh : w)) },
-        ''
+        '',
       );
     } catch (e: any) {
       setSyncError(e.message ?? t('workspaces.syncFailed'));
@@ -137,7 +126,6 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
           <Scroll hideTrack visibility="Hover">
             <PageContent>
               <Box direction="Column" gap="700">
-
                 {/* Workspace Connection */}
                 <Box direction="Column" gap="100">
                   <Text size="L400">{t('workspaces.settings')}</Text>
@@ -153,22 +141,14 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                         connected ? (
                           <Box as="span" gap="100" alignItems="Center">
                             <Badge variant="Success" fill="Solid" size="200" radii="Pill" />
-                            <Text
-                              as="span"
-                              size="L400"
-                              style={{ color: color.Success.Main }}
-                            >
+                            <Text as="span" size="L400" style={{ color: color.Success.Main }}>
                               {t('links.connected')}
                             </Text>
                           </Box>
                         ) : refreshing ? (
                           <Box as="span" gap="100" alignItems="Center">
                             <Spinner size="200" variant="Secondary" />
-                            <Text
-                              as="span"
-                              size="L400"
-                              style={{ color: color.Warning.Main }}
-                            >
+                            <Text as="span" size="L400" style={{ color: color.Warning.Main }}>
                               {t('links.refreshing')}
                             </Text>
                           </Box>
@@ -176,11 +156,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                           <Box alignItems="Center" gap="200">
                             <Box as="span" gap="100" alignItems="Center">
                               <Badge variant="Critical" fill="Solid" size="200" radii="Pill" />
-                              <Text
-                                as="span"
-                                size="L400"
-                                style={{ color: color.Critical.Main }}
-                              >
+                              <Text as="span" size="L400" style={{ color: color.Critical.Main }}>
                                 {t('links.expired')}
                               </Text>
                             </Box>
@@ -192,7 +168,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                                 radii="300"
                                 onClick={() =>
                                   startConnect().catch((e) =>
-                                    setConnectError(e.message ?? String(e))
+                                    setConnectError(e.message ?? String(e)),
                                   )
                                 }
                                 disabled={isConnecting}
@@ -219,9 +195,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                             fill="Solid"
                             radii="300"
                             onClick={() =>
-                              startConnect().catch((e) =>
-                                setConnectError(e.message ?? String(e))
-                              )
+                              startConnect().catch((e) => setConnectError(e.message ?? String(e)))
                             }
                             disabled={isConnecting}
                             before={
@@ -261,7 +235,9 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                     >
                       <SettingTile
                         title={t('workspaces.noWorkspacesLinked')}
-                        description={isModerator ? t('workspaces.noWorkspacesLinkedDesc') : undefined}
+                        description={
+                          isModerator ? t('workspaces.noWorkspacesLinkedDesc') : undefined
+                        }
                       />
                     </SequenceCard>
                   ) : (
@@ -354,7 +330,6 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                     </SequenceCard>
                   </Box>
                 )}
-
               </Box>
             </PageContent>
           </Scroll>

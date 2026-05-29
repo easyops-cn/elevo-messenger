@@ -1,10 +1,7 @@
 import { useCallback } from 'react';
 import { NavigateOptions, useNavigate } from 'react-router-dom';
 import { getCanonicalAliasOrRoomId } from '../utils/matrix';
-import {
-  getExploreSpacePath,
-  getHomeRoomPath,
-} from '../pages/pathUtils';
+import { getExploreSpacePath, getHomeRoomPath } from '../pages/pathUtils';
 import { useMatrixClient } from './useMatrixClient';
 
 export const useRoomNavigate = () => {
@@ -16,7 +13,7 @@ export const useRoomNavigate = () => {
       const roomIdOrAlias = getCanonicalAliasOrRoomId(mx, roomId);
       navigate(getExploreSpacePath(roomIdOrAlias));
     },
-    [mx, navigate]
+    [mx, navigate],
   );
 
   const navigateRoom = useCallback(
@@ -24,7 +21,7 @@ export const useRoomNavigate = () => {
       const roomIdOrAlias = getCanonicalAliasOrRoomId(mx, roomId);
       navigate(getHomeRoomPath(roomIdOrAlias, eventId), opts);
     },
-    [mx, navigate]
+    [mx, navigate],
   );
 
   return {

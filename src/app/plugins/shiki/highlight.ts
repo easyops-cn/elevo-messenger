@@ -36,7 +36,7 @@ export function getCodeHighlighter(): Promise<HighlighterCore> {
           themes: [githubDarkTheme, githubLightTheme],
           langs: [],
           engine: createOnigurumaEngine(import('shiki/wasm')),
-        })
+        }),
     );
   }
 
@@ -62,7 +62,10 @@ export function getShikiThemeName(themeKind: ThemeKind): ShikiThemeName {
 }
 
 export function normalizeLanguageName(language?: string): string | undefined {
-  const normalized = language?.replace(/^language-/, '').trim().toLowerCase();
+  const normalized = language
+    ?.replace(/^language-/, '')
+    .trim()
+    .toLowerCase();
   if (!normalized) return undefined;
   return languageMap[normalized] ?? normalized;
 }
@@ -95,7 +98,7 @@ function resolveLanguage(candidate: string, bundle: LanguageBundle): BundledLang
   if (candidate in bundledLanguages) return candidate as BundledLanguage;
 
   const info = bundledLanguagesInfo.find(
-    (item) => item.id === candidate || item.aliases?.includes(candidate)
+    (item) => item.id === candidate || item.aliases?.includes(candidate),
   );
   if (info?.id && info.id in bundledLanguages) return info.id as BundledLanguage;
 
@@ -104,7 +107,7 @@ function resolveLanguage(candidate: string, bundle: LanguageBundle): BundledLang
 
 export function inferLanguage(
   input: { language?: string; path?: string },
-  bundle: LanguageBundle
+  bundle: LanguageBundle,
 ): BundledLanguage | 'text' {
   const candidates = [
     normalizeLanguageName(input.language),
@@ -121,7 +124,7 @@ export function inferLanguage(
 export async function ensureLanguage(
   highlighter: HighlighterCore,
   bundle: LanguageBundle,
-  lang: BundledLanguage | 'text'
+  lang: BundledLanguage | 'text',
 ): Promise<void> {
   if (lang === 'text' || highlighter.getLoadedLanguages().includes(lang)) return;
 

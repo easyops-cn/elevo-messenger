@@ -22,11 +22,12 @@ const paginateBackwardCache = new Set<string>();
 function filterFileEvents(events: MatrixEvent[]): MatrixEvent[] {
   return events.filter((evt) => {
     if (evt.isRedacted()) return false;
-      const eventType = evt.getType();
-      if (eventType !== MessageEvent.RoomMessage && eventType !== MessageEvent.RoomMessageEncrypted) return false;
+    const eventType = evt.getType();
+    if (eventType !== MessageEvent.RoomMessage && eventType !== MessageEvent.RoomMessageEncrypted)
+      return false;
 
-      const msgtype = evt.getContent()?.msgtype;
-      return typeof msgtype === 'string' && ALLOWED_FILE_MSG_TYPES.has(msgtype);
+    const msgtype = evt.getContent()?.msgtype;
+    return typeof msgtype === 'string' && ALLOWED_FILE_MSG_TYPES.has(msgtype);
   });
 }
 
@@ -68,10 +69,10 @@ export const useRoomFiles = (room: Room): UseRoomFilesResult => {
       try {
         filter.filterId = await mx.getOrCreateFilter(
           `FILTER_FILES_${mx.credentials.userId}`,
-          filter
+          filter,
         );
         const timelineSet = room.getOrCreateFilteredTimelineSet(filter);
-        
+
         syncFiles = async () => {
           if (!alive) return;
 
@@ -94,13 +95,13 @@ export const useRoomFiles = (room: Room): UseRoomFilesResult => {
 
               // back-paginate will first check local IndexedDB
               // eslint-disable-next-line no-await-in-loop
-              const hasMore = await mx.paginateEventTimeline(timeline, { 
-                backwards: true, 
-                limit: 50 
+              const hasMore = await mx.paginateEventTimeline(timeline, {
+                backwards: true,
+                limit: 50,
               });
 
               validEvents = filterFileEvents(timeline.getEvents());
-              
+
               if (!hasMore) break;
             }
           }

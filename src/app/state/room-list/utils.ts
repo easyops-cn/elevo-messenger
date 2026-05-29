@@ -17,7 +17,7 @@ export const useBindRoomsWithMembershipsAtom = (
   mx: MatrixClient,
   roomsAtom: WritableAtom<string[], [RoomsAction], undefined>,
   memberships: Membership[],
-  setInitialized?: (initialized: boolean) => void
+  setInitialized?: (initialized: boolean) => void,
 ) => {
   const setRoomsAtom = useSetAtom(roomsAtom);
 

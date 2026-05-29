@@ -7,12 +7,12 @@ export const useFileDropHandler = (onDrop: (file: File[]) => void): DragEventHan
       const files = getDataTransferFiles(evt.dataTransfer);
       if (files) onDrop(files);
     },
-    [onDrop]
+    [onDrop],
   );
 
 export const useFileDropZone = (
   zoneRef: RefObject<HTMLElement>,
-  onDrop: (file: File[]) => void
+  onDrop: (file: File[]) => void,
 ): boolean => {
   const dragStateRef = useRef<'start' | 'leave' | 'over'>();
   const [active, setActive] = useState(false);

@@ -67,10 +67,10 @@ export function SearchResultGroup({
     () => ({
       ...LINKIFY_OPTS,
       render: factoryRenderLinkifyWithMention((href) =>
-        renderMatrixMention(mx, room.roomId, href, makeMentionCustomProps(mentionClickHandler))
+        renderMatrixMention(mx, room.roomId, href, makeMentionCustomProps(mentionClickHandler)),
       ),
     }),
-    [mx, room, mentionClickHandler]
+    [mx, room, mentionClickHandler],
   );
   const htmlReactParserOptions = useMemo<HTMLReactParserOptions>(
     () =>
@@ -89,34 +89,32 @@ export function SearchResultGroup({
       mentionClickHandler,
       spoilerClickHandler,
       useAuthentication,
-    ]
+    ],
   );
 
-  const renderMatrixEvent = useMatrixEventRenderer<[MatrixEvent, string, GetContentCallback]>(
-    {
-      [MessageEvent.RoomMessage]: (event, displayName, getContent) => {
-        if (event.isRedacted()) {
-          return <RedactedContent reason={event.getUnsigned().redacted_because?.content.reason} />;
-        }
+  const renderMatrixEvent = useMatrixEventRenderer<[MatrixEvent, string, GetContentCallback]>({
+    [MessageEvent.RoomMessage]: (event, displayName, getContent) => {
+      if (event.isRedacted()) {
+        return <RedactedContent reason={event.getUnsigned().redacted_because?.content.reason} />;
+      }
 
-        return (
-          <RenderMessageContent
-            displayName={displayName}
-            msgType={event.getContent().msgtype ?? ''}
-            ts={event.getTs()}
-            eventId={event.getId()!}
-            senderId={event.getSender()}
-            getContent={getContent}
-            urlPreview={urlPreview}
-            htmlReactParserOptions={htmlReactParserOptions}
-            linkifyOpts={linkifyOpts}
-            highlightRegex={highlightRegex}
-            outlineAttachment
-          />
-        );
-      },
+      return (
+        <RenderMessageContent
+          displayName={displayName}
+          msgType={event.getContent().msgtype ?? ''}
+          ts={event.getTs()}
+          eventId={event.getId()!}
+          senderId={event.getSender()}
+          getContent={getContent}
+          urlPreview={urlPreview}
+          htmlReactParserOptions={htmlReactParserOptions}
+          linkifyOpts={linkifyOpts}
+          highlightRegex={highlightRegex}
+          outlineAttachment
+        />
+      );
     },
-  );
+  });
 
   const handleOpenClick: MouseEventHandler = (evt) => {
     const eventId = evt.currentTarget.getAttribute('data-event-id');
@@ -179,14 +177,14 @@ export function SearchResultGroup({
                         userId={senderUserId}
                         src={
                           senderAvatarMxc
-                            ? mxcUrlToHttp(
+                            ? (mxcUrlToHttp(
                                 mx,
                                 senderAvatarMxc,
                                 useAuthentication,
                                 48,
                                 48,
-                                'crop'
-                              ) ?? undefined
+                                'crop',
+                              ) ?? undefined)
                             : undefined
                         }
                         alt={displayName}

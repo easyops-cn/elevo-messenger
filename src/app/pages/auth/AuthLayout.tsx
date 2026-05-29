@@ -127,7 +127,7 @@ export function AuthLayout() {
         serverName,
         response,
       };
-    }, [])
+    }, []),
   );
 
   useEffect(() => {
@@ -146,7 +146,7 @@ export function AuthLayout() {
         generatePath(currentAuthPath(location.pathname), {
           server: encodeURIComponent(server),
         }),
-        { replace: true }
+        { replace: true },
       );
     }
   }, [urlEncodedServer, navigate, location, server]);
@@ -159,10 +159,10 @@ export function AuthLayout() {
         return;
       }
       navigate(
-        generatePath(currentAuthPath(location.pathname), { server: encodeURIComponent(newServer) })
+        generatePath(currentAuthPath(location.pathname), { server: encodeURIComponent(newServer) }),
       );
     },
-    [navigate, location, discoveryState, server, discoverServer]
+    [navigate, location, discoveryState, server, discoverServer],
   );
 
   const [autoDiscoveryError, autoDiscoveryInfo] =
@@ -214,41 +214,39 @@ export function AuthLayout() {
               <AuthServerProvider value={discoveryState.data.serverName}>
                 <AutoDiscoveryInfoProvider value={autoDiscoveryInfo}>
                   <AuthElevoConfigLoader baseUrl={autoDiscoveryInfo['m.homeserver'].base_url}>
-                  <SpecVersionsLoader
-                    baseUrl={autoDiscoveryInfo['m.homeserver'].base_url}
-                    fallback={() => (
-                      <AuthLayoutLoading
-                        message={t('auth.connectingTo', { url: autoDiscoveryInfo['m.homeserver'].base_url })}
-                      />
-                    )}
-                    error={() => (
-                      <AuthLayoutError message={t('auth.failedConnectUnavailable')} />
-                    )}
-                  >
-                    {(specVersions) => (
-                      <SpecVersionsProvider value={specVersions}>
-                        <AuthFlowsLoader
-                          fallback={() => (
-                            <AuthLayoutLoading message={t('auth.loadingAuthFlow')} />
-                          )}
-                          error={() => (
-                            <AuthLayoutError message={t('auth.failedAuthFlow')} />
-                          )}
-                        >
-                          {(authFlows) => (
-                            <AuthFlowsProvider value={authFlows}>
-                              <OidcMetadataLoader
-                                baseUrl={autoDiscoveryInfo['m.homeserver'].base_url}
-                                server={server}
-                              >
-                                <Outlet />
-                              </OidcMetadataLoader>
-                            </AuthFlowsProvider>
-                          )}
-                        </AuthFlowsLoader>
-                      </SpecVersionsProvider>
-                    )}
-                  </SpecVersionsLoader>
+                    <SpecVersionsLoader
+                      baseUrl={autoDiscoveryInfo['m.homeserver'].base_url}
+                      fallback={() => (
+                        <AuthLayoutLoading
+                          message={t('auth.connectingTo', {
+                            url: autoDiscoveryInfo['m.homeserver'].base_url,
+                          })}
+                        />
+                      )}
+                      error={() => <AuthLayoutError message={t('auth.failedConnectUnavailable')} />}
+                    >
+                      {(specVersions) => (
+                        <SpecVersionsProvider value={specVersions}>
+                          <AuthFlowsLoader
+                            fallback={() => (
+                              <AuthLayoutLoading message={t('auth.loadingAuthFlow')} />
+                            )}
+                            error={() => <AuthLayoutError message={t('auth.failedAuthFlow')} />}
+                          >
+                            {(authFlows) => (
+                              <AuthFlowsProvider value={authFlows}>
+                                <OidcMetadataLoader
+                                  baseUrl={autoDiscoveryInfo['m.homeserver'].base_url}
+                                  server={server}
+                                >
+                                  <Outlet />
+                                </OidcMetadataLoader>
+                              </AuthFlowsProvider>
+                            )}
+                          </AuthFlowsLoader>
+                        </SpecVersionsProvider>
+                      )}
+                    </SpecVersionsLoader>
                   </AuthElevoConfigLoader>
                 </AutoDiscoveryInfoProvider>
               </AuthServerProvider>

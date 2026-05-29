@@ -30,6 +30,6 @@ export const Reply = style({
     },
     '&:hover': {
       opacity: config.opacity.P500,
-    }
+    },
   },
 });

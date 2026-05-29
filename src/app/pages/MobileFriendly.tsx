@@ -9,7 +9,11 @@ type MobileFriendlyPageNavProps = {
   hiddenOnMobile?: boolean;
   children: ReactNode;
 };
-export function MobileFriendlyPageNav({ path, hiddenOnMobile, children }: MobileFriendlyPageNavProps) {
+export function MobileFriendlyPageNav({
+  path,
+  hiddenOnMobile,
+  children,
+}: MobileFriendlyPageNavProps) {
   const screenSize = useScreenSizeContext();
   const exactPath = useMatch({
     path,
@@ -27,5 +31,5 @@ export function MobileFriendlyPageNav({ path, hiddenOnMobile, children }: Mobile
       {children}
       <BottomNav />
     </Box>
-  )
+  );
 }

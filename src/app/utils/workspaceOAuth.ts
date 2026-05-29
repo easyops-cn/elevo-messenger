@@ -53,7 +53,7 @@ async function generatePKCE(): Promise<{ codeVerifier: string; codeChallenge: st
 function buildAuthorizationUrl(
   config: OAuthServerConfig,
   state: string,
-  codeChallenge: string
+  codeChallenge: string,
 ): string {
   const params = new URLSearchParams({
     response_type: 'code',
@@ -70,7 +70,7 @@ function buildAuthorizationUrl(
 async function exchangeCodeForToken(
   config: OAuthServerConfig,
   code: string,
-  codeVerifier: string
+  codeVerifier: string,
 ): Promise<OAuthTokenResponse> {
   const params = new URLSearchParams({
     grant_type: 'authorization_code',
@@ -89,7 +89,7 @@ async function exchangeCodeForToken(
 }
 
 export async function performWorkspaceOAuth(
-  config: OAuthServerConfig
+  config: OAuthServerConfig,
 ): Promise<WorkspaceOAuthResult> {
   const state = generateState();
   const { codeVerifier, codeChallenge } = await generatePKCE();
@@ -146,15 +146,15 @@ export async function performWorkspaceOAuth(
             await cleanup();
             reject(err);
           }
-        }
-      )
+        },
+      ),
     );
 
     unlistenPromises.push(
       listen('oauth-elevo-workspace--window-closed', () => {
         cleanup();
         reject(new Error('OAuth window was closed before authentication completed.'));
-      })
+      }),
     );
   });
 }
@@ -162,7 +162,7 @@ export async function performWorkspaceOAuth(
 export async function refreshWorkspaceOAuthToken(
   serverUrl: string,
   clientId: string,
-  refreshToken: string
+  refreshToken: string,
 ): Promise<WorkspaceOAuthResult> {
   const params = new URLSearchParams({
     grant_type: 'refresh_token',

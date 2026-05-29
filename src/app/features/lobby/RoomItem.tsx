@@ -49,7 +49,7 @@ function RoomJoinButton({ roomId, via }: RoomJoinButtonProps) {
   const mx = useMatrixClient();
 
   const [joinState, join] = useAsyncCallback<Room, MatrixError, []>(
-    useCallback(() => mx.joinRoom(roomId, { viaServers: via }), [mx, roomId, via])
+    useCallback(() => mx.joinRoom(roomId, { viaServers: via }), [mx, roomId, via]),
   );
 
   const canJoin = joinState.status === AsyncStatus.Idle || joinState.status === AsyncStatus.Error;
@@ -315,7 +315,7 @@ export const RoomItemCard = as<'div', RoomItemCardProps>(
       getRoom,
       ...props
     },
-    ref
+    ref,
   ) => {
     const { t } = useTranslation();
     const mx = useMatrixClient();
@@ -409,8 +409,8 @@ export const RoomItemCard = as<'div', RoomItemCardProps>(
                   topic={summary.topic}
                   avatarUrl={
                     summary?.avatar_url
-                      ? mxcUrlToHttp(mx, summary.avatar_url, useAuthentication, 96, 96, 'crop') ??
-                        undefined
+                      ? (mxcUrlToHttp(mx, summary.avatar_url, useAuthentication, 96, 96, 'crop') ??
+                        undefined)
                       : undefined
                   }
                   memberCount={summary.num_joined_members}
@@ -426,5 +426,5 @@ export const RoomItemCard = as<'div', RoomItemCardProps>(
         {after}
       </SequenceCard>
     );
-  }
+  },
 );

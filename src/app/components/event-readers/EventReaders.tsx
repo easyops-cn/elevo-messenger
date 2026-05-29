@@ -70,7 +70,7 @@ export const EventReaders = as<'div', EventReadersProps>(
                       'crop',
                       undefined,
                       false,
-                      useAuthentication
+                      useAuthentication,
                     )
                   : undefined;
 
@@ -85,7 +85,7 @@ export const EventReaders = as<'div', EventReadersProps>(
                         space?.roomId,
                         readerId,
                         getMouseEventCords(event.nativeEvent),
-                        'Bottom'
+                        'Bottom',
                       );
                     }}
                     before={
@@ -110,5 +110,5 @@ export const EventReaders = as<'div', EventReadersProps>(
         </Box>
       </Box>
     );
-  }
+  },
 );

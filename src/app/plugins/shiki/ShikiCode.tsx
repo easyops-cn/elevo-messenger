@@ -18,7 +18,7 @@ type ShikiCodeProps = {
 export function ShikiCode({ code, lang, className, ...props }: ShikiCodeProps) {
   const theme = useTheme();
   const [tokenLines, setTokenLines] = useState<HighlightedTokenLines>(() =>
-    getPlainTokenLines(code)
+    getPlainTokenLines(code),
   );
 
   useEffect(() => {

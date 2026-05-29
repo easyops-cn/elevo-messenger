@@ -53,13 +53,7 @@ const shouldFocusMessageField = (evt: KeyboardEvent): boolean => {
   return true;
 };
 
-export function RoomView({
-  eventId,
-  thread,
-}: {
-  eventId?: string;
-  thread?: Thread;
-}) {
+export function RoomView({ eventId, thread }: { eventId?: string; thread?: Thread }) {
   const roomViewRef = useRef<HTMLDivElement>(null);
 
   const room = useRoom();
@@ -88,8 +82,8 @@ export function RoomView({
           ReactEditor.focus(editor);
         }
       },
-      [editor]
-    )
+      [editor],
+    ),
   );
 
   return (
@@ -97,12 +91,7 @@ export function RoomView({
       <RoomThreadProvider thread={thread}>
         <Page ref={roomViewRef}>
           <Box grow="Yes" direction="Column">
-            <RoomTimeline
-              key={roomId}
-              room={room}
-              eventId={eventId}
-              editor={editor}
-            />
+            <RoomTimeline key={roomId} room={room} eventId={eventId} editor={editor} />
           </Box>
           <Box shrink="No" direction="Column">
             {!thread && <RoomViewTyping room={room} />}

@@ -21,7 +21,7 @@ export function useThreadChat(roomId: string): [ThreadChatState, (state: ThreadC
         [roomId]: newState,
       }));
     },
-    [roomId, setThreadChatStates]
+    [roomId, setThreadChatStates],
   );
 
   return useMemo(() => [state, setState], [state, setState]);

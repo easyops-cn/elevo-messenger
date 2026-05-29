@@ -72,7 +72,7 @@ export const requestNotificationPermission = async (): Promise<PermissionState> 
 };
 
 export const sendSystemNotification = async (
-  options: SystemNotificationOptions
+  options: SystemNotificationOptions,
 ): Promise<SystemNotificationHandle | undefined> => {
   const permission = await getNotificationPermission();
   if (permission !== 'granted') return undefined;

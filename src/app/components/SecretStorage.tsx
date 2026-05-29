@@ -38,7 +38,7 @@ export function SecretStorageRecoveryPassphrase({
           passphrase,
           salt,
           iterations,
-          bits
+          bits,
         );
 
         const match = await mx.secretStorage.checkKey(decodedRecoveryKey, keyContent as any);
@@ -49,8 +49,8 @@ export function SecretStorageRecoveryPassphrase({
 
         return decodedRecoveryKey;
       },
-      [mx, keyContent]
-    )
+      [mx, keyContent],
+    ),
   );
 
   const drivingKey = driveKeyState.status === AsyncStatus.Loading;
@@ -142,8 +142,8 @@ export function SecretStorageRecoveryKey({
 
         return decodedRecoveryKey;
       },
-      [mx, keyContent]
-    )
+      [mx, keyContent],
+    ),
   );
 
   const drivingKey = driveKeyState.status === AsyncStatus.Loading;

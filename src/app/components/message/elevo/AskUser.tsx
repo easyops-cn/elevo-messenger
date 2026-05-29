@@ -88,7 +88,7 @@ const AskUserQuestionSchema = z.object({
       z.union([
         z.object({ answers: z.array(z.string()) }),
         z.object({ fields: z.record(z.string(), z.string()) }),
-      ])
+      ]),
     )
     .optional(),
 });
@@ -100,7 +100,7 @@ const QuestionAnswersSchema = z.record(
   z.union([
     z.object({ answers: z.array(z.string()) }),
     z.object({ fields: z.record(z.string(), z.string()) }),
-  ])
+  ]),
 );
 
 export type AskUserQuestionAnswers = z.infer<typeof QuestionAnswersSchema>;
@@ -190,8 +190,8 @@ function AskUserSelect({
       ? DisabledCheckboxIcon
       : CheckboxIcon
     : disabled
-    ? DisabledRadioIcon
-    : RadioIcon;
+      ? DisabledRadioIcon
+      : RadioIcon;
 
   const renderOption = (option: AskUserSelectOption, isOther = false) => {
     const isSelected = isOther ? hasOtherSelected : selectedValues.includes(option.label);
@@ -272,7 +272,7 @@ export function QuestionAnsweredCard({
   const { t } = useTranslation();
   const questionById = useMemo(
     () => new Map((questions ?? []).map((question) => [question.id, question.question])),
-    [questions]
+    [questions],
   );
 
   return (
@@ -346,9 +346,9 @@ export function AskUserQuestionCard({
   const isAssignedUser = !!assignedUserId && mx.getUserId() === assignedUserId;
   const isDisabled = !isAssignedUser || submitted || readOnly;
   const assignedDisplayName = assignedUserId
-    ? getMemberDisplayName(room, assignedUserId) ??
+    ? (getMemberDisplayName(room, assignedUserId) ??
       getMxIdLocalPart(assignedUserId) ??
-      assignedUserId
+      assignedUserId)
     : undefined;
 
   const answerId = eventId;
@@ -382,7 +382,7 @@ export function AskUserQuestionCard({
         return false;
       return true;
     },
-    [data.questions, formAnswers, formOtherTexts, selections, otherTexts, showOtherOption]
+    [data.questions, formAnswers, formOtherTexts, selections, otherTexts, showOtherOption],
   );
 
   const canSubmit = useMemo(() => {
@@ -430,7 +430,7 @@ export function AskUserQuestionCard({
         return { ...prev, [qIndex]: [...current, label] };
       });
     },
-    [data.questions, isDisabled]
+    [data.questions, isDisabled],
   );
 
   const handleFormOptionToggle = useCallback(
@@ -444,7 +444,7 @@ export function AskUserQuestionCard({
         },
       }));
     },
-    [isDisabled]
+    [isDisabled],
   );
 
   const handleSubmit = useCallback(async () => {
@@ -485,7 +485,7 @@ export function AskUserQuestionCard({
           ? {
               format: 'org.matrix.custom.html',
               formatted_body: `<a href="${encodeURI(getMatrixToUser(questionSenderId))}">@${sanitizeText(
-                questionSenderId
+                questionSenderId,
               )}</a> ${sanitizeText(answerBody)}`,
             }
           : {}),

@@ -34,7 +34,7 @@ export function LeaveRoomPrompt({ roomId, onDone, onCancel }: LeaveRoomPromptPro
   const [leaveState, leaveRoom] = useAsyncCallback<undefined, MatrixError, []>(
     useCallback(async () => {
       mx.leave(roomId);
-    }, [mx, roomId])
+    }, [mx, roomId]),
   );
 
   const handleLeave = () => {
@@ -98,7 +98,9 @@ export function LeaveRoomPrompt({ roomId, onDone, onCancel }: LeaveRoomPromptPro
                 }
               >
                 <Text size="B400">
-                  {leaveState.status === AsyncStatus.Loading ? t('dialog.leaving') : t('dialog.leave')}
+                  {leaveState.status === AsyncStatus.Loading
+                    ? t('dialog.leaving')
+                    : t('dialog.leave')}
                 </Text>
               </Button>
             </Box>

@@ -11,18 +11,12 @@ export const isDesktopTauri = isTauri && !mobileOrTablet();
 // Domains whose links open in an in-app WebviewWindow with the ElevoMessengerSDK injected.
 // Keep in sync with ALLOWED_DOMAINS in src-tauri/src/lib.rs.
 // Replace placeholders with real domains before shipping.
-const ALLOWED_DOMAINS: string[] = [
-  'localhost',
-  'easyops.local',
-  'elevo.vip',
-];
+const ALLOWED_DOMAINS: string[] = ['localhost', 'easyops.local', 'elevo.vip'];
 
 function isDomainAllowed(href: string): boolean {
   try {
     const { hostname } = new URL(href);
-    return ALLOWED_DOMAINS.some(
-      (d) => hostname === d || hostname.endsWith(`.${d}`)
-    );
+    return ALLOWED_DOMAINS.some((d) => hostname === d || hostname.endsWith(`.${d}`));
   } catch {
     return false;
   }
@@ -56,13 +50,15 @@ function labelFromUrl(href: string, roomId: string): string {
  */
 function openSidePanel(href: string, roomId: string, label?: string): void {
   if (isDesktopTauri && isDomainAllowed(href)) {
-    invoke('open_side_panel', { url: href, label: label ?? labelFromUrl(href, roomId), roomId }).catch(
-      (error) => {
-        // eslint-disable-next-line no-console
-        console.error('Failed to open side panel, falling back to system browser:', error);
-        window.open(href, '_blank', 'noopener,noreferrer');
-      }
-    );
+    invoke('open_side_panel', {
+      url: href,
+      label: label ?? labelFromUrl(href, roomId),
+      roomId,
+    }).catch((error) => {
+      // eslint-disable-next-line no-console
+      console.error('Failed to open side panel, falling back to system browser:', error);
+      window.open(href, '_blank', 'noopener,noreferrer');
+    });
   } else {
     window.open(href, '_blank', 'noopener,noreferrer');
   }
@@ -107,7 +103,7 @@ export function useTauriThemeSync(themeKind: string) {
 
 export function useSdkMessageListener<T = unknown>(
   channel: string,
-  handler: (payload: SdkMessagePayload<T>) => void
+  handler: (payload: SdkMessagePayload<T>) => void,
 ) {
   useEffect(() => {
     // Mobile: no-op for now; will be wired up when mobile support is added.

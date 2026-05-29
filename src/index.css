@@ -1,6 +1,7 @@
 @font-face {
   font-family: Twemoji;
-  src: url('../public/font/Twemoji.Mozilla.v15.1.0.woff2'),
+  src:
+    url('../public/font/Twemoji.Mozilla.v15.1.0.woff2'),
     url('../public/font/Twemoji.Mozilla.v15.1.0.ttf');
   font-display: swap;
 }
@@ -19,7 +20,10 @@
   --mx-uc-8: hsl(94, 100%, 35%);
 
   --font-emoji: 'Twemoji_DISABLED';
-  --font-secondary: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, var(--font-emoji), 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  --font-secondary:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei UI', 'Microsoft YaHei', Roboto,
+    'Helvetica Neue', Arial, 'Noto Sans', sans-serif, var(--font-emoji), 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 }
 
 .dark-theme {

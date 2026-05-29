@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 
 interface RelativeTimeProps {
   ts: number;
-};
+}
 
 export function RelativeTime({ ts }: RelativeTimeProps) {
   const formatRelativeTime = useCallback(() => dayjs(ts).fromNow(), [ts]);

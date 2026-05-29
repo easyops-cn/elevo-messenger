@@ -238,8 +238,8 @@ function ApplyPatchOperationCard({
     operation.kind === 'add'
       ? operation.content
       : operation.kind === 'update'
-      ? operation.diff
-      : null;
+        ? operation.diff
+        : null;
 
   const moveTo = operation.kind === 'update' ? operation.moveTo : undefined;
   const codeViewPath = moveTo ?? operation.path;
@@ -273,7 +273,9 @@ function ApplyPatchOperationCard({
         role={body !== null ? 'button' : undefined}
         // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
         tabIndex={body !== null ? 0 : undefined}
-        aria-label={body !== null ? t('message.diffEditedOneFile', { path: codeViewPath }) : undefined}
+        aria-label={
+          body !== null ? t('message.diffEditedOneFile', { path: codeViewPath }) : undefined
+        }
       >
         <div className={iconClassName}>
           {status === 'inprogress' && (
@@ -337,25 +339,25 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
     data.status === 'inprogress' && css.ToolCallHeaderIconInprogress,
     {
       [css.ToolCallHeaderIconOffset]: messageLayout === MessageLayout.Modern,
-    }
+    },
   );
 
   const prettierInput = useMemo(() => tryJsonPrettier(data.input), [data.input]);
   const prettierOutput = useMemo(
     () => tryJsonPrettier(data.output ?? data.error),
-    [data.output, data.error]
+    [data.output, data.error],
   );
   const todos = useMemo(() => getTodosForRender(data), [data]);
   const patchOperations = useMemo(
     () => getApplyPatchForRender(data) ?? getToolCallDiffForRender(data),
-    [data]
+    [data],
   );
 
   const prettierToolName = useMemo(
     () =>
       data.name.charAt(0).toUpperCase() +
       data.name.slice(1).replace(/_([a-z])?/g, (_, c) => ` ${c ? c.toUpperCase() : ''}`),
-    [data.name]
+    [data.name],
   );
 
   const toolTitle = useMemo(() => {
@@ -421,8 +423,8 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
                     checked
                       ? DisabledCheckboxIcon
                       : todo.status === 'in_progress'
-                      ? SquareAsteriskIcon
-                      : DisabledCheckboxIcon
+                        ? SquareAsteriskIcon
+                        : DisabledCheckboxIcon
                   }
                   filled={checked}
                   size="50"

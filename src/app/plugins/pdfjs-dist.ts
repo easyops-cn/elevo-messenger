@@ -9,10 +9,10 @@ export const usePdfJSLoader = () =>
     useCallback(async () => {
       const pdf = await import('pdfjs-dist');
       pdf.GlobalWorkerOptions.workerSrc = `${trimTrailingSlash(
-        import.meta.env.BASE_URL
+        import.meta.env.BASE_URL,
       )}/pdf.worker.min.js`;
       return pdf;
-    }, [])
+    }, []),
   );
 
 export const usePdfDocumentLoader = (pdfJS: typeof PdfJsDist | undefined, src: string) =>
@@ -23,13 +23,13 @@ export const usePdfDocumentLoader = (pdfJS: typeof PdfJsDist | undefined, src: s
       }
       const doc = await pdfJS.getDocument(src).promise;
       return doc;
-    }, [pdfJS, src])
+    }, [pdfJS, src]),
   );
 
 export const createPage = async (
   doc: PdfJsDist.PDFDocumentProxy,
   pNo: number,
-  opts: GetViewportParameters
+  opts: GetViewportParameters,
 ): Promise<HTMLCanvasElement> => {
   const page = await doc.getPage(pNo);
   const pageViewport = page.getViewport(opts);

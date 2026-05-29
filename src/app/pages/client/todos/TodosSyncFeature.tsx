@@ -64,7 +64,7 @@ function TodosApiSync() {
     () => () => {
       setTodos({ type: 'RESET' });
     },
-    [setTodos]
+    [setTodos],
   );
 
   return null;
@@ -119,7 +119,7 @@ function TodosTimelineSync() {
       room,
       _toStart,
       _removed,
-      data
+      data,
     ) => {
       if (!data.liveEvent || !room) return;
 

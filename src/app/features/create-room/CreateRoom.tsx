@@ -48,7 +48,6 @@ import { Volume2Icon } from '../../icons/Volume2Icon';
 import { HashIcon } from '../../icons/HashIcon';
 
 const getCreateRoomAccessToIcon = (access: CreateRoomAccess) => {
-
   let joinRule: JoinRule = JoinRule.Public;
   if (access === CreateRoomAccess.Restricted) joinRule = JoinRule.Restricted;
   if (access === CreateRoomAccess.Private) joinRule = JoinRule.Knock;
@@ -93,10 +92,10 @@ export function CreateRoomForm({
   const allowRestricted = space && restrictedSupported(selectedRoomVersion);
 
   const [type, setType] = useState(
-    callEnabled ? (defaultType ?? CreateRoomType.TextRoom) : CreateRoomType.TextRoom
+    callEnabled ? (defaultType ?? CreateRoomType.TextRoom) : CreateRoomType.TextRoom,
   );
   const [access, setAccess] = useState(
-    defaultAccess ?? (allowRestricted ? CreateRoomAccess.Restricted : CreateRoomAccess.Private)
+    defaultAccess ?? (allowRestricted ? CreateRoomAccess.Restricted : CreateRoomAccess.Private),
   );
   const allowAdditionalCreators = creatorsSupported(selectedRoomVersion);
   const { additionalCreators, addAdditionalCreator, removeAdditionalCreator } =
@@ -127,7 +126,7 @@ export function CreateRoomForm({
   };
 
   const [createState, create] = useAsyncCallback<string, Error | MatrixError, [CreateRoomData]>(
-    useCallback((data) => createRoom(mx, data), [mx])
+    useCallback((data) => createRoom(mx, data), [mx]),
   );
   const loading = createState.status === AsyncStatus.Loading;
   const error = createState.status === AsyncStatus.Error ? createState.error : undefined;
@@ -168,7 +167,7 @@ export function CreateRoomForm({
       name: roomName,
       topic: roomTopic || undefined,
       aliasLocalPart: publicRoom ? aliasLocalPart : undefined,
-      encryption: publicRoom ? false : (encryptionEnabled ? encryption : false),
+      encryption: publicRoom ? false : encryptionEnabled ? encryption : false,
       knock: roomKnock,
       allowFederation: federationEnabled ? federation : false,
       additionalCreators: allowAdditionalCreators ? additionalCreators : undefined,
@@ -342,7 +341,7 @@ export function CreateRoomForm({
               {error instanceof MatrixError && error.name === ErrorCode.M_LIMIT_EXCEEDED
                 ? t('create.rateLimited', {
                     minutes: millisecondsToMinutes(
-                      (error.data.retry_after_ms as number | undefined) ?? 0
+                      (error.data.retry_after_ms as number | undefined) ?? 0,
                     ),
                   })
                 : error.message}

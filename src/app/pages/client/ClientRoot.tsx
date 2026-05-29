@@ -160,11 +160,11 @@ export function ClientRoot({ children }: ClientRootProps) {
         throw new Error('No session Found!');
       }
       return initClient(session);
-    }, [])
+    }, []),
   );
   const mx = loadState.status === AsyncStatus.Success ? loadState.data : undefined;
   const [startState, startMatrix] = useAsyncCallback<void, Error, [MatrixClient]>(
-    useCallback((m) => startClient(m), [])
+    useCallback((m) => startClient(m), []),
   );
 
   useLogoutListener(mx);
@@ -183,12 +183,15 @@ export function ClientRoot({ children }: ClientRootProps) {
 
   useSyncState(
     mx,
-    useCallback((state) => {
-      if (state === 'PREPARED') {
-        setLoading(false);
-        setMatrixReady(true);
-      }
-    }, [setMatrixReady])
+    useCallback(
+      (state) => {
+        if (state === 'PREPARED') {
+          setLoading(false);
+          setMatrixReady(true);
+        }
+      },
+      [setMatrixReady],
+    ),
   );
 
   return (
@@ -212,13 +215,16 @@ export function ClientRoot({ children }: ClientRootProps) {
                     <>
                       <Text>{`Failed to load. ${loadState.error.message}`}</Text>
 
-                      <Button variant="Critical" onClick={() => {
-                        if (mx) {
-                          logoutClient(mx);
-                          return;
-                        }
-                        clearLoginData();
-                      }}>
+                      <Button
+                        variant="Critical"
+                        onClick={() => {
+                          if (mx) {
+                            logoutClient(mx);
+                            return;
+                          }
+                          clearLoginData();
+                        }}
+                      >
                         <Text as="span" size="B400">
                           Clear storage and retry
                         </Text>

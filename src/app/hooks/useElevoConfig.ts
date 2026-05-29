@@ -71,5 +71,5 @@ export function useElevoConfig(): ElevoConfig {
 
 export const getOidcStaticClientId = (
   elevoConfig: ElevoConfig,
-  server: string
+  server: string,
 ): string | undefined => elevoConfig.oidcStaticClients?.[server]?.client_id;

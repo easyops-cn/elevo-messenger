@@ -13,14 +13,17 @@ export function SyncStatusBridge({ mx }: SyncStatusBridgeProps) {
 
   useSyncState(
     mx,
-    useCallback((current: SyncState, previous: SyncState | null) => {
-      setSyncState((prev: SyncStatusInfo) => {
-        if (prev.state === current && prev.previous === previous) {
-          return prev;
-        }
-        return { state: current, previous };
-      });
-    }, [setSyncState])
+    useCallback(
+      (current: SyncState, previous: SyncState | null) => {
+        setSyncState((prev: SyncStatusInfo) => {
+          if (prev.state === current && prev.previous === previous) {
+            return prev;
+          }
+          return { state: current, previous };
+        });
+      },
+      [setSyncState],
+    ),
   );
 
   return null;

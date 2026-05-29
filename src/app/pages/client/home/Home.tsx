@@ -1,18 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import {
-  Box,
-  Button,
-  Chip,
-  Icon,
-  Icons,
-  Line,
-  Text,
-  color,
-  config,
-  toRem,
-} from 'folds';
+import { Box, Button, Chip, Icon, Icons, Line, Text, color, config, toRem } from 'folds';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useAtomValue, useSetAtom } from 'jotai';
 import { RoomEvent, RoomEventHandlerMap } from 'matrix-js-sdk';
@@ -25,7 +14,12 @@ import {
   NavItem,
   NavItemContent,
 } from '../../../components/nav';
-import { getHomeCreatePath, getHomeCreateChatPath, getHomeInvitesPath, getHomeRoomPath } from '../../pathUtils';
+import {
+  getHomeCreatePath,
+  getHomeCreateChatPath,
+  getHomeInvitesPath,
+  getHomeRoomPath,
+} from '../../pathUtils';
 import { getCanonicalAliasOrRoomId, getMxIdLocalPart, mxcUrlToHttp } from '../../../utils/matrix';
 import { useSelectedRoom } from '../../../hooks/router/useSelectedRoom';
 import {
@@ -71,7 +65,7 @@ function HomeHeader() {
   const profile = useUserProfile(userId);
   const displayName = profile.displayName ?? getMxIdLocalPart(userId) ?? userId;
   const avatarUrl = profile.avatarUrl
-    ? mxcUrlToHttp(mx, profile.avatarUrl, useAuthentication, 96, 96, 'crop') ?? undefined
+    ? (mxcUrlToHttp(mx, profile.avatarUrl, useAuthentication, 96, 96, 'crop') ?? undefined)
     : undefined;
 
   return (
@@ -146,7 +140,7 @@ function HomeFilterChips({
 function HomeEmpty({ activeFilter }: { activeFilter: HomeRoomFilter | null }) {
   const { t } = useTranslation();
   const isPeople = activeFilter === 'people';
-  
+
   return (
     <NavEmptyCenter>
       <NavEmptyLayout
@@ -204,7 +198,7 @@ export function Home() {
       room,
       _toStartOfTimeline,
       removed,
-      data
+      data,
     ) => {
       if (!room || !data.liveEvent || removed || !roomIdSet.has(room.roomId)) return;
       bumpTick();
@@ -219,7 +213,7 @@ export function Home() {
   const sortedRooms = useMemo(
     () => sortRoomIdsByActivity(rooms, (id) => mx.getRoom(id) ?? undefined),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mx, rooms, tick]
+    [mx, rooms, tick],
   );
 
   const virtualizer = useVirtualizer({
@@ -241,7 +235,9 @@ export function Home() {
             variant="Secondary"
             radii="Pill"
             fill="Soft"
-            before={<Icon size="200" src={SearchIcon} style={{ opacity: config.opacity.Placeholder }} />}
+            before={
+              <Icon size="200" src={SearchIcon} style={{ opacity: config.opacity.Placeholder }} />
+            }
             style={{
               width: '100%',
               justifyContent: 'flex-start',
@@ -251,13 +247,18 @@ export function Home() {
               backgroundColor: elevoColor.Background.SearchBar,
             }}
           >
-            <Box as="span" grow="Yes" alignItems="Center" justifyContent="SpaceBetween" gap="100" style={{ opacity: config.opacity.Placeholder }}>
+            <Box
+              as="span"
+              grow="Yes"
+              alignItems="Center"
+              justifyContent="SpaceBetween"
+              gap="100"
+              style={{ opacity: config.opacity.Placeholder }}
+            >
               <Text size="T300" truncate>
                 {t('home.search')}
               </Text>
-              <span className={css.searchShortcutHint}>
-                {`${modifierKey} + K`}
-              </span>
+              <span className={css.searchShortcutHint}>{`${modifierKey} + K`}</span>
             </Box>
           </Button>
           <NavCategory>
@@ -299,7 +300,12 @@ export function Home() {
                   <NavItemContent>
                     <Box as="span" grow="Yes" alignItems="Center" gap="200">
                       <Avatar size="200" radii="400">
-                        <Icon src={MailIcon} size="100" filled={invitesSelected} style={{ color: color.Primary.Main }} />
+                        <Icon
+                          src={MailIcon}
+                          size="100"
+                          filled={invitesSelected}
+                          style={{ color: color.Primary.Main }}
+                        />
                       </Avatar>
                       <Box as="span" grow="Yes">
                         <Text as="span" size="Inherit" truncate>
@@ -347,7 +353,7 @@ export function Home() {
                         linkPath={getHomeRoomPath(getCanonicalAliasOrRoomId(mx, roomId))}
                         notificationMode={getRoomNotificationMode(
                           notificationPreferences,
-                          room.roomId
+                          room.roomId,
                         )}
                         direct={isDirect}
                       />

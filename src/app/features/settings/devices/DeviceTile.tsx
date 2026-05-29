@@ -92,7 +92,7 @@ export function DeviceKeyDetails({ crypto }: DeviceKeyDetailsProps) {
     useCallback(() => {
       const keys = crypto.getOwnDeviceKeys();
       return keys;
-    }, [crypto])
+    }, [crypto]),
   );
 
   useEffect(() => {
@@ -129,8 +129,8 @@ function DeviceRename({ device, onCancel, onRename, refreshDeviceList }: DeviceR
         await mx.setDeviceDetails(device.device_id, { display_name: name });
         await refreshDeviceList();
       },
-      [mx, device.device_id, refreshDeviceList]
-    )
+      [mx, device.device_id, refreshDeviceList],
+    ),
   );
 
   const renaming = renameState.status === AsyncStatus.Loading;

@@ -7,9 +7,12 @@ const MIME_TYPES = ['audio/ogg;codecs=opus', 'audio/webm;codecs=opus', 'audio/we
 export function getExtFromMimeType(mimeType: string): string {
   const base = mimeType.split(';')[0].trim();
   switch (base) {
-    case 'audio/ogg': return 'ogg';
-    case 'audio/webm': return 'webm';
-    default: return base.split('/')[1] || 'ogg';
+    case 'audio/ogg':
+      return 'ogg';
+    case 'audio/webm':
+      return 'webm';
+    default:
+      return base.split('/')[1] || 'ogg';
   }
 }
 const MAX_LIVE_BARS = 40;

@@ -73,7 +73,7 @@ export const BottomNavItemBadge = recipe({
       true: {
         top: toRem(2),
         right: toRem(2),
-      }
-    }
-  }
+      },
+    },
+  },
 });

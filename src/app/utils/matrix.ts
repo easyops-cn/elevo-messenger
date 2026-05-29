@@ -44,7 +44,7 @@ export const getCanonicalAliasRoomId = (mx: MatrixClient, alias: string): string
     ?.find(
       (room) =>
         room.getCanonicalAlias() === alias &&
-        getStateEvent(room, StateEvent.RoomTombstone) === undefined
+        getStateEvent(room, StateEvent.RoomTombstone) === undefined,
     )?.roomId;
 
 export const getCanonicalAliasOrRoomId = (mx: MatrixClient, roomId: string): string => {
@@ -106,7 +106,7 @@ export const getThumbnailContent = (thumbnailInfo: {
 };
 
 export const encryptFile = async (
-  file: File | Blob
+  file: File | Blob,
 ): Promise<{
   encInfo: EncryptedAttachmentInfo;
   file: File;
@@ -127,7 +127,7 @@ export const encryptFile = async (
 export const decryptFile = async (
   dataBuffer: ArrayBuffer,
   type: string,
-  encInfo: EncryptedAttachmentInfo
+  encInfo: EncryptedAttachmentInfo,
 ): Promise<Blob> => {
   const dataArray = await decryptAttachment(dataBuffer, encInfo);
   const blob = new Blob([dataArray], { type });
@@ -149,7 +149,7 @@ export type ContentUploadOptions = {
 export const uploadContent = async (
   mx: MatrixClient,
   file: TUploadContent,
-  options: ContentUploadOptions
+  options: ContentUploadOptions,
 ) => {
   const { name, fileType, hideFilename, onProgress, onPromise, onSuccess, onError } = options;
 
@@ -181,14 +181,12 @@ export const eventWithShortcode = (ev: MatrixEvent) =>
   typeof ev.getContent().shortcode === 'string';
 
 export const getDMRoomFor = (mx: MatrixClient, userId: string): Room | undefined => {
-  const dmLikeRooms = mx
-    .getRooms()
-    .filter(
-      (room) =>
-        room.getMyMembership() === Membership.Join &&
-        // room.hasEncryptionStateEvent() &&
-        room.getMembers().length <= 2
-    );
+  const dmLikeRooms = mx.getRooms().filter(
+    (room) =>
+      room.getMyMembership() === Membership.Join &&
+      // room.hasEncryptionStateEvent() &&
+      room.getMembers().length <= 2,
+  );
 
   return dmLikeRooms.find((room) => room.getMember(userId));
 };
@@ -221,7 +219,7 @@ export const guessDmRoomUserId = (room: Room, myUserId: string): string => {
 
   // if there are no joined members other than us, use the oldest member
   const member1 = getOldestMember(
-    room.getLiveTimeline().getState(EventTimeline.FORWARDS)?.getMembers() ?? []
+    room.getLiveTimeline().getState(EventTimeline.FORWARDS)?.getMembers() ?? [],
   );
   return member1?.userId ?? myUserId;
 };
@@ -229,7 +227,7 @@ export const guessDmRoomUserId = (room: Room, myUserId: string): string => {
 export const addRoomIdToMDirect = async (
   mx: MatrixClient,
   roomId: string,
-  userId: string
+  userId: string,
 ): Promise<void> => {
   const mDirectsEvent = mx.getAccountData(AccountDataEvent.Direct as any);
   let userIdToRoomIds: Record<string, string[]> = {};
@@ -285,7 +283,7 @@ export const mxcUrlToHttp = (
   height?: number,
   resizeMethod?: string,
   allowDirectLinks?: boolean,
-  allowRedirects?: boolean
+  allowRedirects?: boolean,
 ): string | null =>
   mx.mxcUrlToHttp(
     mxcUrl,
@@ -294,7 +292,7 @@ export const mxcUrlToHttp = (
     resizeMethod,
     allowDirectLinks,
     allowRedirects,
-    useAuthentication
+    useAuthentication,
   );
 
 export const downloadMedia = async (src: string): Promise<Blob> => {
@@ -312,7 +310,7 @@ export const downloadMedia = async (src: string): Promise<Blob> => {
 
 export const downloadEncryptedMedia = async (
   src: string,
-  decryptContent: (buf: ArrayBuffer) => Promise<Blob>
+  decryptContent: (buf: ArrayBuffer) => Promise<Blob>,
 ): Promise<Blob> => {
   const encryptedContent = await downloadMedia(src);
   const decryptedContent = await decryptContent(await encryptedContent.arrayBuffer());
@@ -323,7 +321,7 @@ export const downloadEncryptedMedia = async (
 export const rateLimitedActions = async <T, R = void>(
   data: T[],
   callback: (item: T, index: number) => Promise<R>,
-  maxRetryCount?: number
+  maxRetryCount?: number,
 ) => {
   let retryCount = 0;
 

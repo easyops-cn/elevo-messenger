@@ -42,7 +42,7 @@ export function ServerConfigsLoader({ children }: ServerConfigsLoaderProps) {
         mediaConfig,
         authMetadata: validatedAuthMetadata,
       };
-    }, [mx])
+    }, [mx]),
   );
 
   const configs: ServerConfigs =

@@ -23,7 +23,6 @@ import {
 } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 
-
 type RenderMediaControlProps = {
   after: ReactNode;
   leftControl: ReactNode;
@@ -57,7 +56,7 @@ export function AudioContent({
         ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
         : await downloadMedia(mediaUrl);
       return URL.createObjectURL(fileContent);
-    }, [mx, url, useAuthentication, mimeType, encInfo])
+    }, [mx, url, useAuthentication, mimeType, encInfo]),
   );
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -168,7 +167,7 @@ export function AudioContent({
         </Chip>
 
         <Text size="T200">{`${secondsToMinutesAndSeconds(
-          currentTime
+          currentTime,
         )} / ${secondsToMinutesAndSeconds(duration)}`}</Text>
       </>
     ),

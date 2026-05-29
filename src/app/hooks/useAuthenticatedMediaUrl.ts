@@ -18,9 +18,7 @@ function isAuthenticatedMediaUrl(url: string): boolean {
  * when service worker is disabled. When SW is enabled, returns
  * the URL as-is (SW handles auth injection).
  */
-export function useAuthenticatedMediaUrl(
-  url: string | null | undefined
-): string | undefined {
+export function useAuthenticatedMediaUrl(url: string | null | undefined): string | undefined {
   const mx = useMatrixClient();
   const [blobUrl, setBlobUrl] = useState<string | undefined>(() => {
     if (!url) return undefined;
@@ -87,7 +85,7 @@ export function useAuthenticatedMediaUrl(
         URL.revokeObjectURL(prevBlobRef.current);
       }
     },
-    []
+    [],
   );
 
   return blobUrl;

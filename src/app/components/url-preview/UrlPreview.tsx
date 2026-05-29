@@ -11,7 +11,13 @@ export const UrlPreview = as<'div'>(({ className, ...props }, ref) => (
 export const UrlPreviewImg = as<'img'>(({ className, alt, src, ...props }, ref) => {
   const authSrc = useAuthenticatedMediaUrl(src);
   return (
-    <img className={classNames(css.UrlPreviewImg, className)} alt={alt} src={authSrc} {...props} ref={ref} />
+    <img
+      className={classNames(css.UrlPreviewImg, className)}
+      alt={alt}
+      src={authSrc}
+      {...props}
+      ref={ref}
+    />
   );
 });
 

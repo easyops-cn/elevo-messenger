@@ -6,9 +6,6 @@ import { isRoom } from '../../../utils/room';
 
 export const useAllHomeRooms = () => {
   const mx = useMatrixClient();
-  const selector: RoomSelector = useCallback(
-    (roomId: string) => isRoom(mx.getRoom(roomId)),
-    [mx]
-  );
+  const selector: RoomSelector = useCallback((roomId: string) => isRoom(mx.getRoom(roomId)), [mx]);
   return useSelectedRooms(allRoomsAtom, selector);
 };

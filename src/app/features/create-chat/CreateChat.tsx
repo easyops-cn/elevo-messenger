@@ -14,7 +14,15 @@ import {
   Text,
   toRem,
 } from 'folds';
-import React, { ChangeEventHandler, FormEventHandler, KeyboardEventHandler, useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+  ChangeEventHandler,
+  FormEventHandler,
+  KeyboardEventHandler,
+  useCallback,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { isKeyHotkey } from 'is-hotkey';
 import FocusTrap from 'focus-trap-react';
 import { useTranslation } from 'react-i18next';
@@ -22,7 +30,13 @@ import { ICreateRoomStateEvent, MatrixError, Preset, Visibility } from 'matrix-j
 import { useNavigate } from 'react-router-dom';
 import { SettingTile } from '../../components/setting-tile';
 import { SequenceCard } from '../../components/sequence-card';
-import { addRoomIdToMDirect, getDMRoomFor, getMxIdLocalPart, getMxIdServer, isUserId } from '../../utils/matrix';
+import {
+  addRoomIdToMDirect,
+  getDMRoomFor,
+  getMxIdLocalPart,
+  getMxIdServer,
+  isUserId,
+} from '../../utils/matrix';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { ErrorCode } from '../../cs-errorcode';
@@ -66,16 +80,17 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
 
   const contactsMembers = useRoomMembers(mx, elevoContactsRoomId);
 
-  const contactsMembersMap = useMemo(() => new Map(
-    contactsMembers.map((m) => [m.userId, m.name])
-  ), [contactsMembers]);
+  const contactsMembersMap = useMemo(
+    () => new Map(contactsMembers.map((m) => [m.userId, m.name])),
+    [contactsMembers],
+  );
 
   const knownUsers = useMemo(
     () =>
       [...new Set([...directUsers, ...contactsMembersMap.keys()])].filter(
-        (userId) => userId !== mx.getUserId()
+        (userId) => userId !== mx.getUserId(),
       ),
-    [directUsers, contactsMembersMap, mx]
+    [directUsers, contactsMembersMap, mx],
   );
 
   const getSearchStr = useCallback(
@@ -84,14 +99,10 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
       const displayName = contactsMembersMap.get(userId);
       return displayName ? [localPart, displayName] : localPart;
     },
-    [contactsMembersMap]
+    [contactsMembersMap],
   );
 
-  const [result, search, resetSearch] = useAsyncSearch(
-    knownUsers,
-    getSearchStr,
-    SEARCH_OPTIONS
-  );
+  const [result, search, resetSearch] = useAsyncSearch(knownUsers, getSearchStr, SEARCH_OPTIONS);
 
   const queryHighlighRegex = result?.query
     ? makeHighlightRegex(result.query.split(' '))
@@ -149,8 +160,8 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
 
         return createResult.room_id;
       },
-      [mx]
-    )
+      [mx],
+    ),
   );
   const loading = createState.status === AsyncStatus.Loading;
   const error = createState.status === AsyncStatus.Error ? createState.error : undefined;
@@ -312,7 +323,7 @@ export function CreateChat({ defaultUserId }: CreateChatProps) {
               {error instanceof MatrixError && error.name === ErrorCode.M_LIMIT_EXCEEDED
                 ? t('create.rateLimited', {
                     minutes: millisecondsToMinutes(
-                      (error.data.retry_after_ms as number | undefined) ?? 0
+                      (error.data.retry_after_ms as number | undefined) ?? 0,
                     ),
                   })
                 : error.message}

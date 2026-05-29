@@ -84,8 +84,8 @@ export function OidcCallback() {
 
         return getHomePath();
       },
-      [redirectUri]
-    )
+      [redirectUri],
+    ),
   );
 
   useEffect(() => {
@@ -115,10 +115,7 @@ export function OidcCallback() {
           }
         />
       )}
-      <Overlay
-        open={callbackState.status !== AsyncStatus.Error}
-        backdrop={<OverlayBackdrop />}
-      >
+      <Overlay open={callbackState.status !== AsyncStatus.Error} backdrop={<OverlayBackdrop />}>
         <OverlayCenter>
           <Spinner size="600" variant="Secondary" />
         </OverlayCenter>

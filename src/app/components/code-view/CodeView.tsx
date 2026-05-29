@@ -153,7 +153,7 @@ function parseDiffRows(lines: string[]): ParsedDiffRows {
 async function highlightCodeRows(
   path: string,
   theme: ShikiThemeName,
-  rows: DiffCodeRow[]
+  rows: DiffCodeRow[],
 ): Promise<HighlightedTokenLines> {
   const code = rows.map((row) => row.code).join('\n');
   if (code.length === 0) return [];
@@ -169,7 +169,7 @@ async function highlightDiffHunks(
   path: string,
   theme: ShikiThemeName,
   hunks: DiffHunk[],
-  rowCount: number
+  rowCount: number,
 ): Promise<HighlightedTokenLines> {
   const tokenLinesByRowIndex: HighlightedTokenLines = Array.from({ length: rowCount }, () => []);
 
@@ -189,7 +189,7 @@ async function highlightDiffHunks(
       newRows.forEach((row, index) => {
         tokenLinesByRowIndex[row.rowIndex] = newTokenLines[index] ?? [];
       });
-    })
+    }),
   );
 
   return tokenLinesByRowIndex;
@@ -223,10 +223,9 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
     let alive = true;
     const shikiTheme = getShikiThemeName(theme.kind);
 
-    highlightDiffHunks(path, shikiTheme, hunks, rows.length)
-      .then((result) => {
-        if (alive) setTokenLines(result);
-      });
+    highlightDiffHunks(path, shikiTheme, hunks, rows.length).then((result) => {
+      if (alive) setTokenLines(result);
+    });
 
     return () => {
       alive = false;
@@ -291,7 +290,7 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
                       >
                         {token.content}
                       </span>
-                    )
+                    ),
                   )}
                 </span>
               </span>
@@ -313,7 +312,7 @@ export const CodeView = as<'div', CodeViewProps>(
   ({ className, payload, hideCloseButton, requestClose, ...props }, ref) => {
     const { t } = useTranslation();
     const [expandedFiles, setExpandedFiles] = useState<ReadonlySet<string>>(
-      () => new Set(payload.files.map((file) => file.path))
+      () => new Set(payload.files.map((file) => file.path)),
     );
 
     useEffect(() => {
@@ -413,5 +412,5 @@ export const CodeView = as<'div', CodeViewProps>(
         </Box>
       </Box>
     );
-  }
+  },
 );

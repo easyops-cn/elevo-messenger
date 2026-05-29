@@ -30,7 +30,7 @@ const useNotificationModeStr = (): Record<NotificationMode, string> => {
       [NotificationMode.Notify]: t('settings.notificationSettings.notifySilent'),
       [NotificationMode.NotifyLoud]: t('settings.notificationSettings.notifyLoud'),
     }),
-    [t]
+    [t],
   );
 };
 

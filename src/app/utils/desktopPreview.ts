@@ -16,9 +16,7 @@ export type DesktopPreviewPayload = {
   duration?: number;
 };
 
-export const openDesktopFilePreview = async (
-  payload: DesktopPreviewPayload
-): Promise<boolean> => {
+export const openDesktopFilePreview = async (payload: DesktopPreviewPayload): Promise<boolean> => {
   if (!isDesktopTauri) return false;
 
   try {

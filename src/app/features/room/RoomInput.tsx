@@ -170,17 +170,17 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const threadOrRoomId = threadRootId || roomId;
     const [msgDraft, setMsgDraft] = useAtom(threadOrRoomIdToMsgDraftAtomFamily(threadOrRoomId));
     const [replyDraft, setReplyDraft] = useAtom(
-      threadOrRoomIdToReplyDraftAtomFamily(threadOrRoomId)
+      threadOrRoomIdToReplyDraftAtomFamily(threadOrRoomId),
     );
 
     const [uploadBoard, setUploadBoard] = useState(true);
     const [voiceRecordingOpen, setVoiceRecordingOpen] = useState(false);
     const [selectedFiles, setSelectedFiles] = useAtom(
-      threadOrRoomIdToUploadItemsAtomFamily(threadOrRoomId)
+      threadOrRoomIdToUploadItemsAtomFamily(threadOrRoomId),
     );
     const uploadFamilyObserverAtom = createUploadFamilyObserverAtom(
       roomUploadAtomFamily,
-      selectedFiles.map((f) => f.file)
+      selectedFiles.map((f) => f.file),
     );
     const uploadStore = useStore();
     const mediaConfig = useMediaConfig();
@@ -228,7 +228,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
               data.file.path,
               data.file.name,
               data.file.workspaceId,
-              data.file.workspaceName
+              data.file.workspaceName,
             );
             ReactEditor.focus(editor);
             Transforms.select(editor, Editor.end(editor, []));
@@ -238,11 +238,11 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           }
         }
       },
-      [editor, removeExistingFileRef]
+      [editor, removeExistingFileRef],
     );
     useSdkMessageListener<WorkspaceExplorerMessage>(
       'workspace-explorer',
-      handleWorkspaceFileSelect
+      handleWorkspaceFileSelect,
     );
 
     const removeExistingTaskRef = useCallback(() => {
@@ -276,7 +276,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
               data.task.id,
               data.task.workspace_id,
               data.task.title,
-              data.task.status?.category
+              data.task.status?.category,
             );
             ReactEditor.focus(editor);
             Transforms.select(editor, Editor.end(editor, []));
@@ -286,7 +286,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           }
         }
       },
-      [editor, removeExistingTaskRef]
+      [editor, removeExistingTaskRef],
     );
     useSdkMessageListener<TaskManagementMessage>('tasks-management', handleTaskSelect);
 
@@ -299,7 +299,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
 
         if (room.hasEncryptionStateEvent()) {
           const encryptFiles = fulfilledPromiseSettledResult(
-            await Promise.allSettled(safeFiles.map((f) => encryptFile(f)))
+            await Promise.allSettled(safeFiles.map((f) => encryptFile(f))),
           );
           encryptFiles.forEach((ef) =>
             fileItems.push({
@@ -307,7 +307,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
               metadata: {
                 markedAsSpoiler: false,
               },
-            })
+            }),
           );
         } else {
           safeFiles.forEach((f) =>
@@ -318,7 +318,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
               metadata: {
                 markedAsSpoiler: false,
               },
-            })
+            }),
           );
         }
         setSelectedFiles({
@@ -326,7 +326,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           item: fileItems,
         });
       },
-      [setSelectedFiles, room]
+      [setSelectedFiles, room],
     );
     const pickFile = useFilePicker(handleFiles, true);
     const handlePaste = useFilePasteHandler(handleFiles);
@@ -348,7 +348,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         resetEditor(editor);
         resetEditorHistory(editor);
       },
-      [roomId, editor, setMsgDraft]
+      [roomId, editor, setMsgDraft],
     );
 
     const handleFileMetadata = useCallback(
@@ -359,7 +359,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           replacement: { ...fileItem, metadata },
         });
       },
-      [setSelectedFiles]
+      [setSelectedFiles],
     );
 
     const handleRemoveUpload = useCallback(
@@ -371,7 +371,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         });
         uploads.forEach((u) => roomUploadAtomFamily.remove(u));
       },
-      [setSelectedFiles, selectedFiles]
+      [setSelectedFiles, selectedFiles],
     );
 
     const handleCancelUpload = (uploads: Upload[]) => {
@@ -393,10 +393,10 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           function poll() {
             const uploads = uploadStore.get(uploadFamilyObserverAtom);
             const hasStartableIdleUploads = uploads.some(
-              (upload) => upload.status === UploadStatus.Idle && upload.file.size < allowUploadSize
+              (upload) => upload.status === UploadStatus.Idle && upload.file.size < allowUploadSize,
             );
             const hasLoadingUploads = uploads.some(
-              (upload) => upload.status === UploadStatus.Loading
+              (upload) => upload.status === UploadStatus.Loading,
             );
 
             if (!hasStartableIdleUploads && !hasLoadingUploads) {
@@ -412,7 +412,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         const uploads = await waitForUploadsToSettle();
 
         const successfulUploads = uploads.filter(
-          (upload): upload is UploadSuccess => upload.status === UploadStatus.Success
+          (upload): upload is UploadSuccess => upload.status === UploadStatus.Success,
         );
         if (successfulUploads.length === 0) {
           return;
@@ -435,7 +435,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         });
         const contents = fulfilledPromiseSettledResult(await Promise.allSettled(contentsPromises));
         contents.forEach((content) =>
-          mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent)
+          mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent),
         );
         handleRemoveUpload(successfulUploads.map((upload) => upload.file));
       } finally {
@@ -454,7 +454,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           allowTextFormatting: true,
           allowBlockMarkdown: isMarkdown,
           allowInlineMarkdown: isMarkdown,
-        })
+        }),
       );
       let msgType = MsgType.Text;
 
@@ -579,7 +579,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           setReplyDraft(undefined);
         }
       },
-      [submit, setReplyDraft, enterForNewline, autocompleteQuery]
+      [submit, setReplyDraft, enterForNewline, autocompleteQuery],
     );
 
     const handleKeyUp: KeyboardEventHandler = useCallback(
@@ -599,7 +599,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           : undefined;
         setAutocompleteQuery(query);
       },
-      [editor, sendTypingStatus, hideActivity]
+      [editor, sendTypingStatus, hideActivity],
     );
 
     const handleCloseAutocomplete = useCallback(() => {
@@ -823,7 +823,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
                       anchor={
                         emojiBoardTab === undefined
                           ? undefined
-                          : emojiBtnRef.current?.getBoundingClientRect() ?? undefined
+                          : (emojiBtnRef.current?.getBoundingClientRect() ?? undefined)
                       }
                       content={
                         <EmojiBoard
@@ -916,5 +916,5 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         />
       </div>
     );
-  }
+  },
 );

@@ -20,7 +20,7 @@ export const allRoomsAtom = atom<string[], [RoomsAction], undefined>(
       if (action.type === 'PUT') newIds.push(action.roomId);
       return newIds;
     });
-  }
+  },
 );
 export const useBindAllRoomsAtom = (mx: MatrixClient, allRooms: typeof allRoomsAtom) => {
   const setInitialized = useSetAtom(joinedRoomsInitializedAtom);
@@ -29,6 +29,6 @@ export const useBindAllRoomsAtom = (mx: MatrixClient, allRooms: typeof allRoomsA
     mx,
     allRooms,
     useMemo(() => [Membership.Join], []),
-    setInitialized
+    setInitialized,
   );
 };

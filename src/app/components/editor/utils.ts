@@ -163,7 +163,7 @@ export const createMentionElement = (
   name: string,
   highlight: boolean,
   eventId?: string,
-  viaServers?: string[]
+  viaServers?: string[],
 ): MentionElement => ({
   type: BlockType.Mention,
   id,
@@ -183,7 +183,7 @@ export const createEmoticonElement = (key: string, shortcode: string): EmoticonE
 
 export const createLinkElement = (
   href: string,
-  children: string | FormattedText[]
+  children: string | FormattedText[],
 ): LinkElement => ({
   type: BlockType.Link,
   href,
@@ -200,7 +200,7 @@ export const createFileRefElement = (
   path: string,
   name: string,
   workspaceId: string,
-  workspaceName: string
+  workspaceName: string,
 ): FileRefElement => ({
   type: BlockType.FileRef,
   path,
@@ -214,7 +214,7 @@ export const createTaskRefElement = (
   id: string,
   workspaceId: string,
   title: string,
-  status?: TaskRefStatus
+  status?: TaskRefStatus,
 ): TaskRefElement => ({
   type: BlockType.TaskRef,
   id,
@@ -244,7 +244,7 @@ interface PointUntilCharOptions {
 export const getPointUntilChar = (
   editor: Editor,
   cursorPoint: BasePoint,
-  options: PointUntilCharOptions
+  options: PointUntilCharOptions,
 ): BasePoint | undefined => {
   let targetPoint: BasePoint | undefined;
   let prevPoint: BasePoint | undefined;

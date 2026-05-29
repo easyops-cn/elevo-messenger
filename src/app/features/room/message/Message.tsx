@@ -127,7 +127,7 @@ export const MessageQuickReactions = as<'div', MessageQuickReactionsProps>(
         <Line size="300" />
       </>
     );
-  }
+  },
 );
 
 export const MessageAllReactionItem = as<
@@ -419,8 +419,8 @@ export const MessageDeleteItem = as<
     useCallback(
       (eventId: string, reason?: string) =>
         mx.redactEvent(room.roomId, threadId, eventId, undefined, reason ? { reason } : undefined),
-      [mx, room, threadId]
-    )
+      [mx, room, threadId],
+    ),
   );
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (evt) => {
@@ -478,9 +478,7 @@ export const MessageDeleteItem = as<
                 direction="Column"
                 gap="400"
               >
-                <Text priority="400">
-                  {t('message.deleteMessageConfirm')}
-                </Text>
+                <Text priority="400">{t('message.deleteMessageConfirm')}</Text>
                 <Box direction="Column" gap="100">
                   <Text size="L400">
                     {t('message.reason')}{' '}
@@ -506,7 +504,9 @@ export const MessageDeleteItem = as<
                   aria-disabled={deleteState.status === AsyncStatus.Loading}
                 >
                   <Text size="B400">
-                    {deleteState.status === AsyncStatus.Loading ? t('message.deleting') : t('message.delete')}
+                    {deleteState.status === AsyncStatus.Loading
+                      ? t('message.deleting')
+                      : t('message.delete')}
                   </Text>
                 </Button>
               </Box>
@@ -549,8 +549,8 @@ export const MessageReportItem = as<
     useCallback(
       (eventId: string, score: number, reason: string) =>
         mx.reportEvent(room.roomId, eventId, score, reason),
-      [mx, room]
-    )
+      [mx, room],
+    ),
   );
 
   const handleSubmit: FormEventHandler<HTMLFormElement> = (evt) => {
@@ -609,9 +609,7 @@ export const MessageReportItem = as<
                 direction="Column"
                 gap="400"
               >
-                <Text priority="400">
-                  {t('message.reportMessageDesc')}
-                </Text>
+                <Text priority="400">{t('message.reportMessageDesc')}</Text>
                 <Box direction="Column" gap="100">
                   <Text size="L400">{t('message.reason')}</Text>
                   <Input name="reasonInput" variant="Background" required />
@@ -640,7 +638,9 @@ export const MessageReportItem = as<
                   }
                 >
                   <Text size="B400">
-                    {reportState.status === AsyncStatus.Loading ? t('message.reporting') : t('message.report')}
+                    {reportState.status === AsyncStatus.Loading
+                      ? t('message.reporting')
+                      : t('message.report')}
                   </Text>
                 </Button>
               </Box>
@@ -685,7 +685,7 @@ export type MessageProps = {
   onUsernameClick: MouseEventHandler<HTMLButtonElement>;
   onReplyClick: (
     ev: Parameters<MouseEventHandler<HTMLButtonElement>>[0],
-    startThread?: boolean
+    startThread?: boolean,
   ) => void;
   onEditId?: (eventId?: string) => void;
   onReactionToggle: (targetEventId: string, key: string, shortcode?: string) => void;
@@ -729,7 +729,7 @@ export const Message = as<'div', MessageProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const mx = useMatrixClient();
     const { t } = useTranslation();
@@ -748,18 +748,27 @@ export const Message = as<'div', MessageProps>(
     const senderAvatarMxc = getMemberAvatarMxc(room, senderId);
 
     const msgType = mEvent.getContent()?.msgtype;
-    const transparent = mEvent.getType() === MessageEvent.Sticker || msgType === MsgType.Audio || msgType === MsgType.Video || msgType === MsgType.Image || msgType === MsgType.File;
+    const transparent =
+      mEvent.getType() === MessageEvent.Sticker ||
+      msgType === MsgType.Audio ||
+      msgType === MsgType.Video ||
+      msgType === MsgType.Image ||
+      msgType === MsgType.File;
 
     const headerJSX = !collapse && (
       <Box
         gap="300"
         direction={messageLayout === MessageLayout.Compact || isOwn ? 'RowReverse' : 'Row'}
         justifyContent={messageLayout === MessageLayout.Compact ? 'SpaceBetween' : 'Start'}
-        alignItems={messageLayout !== MessageLayout.Compact ? "Center" : "Baseline"}
+        alignItems={messageLayout !== MessageLayout.Compact ? 'Center' : 'Baseline'}
         grow="No"
-        style={messageLayout !== MessageLayout.Compact ? {
-          height: toRem(32),
-        } : undefined}
+        style={
+          messageLayout !== MessageLayout.Compact
+            ? {
+                height: toRem(32),
+              }
+            : undefined
+        }
       >
         <Box alignItems="Center" gap="200">
           <Username
@@ -769,11 +778,7 @@ export const Message = as<'div', MessageProps>(
             onContextMenu={onUserClick}
             onClick={onUsernameClick}
           >
-            <Text
-              as="span"
-              size="T300"
-              truncate
-            >
+            <Text as="span" size="T300" truncate>
               {senderDisplayName}
             </Text>
           </Username>
@@ -805,7 +810,8 @@ export const Message = as<'div', MessageProps>(
             userId={senderId}
             src={
               senderAvatarMxc
-                ? mxcUrlToHttp(mx, senderAvatarMxc, useAuthentication, 48, 48, 'crop') ?? undefined
+                ? (mxcUrlToHttp(mx, senderAvatarMxc, useAuthentication, 48, 48, 'crop') ??
+                  undefined)
                 : undefined
             }
             alt={senderDisplayName}
@@ -846,9 +852,11 @@ export const Message = as<'div', MessageProps>(
       <Box
         direction="Column"
         className={
-          isOwn && messageLayout === MessageLayout.Modern ? layoutCss.ModernOwnContent({
-            transparent
-          }) : undefined
+          isOwn && messageLayout === MessageLayout.Modern
+            ? layoutCss.ModernOwnContent({
+                transparent,
+              })
+            : undefined
         }
         style={{ maxWidth: '100%' }}
       >
@@ -871,11 +879,11 @@ export const Message = as<'div', MessageProps>(
     );
 
     const bubbleAfterContentJSX = (
-      <Box direction="Column" gap="0" alignItems={isOwn ? "End" : "Start"}>
+      <Box direction="Column" gap="0" alignItems={isOwn ? 'End' : 'Start'}>
         {reactions}
         {threadSummary}
       </Box>
-    )
+    );
 
     const handleContextMenu: MouseEventHandler<HTMLDivElement> = (evt) => {
       if (evt.altKey || !window.getSelection()?.isCollapsed || edit) return;
@@ -1175,9 +1183,7 @@ export const Message = as<'div', MessageProps>(
           </div>
         )}
         {messageLayout === MessageLayout.Compact && (
-          <CompactLayout before={headerJSX}>
-            {msgCompactContentJSX}
-          </CompactLayout>
+          <CompactLayout before={headerJSX}>{msgCompactContentJSX}</CompactLayout>
         )}
         {messageLayout === MessageLayout.Bubble && (
           <BubbleLayout
@@ -1204,7 +1210,7 @@ export const Message = as<'div', MessageProps>(
         )}
       </MessageBase>
     );
-  }
+  },
 );
 
 export type EventProps = {
@@ -1230,7 +1236,7 @@ export const Event = as<'div', EventProps>(
       children,
       ...props
     },
-    ref
+    ref,
   ) => {
     const mx = useMatrixClient();
     const [hover, setHover] = useState(false);
@@ -1355,5 +1361,5 @@ export const Event = as<'div', EventProps>(
         <div onContextMenu={handleContextMenu}>{children}</div>
       </MessageBase>
     );
-  }
+  },
 );

@@ -77,7 +77,7 @@ export const clearCacheAndReload = async (mx: MatrixClient) => {
  */
 const revokeOidcRefreshToken = async (
   oidcData: OidcSessionData,
-  revocationEndpoint: string
+  revocationEndpoint: string,
 ): Promise<void> => {
   try {
     const params = new URLSearchParams();
@@ -95,10 +95,7 @@ const revokeOidcRefreshToken = async (
   }
 };
 
-export const logoutClient = async (
-  mx: MatrixClient,
-  revocationEndpoint?: string
-) => {
+export const logoutClient = async (mx: MatrixClient, revocationEndpoint?: string) => {
   pushSessionToSW();
   mx.stopClient();
 

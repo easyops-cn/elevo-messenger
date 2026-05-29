@@ -5,7 +5,13 @@ import { Room } from 'matrix-js-sdk';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useRoomMembers } from '../../../hooks/useRoomMembers';
 import { PowerLevelsContextProvider, usePowerLevels } from '../../../hooks/usePowerLevels';
-import { Page, PageContent, PageContentCenter, PageHeader, PageMain } from '../../../components/page';
+import {
+  Page,
+  PageContent,
+  PageContentCenter,
+  PageHeader,
+  PageMain,
+} from '../../../components/page';
 import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';
 import { ContainerColor } from '../../../styles/ContainerColor.css';
@@ -37,53 +43,53 @@ export function ContactsRolePage() {
     <PageMain>
       <Page>
         <PageHeader balance>
-        <Box grow="Yes" gap="200">
-          <Box grow="Yes" basis="No">
-            {screenSize === ScreenSize.Mobile && (
-              <BackRouteHandler>
-                {(onBack) => (
-                  <IconButton size="300" fill="None" onClick={onBack}>
-                    <Icon size="100" src={Icons.ArrowLeft} />
-                  </IconButton>
-                )}
-              </BackRouteHandler>
-            )}
+          <Box grow="Yes" gap="200">
+            <Box grow="Yes" basis="No">
+              {screenSize === ScreenSize.Mobile && (
+                <BackRouteHandler>
+                  {(onBack) => (
+                    <IconButton size="300" fill="None" onClick={onBack}>
+                      <Icon size="100" src={Icons.ArrowLeft} />
+                    </IconButton>
+                  )}
+                </BackRouteHandler>
+              )}
+            </Box>
+            <Box alignItems="Center" gap="200">
+              <Icon size="400" src={ContactIcon} />
+              <Text size="H5" truncate>
+                {roleName}
+              </Text>
+            </Box>
+            <Box grow="Yes" basis="No" />
           </Box>
-          <Box alignItems="Center" gap="200">
-            <Icon size="400" src={ContactIcon} />
-            <Text size="H5" truncate>
-              {roleName}
-            </Text>
-          </Box>
-          <Box grow="Yes" basis="No" />
-        </Box>
-      </PageHeader>
+        </PageHeader>
 
-      <Box style={{ position: 'relative' }} grow="Yes">
-        {room ? (
-          <ContactsRoleRoomMembers room={room} filterRole={roleName} />
-        ) : (
-          <Scroll hideTrack visibility="Hover">
-            <PageContent>
-              <PageContentCenter>
-                <Box
-                  className={ContainerColor({ variant: 'SurfaceVariant' })}
-                  style={{
-                    padding: config.space.S300,
-                    borderRadius: config.radii.R400,
-                  }}
-                  direction="Column"
-                  gap="200"
-                >
-                  <Text>{t('contacts.roomNotFound')}</Text>
-                  <Text size="T200">{t('contacts.roomNotFoundDesc')}</Text>
-                </Box>
-              </PageContentCenter>
-            </PageContent>
-          </Scroll>
-        )}
-      </Box>
-    </Page>
+        <Box style={{ position: 'relative' }} grow="Yes">
+          {room ? (
+            <ContactsRoleRoomMembers room={room} filterRole={roleName} />
+          ) : (
+            <Scroll hideTrack visibility="Hover">
+              <PageContent>
+                <PageContentCenter>
+                  <Box
+                    className={ContainerColor({ variant: 'SurfaceVariant' })}
+                    style={{
+                      padding: config.space.S300,
+                      borderRadius: config.radii.R400,
+                    }}
+                    direction="Column"
+                    gap="200"
+                  >
+                    <Text>{t('contacts.roomNotFound')}</Text>
+                    <Text size="T200">{t('contacts.roomNotFoundDesc')}</Text>
+                  </Box>
+                </PageContentCenter>
+              </PageContent>
+            </Scroll>
+          )}
+        </Box>
+      </Page>
     </PageMain>
   );
 }

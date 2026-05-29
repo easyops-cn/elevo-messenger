@@ -33,7 +33,7 @@ export function setFallbackSession(
   accessToken: string,
   deviceId: string,
   userId: string,
-  baseUrl: string
+  baseUrl: string,
 ) {
   localStorage.setItem('elevo_access_token', accessToken);
   localStorage.setItem('elevo_device_id', deviceId);
@@ -88,7 +88,7 @@ export const setOidcSession = (
   deviceId: string,
   userId: string,
   baseUrl: string,
-  oidcData: OidcSessionData
+  oidcData: OidcSessionData,
 ): void => {
   setFallbackSession(accessToken, deviceId, userId, baseUrl);
   localStorage.setItem(OIDC_SESSION_KEY, JSON.stringify(oidcData));

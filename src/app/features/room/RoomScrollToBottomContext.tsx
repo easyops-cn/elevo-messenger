@@ -17,12 +17,9 @@ const RoomScrollToBottomContext = createContext<RoomScrollToBottomContextValue>(
 export function RoomScrollToBottomProvider({ children }: { children: ReactNode }) {
   const listenersRef = useRef<Set<ScrollToBottomListener>>(new Set());
 
-  const emitScrollToBottomRequest = useCallback(
-    () => {
-      listenersRef.current.forEach((listener) => listener());
-    },
-    []
-  );
+  const emitScrollToBottomRequest = useCallback(() => {
+    listenersRef.current.forEach((listener) => listener());
+  }, []);
 
   const listenScrollToBottomRequest = useCallback((listener: ScrollToBottomListener) => {
     listenersRef.current.add(listener);
@@ -36,11 +33,13 @@ export function RoomScrollToBottomProvider({ children }: { children: ReactNode }
       emitScrollToBottomRequest,
       listenScrollToBottomRequest,
     }),
-    [emitScrollToBottomRequest, listenScrollToBottomRequest]
+    [emitScrollToBottomRequest, listenScrollToBottomRequest],
   );
 
   return (
-    <RoomScrollToBottomContext.Provider value={value}>{children}</RoomScrollToBottomContext.Provider>
+    <RoomScrollToBottomContext.Provider value={value}>
+      {children}
+    </RoomScrollToBottomContext.Provider>
   );
 }
 

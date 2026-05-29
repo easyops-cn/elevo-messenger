@@ -14,8 +14,8 @@ export function useAccountData(eventType: string) {
           setEvent(evt);
         }
       },
-      [eventType, setEvent]
-    )
+      [eventType, setEvent],
+    ),
   );
 
   return event;

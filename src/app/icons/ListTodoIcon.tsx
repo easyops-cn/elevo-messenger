@@ -3,12 +3,7 @@ import React from 'react';
 export function ListTodoIcon() {
   // https://lucide.dev/icons/list-todo
   return (
-    <g
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
+    <g stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <path d="M13 5h8" />
       <path d="M13 12h8" />
       <path d="M13 19h8" />

@@ -20,7 +20,10 @@ import {
   downloadMedia,
   mxcUrlToHttp,
 } from '../../utils/matrix';
-import { type DesktopPreviewPayload, type DesktopPreviewViewerType } from '../../utils/desktopPreview';
+import {
+  type DesktopPreviewPayload,
+  type DesktopPreviewViewerType,
+} from '../../utils/desktopPreview';
 
 type ViewerType = 'image' | 'video' | 'audio' | 'text' | 'pdf';
 
@@ -75,7 +78,7 @@ export const getFileViewerInfo = (fileEvent: MatrixEvent) => {
 
 export const createDesktopPreviewPayload = (
   fileEvent: MatrixEvent,
-  mediaUrl: string
+  mediaUrl: string,
 ): DesktopPreviewPayload => {
   const {
     filename,

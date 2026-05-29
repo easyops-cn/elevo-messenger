@@ -60,7 +60,7 @@ export function OidcLoginCard({ data, style }: OidcLoginCardProps) {
           // eslint-disable-next-line no-console
           console.error('Failed to open OAuth window, falling back to browser:', err);
           window.open(data.url, '_blank', 'noopener,noreferrer');
-        }
+        },
       );
     }
   };

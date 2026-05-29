@@ -61,8 +61,8 @@ function CreatePackTile({ packs, roomId }: CreatePackTileProps) {
         };
         await mx.sendStateEvent(roomId, StateEvent.PoniesRoomEmotes as any, content, stateKey);
       },
-      [mx, roomId]
-    )
+      [mx, roomId],
+    ),
   );
 
   const creating = addState.status === AsyncStatus.Loading;
@@ -166,7 +166,7 @@ export function RoomPacks({ onViewPack }: RoomPacksProps) {
         // eslint-disable-next-line no-await-in-loop
         await mx.sendStateEvent(room.roomId, StateEvent.PoniesRoomEmotes as any, {}, addr.stateKey);
       }
-    }, [mx, room, removedPacks])
+    }, [mx, room, removedPacks]),
   );
   const applyingChanges = applyState.status === AsyncStatus.Loading;
 

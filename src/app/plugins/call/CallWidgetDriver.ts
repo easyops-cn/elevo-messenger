@@ -32,7 +32,10 @@ export class CallWidgetDriver extends WidgetDriver {
 
   private readonly mx: MatrixClient;
 
-  public constructor(mx: MatrixClient, private inRoomId: string) {
+  public constructor(
+    mx: MatrixClient,
+    private inRoomId: string,
+  ) {
     super();
     this.mx = mx;
 
@@ -51,7 +54,7 @@ export class CallWidgetDriver extends WidgetDriver {
     eventType: string,
     content: IContent,
     stateKey: string | null = null,
-    targetRoomId: string | null = null
+    targetRoomId: string | null = null,
   ): Promise<ISendEventDetails> {
     const client = this.mx;
     const roomId = targetRoomId || this.inRoomId;
@@ -64,7 +67,7 @@ export class CallWidgetDriver extends WidgetDriver {
         roomId,
         eventType as keyof StateEvents,
         content as StateEvents[keyof StateEvents],
-        stateKey
+        stateKey,
       );
     } else if (eventType === EventType.RoomRedaction) {
       // special case: extract the `redacts` property and call redact
@@ -73,7 +76,7 @@ export class CallWidgetDriver extends WidgetDriver {
       r = await client.sendEvent(
         roomId,
         eventType as keyof TimelineEvents,
-        content as TimelineEvents[keyof TimelineEvents]
+        content as TimelineEvents[keyof TimelineEvents],
       );
     }
 
@@ -86,7 +89,7 @@ export class CallWidgetDriver extends WidgetDriver {
     eventType: string,
     content: IContent,
     stateKey: string | null = null,
-    targetRoomId: string | null = null
+    targetRoomId: string | null = null,
   ): Promise<ISendDelayedEventDetails> {
     const client = this.mx;
     const roomId = targetRoomId || this.inRoomId;
@@ -115,7 +118,7 @@ export class CallWidgetDriver extends WidgetDriver {
         delayOpts,
         eventType as keyof StateEvents,
         content as StateEvents[keyof StateEvents],
-        stateKey
+        stateKey,
       );
     } else {
       // message event
@@ -124,7 +127,7 @@ export class CallWidgetDriver extends WidgetDriver {
         delayOpts,
         null,
         eventType as keyof TimelineEvents,
-        content as TimelineEvents[keyof TimelineEvents]
+        content as TimelineEvents[keyof TimelineEvents],
       );
     }
 
@@ -136,7 +139,7 @@ export class CallWidgetDriver extends WidgetDriver {
 
   public async updateDelayedEvent(
     delayId: string,
-    action: UpdateDelayedEventAction
+    action: UpdateDelayedEventAction,
   ): Promise<void> {
     const client = this.mx;
 
@@ -148,7 +151,7 @@ export class CallWidgetDriver extends WidgetDriver {
   public async sendToDevice(
     eventType: string,
     encrypted: boolean,
-    contentMap: { [userId: string]: { [deviceId: string]: object } }
+    contentMap: { [userId: string]: { [deviceId: string]: object } },
   ): Promise<void> {
     const client = this.mx;
 
@@ -176,11 +179,11 @@ export class CallWidgetDriver extends WidgetDriver {
           const batch = await crypto.encryptToDeviceMessages(
             eventType,
             recipients,
-            JSON.parse(stringifiedContent)
+            JSON.parse(stringifiedContent),
           );
 
           await client.queueToDevice(batch);
-        })
+        }),
       );
     } else {
       await client.queueToDevice({
@@ -190,7 +193,7 @@ export class CallWidgetDriver extends WidgetDriver {
             userId,
             deviceId,
             payload: content,
-          }))
+          })),
         ),
       });
     }
@@ -202,7 +205,7 @@ export class CallWidgetDriver extends WidgetDriver {
     msgtype: string | undefined,
     stateKey: string | undefined,
     limit: number,
-    since: string | undefined
+    since: string | undefined,
   ): Promise<IRoomEvent[]> {
     const safeLimit =
       limit > 0 ? Math.min(limit, Number.MAX_SAFE_INTEGER) : Number.MAX_SAFE_INTEGER; // relatively arbitrary
@@ -240,7 +243,7 @@ export class CallWidgetDriver extends WidgetDriver {
   public async readRoomState(
     roomId: string,
     eventType: string,
-    stateKey: string | undefined
+    stateKey: string | undefined,
   ): Promise<IRoomEvent[]> {
     const room = this.mx.getRoom(roomId);
     if (room === null) return [];
@@ -261,7 +264,7 @@ export class CallWidgetDriver extends WidgetDriver {
     from?: string,
     to?: string,
     limit?: number,
-    direction?: 'f' | 'b'
+    direction?: 'f' | 'b',
   ): Promise<IReadEventRelationsResult> {
     const client = this.mx;
     const dir = direction as Direction;
@@ -276,7 +279,7 @@ export class CallWidgetDriver extends WidgetDriver {
       eventId,
       relationType ?? null,
       eventType ?? null,
-      { from, to, limit, dir }
+      { from, to, limit, dir },
     );
 
     return {
@@ -288,7 +291,7 @@ export class CallWidgetDriver extends WidgetDriver {
 
   public async searchUserDirectory(
     searchTerm: string,
-    limit?: number
+    limit?: number,
   ): Promise<ISearchUserDirectoryResult> {
     const client = this.mx;
 

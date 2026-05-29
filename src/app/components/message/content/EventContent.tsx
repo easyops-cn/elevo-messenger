@@ -33,9 +33,14 @@ export function EventContent({ messageLayout, time, content }: EventContentProps
   );
 
   const msgContentJSX = (
-    <Box justifyContent="SpaceBetween" alignItems="Baseline" gap="200" style={{
-      color: elevoColor.Text.Muted,
-    }}>
+    <Box
+      justifyContent="SpaceBetween"
+      alignItems="Baseline"
+      gap="200"
+      style={{
+        color: elevoColor.Text.Muted,
+      }}
+    >
       {content}
       {messageLayout !== MessageLayout.Compact && <span style={timeStyle}>{time}</span>}
     </Box>

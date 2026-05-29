@@ -29,7 +29,7 @@ export function DeveloperTools({ requestClose }: DeveloperToolsProps) {
     async (type, content) => {
       await mx.setAccountData(type, content);
     },
-    [mx]
+    [mx],
   );
 
   if (accountDataType !== undefined) {

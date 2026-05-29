@@ -1,7 +1,13 @@
 import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Icon, Icons, Text, Scroll, IconButton } from 'folds';
-import { Page, PageContent, PageContentCenter, PageHeader, PageMain } from '../../../components/page';
+import {
+  Page,
+  PageContent,
+  PageContentCenter,
+  PageHeader,
+  PageMain,
+} from '../../../components/page';
 import { MessageSearch } from '../../../features/message-search';
 import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';

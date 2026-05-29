@@ -30,8 +30,20 @@ export function AuthFooter() {
     SUPPORTED_LANGUAGES.find((l) => l.code === i18n.language) ?? SUPPORTED_LANGUAGES[0];
 
   return (
-    <Box className={css.AuthFooter} justifyContent="Center" gap="400" wrap="Wrap" alignItems="Center">
-      <Text as="a" size="T300" href="https://github.com/easyops-cn/elevo-desktop" target="_blank" rel="noreferrer">
+    <Box
+      className={css.AuthFooter}
+      justifyContent="Center"
+      gap="400"
+      wrap="Wrap"
+      alignItems="Center"
+    >
+      <Text
+        as="a"
+        size="T300"
+        href="https://github.com/easyops-cn/elevo-desktop"
+        target="_blank"
+        rel="noreferrer"
+      >
         {t('auth.about')}
       </Text>
       <Text

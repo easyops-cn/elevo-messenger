@@ -58,7 +58,7 @@ export function AddServer() {
   const serverInputRef = useRef<HTMLInputElement>(null);
 
   const [exploreState] = useAsyncCallback(
-    useCallback((server: string) => mx.publicRooms({ server, limit: 1 }), [mx])
+    useCallback((server: string) => mx.publicRooms({ server, limit: 1 }), [mx]),
   );
 
   const getInputServer = (): string | undefined => {
@@ -285,9 +285,7 @@ export function Explore() {
                       aria-selected={folder.content.includes(selectedExploreSpace ?? '')}
                     >
                       <NavLink
-                        to={getExploreSpacePath(
-                          getCanonicalAliasOrRoomId(mx, firstSpace.roomId)
-                        )}
+                        to={getExploreSpacePath(getCanonicalAliasOrRoomId(mx, firstSpace.roomId))}
                       >
                         <NavItemContent>
                           <Box as="span" grow="Yes" alignItems="Center" gap="200">
@@ -320,9 +318,7 @@ export function Explore() {
                     radii="400"
                     aria-selected={space.roomId === selectedExploreSpace}
                   >
-                    <NavLink
-                      to={getExploreSpacePath(getCanonicalAliasOrRoomId(mx, space.roomId))}
-                    >
+                    <NavLink to={getExploreSpacePath(getCanonicalAliasOrRoomId(mx, space.roomId))}>
                       <NavItemContent>
                         <Box as="span" grow="Yes" alignItems="Center" gap="200">
                           <Avatar size="200" radii="400">

@@ -39,7 +39,7 @@ export const useMemberSortMenu = (): MemberSortItem[] =>
         sortFn: MemberSort.Oldest,
       },
     ],
-    []
+    [],
   );
 
 export const useMemberSort = (index: number, memberSort: MemberSortItem[]): MemberSortItem => {
@@ -49,7 +49,7 @@ export const useMemberSort = (index: number, memberSort: MemberSortItem[]): Memb
 
 export const useMemberPowerSort = (
   creators: Set<string>,
-  getPowerLevel: (userId: string) => number
+  getPowerLevel: (userId: string) => number,
 ): MemberSortFn => {
   const sort: MemberSortFn = useCallback(
     (a, b) => {
@@ -61,7 +61,7 @@ export const useMemberPowerSort = (
 
       return getPowerLevel(b.userId) - getPowerLevel(a.userId);
     },
-    [creators]
+    [creators],
   );
 
   return sort;

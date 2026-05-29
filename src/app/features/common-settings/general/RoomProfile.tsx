@@ -69,7 +69,7 @@ export function RoomProfileEdit({
   const [roomAvatar, setRoomAvatar] = useState(avatar);
 
   const avatarUrl = roomAvatar
-    ? mxcUrlToHttp(mx, roomAvatar, useAuthentication) ?? undefined
+    ? (mxcUrlToHttp(mx, roomAvatar, useAuthentication) ?? undefined)
     : undefined;
 
   const [imageFile, setImageFile] = useState<File>();
@@ -106,8 +106,8 @@ export function RoomProfileEdit({
           await mx.sendStateEvent(room.roomId, StateEvent.RoomTopic as any, { topic: roomTopic });
         }
       },
-      [mx, room.roomId]
-    )
+      [mx, room.roomId],
+    ),
   );
   const submitting = submitState.status === AsyncStatus.Loading;
 
@@ -130,7 +130,7 @@ export function RoomProfileEdit({
     submit(
       roomAvatar === avatar ? undefined : roomAvatar || null,
       roomName === name ? undefined : roomName,
-      roomTopic === topic ? undefined : roomTopic
+      roomTopic === topic ? undefined : roomTopic,
     ).then(() => {
       if (alive()) {
         onClose();
@@ -283,7 +283,7 @@ export function RoomProfile({ permissions }: RoomProfileProps) {
   const canEdit = canEditAvatar || canEditName || canEditTopic;
 
   const avatarUrl = avatar
-    ? mxcUrlToHttp(mx, avatar, useAuthentication, 96, 96, 'crop') ?? undefined
+    ? (mxcUrlToHttp(mx, avatar, useAuthentication, 96, 96, 'crop') ?? undefined)
     : undefined;
 
   const [edit, setEdit] = useState(false);

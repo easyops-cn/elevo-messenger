@@ -23,7 +23,7 @@ function CallUtils({ embed }: { embed: CallEmbed }) {
     embed,
     useCallback(() => {
       setCallEmbed(undefined);
-    }, [setCallEmbed])
+    }, [setCallEmbed]),
   );
 
   return null;

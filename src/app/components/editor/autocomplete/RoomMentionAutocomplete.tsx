@@ -92,9 +92,9 @@ export function RoomMentionAutocomplete({
         if (alias) return [r.name, alias];
         return r.name;
       },
-      [mx]
+      [mx],
     ),
-    SEARCH_OPTIONS
+    SEARCH_OPTIONS,
   );
 
   const autoCompleteRoomIds = result ? result.items.slice(0, 20) : allRooms.slice(0, 20);
@@ -112,7 +112,7 @@ export function RoomMentionAutocomplete({
       name.startsWith('#') ? name : `#${name}`,
       roomId === roomAliasOrId || mx.getRoom(roomId)?.getCanonicalAlias() === roomAliasOrId,
       undefined,
-      viaServers
+      viaServers,
     );
     replaceWithElement(editor, query.range, mentionEl);
     moveCursor(editor, true);
@@ -163,22 +163,16 @@ export function RoomMentionAutocomplete({
                 <Avatar size="200">
                   <RoomAvatar
                     roomId={room.roomId}
-                    src={
-                      dm
-                        ? getDirectRoomAvatarUrl(mx, room)
-                        : getRoomAvatarUrl(mx, room, 96)
-                    }
+                    src={dm ? getDirectRoomAvatarUrl(mx, room) : getRoomAvatarUrl(mx, room, 96)}
                     alt={room.name}
                     fallbackAsIcon={
-                      dm
-                        ? undefined
-                        : (
-                            <RoomIcon
-                              size="100"
-                              joinRule={room.getJoinRule()}
-                              roomType={room.getType()}
-                            />
-                          )
+                      dm ? undefined : (
+                        <RoomIcon
+                          size="100"
+                          joinRule={room.getJoinRule()}
+                          roomType={room.getType()}
+                        />
+                      )
                     }
                     renderFallback={() => (
                       <RoomIcon

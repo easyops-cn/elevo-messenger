@@ -107,7 +107,7 @@ function PinnedMessage({
       };
 
       return mx.sendStateEvent(room.roomId, StateEvent.RoomPinnedEvents as any, newContent);
-    }, [room, eventId, mx])
+    }, [room, eventId, mx]),
   );
 
   const handleOpenClick: MouseEventHandler = (evt) => {
@@ -172,8 +172,8 @@ function PinnedMessage({
               userId={sender}
               src={
                 senderAvatarMxc
-                  ? mxcUrlToHttp(mx, senderAvatarMxc, useAuthentication, 48, 48, 'crop') ??
-                    undefined
+                  ? (mxcUrlToHttp(mx, senderAvatarMxc, useAuthentication, 48, 48, 'crop') ??
+                    undefined)
                   : undefined
               }
               alt={displayName}
@@ -252,10 +252,10 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(
       () => ({
         ...LINKIFY_OPTS,
         render: factoryRenderLinkifyWithMention((href) =>
-          renderMatrixMention(mx, room.roomId, href, makeMentionCustomProps(mentionClickHandler))
+          renderMatrixMention(mx, room.roomId, href, makeMentionCustomProps(mentionClickHandler)),
         ),
       }),
-      [mx, room, mentionClickHandler]
+      [mx, room, mentionClickHandler],
     );
     const htmlReactParserOptions = useMemo<HTMLReactParserOptions>(
       () =>
@@ -265,7 +265,7 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(
           handleSpoilerClick: spoilerClickHandler,
           handleMentionClick: mentionClickHandler,
         }),
-      [mx, room, linkifyOpts, mentionClickHandler, spoilerClickHandler, useAuthentication]
+      [mx, room, linkifyOpts, mentionClickHandler, spoilerClickHandler, useAuthentication],
     );
 
     const renderMatrixEvent = useMatrixEventRenderer<[MatrixEvent, string, GetContentCallback]>(
@@ -396,7 +396,7 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(
             </Text>
           </Box>
         );
-      }
+      },
     );
 
     const handleOpen = (roomId: string, eventId: string) => {
@@ -493,5 +493,5 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(
         </Box>
       </Menu>
     );
-  }
+  },
 );

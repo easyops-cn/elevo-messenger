@@ -30,7 +30,7 @@ export const BaseUnknownFileViewer = as<'div', BaseUnknownFileViewerProps>(
       onDownload,
       ...props
     },
-    ref
+    ref,
   ) => {
     const { t } = useTranslation();
 
@@ -84,5 +84,5 @@ export const BaseUnknownFileViewer = as<'div', BaseUnknownFileViewerProps>(
         </Box>
       </Box>
     );
-  }
+  },
 );

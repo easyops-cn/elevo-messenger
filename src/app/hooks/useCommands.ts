@@ -232,7 +232,7 @@ export const useCommands = (mx: MatrixClient, room: Room): CommandRecord => {
         exe: async (payload) => {
           const rawIds = splitWithSpace(payload);
           const roomIdOrAliases = rawIds.filter(
-            (idOrAlias) => isRoomId(idOrAlias) || isRoomAlias(idOrAlias)
+            (idOrAlias) => isRoomId(idOrAlias) || isRoomAlias(idOrAlias),
           );
           roomIdOrAliases.forEach(async (idOrAlias) => {
             await mx.joinRoom(idOrAlias);
@@ -373,7 +373,7 @@ export const useCommands = (mx: MatrixClient, room: Room): CommandRecord => {
               ...content,
               displayname: nick,
             },
-            mx.getSafeUserId()
+            mx.getSafeUserId(),
           );
         },
       },
@@ -395,7 +395,7 @@ export const useCommands = (mx: MatrixClient, room: Room): CommandRecord => {
                 ...content,
                 avatar_url: payload,
               },
-              mx.getSafeUserId()
+              mx.getSafeUserId(),
             );
           }
         },
@@ -446,7 +446,7 @@ export const useCommands = (mx: MatrixClient, room: Room): CommandRecord => {
           const startEventId = result.event_id;
 
           const path = `/rooms/${encodeURIComponent(room.roomId)}/context/${encodeURIComponent(
-            startEventId
+            startEventId,
           )}`;
           const eventContext = await mx.http.authedRequest<IContextResponse>(Method.Get, path, {
             limit: 0,
@@ -460,7 +460,7 @@ export const useCommands = (mx: MatrixClient, room: Room): CommandRecord => {
               token,
               20,
               Direction.Forward,
-              undefined
+              undefined,
             );
             const { end, chunk } = response;
             // remove until the latest event;
@@ -470,14 +470,14 @@ export const useCommands = (mx: MatrixClient, room: Room): CommandRecord => {
               (roomEvent) =>
                 (messageTypes.length > 0 ? messageTypes.includes(roomEvent.type) : true) &&
                 users.includes(roomEvent.sender) &&
-                roomEvent.unsigned?.redacted_because === undefined
+                roomEvent.unsigned?.redacted_because === undefined,
             );
 
             const eventIds = eventsToDelete.map((roomEvent) => roomEvent.event_id);
 
             // eslint-disable-next-line no-await-in-loop
             await rateLimitedActions(eventIds, (eventId) =>
-              mx.redactEvent(room.roomId, eventId, undefined, { reason })
+              mx.redactEvent(room.roomId, eventId, undefined, { reason }),
             );
           }
         },
@@ -502,7 +502,7 @@ export const useCommands = (mx: MatrixClient, room: Room): CommandRecord => {
 
           const serverAcl = getStateEvent(
             room,
-            StateEvent.RoomServerAcl
+            StateEvent.RoomServerAcl,
           )?.getContent<RoomServerAclEventContent>();
 
           const aclContent: RoomServerAclEventContent = {
@@ -521,10 +521,10 @@ export const useCommands = (mx: MatrixClient, room: Room): CommandRecord => {
           });
 
           aclContent.allow = aclContent.allow?.filter(
-            (servername) => !removeAllowList.includes(servername)
+            (servername) => !removeAllowList.includes(servername),
           );
           aclContent.deny = aclContent.deny?.filter(
-            (servername) => !removeDenyList.includes(servername)
+            (servername) => !removeDenyList.includes(servername),
           );
 
           aclContent.allow?.sort();
@@ -534,7 +534,7 @@ export const useCommands = (mx: MatrixClient, room: Room): CommandRecord => {
         },
       },
     }),
-    [mx, room, navigateRoom]
+    [mx, room, navigateRoom],
   );
 
   const commands: CommandRecord = useMemo(() => {

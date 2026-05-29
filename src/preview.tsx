@@ -26,7 +26,7 @@ const applyTheme = (themeKind: ThemeKind) => {
   document.body.className = '';
   document.body.classList.add(elevoConfig, varsClass, css.PreviewBody);
   document.body.classList.add(
-    ...(themeKind === ThemeKind.Dark ? DarkTheme.classNames : LightTheme.classNames)
+    ...(themeKind === ThemeKind.Dark ? DarkTheme.classNames : LightTheme.classNames),
   );
 };
 
@@ -36,7 +36,7 @@ const closePreviewWindow = () => {
 
 function PreviewTheme({ children }: { children: React.ReactNode }) {
   const [themeKind, setThemeKind] = useState<ThemeKind>(
-    window.__ElevoPreview_initialTheme__ === ThemeKind.Dark ? ThemeKind.Dark : ThemeKind.Light
+    window.__ElevoPreview_initialTheme__ === ThemeKind.Dark ? ThemeKind.Dark : ThemeKind.Light,
   );
   const theme = themeKind === ThemeKind.Dark ? DarkTheme : LightTheme;
 
@@ -57,7 +57,7 @@ function PreviewTheme({ children }: { children: React.ReactNode }) {
 
 function PreviewApp() {
   const [payload, setPayload] = useState<DesktopPreviewPayload | undefined>(
-    window.__ElevoPreview_initialPayload__
+    window.__ElevoPreview_initialPayload__,
   );
   const previewItem = useMemo<FilePreviewItem | undefined>(() => {
     if (!payload) return undefined;

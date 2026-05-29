@@ -9,7 +9,7 @@ export type MediaSeekControl = {
 };
 
 export const useMediaSeek = (
-  getTargetElement: () => HTMLMediaElement | null
+  getTargetElement: () => HTMLMediaElement | null,
 ): MediaSeekData & MediaSeekControl => {
   const [seekData, setSeekData] = useState<MediaSeekData>({
     seeking: false,
@@ -22,7 +22,7 @@ export const useMediaSeek = (
       if (!targetEl) return;
       targetEl.currentTime = time;
     },
-    [getTargetElement]
+    [getTargetElement],
   );
 
   useEffect(() => {

@@ -41,7 +41,7 @@ import { getMxIdLocalPart } from './matrix';
 export const getStateEvent = (
   room: Room,
   eventType: StateEvent,
-  stateKey = ''
+  stateKey = '',
 ): MatrixEvent | undefined =>
   room.getLiveTimeline().getState(EventTimeline.FORWARDS)?.getStateEvents(eventType, stateKey) ??
   undefined;
@@ -51,7 +51,7 @@ export const getStateEvents = (room: Room, eventType: StateEvent): MatrixEvent[]
 
 export const getAccountData = (
   mx: MatrixClient,
-  eventType: AccountDataEvent
+  eventType: AccountDataEvent,
 ): MatrixEvent | undefined => mx.getAccountData(eventType as any);
 
 export const getMDirects = (mDirectEvent: MatrixEvent): Set<string> => {
@@ -135,7 +135,7 @@ export const getSpaceChildren = (room: Room) =>
 export const mapParentWithChildren = (
   roomToParents: RoomToParents,
   roomId: string,
-  children: string[]
+  children: string[],
 ) => {
   const allParents = getAllParents(roomToParents, roomId);
   children.forEach((childId) => {
@@ -161,7 +161,7 @@ export const getRoomToParents = (mx: MatrixClient): RoomToParents => {
 export const getOrphanParents = (roomToParents: RoomToParents, roomId: string): string[] => {
   const parents = getAllParents(roomToParents, roomId);
   const orphanParents = Array.from(parents).filter(
-    (parentRoomId) => !roomToParents.has(parentRoomId)
+    (parentRoomId) => !roomToParents.has(parentRoomId),
   );
 
   return orphanParents;
@@ -222,7 +222,7 @@ export const findLatestNotificationEvent = (events: MatrixEvent[]): MatrixEvent 
       return event;
     }
   }
-}
+};
 
 export const timelineHasUnread = (room: Room, timeline: MatrixEvent[]): boolean => {
   const userId = room.client.getSafeUserId();
@@ -246,7 +246,7 @@ export const timelineHasUnread = (room: Room, timeline: MatrixEvent[]): boolean 
   }
 
   return true;
-}
+};
 
 export const roomHaveNotification = (room: Room): boolean => {
   const total = room.getRoomUnreadNotificationCount(NotificationCountType.Total);
@@ -255,11 +255,15 @@ export const roomHaveNotification = (room: Room): boolean => {
   return total > 0 || highlight > 0;
 };
 
-export const roomHaveUnread = (room: Room) => timelineHasUnread(room, room.getLiveTimeline().getEvents());
+export const roomHaveUnread = (room: Room) =>
+  timelineHasUnread(room, room.getLiveTimeline().getEvents());
 
 export const threadHaveNotification = (room: Room, threadId: string): boolean => {
   const total = room.getThreadUnreadNotificationCount(threadId, NotificationCountType.Total);
-  const highlight = room.getThreadUnreadNotificationCount(threadId, NotificationCountType.Highlight);
+  const highlight = room.getThreadUnreadNotificationCount(
+    threadId,
+    NotificationCountType.Highlight,
+  );
 
   return total > 0 || highlight > 0;
 };
@@ -295,7 +299,7 @@ export const getRoomIconSrc = (
   icons: Record<IconName, IconSrc>,
   roomType?: string,
   // eslint-disable-next-line
-  joinRule?: JoinRule
+  joinRule?: JoinRule,
 ): IconSrc => {
   if (roomType === RoomType.Space) {
     return icons.Space;
@@ -320,17 +324,18 @@ export const getAccessIconSrc = (joinRule: JoinRule) => {
       return LockIcon;
   }
   return HashIcon;
-}
+};
 
 export const getRoomAvatarUrl = (
   mx: MatrixClient,
   room: Room,
   size: 32 | 96 = 32,
-  useAuthentication = false
+  useAuthentication = false,
 ): string | undefined => {
   const mxcUrl = room.getMxcAvatarUrl();
   return mxcUrl
-    ? mx.mxcUrlToHttp(mxcUrl, size, size, 'crop', undefined, false, useAuthentication) ?? undefined
+    ? (mx.mxcUrlToHttp(mxcUrl, size, size, 'crop', undefined, false, useAuthentication) ??
+        undefined)
     : undefined;
 };
 
@@ -338,7 +343,7 @@ export const getDirectRoomAvatarUrl = (
   mx: MatrixClient,
   room: Room,
   size: 32 | 96 = 32,
-  useAuthentication = false
+  useAuthentication = false,
 ): string | undefined => {
   const mxcUrl = room.getAvatarFallbackMember()?.getMxcAvatarUrl();
 
@@ -373,10 +378,10 @@ export const parseReplyFormattedBody = (
   roomId: string,
   userId: string,
   eventId: string,
-  formattedBody: string
+  formattedBody: string,
 ): string => {
   const replyToLink = `<a href="https://matrix.to/#/${encodeURIComponent(
-    roomId
+    roomId,
   )}/${encodeURIComponent(eventId)}">In reply to</a>`;
   const userLink = `<a href="https://matrix.to/#/${encodeURIComponent(userId)}">${userId}</a>`;
 
@@ -393,7 +398,7 @@ export const getMemberDisplayName = (room: Room, userId: string): string | undef
 export const getMemberSearchStr = (
   member: RoomMember,
   query: string,
-  mxIdToName: (mxId: string) => string
+  mxIdToName: (mxId: string) => string,
 ): string[] => [
   member.rawDisplayName === member.userId ? mxIdToName(member.userId) : member.rawDisplayName,
   query.startsWith('@') || query.indexOf(':') > -1 ? member.userId : mxIdToName(member.userId),
@@ -432,7 +437,7 @@ export const getEventReactions = (timelineSet: EventTimelineSet, eventId: string
   timelineSet.relations.getChildEventsForEvent(
     eventId,
     RelationType.Annotation,
-    EventType.Reaction
+    EventType.Reaction,
   );
 
 export const getEventEdits = (timelineSet: EventTimelineSet, eventId: string, eventType: string) =>
@@ -440,7 +445,7 @@ export const getEventEdits = (timelineSet: EventTimelineSet, eventId: string, ev
 
 export const getLatestEdit = (
   targetEvent: MatrixEvent,
-  editEvents: MatrixEvent[]
+  editEvents: MatrixEvent[],
 ): MatrixEvent | undefined => {
   const eventByTargetSender = (rEvent: MatrixEvent) =>
     rEvent.getSender() === targetEvent.getSender();
@@ -450,7 +455,7 @@ export const getLatestEdit = (
 export const getEditedEvent = (
   mEventId: string,
   mEvent: MatrixEvent,
-  timelineSet: EventTimelineSet
+  timelineSet: EventTimelineSet,
 ): MatrixEvent | undefined => {
   const edits = getEventEdits(timelineSet, mEventId, mEvent.getType());
   return edits && getLatestEdit(mEvent, edits.getRelations());
@@ -471,7 +476,7 @@ export const canEditEvent = (mx: MatrixClient, mEvent: MatrixEvent) => {
 
 export const getLatestEditableEvt = (
   timeline: EventTimeline,
-  canEdit: (mEvent: MatrixEvent) => boolean
+  canEdit: (mEvent: MatrixEvent) => boolean,
 ): MatrixEvent | undefined => {
   const events = timeline.getEvents();
 
@@ -501,7 +506,7 @@ export const getMentionContent = (userIds: string[], room: boolean): IMentions =
 export const getCommonRooms = (
   mx: MatrixClient,
   rooms: string[],
-  otherUserId: string
+  otherUserId: string,
 ): string[] => {
   const commonRooms: string[] = [];
 
@@ -547,7 +552,7 @@ export const getAllVersionsRoomCreator = (room: Room): Set<string> => {
 export const guessPerfectParent = (
   mx: MatrixClient,
   roomId: string,
-  parents: string[]
+  parents: string[],
 ): string | undefined => {
   if (parents.length === 1) {
     return parents[0];
@@ -563,7 +568,7 @@ export const guessPerfectParent = (
 
     const powerLevels = getStateEvent(
       r,
-      StateEvent.RoomPowerLevels
+      StateEvent.RoomPowerLevels,
     )?.getContent<IPowerLevelsContent>();
 
     const { users_default: usersDefault, users } = powerLevels ?? {};
@@ -586,7 +591,7 @@ export const guessPerfectParent = (
   parents.forEach((parentId) => {
     const parentSpecialUsers = getSpecialUsers(parentId);
     const matchedUsersCount = parentSpecialUsers.filter((userId) =>
-      roomSpecialUsers.includes(userId)
+      roomSpecialUsers.includes(userId),
     ).length;
 
     if (matchedUsersCount > score) {
@@ -606,7 +611,7 @@ export const getLatestMessageTextFromContent = (
   direct: boolean | undefined,
   t: (key: string, options?: Record<string, unknown>) => string,
   showUsername = true,
-  showSelfName = false
+  showSelfName = false,
 ): string | undefined => {
   const sender = evt.getSender();
   if (!sender || !content?.body) return undefined;
@@ -638,7 +643,7 @@ export const getLatestMessageText = (
   direct: boolean | undefined,
   t: (key: string, options?: Record<string, unknown>) => string,
   showUsername = true,
-  showSelfName = false
+  showSelfName = false,
 ): string | undefined =>
   getLatestMessageTextFromContent(
     room,
@@ -648,5 +653,5 @@ export const getLatestMessageText = (
     direct,
     t,
     showUsername,
-    showSelfName
+    showSelfName,
   );

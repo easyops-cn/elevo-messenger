@@ -23,7 +23,7 @@ export const useRoomMembers = (mx: MatrixClient, roomId: string | undefined): Ro
         updateMemberList();
       });
     } else {
-      setMembers(prev => prev.length === 0 ? prev : []);
+      setMembers((prev) => (prev.length === 0 ? prev : []));
     }
 
     mx.on(RoomMemberEvent.Membership, updateMemberList);

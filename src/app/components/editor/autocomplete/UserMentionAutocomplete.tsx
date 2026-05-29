@@ -23,7 +23,6 @@ import { Membership } from '../../../../types/matrix/room';
 
 type MentionAutoCompleteHandler = (userId: string, name: string) => void;
 
-
 function UnknownMentionItem({
   userId,
   name,
@@ -95,7 +94,7 @@ export function UserMentionAutocomplete({
   const [result, search, resetSearch] = useAsyncSearch(members, getRoomMemberStr, SEARCH_OPTIONS);
   const currentUserId = mx.getUserId();
   const autoCompleteMembers = (result ? result.items.slice(0, 20) : members.slice(0, 20)).filter(
-    (m) => withAllowedMembership(m) && m.userId !== currentUserId
+    (m) => withAllowedMembership(m) && m.userId !== currentUserId,
   );
 
   useEffect(() => {
@@ -107,7 +106,7 @@ export function UserMentionAutocomplete({
     const mentionEl = createMentionElement(
       uId,
       name.startsWith('@') ? name : `@${name}`,
-      mx.getUserId() === uId || roomAliasOrId === uId
+      mx.getUserId() === uId || roomAliasOrId === uId,
     );
     replaceWithElement(editor, query.range, mentionEl);
     moveCursor(editor, true);
@@ -130,7 +129,6 @@ export function UserMentionAutocomplete({
   const getName = (member: RoomMember) =>
     getMemberDisplayName(room, member.userId) ?? getMxIdLocalPart(member.userId) ?? member.userId;
 
-
   // TODO: support @room
   if (autoCompleteMembers.length === 0) {
     return null;
@@ -146,42 +144,41 @@ export function UserMentionAutocomplete({
         />
       )}
       {autoCompleteMembers.map((roomMember) => {
-          const avatarMxcUrl = roomMember.getMxcAvatarUrl();
-          const avatarUrl = avatarMxcUrl
-            ? mx.mxcUrlToHttp(avatarMxcUrl, 32, 32, 'crop', undefined, false, useAuthentication)
-            : undefined;
-          return (
-            <MenuItem
-              key={roomMember.userId}
-              as="button"
-              radii="300"
-              onKeyDown={(evt: ReactKeyboardEvent<HTMLButtonElement>) =>
-                onTabPress(evt, () => handleAutocomplete(roomMember.userId, getName(roomMember)))
-              }
-              onClick={() => handleAutocomplete(roomMember.userId, getName(roomMember))}
-              after={
-                <Text size="T200" priority="300" truncate>
-                  {roomMember.userId}
-                </Text>
-              }
-              before={
-                <Avatar size="200">
-                  <UserAvatar
-                    userId={roomMember.userId}
-                    src={avatarUrl ?? undefined}
-                    alt={getName(roomMember)}
-                    renderFallback={() => <Icon size="50" src={Icons.User} filled />}
-                  />
-                </Avatar>
-              }
-            >
-              <Text style={{ flexGrow: 1 }} size="B400" truncate>
-                {getName(roomMember)}
+        const avatarMxcUrl = roomMember.getMxcAvatarUrl();
+        const avatarUrl = avatarMxcUrl
+          ? mx.mxcUrlToHttp(avatarMxcUrl, 32, 32, 'crop', undefined, false, useAuthentication)
+          : undefined;
+        return (
+          <MenuItem
+            key={roomMember.userId}
+            as="button"
+            radii="300"
+            onKeyDown={(evt: ReactKeyboardEvent<HTMLButtonElement>) =>
+              onTabPress(evt, () => handleAutocomplete(roomMember.userId, getName(roomMember)))
+            }
+            onClick={() => handleAutocomplete(roomMember.userId, getName(roomMember))}
+            after={
+              <Text size="T200" priority="300" truncate>
+                {roomMember.userId}
               </Text>
-            </MenuItem>
-          );
-        })
-      }
+            }
+            before={
+              <Avatar size="200">
+                <UserAvatar
+                  userId={roomMember.userId}
+                  src={avatarUrl ?? undefined}
+                  alt={getName(roomMember)}
+                  renderFallback={() => <Icon size="50" src={Icons.User} filled />}
+                />
+              </Avatar>
+            }
+          >
+            <Text style={{ flexGrow: 1 }} size="B400" truncate>
+              {getName(roomMember)}
+            </Text>
+          </MenuItem>
+        );
+      })}
     </AutocompleteMenu>
   );
 }

@@ -22,6 +22,6 @@ export const useOpenCodeView = (): ((payload: CodeViewPayload) => Promise<boolea
       setCodeViewPayload(payload);
       return true;
     },
-    [setCodeViewPayload]
+    [setCodeViewPayload],
   );
 };

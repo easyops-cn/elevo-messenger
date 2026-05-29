@@ -51,7 +51,7 @@ export function RoomEncryption({ permissions }: RoomEncryptionProps) {
       await mx.sendStateEvent(room.roomId, StateEvent.RoomEncryption as any, {
         algorithm: ROOM_ENC_ALGO,
       });
-    }, [mx, room.roomId])
+    }, [mx, room.roomId]),
   );
 
   const enabling = enableState.status === AsyncStatus.Loading;
@@ -73,9 +73,7 @@ export function RoomEncryption({ permissions }: RoomEncryptionProps) {
       <SettingTile
         title={t('roomSettings.roomEncryption')}
         description={
-          enabled
-            ? t('roomSettings.encryptionEnabled')
-            : t('roomSettings.encryptionWarning')
+          enabled ? t('roomSettings.encryptionEnabled') : t('roomSettings.encryptionWarning')
         }
         after={
           enabled ? (
@@ -130,9 +128,7 @@ export function RoomEncryption({ permissions }: RoomEncryptionProps) {
                     </IconButton>
                   </Header>
                   <Box style={{ padding: config.space.S400 }} direction="Column" gap="400">
-                    <Text priority="400">
-                      {t('roomSettings.enableConfirm')}
-                    </Text>
+                    <Text priority="400">{t('roomSettings.enableConfirm')}</Text>
                     <Button type="submit" variant="Primary" onClick={handleEnable}>
                       <Text size="B400">{t('roomSettings.enableE2E')}</Text>
                     </Button>

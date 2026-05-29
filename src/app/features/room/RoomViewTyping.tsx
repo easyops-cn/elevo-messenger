@@ -23,7 +23,7 @@ export const RoomViewTyping = as<'div', RoomViewTypingProps>(
     const typingNames = typingMembers
       .filter((receipt) => receipt.userId !== mx.getUserId())
       .map(
-        (receipt) => getMemberDisplayName(room, receipt.userId) ?? getMxIdLocalPart(receipt.userId)
+        (receipt) => getMemberDisplayName(room, receipt.userId) ?? getMxIdLocalPart(receipt.userId),
       )
       .reverse();
 
@@ -39,7 +39,7 @@ export const RoomViewTyping = as<'div', RoomViewTypingProps>(
           type: 'DELETE',
           roomId: room.roomId,
           userId: receipt.userId,
-        })
+        }),
       );
     };
 
@@ -117,5 +117,5 @@ export const RoomViewTyping = as<'div', RoomViewTypingProps>(
         </Box>
       </div>
     );
-  }
+  },
 );

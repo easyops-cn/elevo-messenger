@@ -39,9 +39,13 @@ export const useRoomLatestContentfulEvent = (room: Room) => {
       const latest = getLatestEvent();
       const hasTriedPaginate = paginateBackwardCache.has(room.roomId);
       paginateBackwardCache.add(room.roomId);
-      
+
       if (latest) {
-        const latestEdited = getEditedEvent(latest.getId()!, latest, room.getUnfilteredTimelineSet());
+        const latestEdited = getEditedEvent(
+          latest.getId()!,
+          latest,
+          room.getUnfilteredTimelineSet(),
+        );
         setLatestEvent(latest);
         setLatestEditedEvent(latestEdited);
         return;
@@ -61,7 +65,7 @@ export const useRoomLatestContentfulEvent = (room: Room) => {
       });
       setLatestEvent(getLatestEvent());
     }, [mx, room]),
-    { wait: 100 }
+    { wait: 100 },
   );
 
   useEffect(() => {

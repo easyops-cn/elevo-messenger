@@ -91,7 +91,7 @@ function InviteNotifications() {
         },
       });
     },
-    [navigate]
+    [navigate],
   );
 
   const playSound = useCallback(() => {
@@ -173,7 +173,7 @@ function MessageNotifications() {
         },
       });
     },
-    [mx, navigateRoom, t]
+    [mx, navigateRoom, t],
   );
 
   const playSound = useCallback(() => {
@@ -187,7 +187,7 @@ function MessageNotifications() {
       room,
       toStartOfTimeline,
       removed,
-      data
+      data,
     ) => {
       if (mx.getSyncState() !== 'SYNCING') return;
       if (document.hasFocus() && (selectedRoomId === room?.roomId || notificationSelected)) return;
@@ -223,7 +223,7 @@ function MessageNotifications() {
         notify({
           roomName: room.name ?? 'Unknown',
           roomAvatar: avatarMxc
-            ? mxcUrlToHttp(mx, avatarMxc, useAuthentication, 96, 96, 'crop') ?? undefined
+            ? (mxcUrlToHttp(mx, avatarMxc, useAuthentication, 96, 96, 'crop') ?? undefined)
             : undefined,
           username: getMemberDisplayName(room, sender) ?? getMxIdLocalPart(sender) ?? sender,
           room,
@@ -271,7 +271,7 @@ function ClientToolSdkHandler() {
 
   // Track registered tools per webview label: Map<label, Map<toolName, { roomId, data }>>
   const registeredToolsRef = useRef<Map<string, Map<string, { roomId: string; data: unknown }>>>(
-    new Map()
+    new Map(),
   );
 
   useSdkMessageListener('client_tool_register', (payload: SdkMessagePayload) => {
@@ -341,7 +341,7 @@ function ClientToolSdkHandler() {
       eventRoom,
       _toStart,
       _removed,
-      data
+      data,
     ) => {
       if (!eventRoom?.roomId || !data.liveEvent) return;
       if (mEvent.getType() === 'vip.elevo.client_tool.execute') {

@@ -15,7 +15,7 @@ export const useSetSetting = <K extends keyof Settings>(settingsAtom: typeof sAt
         s[key] = typeof value === 'function' ? value(s[key]) : value;
         set(settingsAtom, s);
       }),
-    [settingsAtom, key]
+    [settingsAtom, key],
   );
 
   return useSetAtom(setterAtom);
@@ -23,7 +23,7 @@ export const useSetSetting = <K extends keyof Settings>(settingsAtom: typeof sAt
 
 export const useSetting = <K extends keyof Settings>(
   settingsAtom: typeof sAtom,
-  key: K
+  key: K,
 ): [Settings[K], ReturnType<typeof useSetSetting<K>>] => {
   const selector = useMemo(() => (s: Settings) => s[key], [key]);
   const setting = useAtomValue(selectAtom(settingsAtom, selector));

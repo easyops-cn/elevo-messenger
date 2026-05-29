@@ -71,7 +71,7 @@ export function useWorkspaceToken(): UseWorkspaceTokenReturn {
         const result = await refreshWorkspaceOAuthToken(
           connection.serverUrl,
           oauth.clientId,
-          refreshToken
+          refreshToken,
         );
         await mx.setAccountData(AccountDataEvent.ElevoLinks, {
           workspaces: {

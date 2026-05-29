@@ -59,7 +59,7 @@ export class CallEmbed {
     mx: MatrixClient,
     room: Room,
     intent: ElementCallIntent,
-    themeKind: ElementCallThemeKind
+    themeKind: ElementCallThemeKind,
   ): Widget {
     const userId = mx.getSafeUserId();
     const deviceId = mx.getDeviceId() ?? '';
@@ -85,7 +85,7 @@ export class CallEmbed {
 
     const widgetUrl = new URL(
       `${trimTrailingSlash(import.meta.env.BASE_URL)}/public/element-call/index.html`,
-      window.location.origin
+      window.location.origin,
     );
     widgetUrl.search = params.toString();
 
@@ -110,7 +110,7 @@ export class CallEmbed {
     iframe.title = 'Call Embed';
     iframe.setAttribute(
       'sandbox',
-      'allow-forms allow-scripts allow-same-origin allow-popups allow-modals allow-downloads'
+      'allow-forms allow-scripts allow-same-origin allow-popups allow-modals allow-downloads',
     );
     iframe.allow = 'microphone; camera; display-capture; autoplay; clipboard-write;';
     iframe.src = url;
@@ -127,10 +127,10 @@ export class CallEmbed {
     room: Room,
     widget: Widget,
     container: HTMLElement,
-    initialControlState?: CallControlState
+    initialControlState?: CallControlState,
   ) {
     const iframe = CallEmbed.getIframe(
-      widget.getCompleteUrl({ currentUserId: mx.getSafeUserId() })
+      widget.getCompleteUrl({ currentUserId: mx.getSafeUserId() }),
     );
     container.append(iframe);
 
@@ -155,7 +155,7 @@ export class CallEmbed {
           return;
         }
         this.control.onMediaState(evt);
-      })
+      }),
     );
 
     this.start();
@@ -199,7 +199,7 @@ export class CallEmbed {
     // Room widgets get locked to the room they were added in
     this.call.setViewedRoomId(this.roomId);
     this.disposables.push(
-      this.listenAction(ElementWidgetActions.JoinCall, this.onCallJoined.bind(this))
+      this.listenAction(ElementWidgetActions.JoinCall, this.onCallJoined.bind(this)),
     );
 
     // Populate the map of "read up to" events for this widget with the current event in every room.

@@ -31,46 +31,43 @@ type RoomSettingsMenuItem = {
 
 const useRoomSettingsMenuItems = (): RoomSettingsMenuItem[] => {
   const elevoConfig = useElevoConfig();
-  return useMemo(
-    () => {
-      const items: RoomSettingsMenuItem[] = [
-        {
-          page: RoomSettingsPage.GeneralPage,
-          nameKey: 'settings.general',
-          icon: Icons.Setting,
-        },
-        {
-          page: RoomSettingsPage.MembersPage,
-          nameKey: 'roomSettings.members',
-          icon: UsersIcon,
-        },
-        {
-          page: RoomSettingsPage.PermissionsPage,
-          nameKey: 'roomSettings.permissions',
-          icon: Icons.Lock,
-        },
-        {
-          page: RoomSettingsPage.EmojisStickersPage,
-          nameKey: 'settings.emojisStickers',
-          icon: Icons.Smile,
-        },
-      ];
-      if (elevoConfig.workspaces?.apiBaseUrl) {
-        items.push({
-          page: RoomSettingsPage.WorkspacesPage,
-          nameKey: 'workspaces.title',
-          icon: LayoutGridIcon,
-        });
-      }
+  return useMemo(() => {
+    const items: RoomSettingsMenuItem[] = [
+      {
+        page: RoomSettingsPage.GeneralPage,
+        nameKey: 'settings.general',
+        icon: Icons.Setting,
+      },
+      {
+        page: RoomSettingsPage.MembersPage,
+        nameKey: 'roomSettings.members',
+        icon: UsersIcon,
+      },
+      {
+        page: RoomSettingsPage.PermissionsPage,
+        nameKey: 'roomSettings.permissions',
+        icon: Icons.Lock,
+      },
+      {
+        page: RoomSettingsPage.EmojisStickersPage,
+        nameKey: 'settings.emojisStickers',
+        icon: Icons.Smile,
+      },
+    ];
+    if (elevoConfig.workspaces?.apiBaseUrl) {
       items.push({
-        page: RoomSettingsPage.DeveloperToolsPage,
-        nameKey: 'settings.developerTools',
-        icon: Icons.Terminal,
+        page: RoomSettingsPage.WorkspacesPage,
+        nameKey: 'workspaces.title',
+        icon: LayoutGridIcon,
       });
-      return items;
-    },
-    [elevoConfig.workspaces?.apiBaseUrl]
-  );
+    }
+    items.push({
+      page: RoomSettingsPage.DeveloperToolsPage,
+      nameKey: 'settings.developerTools',
+      icon: Icons.Terminal,
+    });
+    return items;
+  }, [elevoConfig.workspaces?.apiBaseUrl]);
 };
 
 type RoomSettingsProps = {
@@ -89,7 +86,7 @@ export function RoomSettings({ initialPage, requestClose }: RoomSettingsProps) {
   const joinRuleContent = useRoomJoinRule(room);
 
   const avatarUrl = roomAvatar
-    ? mxcUrlToHttp(mx, roomAvatar, useAuthentication, 96, 96, 'crop') ?? undefined
+    ? (mxcUrlToHttp(mx, roomAvatar, useAuthentication, 96, 96, 'crop') ?? undefined)
     : undefined;
 
   const screenSize = useScreenSizeContext();

@@ -32,8 +32,8 @@ function ExportKeys() {
         });
         await saveFile(blob, 'cinny-keys.txt');
       },
-      [mx]
-    )
+      [mx],
+    ),
   );
 
   const exporting = exportState.status === AsyncStatus.Loading;
@@ -178,8 +178,8 @@ function ImportKeys({ file, onDone }: ImportKeysProps) {
 
         await crypto.importRoomKeysAsJson(keys);
       },
-      [file, mx]
-    )
+      [file, mx],
+    ),
   );
 
   const decrypting = decryptState.status === AsyncStatus.Loading;

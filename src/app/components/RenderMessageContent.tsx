@@ -158,13 +158,7 @@ export function RenderMessageContent({
               />
             )}
           >
-            <DownloadFile
-              body={body}
-              mimeType={mimeType}
-              url={url}
-              encInfo={encInfo}
-              info={info}
-            />
+            <DownloadFile body={body} mimeType={mimeType} url={url} encInfo={encInfo} info={info} />
           </FileContent>
         )}
       />
@@ -261,9 +255,7 @@ export function RenderMessageContent({
               renderThumbnail={() => (
                 <ThumbnailContent
                   info={info}
-                  renderImage={(src) => (
-                    <Image alt={body} title={body} src={src} loading="lazy" />
-                  )}
+                  renderImage={(src) => <Image alt={body} title={body} src={src} loading="lazy" />}
                 />
               )}
               renderVideo={(p) => <Video {...p} />}

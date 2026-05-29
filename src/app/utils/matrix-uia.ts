@@ -2,7 +2,7 @@ import { AuthType, IAuthData, UIAFlow } from 'matrix-js-sdk';
 
 export const getSupportedUIAFlows = (uiaFlows: UIAFlow[], supportedStages: string[]): UIAFlow[] => {
   const supportedUIAFlows = uiaFlows.filter((flow) =>
-    flow.stages.every((stage) => supportedStages.includes(stage))
+    flow.stages.every((stage) => supportedStages.includes(stage)),
   );
 
   return supportedUIAFlows;
