@@ -14,13 +14,9 @@ import {
   useMediaVolume,
 } from '../../../hooks/media';
 import { secondsToMinutesAndSeconds } from '../../../utils/common';
-import {
-  decryptFile,
-  downloadEncryptedMedia,
-  downloadMedia,
-  mxcUrlToHttp,
-} from '../../../utils/matrix';
+import { mxcUrlToHttp } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
+import { loadMediaBlobUrl } from '../../../utils/mediaDownload';
 
 type RenderMediaControlProps = {
   after: ReactNode;
@@ -51,10 +47,7 @@ export function AudioContent({
     useCallback(async () => {
       const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
-      const fileContent = encInfo
-        ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
-        : await downloadMedia(mediaUrl);
-      return URL.createObjectURL(fileContent);
+      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo);
     }, [mx, url, useAuthentication, mimeType, encInfo]),
   );
 

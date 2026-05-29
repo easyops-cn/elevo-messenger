@@ -29,15 +29,11 @@ import {
   millisecondsToMinutesAndSeconds,
   scaleYDimension,
 } from '../../../utils/common';
-import {
-  decryptFile,
-  downloadEncryptedMedia,
-  downloadMedia,
-  mxcUrlToHttp,
-} from '../../../utils/matrix';
+import { mxcUrlToHttp } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { validBlurHash } from '../../../utils/blurHash';
 import { PlayIcon } from '../../../icons/PlayIcon';
+import { loadMediaBlobUrl } from '../../../utils/mediaDownload';
 
 type RenderVideoProps = {
   title: string;
@@ -91,12 +87,10 @@ export const VideoContent = as<'div', VideoContentProps>(
     const aspectRatio = originalWidth / originalHeight;
 
     let width: number;
-    let height: number;
     if (isLandscape) {
       width = Math.min(originalWidth, 320);
-      height = scaleYDimension(originalWidth, width, originalHeight);
     } else {
-      height = Math.min(originalHeight, 320);
+      const height = Math.min(originalHeight, 320);
       width = scaleYDimension(originalHeight, height, originalWidth);
     }
 
@@ -104,12 +98,7 @@ export const VideoContent = as<'div', VideoContentProps>(
       useCallback(async () => {
         const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
         if (!mediaUrl) throw new Error('Invalid media URL');
-        const fileContent = encInfo
-          ? await downloadEncryptedMedia(mediaUrl, (encBuf) =>
-              decryptFile(encBuf, mimeType, encInfo),
-            )
-          : await downloadMedia(mediaUrl);
-        return URL.createObjectURL(fileContent);
+        return loadMediaBlobUrl(mediaUrl, mimeType, encInfo);
       }, [mx, url, useAuthentication, mimeType, encInfo]),
     );
 

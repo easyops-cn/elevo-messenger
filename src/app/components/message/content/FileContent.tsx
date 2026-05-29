@@ -28,14 +28,10 @@ import {
   mimeTypeToExt,
 } from '../../../utils/mimeTypes';
 import { stopPropagation } from '../../../utils/keyboard';
-import {
-  decryptFile,
-  downloadEncryptedMedia,
-  downloadMedia,
-  mxcUrlToHttp,
-} from '../../../utils/matrix';
+import { mxcUrlToHttp } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { ModalWide } from '../../../styles/Modal.css';
+import { loadMediaBlob, loadMediaBlobUrl } from '../../../utils/mediaDownload';
 
 const renderErrorButton = (retry: () => void, text: string) => (
   <TooltipProvider
@@ -96,9 +92,7 @@ export function ReadTextFile({
     useCallback(async () => {
       const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
-      const fileContent = encInfo
-        ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
-        : await downloadMedia(mediaUrl);
+      const fileContent = await loadMediaBlob(mediaUrl, mimeType, encInfo);
 
       const text = fileContent.text();
       setTextViewer(true);
@@ -200,11 +194,8 @@ export function ReadPdfFile({
     useCallback(async () => {
       const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
-      const fileContent = encInfo
-        ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
-        : await downloadMedia(mediaUrl);
       setPdfViewer(true);
-      return URL.createObjectURL(fileContent);
+      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo);
     }, [mx, url, useAuthentication, mimeType, encInfo]),
   );
 
