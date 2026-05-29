@@ -2,6 +2,8 @@ export enum AccountDataEvent {
   PushRules = 'm.push_rules',
   Direct = 'm.direct',
   IgnoredUserList = 'm.ignored_user_list',
+  FullyRead = 'm.fully_read',
+  MarkedUnread = 'm.marked_unread',
 
   CinnySpaces = 'in.cinny.spaces',
 
@@ -21,6 +23,14 @@ export enum AccountDataEvent {
 }
 
 export type MDirectContent = Record<string, string[]>;
+
+export type MFullyReadContent = {
+  event_id: string;
+};
+
+export type MMarkedUnreadContent = {
+  unread: boolean;
+};
 
 export type SecretStorageDefaultKeyContent = {
   key: string;

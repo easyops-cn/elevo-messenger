@@ -5,6 +5,7 @@ import {
   type Room,
   type Thread,
 } from 'matrix-js-sdk';
+import { AccountDataEvent, type MMarkedUnreadContent } from '../../types/matrix/accountData';
 
 const markedCache = new Map<string, string>();
 
@@ -48,11 +49,28 @@ export async function markAsRead(
   const lastEventId = latestEvent.getId() ?? '';
   if (markedCache.get(keyId) === lastEventId) return;
 
-  await mx.sendReadReceipt(
-    latestEvent,
-    privateReceipt ? ReceiptType.ReadPrivate : ReceiptType.Read,
-    unthreaded,
-  );
+  if (threadRootId) {
+    await mx.sendReadReceipt(
+      latestEvent,
+      privateReceipt ? ReceiptType.ReadPrivate : ReceiptType.Read,
+      unthreaded,
+    );
+  } else {
+    await mx.setRoomReadMarkers(
+      roomId,
+      lastEventId,
+      privateReceipt ? undefined : latestEvent,
+      privateReceipt ? latestEvent : undefined,
+    );
+    const markedUnread = room
+      .getAccountData(AccountDataEvent.MarkedUnread)
+      ?.getContent<MMarkedUnreadContent>();
+    if (markedUnread?.unread === true) {
+      await mx
+        .setRoomAccountData(roomId, AccountDataEvent.MarkedUnread, { unread: false })
+        .catch(() => undefined);
+    }
+  }
 
   markedCache.set(keyId, lastEventId);
 }

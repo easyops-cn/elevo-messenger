@@ -18,11 +18,13 @@ import {
   Unread,
   StateEvent,
 } from '../../../types/matrix/room';
+import { AccountDataEvent } from '../../../types/matrix/accountData';
 import {
   getAllParents,
   getNotificationType,
   getUnreadInfo,
   getUnreadInfos,
+  roomHaveUnread,
   isNotificationEvent,
 } from '../../utils/room';
 import { roomToParentsAtom } from './roomToParents';
@@ -49,6 +51,28 @@ export const unreadInfoToUnread = (unreadInfo: UnreadInfo): Unread => ({
   total: unreadInfo.total,
   from: null,
 });
+
+const roomHasMarkedUnread = (room: Room): boolean =>
+  room.getAccountData(AccountDataEvent.MarkedUnread)?.getContent<{ unread?: boolean }>().unread ===
+  true;
+
+const roomHasUnreadBadge = (room: Room, unreadInfo: UnreadInfo): boolean =>
+  unreadInfo.total > 0 ||
+  unreadInfo.highlight > 0 ||
+  roomHaveUnread(room) ||
+  roomHasMarkedUnread(room);
+
+const updateRoomUnread = (
+  setUnreadAtom: (action: RoomToUnreadAction) => void,
+  room: Room,
+  unreadInfo = getUnreadInfo(room),
+) => {
+  setUnreadAtom(
+    roomHasUnreadBadge(room, unreadInfo)
+      ? { type: 'PUT', unreadInfo }
+      : { type: 'DELETE', roomId: room.roomId },
+  );
+};
 
 const putUnreadInfo = (
   roomToUnread: RoomToUnread,
@@ -242,12 +266,37 @@ export const useBindRoomToUnreadAtom = (mx: MatrixClient, unreadAtom: typeof roo
         ),
       );
       if (isMyReceipt) {
-        setUnreadAtom({ type: 'DELETE', roomId: room.roomId });
+        updateRoomUnread(setUnreadAtom, room);
       }
     };
     mx.on(RoomEvent.Receipt, handleReceipt);
     return () => {
       mx.removeListener(RoomEvent.Receipt, handleReceipt);
+    };
+  }, [mx, setUnreadAtom]);
+
+  useEffect(() => {
+    const handleRoomAccountData = (mEvent: MatrixEvent, room: Room) => {
+      if (room.isSpaceRoom()) return;
+      if (
+        mEvent.getType() !== AccountDataEvent.FullyRead &&
+        mEvent.getType() !== AccountDataEvent.MarkedUnread
+      ) {
+        return;
+      }
+      if (getNotificationType(mx, room.roomId) === NotificationType.Mute) {
+        setUnreadAtom({
+          type: 'DELETE',
+          roomId: room.roomId,
+        });
+        return;
+      }
+
+      updateRoomUnread(setUnreadAtom, room);
+    };
+    mx.on(RoomEvent.AccountData, handleRoomAccountData);
+    return () => {
+      mx.removeListener(RoomEvent.AccountData, handleRoomAccountData);
     };
   }, [mx, setUnreadAtom]);
 
