@@ -179,22 +179,25 @@ export function MText({
         ? Number(reasoningContent.duration_ms)
         : undefined;
     const reasoningStreaming = reasoningContent?.streaming;
+    const isEmpty = trimmedBody === '';
     return (
       <ReasoningCard
         style={style}
         durationMs={durationMs}
         streaming={reasoningStreaming}
-        empty={!trimmedBody}
+        empty={isEmpty}
       >
-        <MessageTextBody
-          preWrap={typeof customBody !== 'string'}
-          jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
-        >
-          {renderBody({
-            body: trimmedBody,
-            customBody: typeof customBody === 'string' ? customBody : undefined,
-          })}
-        </MessageTextBody>
+        {!isEmpty && (
+          <MessageTextBody
+            preWrap={typeof customBody !== 'string'}
+            jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
+          >
+            {renderBody({
+              body: trimmedBody,
+              customBody: typeof customBody === 'string' ? customBody : undefined,
+            })}
+          </MessageTextBody>
+        )}
       </ReasoningCard>
     );
   }

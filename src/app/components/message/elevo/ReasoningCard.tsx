@@ -50,7 +50,7 @@ export function ReasoningCard({
         </Text>
         {!empty && <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="100" />}
       </div>
-      {(expanded || empty) && children}
+      {expanded && !empty && children}
     </Box>
   );
 }
