@@ -35,12 +35,12 @@ export async function markAsRead(mx: MatrixClient, roomId: string, privateReceip
 
   const lastEventId = latestEvent.getId() ?? '';
   if (markedCache.get(keyId) === lastEventId) return;
-
-  markedCache.set(keyId, lastEventId);
-
+  
   await mx.sendReadReceipt(
     latestEvent,
     privateReceipt ? ReceiptType.ReadPrivate : ReceiptType.Read,
     unthreaded
   );
+
+  markedCache.set(keyId, lastEventId);
 }
