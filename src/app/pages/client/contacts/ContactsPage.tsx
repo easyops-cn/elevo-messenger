@@ -27,7 +27,13 @@ import {
 import { MatrixClient, Room, RoomMember } from 'matrix-js-sdk';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import classNames from 'classnames';
-import { Page, PageContent, PageContentCenter, PageHeader, PageMain } from '../../../components/page';
+import {
+  Page,
+  PageContent,
+  PageContentCenter,
+  PageHeader,
+  PageMain,
+} from '../../../components/page';
 import { ScreenSize, useScreenSizeContext } from '../../../hooks/useScreenSize';
 import { BackRouteHandler } from '../../../components/BackRouteHandler';
 import { ContainerColor } from '../../../styles/ContainerColor.css';
@@ -283,7 +289,7 @@ export function ContactsMemberList({ room, members, filterRole }: ContactsMember
                       >
                         <Text size="B300">
                           {result.items.length
-                            ? t('contacts.resultCount_other', { count: result.items.length })
+                            ? t('contacts.resultCount', { count: result.items.length })
                             : t('contacts.noResults')}
                         </Text>
                       </Chip>
@@ -423,9 +429,7 @@ export function ContactsMemberList({ room, members, filterRole }: ContactsMember
                         member={member}
                         onClick={handleMemberClick}
                         pressed={openProfileUserId === member.userId}
-                        typing={typingMembers.some(
-                          (receipt) => receipt.userId === member.userId
-                        )}
+                        typing={typingMembers.some((receipt) => receipt.userId === member.userId)}
                       />
                     </div>
                   );

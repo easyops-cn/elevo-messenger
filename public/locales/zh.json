@@ -154,7 +154,7 @@
     "notifMentionKeywords": "提及和关键词",
     "notifMute": "静音",
     "editMessage": "编辑消息...",
-    "membersCount": "{{count}} 位成员",
+    "membersCount": "{{formattedCount}} 位成员",
     "typeNamePlaceholder": "输入名称...",
     "resultCount_one": "{{count}} 个结果",
     "resultCount_other": "{{count}} 个结果",
