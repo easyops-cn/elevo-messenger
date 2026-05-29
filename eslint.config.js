@@ -22,7 +22,6 @@ export default [
       'plugin:react/recommended',
       'plugin:@typescript-eslint/eslint-recommended',
       'plugin:@typescript-eslint/recommended',
-      'airbnb',
     ),
   ),
   prettierConfig,
@@ -62,12 +61,12 @@ export default [
       'import/prefer-default-export': 'off',
       'import/extensions': 'off',
       'import/no-unresolved': 'off',
-      'import/no-extraneous-dependencies': [
-        'error',
-        {
-          devDependencies: true,
-        },
-      ],
+      // 'import/no-extraneous-dependencies': [
+      //   'error',
+      //   {
+      //     devDependencies: true,
+      //   },
+      // ],
 
       'react/no-unstable-nested-components': ['error', { allowAsProps: true }],
       'react/jsx-filename-extension': [
