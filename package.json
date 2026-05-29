@@ -13,11 +13,16 @@
     "build": "vite build",
     "build:no-sw": "cross-env VITE_NO_SERVICE_WORKER=true vite build",
     "preview": "vite preview",
-    "lint": "npm run check:eslint && npm run check:prettier",
-    "check:eslint": "eslint src/*",
-    "check:prettier": "prettier --check .",
-    "fix:prettier": "prettier --write .",
-    "typecheck": "tsc --noEmit"
+    "lint": "eslint src/*",
+    "typecheck": "tsc --noEmit",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,css,scss,md,mdx,yml,yaml,html}": "prettier --write"
   },
   "keywords": [],
   "author": "Elevo Team",
@@ -119,6 +124,8 @@
     "eslint-plugin-react": "7.37.5",
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "17.6.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.0.5",
     "prettier": "3.8.3",
     "typescript": "5.6.3",
     "vite": "5.4.19",
