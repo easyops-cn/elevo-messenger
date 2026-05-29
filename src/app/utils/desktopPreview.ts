@@ -23,7 +23,6 @@ export const openDesktopFilePreview = async (payload: DesktopPreviewPayload): Pr
     await invoke('open_preview_window', { payload });
     return true;
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error('[desktopPreview] open_preview_window failed:', error);
     return false;
   }

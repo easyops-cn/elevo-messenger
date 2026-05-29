@@ -45,10 +45,8 @@ export function ShikiCode({ code, lang, className, ...props }: ShikiCodeProps) {
   return (
     <code {...props} className={codeClassName}>
       {tokenLines.map((line, lineIndex) => (
-        // eslint-disable-next-line react/no-array-index-key
         <React.Fragment key={lineIndex}>
           {line.map((token: ThemedToken, tokenIndex) => (
-            // eslint-disable-next-line react/no-array-index-key
             <span key={tokenIndex} style={getTokenStyle(token)}>
               {token.content}
             </span>

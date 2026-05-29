@@ -119,7 +119,7 @@ export function SseMarkdownBody({
       } catch (error) {
         if (!abortController.signal.aborted) {
           setStreamError(true);
-          // eslint-disable-next-line no-console
+
           console.error('Failed to consume step SSE stream:', error);
         }
       } finally {

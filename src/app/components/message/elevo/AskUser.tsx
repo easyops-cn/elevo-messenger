@@ -95,15 +95,10 @@ const AskUserQuestionSchema = z.object({
 
 export type AskUserQuestionData = z.infer<typeof AskUserQuestionSchema>;
 
-const QuestionAnswersSchema = z.record(
-  z.string(),
-  z.union([
-    z.object({ answers: z.array(z.string()) }),
-    z.object({ fields: z.record(z.string(), z.string()) }),
-  ]),
-);
-
-export type AskUserQuestionAnswers = z.infer<typeof QuestionAnswersSchema>;
+export type AskUserQuestionAnswers = Record<
+  string,
+  { answers: string[] } | { fields: Record<string, string> }
+>;
 
 export function isUserAnswerEvent(mEvent: MatrixEvent) {
   const content = mEvent.getContent();
@@ -123,7 +118,7 @@ export function parseAskUser(content: Record<string, unknown>): AskUserQuestionD
   if (result.success) {
     return result.data;
   }
-  // eslint-disable-next-line no-console
+
   console.error('Failed to parse ask user content:', result.error);
 }
 
@@ -196,7 +191,6 @@ function AskUserSelect({
   const renderOption = (option: AskUserSelectOption, isOther = false) => {
     const isSelected = isOther ? hasOtherSelected : selectedValues.includes(option.label);
     return (
-      // eslint-disable-next-line jsx-a11y/no-static-element-interactions
       <div
         key={option.label}
         className={OptionItem({
@@ -238,7 +232,6 @@ function AskUserSelect({
               placeholder={otherPlaceholder}
               disabled={disabled}
               className={OtherInput}
-              // eslint-disable-next-line jsx-a11y/no-autofocus
               autoFocus
             />
           )}
@@ -504,7 +497,6 @@ export function AskUserQuestionCard({
       setLocalSubmitted(true);
       onSubmit?.();
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('Failed to submit question answers:', err);
     } finally {
       setSubmitting(false);

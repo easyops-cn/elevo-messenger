@@ -43,7 +43,6 @@ function PreviewVideo({ fileItem }: PreviewVideoProps) {
   const fileUrl = useObjectURL(originalFile);
 
   return (
-    // eslint-disable-next-line jsx-a11y/media-has-caption
     <video
       style={{
         objectFit: 'contain',

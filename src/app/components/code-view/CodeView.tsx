@@ -250,7 +250,6 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
             if (row.type === 'hunk') {
               return (
                 <span
-                  // eslint-disable-next-line react/no-array-index-key
                   key={`hunk:${rowIndex}`}
                   className={css.HunkHeader({ lineNumbers: showLineNumbers })}
                 >
@@ -267,7 +266,6 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
 
             return (
               <span
-                // eslint-disable-next-line react/no-array-index-key
                 key={`${row.oldLine ?? ''}:${row.newLine ?? ''}:${rowIndex}`}
                 className={css.CodeLine({
                   diff: row.type,
@@ -283,11 +281,7 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
                 <span className={css.LineCode}>
                   {(tokenLines[row.rowIndex] ?? [{ content: row.code } as ThemedToken]).map(
                     (token, tokenIndex) => (
-                      <span
-                        // eslint-disable-next-line react/no-array-index-key
-                        key={tokenIndex}
-                        style={getTokenStyle(token)}
-                      >
+                      <span key={tokenIndex} style={getTokenStyle(token)}>
                         {token.content}
                       </span>
                     ),

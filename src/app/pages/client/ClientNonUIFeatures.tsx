@@ -114,7 +114,6 @@ function InviteNotifications() {
   }, [mx, invites, perviousInviteLen, showNotifications, notificationSound, notify, playSound]);
 
   return (
-    // eslint-disable-next-line jsx-a11y/media-has-caption
     <audio ref={audioRef} style={{ display: 'none' }}>
       <source src={InviteSound} type="audio/ogg" />
     </audio>
@@ -255,7 +254,6 @@ function MessageNotifications() {
   ]);
 
   return (
-    // eslint-disable-next-line jsx-a11y/media-has-caption
     <audio ref={audioRef} style={{ display: 'none' }}>
       <source src={NotificationSound} type="audio/ogg" />
     </audio>
@@ -285,7 +283,7 @@ function ClientToolSdkHandler() {
     registeredToolsRef.current.get(source)?.set(toolName, { roomId, data });
 
     mx.sendEvent(roomId, 'vip.elevo.client_tool.register' as any, data)
-      // eslint-disable-next-line no-console
+
       .catch(console.error);
   });
 
@@ -297,13 +295,13 @@ function ClientToolSdkHandler() {
     registeredToolsRef.current.get(source)?.delete(toolName);
 
     mx.sendEvent(roomId, 'vip.elevo.client_tool.unregister' as any, data)
-      // eslint-disable-next-line no-console
+
       .catch(console.error);
   });
 
   useSdkMessageListener('client_tool_output', (payload: SdkMessagePayload) => {
     mx.sendEvent(payload.roomId, 'vip.elevo.client_tool.output' as any, payload.data)
-      // eslint-disable-next-line no-console
+
       .catch(console.error);
   });
 
@@ -321,7 +319,7 @@ function ClientToolSdkHandler() {
       // Send unregister events for all tools, then clear tracking
       Array.from(tools.entries()).forEach(([toolName, { roomId }]) => {
         mx.sendEvent(roomId, 'vip.elevo.client_tool.unregister' as any, { name: toolName })
-          // eslint-disable-next-line no-console
+
           .catch(console.error);
       });
       registeredToolsRef.current.delete(label);
@@ -347,7 +345,6 @@ function ClientToolSdkHandler() {
       if (mEvent.getType() === 'vip.elevo.client_tool.execute') {
         const content = mEvent.getContent();
 
-        // eslint-disable-next-line no-console
         console.log('[elevo] client_tool.execute event:', content);
 
         invoke('send_to_all_webviews', {
@@ -355,7 +352,6 @@ function ClientToolSdkHandler() {
           channel: 'client_tool_execute',
           data: content,
         }).catch((err) => {
-          // eslint-disable-next-line no-console
           console.error('Failed to send message to webview:', err);
         });
       }

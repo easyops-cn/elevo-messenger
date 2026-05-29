@@ -218,7 +218,6 @@ function BaseAudioContent({ mimeType, src, info, isLoading, onPlayClick }: BaseA
         />
       }
     >
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <audio controls={false} autoPlay ref={audioRef}>
         {src && <source src={src} type={mimeType} />}
       </audio>

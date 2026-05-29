@@ -1,4 +1,3 @@
-/* eslint-disable react/destructuring-assignment */
 import React, { MouseEventHandler, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { JoinRule, Room, type MatrixEvent } from 'matrix-js-sdk';

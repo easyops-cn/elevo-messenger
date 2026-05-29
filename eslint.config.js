@@ -83,6 +83,7 @@ export default [
 
       '@typescript-eslint/no-unused-vars': 'error',
       '@typescript-eslint/no-shadow': 'error',
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
   {

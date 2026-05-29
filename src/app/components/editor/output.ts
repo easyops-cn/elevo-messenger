@@ -250,7 +250,7 @@ export const getFileReference = (editor: Editor): FileRefData | null => {
     if (node.type === BlockType.FileRef) {
       return { path: node.path, workspaceId: node.workspaceId, workspaceName: node.workspaceName };
     }
-    // eslint-disable-next-line no-restricted-syntax
+
     for (const child of node.children) {
       const found = collect(child);
       if (found) return found;
@@ -258,7 +258,6 @@ export const getFileReference = (editor: Editor): FileRefData | null => {
     return null;
   };
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const child of editor.children) {
     const found = collect(child);
     if (found) return found;
@@ -277,7 +276,7 @@ export const getTaskReference = (editor: Editor): TaskRefData | null => {
     if (node.type === BlockType.TaskRef) {
       return { id: node.id, title: node.title, workspaceId: node.workspaceId };
     }
-    // eslint-disable-next-line no-restricted-syntax
+
     for (const child of node.children) {
       const found = collect(child);
       if (found) return found;
@@ -285,7 +284,6 @@ export const getTaskReference = (editor: Editor): TaskRefData | null => {
     return null;
   };
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const child of editor.children) {
     const found = collect(child);
     if (found) return found;

@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import React, {
   ClipboardEventHandler,
   KeyboardEventHandler,
@@ -77,7 +76,7 @@ type CustomEditorProps = {
   onPaste?: ClipboardEventHandler;
 };
 export const CustomEditor = forwardRef<HTMLDivElement, CustomEditorProps>(
-  (
+  function LegacyCustomEditor(
     {
       editableName,
       top,
@@ -93,7 +92,7 @@ export const CustomEditor = forwardRef<HTMLDivElement, CustomEditorProps>(
       onPaste,
     },
     ref,
-  ) => {
+  ) {
     const renderElement = useCallback(
       (props: RenderElementProps) => <RenderElement {...props} />,
       [],

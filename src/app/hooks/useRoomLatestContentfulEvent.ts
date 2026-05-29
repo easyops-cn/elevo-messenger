@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 import { Direction, MatrixEvent, Room, RoomEvent } from 'matrix-js-sdk';
 import { useCallback, useEffect, useState } from 'react';
 import { MessageEvent } from '../../types/matrix/room';

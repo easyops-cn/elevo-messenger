@@ -35,7 +35,6 @@ function LiveWaveform({ bars }: LiveWaveformProps) {
         const height = Math.max(MIN_BAR_HEIGHT, Math.sqrt(h) * MAX_BAR_HEIGHT);
         return (
           <div
-            // eslint-disable-next-line react/no-array-index-key
             key={index}
             className={css.WaveformBar}
             style={{
@@ -66,7 +65,7 @@ type VoiceRecordingBoardProps = {
 export const VoiceRecordingBoard = forwardRef<
   VoiceRecordingBoardHandlers,
   VoiceRecordingBoardProps
->(({ roomId, room, onClose }, ref) => {
+>(function LegacyVoiceRecordingBoard({ roomId, room, onClose }, ref) {
   const mx = useMatrixClient();
   const { t } = useTranslation();
 
@@ -181,7 +180,7 @@ export const VoiceRecordingBoard = forwardRef<
       } as any);
       setRecognizedText('');
       onClose();
-    } catch (err) {
+    } catch {
       setError('Failed to send text message.');
     } finally {
       setSendingText(false);
@@ -217,7 +216,7 @@ export const VoiceRecordingBoard = forwardRef<
       const content = getVoiceMsgContent({ file, encInfo }, mxc, durationMs, finalWaveform);
       mx.sendMessage(roomId, content as any);
       onClose();
-    } catch (err) {
+    } catch {
       setError('Failed to send voice message. Please try again.');
       setSending(false);
     }

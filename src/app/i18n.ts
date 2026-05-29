@@ -54,7 +54,6 @@ chain
         await i18n.changeLanguage(langOnly);
       }
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.warn('[i18n] Tauri language detection failed, using fallback:', err);
     }
   });

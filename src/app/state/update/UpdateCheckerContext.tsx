@@ -43,9 +43,9 @@ const initial: UpdateState = {
 
 const UpdateCheckerContext = React.createContext<UpdateCheckerContextValue>({
   ...initial,
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+
   checkAndPrepare: async () => {},
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
+
   applyUpdate: async () => {},
 });
 

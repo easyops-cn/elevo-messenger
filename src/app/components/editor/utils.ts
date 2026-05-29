@@ -151,7 +151,6 @@ export const resetEditor = (editor: Editor) => {
 };
 
 export const resetEditorHistory = (editor: Editor) => {
-  // eslint-disable-next-line no-param-reassign
   editor.history = {
     undos: [],
     redos: [],
@@ -259,7 +258,6 @@ export const getPointUntilChar = (
     reverse: options.reverse,
   });
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const point of pointItr) {
     if (!Point.equals(point, cursorPoint) && prevPoint) {
       char = Editor.string(editor, { anchor: point, focus: prevPoint });

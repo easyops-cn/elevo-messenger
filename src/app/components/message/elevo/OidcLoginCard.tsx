@@ -57,7 +57,6 @@ export function OidcLoginCard({ data, style }: OidcLoginCardProps) {
     if (isDesktopTauri && data.url) {
       invoke('open_oauth_window', { authUrl: data.url, label: 'oauth-elevo-bridge' }).catch(
         (err) => {
-          // eslint-disable-next-line no-console
           console.error('Failed to open OAuth window, falling back to browser:', err);
           window.open(data.url, '_blank', 'noopener,noreferrer');
         },

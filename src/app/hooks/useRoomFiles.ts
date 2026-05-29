@@ -94,7 +94,7 @@ export const useRoomFiles = (room: Room): UseRoomFilesResult => {
               count += 1;
 
               // back-paginate will first check local IndexedDB
-              // eslint-disable-next-line no-await-in-loop
+
               const hasMore = await mx.paginateEventTimeline(timeline, {
                 backwards: true,
                 limit: 50,

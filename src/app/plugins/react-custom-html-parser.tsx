@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/alt-text */
 import React, { ComponentPropsWithoutRef, ReactEventHandler, useMemo, useState } from 'react';
 import {
   Element,
@@ -564,7 +563,6 @@ export const getReactCustomHtmlParser = (
           const parentName = domNode.parent.name;
           // Whitespace text nodes cannot appear as a child of these elements.
           if (!domNode.data.trim() && ['table', 'thead', 'tbody', 'tr'].includes(parentName)) {
-            // eslint-disable-next-line react/jsx-no-useless-fragment
             return <></>;
           }
           linkify = parentName !== 'code' && parentName !== 'a';

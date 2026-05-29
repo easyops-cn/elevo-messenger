@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import produce from 'immer';
 import { atom } from 'jotai';
 import type { TodoItem } from '../../pages/client/todos/useTodosApi';

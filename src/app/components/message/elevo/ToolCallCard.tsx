@@ -265,13 +265,11 @@ function ApplyPatchOperationCard({
 
   return (
     <Box direction="Column" gap="200">
-      {/* eslint-disable-next-line jsx-a11y/no-static-element-interactions */}
       <div
         className={css.ToolCallHeader({ interactive: body !== null })}
         onClick={body !== null ? openDiff : undefined}
         onKeyDown={handleHeaderKeyDown}
         role={body !== null ? 'button' : undefined}
-        // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex
         tabIndex={body !== null ? 0 : undefined}
         aria-label={
           body !== null ? t('message.diffEditedOneFile', { path: codeViewPath }) : undefined

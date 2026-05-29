@@ -55,7 +55,6 @@ function openSidePanel(href: string, roomId: string, label?: string): void {
       label: label ?? labelFromUrl(href, roomId),
       roomId,
     }).catch((error) => {
-      // eslint-disable-next-line no-console
       console.error('Failed to open side panel, falling back to system browser:', error);
       window.open(href, '_blank', 'noopener,noreferrer');
     });
@@ -95,7 +94,6 @@ export function useTauriThemeSync(themeKind: string) {
   useEffect(() => {
     if (!isDesktopTauri) return;
     invoke('set_theme', { themeKind }).catch((e) => {
-      // eslint-disable-next-line no-console
       console.error('[useTauriThemeSync] set_theme failed:', e);
     });
   }, [themeKind]);

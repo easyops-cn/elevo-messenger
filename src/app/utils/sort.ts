@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 import { MatrixClient, MatrixEvent, Room } from 'matrix-js-sdk';
 import { MessageEvent } from '../../types/matrix/room';
 import { reactionOrEditEvent } from './room';

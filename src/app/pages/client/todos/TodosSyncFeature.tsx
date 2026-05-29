@@ -100,7 +100,6 @@ export function useFetchTodosNextPage() {
         append: true,
       });
     } catch (err) {
-      // eslint-disable-next-line no-console
       console.error('Failed to fetch todos next page:', err);
     } finally {
       fetchingRef.current = false;
