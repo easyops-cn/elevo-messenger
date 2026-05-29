@@ -226,7 +226,7 @@ function RoomProfile({
           {memberCount && (
             <Box shrink="No" gap="200">
               <Text size="T200" priority="300">
-                {t('room.membersCount', { count: millify(memberCount) })}
+                {t('room.membersCount', { count: memberCount, formattedCount: millify(memberCount) })}
               </Text>
             </Box>
           )}

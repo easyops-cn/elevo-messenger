@@ -1,6 +1,6 @@
 import { Box, config, Icon, Icons, Text } from 'folds';
 import { CallMembership } from 'matrix-js-sdk/lib/matrixrtc/CallMembership';
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import { Room } from 'matrix-js-sdk';
 import { UserAvatar } from '../../components/user-avatar';
 import { getMemberAvatarMxc, getMemberDisplayName } from '../../utils/room';
@@ -46,7 +46,7 @@ export function MemberGlance({ room, members, speakers, max = 6 }: MemberGlanceP
             variant="Background"
             size="200"
             radii="Pill"
-            onClick={(evt) =>
+            onClick={(evt: MouseEvent<HTMLElement>) =>
               openUserProfile(
                 room.roomId,
                 undefined,

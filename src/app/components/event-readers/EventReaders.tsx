@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { MouseEvent } from 'react';
 import classNames from 'classnames';
 import {
   Avatar,
@@ -79,7 +79,7 @@ export const EventReaders = as<'div', EventReadersProps>(
                     key={readerId}
                     style={{ padding: `0 ${config.space.S200}` }}
                     radii="400"
-                    onClick={(event) => {
+                    onClick={(event: MouseEvent<HTMLElement>) => {
                       openProfile(
                         room.roomId,
                         space?.roomId,

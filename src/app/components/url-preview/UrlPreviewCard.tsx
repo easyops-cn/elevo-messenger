@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
 import { IPreviewUrlResponse } from 'matrix-js-sdk';
 import { Box, Icon, IconButton, Icons, Scroll, Spinner, Text, as, color, config } from 'folds';
 import { ImageOverlay } from '../ImageOverlay';
@@ -69,7 +69,7 @@ export const UrlPreviewCard = as<'div', { url: string; ts: number }>(
               alt={prev['og:title']}
               title={prev['og:title']}
               tabIndex={0}
-              onKeyDown={(evt) => onEnterOrSpace(openImage)(evt)}
+              onKeyDown={(evt: KeyboardEvent<HTMLElement>) => onEnterOrSpace(openImage)(evt)}
               onClick={openImage}
             />
           )}

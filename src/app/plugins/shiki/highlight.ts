@@ -22,7 +22,7 @@ export function getCodeHighlighter(): Promise<HighlighterCore> {
   if (!codeHighlighterPromise) {
     codeHighlighterPromise = Promise.all([
       import('shiki/core'),
-      import('shiki/engine-oniguruma'),
+      import('shiki/engine/oniguruma'),
       import('shiki/themes/github-dark.mjs'),
       import('shiki/themes/github-light.mjs'),
     ]).then(
@@ -90,12 +90,9 @@ function getPathLanguageCandidates(path: string): string[] {
 }
 
 function resolveLanguage(candidate: string, bundle: LanguageBundle): BundledLanguage | undefined {
-  const { bundledLanguages, bundledLanguagesAlias, bundledLanguagesInfo } = bundle;
+  const { bundledLanguages, bundledLanguagesInfo } = bundle;
 
   if (candidate in bundledLanguages) return candidate as BundledLanguage;
-
-  const aliasTarget = bundledLanguagesAlias[candidate as keyof typeof bundledLanguagesAlias];
-  if (aliasTarget && aliasTarget in bundledLanguages) return aliasTarget as BundledLanguage;
 
   const info = bundledLanguagesInfo.find(
     (item) => item.id === candidate || item.aliases?.includes(candidate)

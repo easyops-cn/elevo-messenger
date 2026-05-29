@@ -13,6 +13,7 @@ import {
   getShikiThemeName,
   getTokenStyle,
   type HighlightedTokenLines,
+  type ShikiThemeName,
 } from '../../plugins/shiki';
 
 type DiffRowType = 'add' | 'delete' | 'context';
@@ -151,7 +152,7 @@ function parseDiffRows(lines: string[]): ParsedDiffRows {
 
 async function highlightCodeRows(
   path: string,
-  theme: string,
+  theme: ShikiThemeName,
   rows: DiffCodeRow[]
 ): Promise<HighlightedTokenLines> {
   const code = rows.map((row) => row.code).join('\n');
@@ -166,7 +167,7 @@ async function highlightCodeRows(
 
 async function highlightDiffHunks(
   path: string,
-  theme: string,
+  theme: ShikiThemeName,
   hunks: DiffHunk[],
   rowCount: number
 ): Promise<HighlightedTokenLines> {

@@ -400,12 +400,12 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
             );
 
             if (!hasStartableIdleUploads && !hasLoadingUploads) {
-              clearInterval(interval);
+              window.clearInterval(interval);
               resolve(uploads);
             }
           }
 
-          interval = setInterval(poll, 120);
+          interval = window.setInterval(poll, 120);
         });
 
       try {
