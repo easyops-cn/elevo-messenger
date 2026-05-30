@@ -14,13 +14,9 @@ import {
   useMediaVolume,
 } from '../../../hooks/media';
 import { secondsToMinutesAndSeconds } from '../../../utils/common';
-import {
-  decryptFile,
-  downloadEncryptedMedia,
-  downloadMedia,
-  mxcUrlToHttp,
-} from '../../../utils/matrix';
+import { mxcUrlToHttp } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
+import { loadMediaBlobUrl } from '../../../utils/mediaDownload';
 
 type RenderMediaControlProps = {
   after: ReactNode;
@@ -34,6 +30,7 @@ export type AudioContentProps = {
   url: string;
   info: IAudioInfo;
   encInfo?: EncryptedAttachmentInfo;
+  createdAt?: number;
   waveform?: number[];
   renderMediaControl: (props: RenderMediaControlProps) => ReactNode;
 };
@@ -42,6 +39,7 @@ export function AudioContent({
   url,
   info,
   encInfo,
+  createdAt,
   renderMediaControl,
 }: AudioContentProps) {
   const mx = useMatrixClient();
@@ -51,11 +49,8 @@ export function AudioContent({
     useCallback(async () => {
       const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
-      const fileContent = encInfo
-        ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
-        : await downloadMedia(mediaUrl);
-      return URL.createObjectURL(fileContent);
-    }, [mx, url, useAuthentication, mimeType, encInfo]),
+      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo, createdAt);
+    }, [mx, url, useAuthentication, mimeType, encInfo, createdAt]),
   );
 
   const audioRef = useRef<HTMLAudioElement | null>(null);

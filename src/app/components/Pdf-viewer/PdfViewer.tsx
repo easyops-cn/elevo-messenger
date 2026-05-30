@@ -26,17 +26,18 @@ import { AsyncStatus } from '../../hooks/useAsyncCallback';
 import { useZoom } from '../../hooks/useZoom';
 import { createPage, usePdfDocumentLoader, usePdfJSLoader } from '../../plugins/pdfjs-dist';
 import { stopPropagation } from '../../utils/keyboard';
+import type { FilePreviewDownloadAction } from '../file-preview';
 
 export type PdfViewerProps = {
   name: string;
   src: string;
   hideCloseButton?: boolean;
-  onDownload?: () => Promise<void>;
+  downloadAction?: FilePreviewDownloadAction;
   requestClose: () => void;
 };
 
 export const PdfViewer = as<'div', PdfViewerProps>(
-  ({ className, name, src, hideCloseButton, onDownload, requestClose, ...props }, ref) => {
+  ({ className, name, src, hideCloseButton, downloadAction, requestClose, ...props }, ref) => {
     const { t } = useTranslation();
     const containerRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -80,8 +81,8 @@ export const PdfViewer = as<'div', PdfViewerProps>(
     }, [docState, pageNo, zoom]);
 
     const handleDownload = async () => {
-      if (onDownload) {
-        await onDownload();
+      if (downloadAction) {
+        await downloadAction.onClick();
         return;
       }
       const blob = await fetch(src).then((r) => r.blob());
@@ -152,9 +153,9 @@ export const PdfViewer = as<'div', PdfViewerProps>(
               variant="Primary"
               onClick={handleDownload}
               radii="300"
-              before={<Icon size="50" src={Icons.Download} />}
+              before={<Icon size="50" src={downloadAction?.icon ?? Icons.Download} />}
             >
-              <Text size="B300">{t('viewer.download')}</Text>
+              <Text size="B300">{downloadAction?.label ?? t('viewer.download')}</Text>
             </Chip>
           </Box>
         </Header>

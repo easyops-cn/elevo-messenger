@@ -28,14 +28,10 @@ import {
   mimeTypeToExt,
 } from '../../../utils/mimeTypes';
 import { stopPropagation } from '../../../utils/keyboard';
-import {
-  decryptFile,
-  downloadEncryptedMedia,
-  downloadMedia,
-  mxcUrlToHttp,
-} from '../../../utils/matrix';
+import { mxcUrlToHttp } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { ModalWide } from '../../../styles/Modal.css';
+import { loadMediaBlob, loadMediaBlobUrl } from '../../../utils/mediaDownload';
 
 const renderErrorButton = (retry: () => void, text: string) => (
   <TooltipProvider
@@ -77,6 +73,7 @@ type ReadTextFileProps = {
   mimeType: string;
   url: string;
   encInfo?: EncryptedAttachmentInfo;
+  createdAt?: number;
   onOpenDesktop?: () => Promise<boolean>;
   renderViewer: (props: RenderTextViewerProps) => ReactNode;
 };
@@ -85,6 +82,7 @@ export function ReadTextFile({
   mimeType,
   url,
   encInfo,
+  createdAt,
   onOpenDesktop,
   renderViewer,
 }: ReadTextFileProps) {
@@ -96,14 +94,12 @@ export function ReadTextFile({
     useCallback(async () => {
       const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
-      const fileContent = encInfo
-        ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
-        : await downloadMedia(mediaUrl);
+      const fileContent = await loadMediaBlob(mediaUrl, mimeType, encInfo, createdAt);
 
       const text = fileContent.text();
       setTextViewer(true);
       return text;
-    }, [mx, useAuthentication, mimeType, encInfo, url]),
+    }, [mx, useAuthentication, mimeType, encInfo, createdAt, url]),
   );
 
   return (
@@ -181,6 +177,7 @@ export type ReadPdfFileProps = {
   mimeType: string;
   url: string;
   encInfo?: EncryptedAttachmentInfo;
+  createdAt?: number;
   onOpenDesktop?: () => Promise<boolean>;
   renderViewer: (props: RenderPdfViewerProps) => ReactNode;
 };
@@ -189,6 +186,7 @@ export function ReadPdfFile({
   mimeType,
   url,
   encInfo,
+  createdAt,
   onOpenDesktop,
   renderViewer,
 }: ReadPdfFileProps) {
@@ -200,12 +198,9 @@ export function ReadPdfFile({
     useCallback(async () => {
       const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
-      const fileContent = encInfo
-        ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
-        : await downloadMedia(mediaUrl);
       setPdfViewer(true);
-      return URL.createObjectURL(fileContent);
-    }, [mx, url, useAuthentication, mimeType, encInfo]),
+      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo, createdAt);
+    }, [mx, url, useAuthentication, mimeType, encInfo, createdAt]),
   );
 
   return (
@@ -276,6 +271,7 @@ export type DownloadFileProps = {
   url: string;
   info: IFileInfo;
   encInfo?: EncryptedAttachmentInfo;
+  createdAt?: number;
   onOpenDesktop?: () => Promise<boolean>;
 };
 export function DownloadFile({
@@ -284,9 +280,10 @@ export function DownloadFile({
   url,
   info,
   encInfo,
+  createdAt,
   onOpenDesktop,
 }: DownloadFileProps) {
-  const [downloadState, download] = useMediaDownload(url, mimeType, body, encInfo);
+  const [downloadState, download] = useMediaDownload(url, mimeType, body, encInfo, createdAt);
 
   return downloadState.status === AsyncStatus.Error ? (
     renderErrorButton(download, `Retry Download (${bytesToSize(info.size ?? 0)})`)

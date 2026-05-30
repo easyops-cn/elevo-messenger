@@ -14,6 +14,7 @@ export type DesktopPreviewPayload = {
   waveform?: number[];
   langName?: string;
   duration?: number;
+  createdAt?: number;
 };
 
 export const openDesktopFilePreview = async (payload: DesktopPreviewPayload): Promise<boolean> => {

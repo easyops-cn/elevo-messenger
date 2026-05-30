@@ -6,6 +6,7 @@ import * as css from './TextViewer.css';
 import { copyToClipboard } from '../../utils/dom';
 import { saveFile } from '../../utils/file-saver';
 import { ShikiCode } from '../../plugins/shiki';
+import type { FilePreviewDownloadAction } from '../file-preview';
 
 type TextViewerContentProps = {
   text: string;
@@ -34,11 +35,25 @@ export type TextViewerProps = {
   langName: string;
   mimeType?: string;
   hideCloseButton?: boolean;
+  downloadAction?: FilePreviewDownloadAction;
   requestClose: () => void;
 };
 
 export const TextViewer = as<'div', TextViewerProps>(
-  ({ className, name, text, langName, mimeType, hideCloseButton, requestClose, ...props }, ref) => {
+  (
+    {
+      className,
+      name,
+      text,
+      langName,
+      mimeType,
+      hideCloseButton,
+      downloadAction,
+      requestClose,
+      ...props
+    },
+    ref,
+  ) => {
     const { t } = useTranslation();
 
     const handleCopy = () => {
@@ -46,6 +61,11 @@ export const TextViewer = as<'div', TextViewerProps>(
     };
 
     const handleDownload = async () => {
+      if (downloadAction) {
+        await downloadAction.onClick();
+        return;
+      }
+
       await saveFile(new Blob([text], { type: mimeType ?? 'text/plain' }), name);
     };
 
@@ -72,9 +92,9 @@ export const TextViewer = as<'div', TextViewerProps>(
               variant="Primary"
               radii="300"
               onClick={handleDownload}
-              before={<Icon size="50" src={Icons.Download} />}
+              before={<Icon size="50" src={downloadAction?.icon ?? Icons.Download} />}
             >
-              <Text size="B300">{t('viewer.download')}</Text>
+              <Text size="B300">{downloadAction?.label ?? t('viewer.download')}</Text>
             </Chip>
             <Chip variant="Primary" radii="300" onClick={handleCopy}>
               <Text size="B300">Copy All</Text>

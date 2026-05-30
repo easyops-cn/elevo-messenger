@@ -3,24 +3,28 @@ import { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import { IAudioInfo } from '../../../../types/matrix/common';
-import {
-  decryptFile,
-  downloadEncryptedMedia,
-  downloadMedia,
-  mxcUrlToHttp,
-} from '../../../utils/matrix';
+import { mxcUrlToHttp } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { WaveformPlayer } from '../../media/WaveformPlayer';
+import { loadMediaBlobUrl } from '../../../utils/mediaDownload';
 
 export type VoiceMessageProps = {
   mimeType: string;
   url: string;
   info: IAudioInfo;
   encInfo?: EncryptedAttachmentInfo;
+  createdAt?: number;
   waveform: number[];
 };
 
-export function VoiceMessage({ mimeType, url, info, encInfo, waveform }: VoiceMessageProps) {
+export function VoiceMessage({
+  mimeType,
+  url,
+  info,
+  encInfo,
+  createdAt,
+  waveform,
+}: VoiceMessageProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
 
@@ -28,11 +32,8 @@ export function VoiceMessage({ mimeType, url, info, encInfo, waveform }: VoiceMe
     useCallback(async () => {
       const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
-      const fileContent = encInfo
-        ? await downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
-        : await downloadMedia(mediaUrl);
-      return URL.createObjectURL(fileContent);
-    }, [mx, url, useAuthentication, mimeType, encInfo]),
+      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo, createdAt);
+    }, [mx, url, useAuthentication, mimeType, encInfo, createdAt]),
   );
 
   const infoDuration = info.duration ?? 0;

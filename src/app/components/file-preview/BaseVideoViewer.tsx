@@ -1,22 +1,20 @@
 import React from 'react';
 import classNames from 'classnames';
 import { Box, Chip, Header, Icon, IconButton, Icons, Text, as } from 'folds';
-import { useTranslation } from 'react-i18next';
 import { Video } from '../media/Video';
 import * as css from './VideoViewer.css';
+import type { FilePreviewDownloadAction } from './types';
 
 export type BaseVideoViewerProps = {
   name: string;
   src: string;
   hideCloseButton?: boolean;
   requestClose: () => void;
-  onDownload: () => Promise<void>;
+  downloadAction: FilePreviewDownloadAction;
 };
 
 export const BaseVideoViewer = as<'div', BaseVideoViewerProps>(
-  ({ className, name, src, hideCloseButton, requestClose, onDownload, ...props }, ref) => {
-    const { t } = useTranslation();
-
+  ({ className, name, src, hideCloseButton, requestClose, downloadAction, ...props }, ref) => {
     return (
       <Box
         className={classNames(css.VideoViewer, className)}
@@ -38,11 +36,11 @@ export const BaseVideoViewer = as<'div', BaseVideoViewerProps>(
           <Box shrink="No" alignItems="Center" gap="200">
             <Chip
               variant="Primary"
-              onClick={onDownload}
+              onClick={downloadAction.onClick}
               radii="300"
-              before={<Icon size="50" src={Icons.Download} />}
+              before={<Icon size="50" src={downloadAction.icon ?? Icons.Download} />}
             >
-              <Text size="B300">{t('viewer.download')}</Text>
+              <Text size="B300">{downloadAction.label}</Text>
             </Chip>
           </Box>
         </Header>

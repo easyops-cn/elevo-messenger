@@ -1,20 +1,41 @@
 import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
-import { decryptFile, downloadEncryptedMedia, downloadMedia } from './matrix';
+import { loadCachedMediaBlob, loadCachedMediaFilePath, loadCachedMediaUrl } from './mediaCache';
 
 export const loadMediaBlob = async (
   mediaUrl: string,
   mimeType: string,
   encInfo?: EncryptedAttachmentInfo,
+  createdAt?: number,
 ): Promise<Blob> =>
-  encInfo
-    ? downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimeType, encInfo))
-    : downloadMedia(mediaUrl);
+  loadCachedMediaBlob({
+    mediaUrl,
+    mimeType,
+    encInfo,
+    createdAt,
+  });
 
 export const loadMediaBlobUrl = async (
   mediaUrl: string,
   mimeType: string,
   encInfo?: EncryptedAttachmentInfo,
-): Promise<string> => {
-  const blob = await loadMediaBlob(mediaUrl, mimeType, encInfo);
-  return URL.createObjectURL(blob);
-};
+  createdAt?: number,
+): Promise<string> =>
+  loadCachedMediaUrl({
+    mediaUrl,
+    mimeType,
+    encInfo,
+    createdAt,
+  });
+
+export const loadMediaFilePath = async (
+  mediaUrl: string,
+  mimeType: string,
+  encInfo?: EncryptedAttachmentInfo,
+  createdAt?: number,
+): Promise<string> =>
+  loadCachedMediaFilePath({
+    mediaUrl,
+    mimeType,
+    encInfo,
+    createdAt,
+  });

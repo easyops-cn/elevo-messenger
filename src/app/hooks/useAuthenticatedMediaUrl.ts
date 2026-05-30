@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMatrixClient } from './useMatrixClient';
 import { NO_SERVICE_WORKER } from '../utils/noServiceWorker';
+import { loadCachedMediaUrl } from '../utils/mediaCache';
 
 const MEDIA_PATHS = ['/_matrix/client/v1/media/download', '/_matrix/client/v1/media/thumbnail'];
 
@@ -51,23 +52,20 @@ export function useAuthenticatedMediaUrl(url: string | null | undefined): string
 
     let cancelled = false;
 
-    fetch(url, {
-      headers: { Authorization: `Bearer ${accessToken}` },
+    loadCachedMediaUrl({
+      mediaUrl: url,
+      mimeType: 'application/octet-stream',
+      cacheVariant: 'authenticated-media',
     })
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.blob();
-      })
-      .then((blob) => {
+      .then((newUrl) => {
         if (!cancelled) {
-          const newBlobUrl = URL.createObjectURL(blob);
           setBlobUrl((prev) => {
             if (prev && prev.startsWith('blob:')) {
               URL.revokeObjectURL(prev);
             }
-            return newBlobUrl;
+            return newUrl;
           });
-          prevBlobRef.current = newBlobUrl;
+          prevBlobRef.current = newUrl;
         }
       })
       .catch(() => {

@@ -2,21 +2,19 @@ import { ReactNode, useCallback, useEffect } from 'react';
 import { IThumbnailContent } from '../../../../types/matrix/common';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
-import {
-  decryptFile,
-  downloadEncryptedMedia,
-  downloadMedia,
-  mxcUrlToHttp,
-} from '../../../utils/matrix';
+import { mxcUrlToHttp } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { FALLBACK_MIMETYPE } from '../../../utils/mimeTypes';
+import { loadMediaBlobUrl } from '../../../utils/mediaDownload';
 import { NO_SERVICE_WORKER } from '../../../utils/noServiceWorker';
+import { isDesktopTauri } from '../../../plugins/useTauriOpener';
 
 export type ThumbnailContentProps = {
   info: IThumbnailContent;
+  createdAt?: number;
   renderImage: (src: string) => ReactNode;
 };
-export function ThumbnailContent({ info, renderImage }: ThumbnailContentProps) {
+export function ThumbnailContent({ info, createdAt, renderImage }: ThumbnailContentProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
 
@@ -31,19 +29,14 @@ export function ThumbnailContent({ info, renderImage }: ThumbnailContentProps) {
 
       const mediaUrl = mxcUrlToHttp(mx, thumbMxcUrl, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
-      if (encInfo) {
-        const fileContent = await downloadEncryptedMedia(mediaUrl, (encBuf) =>
-          decryptFile(encBuf, thumbInfo.mimetype ?? FALLBACK_MIMETYPE, encInfo),
-        );
-        return URL.createObjectURL(fileContent);
-      }
-      if (NO_SERVICE_WORKER) {
-        const blob = await downloadMedia(mediaUrl);
-        return URL.createObjectURL(blob);
-      }
-
-      return mediaUrl;
-    }, [mx, info, useAuthentication]),
+      if (!encInfo && !NO_SERVICE_WORKER && !isDesktopTauri) return mediaUrl;
+      return loadMediaBlobUrl(
+        mediaUrl,
+        thumbInfo.mimetype ?? FALLBACK_MIMETYPE,
+        encInfo,
+        createdAt,
+      );
+    }, [mx, info, useAuthentication, createdAt]),
   );
 
   useEffect(() => {

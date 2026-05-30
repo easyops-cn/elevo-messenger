@@ -6,7 +6,7 @@ import 'folds/dist/style.css';
 import './index.css';
 import './preview.css';
 import './app/i18n';
-import { loadMediaBlob } from './app/utils/mediaDownload';
+import { loadMediaBlob, loadMediaFilePath } from './app/utils/mediaDownload';
 import type { DesktopPreviewPayload } from './app/utils/desktopPreview';
 import { elevoConfig } from './config.css';
 import { DarkTheme, LightTheme, ThemeContextProvider, ThemeKind } from './app/hooks/useTheme';
@@ -69,7 +69,10 @@ function PreviewApp() {
       duration: payload.duration,
       waveform: payload.waveform,
       langName: payload.langName,
-      loadBlob: () => loadMediaBlob(payload.mediaUrl, payload.mimeType, payload.encInfo),
+      loadBlob: () =>
+        loadMediaBlob(payload.mediaUrl, payload.mimeType, payload.encInfo, payload.createdAt),
+      loadFilePath: () =>
+        loadMediaFilePath(payload.mediaUrl, payload.mimeType, payload.encInfo, payload.createdAt),
     };
   }, [payload]);
 
@@ -97,6 +100,7 @@ function PreviewApp() {
             className={css.PreviewShell}
             item={previewItem}
             hideCloseButton
+            downloadAction="open-folder"
             requestClose={closePreviewWindow}
           />
         ) : null}

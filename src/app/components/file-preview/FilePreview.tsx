@@ -1,15 +1,22 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import classNames from 'classnames';
-import { Box, Spinner, Text, as } from 'folds';
+import { Box, Icons, Spinner, Text, as } from 'folds';
 import { useTranslation } from 'react-i18next';
+import { platform } from '@tauri-apps/plugin-os';
+import { revealItemInDir } from '@tauri-apps/plugin-opener';
 import { PdfViewer } from '../Pdf-viewer/PdfViewer';
 import { TextViewer } from '../text-viewer';
 import { saveFile } from '../../utils/file-saver';
+import { FolderOpenIcon } from '../../icons/FolderOpenIcon';
 import { BaseAudioViewer } from './BaseAudioViewer';
 import { BaseImageViewer } from './BaseImageViewer';
 import { BaseUnknownFileViewer } from './BaseUnknownFileViewer';
 import { BaseVideoViewer } from './BaseVideoViewer';
-import type { FilePreviewItem } from './types';
+import type {
+  FilePreviewDownloadAction,
+  FilePreviewDownloadActionKind,
+  FilePreviewItem,
+} from './types';
 
 type LoadedPreview =
   | { type: 'blob-url'; src: string }
@@ -19,11 +26,12 @@ type LoadedPreview =
 export type FilePreviewProps = {
   item: FilePreviewItem;
   hideCloseButton?: boolean;
+  downloadAction?: FilePreviewDownloadActionKind;
   requestClose: () => void;
 };
 
 export const FilePreview = as<'div', FilePreviewProps>(
-  ({ className, item, hideCloseButton, requestClose, ...props }, ref) => {
+  ({ className, item, hideCloseButton, downloadAction, requestClose, ...props }, ref) => {
     const { t } = useTranslation();
     const [loaded, setLoaded] = useState<LoadedPreview>({ type: 'none' });
     const [loading, setLoading] = useState(false);
@@ -43,12 +51,34 @@ export const FilePreview = as<'div', FilePreviewProps>(
     const download = useCallback(async () => {
       setDownloading(true);
       try {
+        if (downloadAction === 'open-folder') {
+          if (!item.loadFilePath) {
+            throw new Error('File path loading is required for the open-folder action.');
+          }
+          const filePath = await item.loadFilePath();
+          await revealItemInDir(filePath);
+          return;
+        }
+
         const blob = await item.loadBlob();
         await saveFile(blob, item.name);
       } finally {
         setDownloading(false);
       }
-    }, [item]);
+    }, [item, downloadAction]);
+
+    const actionLabel =
+      downloadAction !== 'open-folder'
+        ? t('viewer.download')
+        : platform() === 'macos'
+          ? t('viewer.showInFinder')
+          : t('viewer.openContainingFolder');
+    const actionIcon = downloadAction === 'open-folder' ? FolderOpenIcon : Icons.Download;
+    const viewerDownloadAction: FilePreviewDownloadAction = {
+      label: actionLabel,
+      icon: actionIcon,
+      onClick: download,
+    };
 
     useEffect(() => {
       let alive = true;
@@ -116,7 +146,7 @@ export const FilePreview = as<'div', FilePreviewProps>(
           hideCloseButton={hideCloseButton}
           downloading={downloading}
           requestClose={requestClose}
-          onDownload={download}
+          downloadAction={viewerDownloadAction}
           {...props}
           ref={ref}
         />
@@ -137,7 +167,7 @@ export const FilePreview = as<'div', FilePreviewProps>(
           downloading={downloading}
           hideCloseButton={hideCloseButton}
           requestClose={requestClose}
-          onDownload={download}
+          downloadAction={viewerDownloadAction}
           onPlayClick={() => {
             if (!loading && loaded.type === 'none') {
               loadPreview()
@@ -162,6 +192,7 @@ export const FilePreview = as<'div', FilePreviewProps>(
           mimeType={item.mimeType}
           hideCloseButton={hideCloseButton}
           requestClose={requestClose}
+          downloadAction={viewerDownloadAction}
           {...props}
           ref={ref}
         />
@@ -192,7 +223,7 @@ export const FilePreview = as<'div', FilePreviewProps>(
           alt={item.name}
           hideCloseButton={hideCloseButton}
           requestClose={requestClose}
-          onDownload={download}
+          downloadAction={viewerDownloadAction}
           {...props}
           ref={ref}
         />
@@ -207,7 +238,7 @@ export const FilePreview = as<'div', FilePreviewProps>(
           src={loaded.src}
           hideCloseButton={hideCloseButton}
           requestClose={requestClose}
-          onDownload={download}
+          downloadAction={viewerDownloadAction}
           {...props}
           ref={ref}
         />
@@ -222,7 +253,7 @@ export const FilePreview = as<'div', FilePreviewProps>(
           src={loaded.src}
           hideCloseButton={hideCloseButton}
           requestClose={requestClose}
-          onDownload={download}
+          downloadAction={viewerDownloadAction}
           {...props}
           ref={ref}
         />
@@ -239,7 +270,7 @@ export const FilePreview = as<'div', FilePreviewProps>(
         hideCloseButton={hideCloseButton}
         downloading={downloading}
         requestClose={requestClose}
-        onDownload={download}
+        downloadAction={viewerDownloadAction}
         {...props}
         ref={ref}
       />

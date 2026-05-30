@@ -26,17 +26,14 @@ import * as css from './style.css';
 import { scaleYDimension } from '../../../utils/common';
 import { FALLBACK_MIMETYPE } from '../../../utils/mimeTypes';
 import { stopPropagation } from '../../../utils/keyboard';
-import {
-  decryptFile,
-  downloadEncryptedMedia,
-  downloadMedia,
-  mxcUrlToHttp,
-} from '../../../utils/matrix';
+import { mxcUrlToHttp } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { NO_SERVICE_WORKER } from '../../../utils/noServiceWorker';
 import { ModalWide } from '../../../styles/Modal.css';
 import { validBlurHash } from '../../../utils/blurHash';
 import { openDesktopFilePreview } from '../../../utils/desktopPreview';
+import { loadMediaBlobUrl } from '../../../utils/mediaDownload';
+import { isDesktopTauri } from '../../../plugins/useTauriOpener';
 
 type RenderViewerProps = {
   src: string;
@@ -58,6 +55,7 @@ export type ImageContentProps = {
   url: string;
   info?: IImageInfo;
   encInfo?: EncryptedAttachmentInfo;
+  createdAt?: number;
   markedAsSpoiler?: boolean;
   spoilerReason?: string;
   renderViewer: (props: RenderViewerProps) => ReactNode;
@@ -72,6 +70,7 @@ export const ImageContent = as<'div', ImageContentProps>(
       url,
       info,
       encInfo,
+      createdAt,
       markedAsSpoiler,
       spoilerReason,
       renderViewer,
@@ -107,18 +106,9 @@ export const ImageContent = as<'div', ImageContentProps>(
       useCallback(async () => {
         const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
         if (!mediaUrl) throw new Error('Invalid media URL');
-        if (encInfo) {
-          const fileContent = await downloadEncryptedMedia(mediaUrl, (encBuf) =>
-            decryptFile(encBuf, mimeType ?? FALLBACK_MIMETYPE, encInfo),
-          );
-          return URL.createObjectURL(fileContent);
-        }
-        if (NO_SERVICE_WORKER) {
-          const blob = await downloadMedia(mediaUrl);
-          return URL.createObjectURL(blob);
-        }
-        return mediaUrl;
-      }, [mx, url, useAuthentication, mimeType, encInfo]),
+        if (!encInfo && !NO_SERVICE_WORKER && !isDesktopTauri) return mediaUrl;
+        return loadMediaBlobUrl(mediaUrl, mimeType ?? FALLBACK_MIMETYPE, encInfo, createdAt);
+      }, [mx, url, useAuthentication, mimeType, encInfo, createdAt]),
     );
 
     const handleLoad = () => {
@@ -145,6 +135,7 @@ export const ImageContent = as<'div', ImageContentProps>(
           size: info?.size,
           mediaUrl,
           encInfo,
+          createdAt,
         }))
       ) {
         return;

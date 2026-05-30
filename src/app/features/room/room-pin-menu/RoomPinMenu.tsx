@@ -317,6 +317,7 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(function
                 return (
                   <MSticker
                     content={mEvent.getContent()}
+                    createdAt={mEvent.getTs()}
                     renderImageContent={(props) => (
                       <ImageContent
                         {...props}
@@ -369,6 +370,7 @@ export const RoomPinMenu = forwardRef<HTMLDivElement, RoomPinMenuProps>(function
         return (
           <MSticker
             content={getContent()}
+            createdAt={event.getTs()}
             renderImageContent={(props) => (
               <ImageContent
                 {...props}

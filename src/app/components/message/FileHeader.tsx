@@ -12,9 +12,16 @@ type FileDownloadButtonProps = {
   url: string;
   mimeType: string;
   encInfo?: EncryptedAttachmentInfo;
+  createdAt?: number;
 };
-export function FileDownloadButton({ filename, url, mimeType, encInfo }: FileDownloadButtonProps) {
-  const [downloadState, download] = useMediaDownload(url, mimeType, filename, encInfo);
+export function FileDownloadButton({
+  filename,
+  url,
+  mimeType,
+  encInfo,
+  createdAt,
+}: FileDownloadButtonProps) {
+  const [downloadState, download] = useMediaDownload(url, mimeType, filename, encInfo, createdAt);
 
   const downloading = downloadState.status === AsyncStatus.Loading;
   const hasError = downloadState.status === AsyncStatus.Error;
