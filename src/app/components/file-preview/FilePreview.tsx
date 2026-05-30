@@ -67,10 +67,12 @@ export const FilePreview = as<'div', FilePreviewProps>(
       }
     }, [item, downloadAction]);
 
-    const openFolderLabelKey =
-      platform() === 'macos' ? 'viewer.showInFinder' : 'viewer.openContainingFolder';
     const actionLabel =
-      downloadAction === 'open-folder' ? t(openFolderLabelKey) : t('viewer.download');
+      downloadAction !== 'open-folder'
+        ? t('viewer.download')
+        : platform() === 'macos'
+          ? t('viewer.showInFinder')
+          : t('viewer.openContainingFolder');
     const actionIcon = downloadAction === 'open-folder' ? FolderOpenIcon : Icons.Download;
     const viewerDownloadAction: FilePreviewDownloadAction = {
       label: actionLabel,
