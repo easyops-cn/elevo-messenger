@@ -39,8 +39,6 @@ import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useVirtualPaginator, ItemRange } from '../../hooks/useVirtualPaginator';
 import { useAlive } from '../../hooks/useAlive';
 import {
-  DefaultPlaceholder,
-  CompactPlaceholder,
   Reply,
   MessageBase,
   MessageBrokenContent,
@@ -230,6 +228,13 @@ type RoomTimelineProps = {
 };
 
 const PAGINATION_LIMIT = 80;
+const PAGINATION_ROOT_MARGIN = '640px 0px';
+const PAGINATION_SENTINEL_STYLE = {
+  height: 1,
+  minHeight: 1,
+  overflow: 'hidden',
+  pointerEvents: 'none',
+} as const;
 
 type Timeline = {
   linkedTimelines: EventTimeline[];
@@ -628,10 +633,29 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
       limit: PAGINATION_LIMIT,
       range: timeline.range,
       onRangeChange: useCallback((r) => setTimeline((cs) => ({ ...cs, range: r })), []),
+      rootMargin: PAGINATION_ROOT_MARGIN,
       getScrollElement,
       getItemElement: useCallback(
         (index: number) =>
           (scrollRef.current?.querySelector(`[data-message-item="${index}"]`) as HTMLElement) ??
+          undefined,
+        [],
+      ),
+      getItemKey: useCallback(
+        (index: number) => {
+          const [eventTimeline, baseIndex] = getTimelineAndBaseIndex(
+            timeline.linkedTimelines,
+            index,
+          );
+          return eventTimeline
+            ? getTimelineEvent(eventTimeline, getTimelineRelativeIndex(index, baseIndex))?.getId()
+            : undefined;
+        },
+        [timeline.linkedTimelines],
+      ),
+      getItemElementByKey: useCallback(
+        (evtId: string) =>
+          (scrollRef.current?.querySelector(`[data-message-id="${evtId}"]`) as HTMLElement) ??
           undefined,
         [],
       ),
@@ -1854,73 +1878,15 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
               <RoomIntro room={room} />
             </div>
           )}
-          {(canPaginateBack || !rangeAtStart) &&
-            (messageLayout === MessageLayout.Compact ? (
-              <>
-                <MessageBase>
-                  <CompactPlaceholder key={getItems().length} />
-                </MessageBase>
-                <MessageBase>
-                  <CompactPlaceholder key={getItems().length} />
-                </MessageBase>
-                <MessageBase>
-                  <CompactPlaceholder key={getItems().length} />
-                </MessageBase>
-                <MessageBase>
-                  <CompactPlaceholder key={getItems().length} />
-                </MessageBase>
-                <MessageBase ref={observeBackAnchor}>
-                  <CompactPlaceholder key={getItems().length} />
-                </MessageBase>
-              </>
-            ) : (
-              <>
-                <MessageBase>
-                  <DefaultPlaceholder key={getItems().length} />
-                </MessageBase>
-                <MessageBase>
-                  <DefaultPlaceholder key={getItems().length} />
-                </MessageBase>
-                <MessageBase ref={observeBackAnchor}>
-                  <DefaultPlaceholder key={getItems().length} />
-                </MessageBase>
-              </>
-            ))}
+          {(canPaginateBack || !rangeAtStart) && (
+            <div ref={observeBackAnchor} aria-hidden style={PAGINATION_SENTINEL_STYLE} />
+          )}
 
           {getItems().map(eventRenderer)}
 
-          {(!liveTimelineLinked || !rangeAtEnd) &&
-            (messageLayout === MessageLayout.Compact ? (
-              <>
-                <MessageBase ref={observeFrontAnchor}>
-                  <CompactPlaceholder key={getItems().length} />
-                </MessageBase>
-                <MessageBase>
-                  <CompactPlaceholder key={getItems().length} />
-                </MessageBase>
-                <MessageBase>
-                  <CompactPlaceholder key={getItems().length} />
-                </MessageBase>
-                <MessageBase>
-                  <CompactPlaceholder key={getItems().length} />
-                </MessageBase>
-                <MessageBase>
-                  <CompactPlaceholder key={getItems().length} />
-                </MessageBase>
-              </>
-            ) : (
-              <>
-                <MessageBase ref={observeFrontAnchor}>
-                  <DefaultPlaceholder key={getItems().length} />
-                </MessageBase>
-                <MessageBase>
-                  <DefaultPlaceholder key={getItems().length} />
-                </MessageBase>
-                <MessageBase>
-                  <DefaultPlaceholder key={getItems().length} />
-                </MessageBase>
-              </>
-            ))}
+          {(!liveTimelineLinked || !rangeAtEnd) && (
+            <div ref={observeFrontAnchor} aria-hidden style={PAGINATION_SENTINEL_STYLE} />
+          )}
         </Box>
       </Scroll>
       {scrollable && (

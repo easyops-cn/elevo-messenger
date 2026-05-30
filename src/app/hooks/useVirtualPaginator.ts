@@ -51,8 +51,11 @@ type VirtualPaginatorOptions<TScrollElement extends HTMLElement> = {
   limit: number;
   range: ItemRange;
   onRangeChange: (range: ItemRange) => void;
+  rootMargin?: string;
   getScrollElement: () => TScrollElement | null;
   getItemElement: (index: number) => HTMLElement | undefined;
+  getItemKey?: (index: number) => string | undefined;
+  getItemElementByKey?: (key: string) => HTMLElement | undefined;
   onEnd?: (back: boolean) => void;
 };
 
@@ -111,34 +114,38 @@ const getDropIndex = (
   return dropIndex;
 };
 
-type RestoreAnchorData = [number | undefined, HTMLElement | undefined];
+type RestoreAnchorData = [number | undefined, HTMLElement | undefined, string | undefined];
 const getRestoreAnchor = (
   range: ItemRange,
   getItemElement: (index: number) => HTMLElement | undefined,
+  getItemKey: ((index: number) => string | undefined) | undefined,
   direction: Direction,
 ): RestoreAnchorData => {
   let scrollAnchorEl: HTMLElement | undefined;
+  let scrollAnchorKey: string | undefined;
   const scrollAnchorItem = (
     direction === Direction.Backward ? generateItems(range) : generateItems(range).reverse()
   ).find((i) => {
     const el = getItemElement(i);
     if (el) {
       scrollAnchorEl = el;
+      scrollAnchorKey = getItemKey?.(i);
       return true;
     }
     return false;
   });
-  return [scrollAnchorItem, scrollAnchorEl];
+  return [scrollAnchorItem, scrollAnchorEl, scrollAnchorKey];
 };
 
 const getRestoreScrollData = (scrollTop: number, restoreAnchorData: RestoreAnchorData) => {
-  const [anchorItem, anchorElement] = restoreAnchorData;
-  if (!anchorItem || !anchorElement) {
+  const [anchorItem, anchorElement, anchorKey] = restoreAnchorData;
+  if (anchorItem === undefined || !anchorElement) {
     return undefined;
   }
   return {
     scrollTop,
     anchorItem,
+    anchorKey,
     anchorOffsetTop: anchorElement.offsetTop,
   };
 };
@@ -162,7 +169,18 @@ const useObserveAnchorHandle = (
 export const useVirtualPaginator = <TScrollElement extends HTMLElement>(
   options: VirtualPaginatorOptions<TScrollElement>,
 ): VirtualPaginator => {
-  const { count, limit, range, onRangeChange, getScrollElement, getItemElement, onEnd } = options;
+  const {
+    count,
+    limit,
+    range,
+    onRangeChange,
+    rootMargin,
+    getScrollElement,
+    getItemElement,
+    getItemKey,
+    getItemElementByKey,
+    onEnd,
+  } = options;
 
   const initialRenderRef = useRef(true);
 
@@ -170,6 +188,7 @@ export const useVirtualPaginator = <TScrollElement extends HTMLElement>(
     scrollTop: number;
     anchorOffsetTop: number;
     anchorItem: number;
+    anchorKey?: string;
   }>();
 
   const scrollToItemRef = useRef<{
@@ -184,8 +203,10 @@ export const useVirtualPaginator = <TScrollElement extends HTMLElement>(
   });
   if (propRef.current.count !== count) {
     // Clear restoreScrollRef on count change
-    // As restoreScrollRef.current.anchorItem might changes
-    restoreScrollRef.current = undefined;
+    // As restoreScrollRef.current.anchorItem might changes unless it can be restored by key.
+    if (!restoreScrollRef.current?.anchorKey) {
+      restoreScrollRef.current = undefined;
+    }
   }
   propRef.current = {
     range,
@@ -272,15 +293,15 @@ export const useVirtualPaginator = <TScrollElement extends HTMLElement>(
 
       if (direction === Direction.Backward) {
         restoreScrollRef.current = undefined;
-        if (start === 0) {
-          onEnd?.(true);
-          return;
-        }
         if (scrollEl) {
           restoreScrollRef.current = getRestoreScrollData(
             scrollEl.scrollTop,
-            getRestoreAnchor({ start, end }, getItemElement, Direction.Backward),
+            getRestoreAnchor({ start, end }, getItemElement, getItemKey, Direction.Backward),
           );
+        }
+        if (start === 0) {
+          onEnd?.(true);
+          return;
         }
         if (scrollEl) {
           end = getDropIndex(scrollEl, currentRange, Direction.Forward, getItemElement, 2) ?? end;
@@ -290,15 +311,15 @@ export const useVirtualPaginator = <TScrollElement extends HTMLElement>(
 
       if (direction === Direction.Forward) {
         restoreScrollRef.current = undefined;
-        if (end === currentCount) {
-          onEnd?.(false);
-          return;
-        }
         if (scrollEl) {
           restoreScrollRef.current = getRestoreScrollData(
             scrollEl.scrollTop,
-            getRestoreAnchor({ start, end }, getItemElement, Direction.Forward),
+            getRestoreAnchor({ start, end }, getItemElement, getItemKey, Direction.Forward),
           );
+        }
+        if (end === currentCount) {
+          onEnd?.(false);
+          return;
         }
         end = Math.min(end + currentLimit, currentCount);
         if (scrollEl) {
@@ -312,7 +333,7 @@ export const useVirtualPaginator = <TScrollElement extends HTMLElement>(
         end,
       });
     },
-    [getScrollElement, getItemElement, onEnd, onRangeChange],
+    [getScrollElement, getItemElement, getItemKey, onEnd, onRangeChange],
   );
 
   const handlePaginatorElIntersection: OnIntersectionCallback = useCallback(
@@ -338,8 +359,9 @@ export const useVirtualPaginator = <TScrollElement extends HTMLElement>(
     useCallback(
       () => ({
         root: getScrollElement(),
+        rootMargin,
       }),
-      [getScrollElement],
+      [getScrollElement, rootMargin],
     ),
   );
 
@@ -355,11 +377,16 @@ export const useVirtualPaginator = <TScrollElement extends HTMLElement>(
     const {
       anchorOffsetTop: oldOffsetTop,
       anchorItem,
+      anchorKey,
       scrollTop: oldScrollTop,
     } = restoreScrollRef.current;
-    const anchorEl = getItemElement(anchorItem);
+    const anchorEl =
+      (anchorKey ? getItemElementByKey?.(anchorKey) : undefined) ?? getItemElement(anchorItem);
 
-    if (!anchorEl) return;
+    if (!anchorEl) {
+      restoreScrollRef.current = undefined;
+      return;
+    }
     const { offsetTop } = anchorEl;
     const offsetAddition = offsetTop - oldOffsetTop;
     const restoreTop = oldScrollTop + offsetAddition;
@@ -369,7 +396,7 @@ export const useVirtualPaginator = <TScrollElement extends HTMLElement>(
       behavior: 'instant',
     });
     restoreScrollRef.current = undefined;
-  }, [range, getScrollElement, getItemElement]);
+  }, [range, count, getScrollElement, getItemElement, getItemElementByKey]);
 
   // When scrollToItem index was not in range.
   // Scroll to item after range changes.
