@@ -1,48 +1,53 @@
 import React, { useState } from 'react';
 import { Box, Chip, Spinner, Text, config } from 'folds';
-import { MatrixEvent, Room } from 'matrix-js-sdk';
+import { Room } from 'matrix-js-sdk';
 import { useTranslation } from 'react-i18next';
 
 import * as css from './RoomSidePanel.css';
 import { FileMenuItem } from './FileMenuItem';
-import {
-  createDesktopPreviewPayload,
-  getFileViewerInfo,
-  FileViewerOverlay,
-} from './FileViewerOverlay';
+import { createDesktopPreviewPayloadFromEntry, RoomMediaViewerOverlay } from './FileViewerOverlay';
 import { useRoomFiles } from '../../hooks/useRoomFiles';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { mxcUrlToHttp } from '../../utils/matrix';
 import { openDesktopFilePreview } from '../../utils/desktopPreview';
+import { isDesktopTauri } from '../../plugins/useTauriOpener';
+import type { RoomMediaEntry } from '../../utils/roomMediaIndex';
 
 type FilesPanelProps = {
   room: Room;
 };
 
+const FILES_PANEL_VISIBLE_LIMIT = 10;
+
 export function FilesPanel({ room }: FilesPanelProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const useAuth = useMediaAuthentication();
-  const [viewingFile, setViewingFile] = useState<MatrixEvent | null>(null);
+  const [viewingFile, setViewingFile] = useState<{ file: RoomMediaEntry; mediaUrl: string } | null>(
+    null,
+  );
 
-  const { files, loading, error, retry } = useRoomFiles(room);
+  const { files, loading, error, retry } = useRoomFiles(room, FILES_PANEL_VISIBLE_LIMIT + 1);
+  const visibleFiles = files.slice(0, FILES_PANEL_VISIBLE_LIMIT);
+  const hasMoreFiles = files.length > FILES_PANEL_VISIBLE_LIMIT;
   const isSpaceRoom = room.isSpaceRoom();
-  const handleOpenFile = async (fileEvent: MatrixEvent) => {
-    const { url } = getFileViewerInfo(fileEvent);
-    const mediaUrl = url ? mxcUrlToHttp(mx, url, useAuth) : undefined;
+  const handleOpenFile = async (file: RoomMediaEntry) => {
+    const mediaUrl = mxcUrlToHttp(mx, file.mediaMxc, useAuth);
 
     if (
       mediaUrl &&
-      (await openDesktopFilePreview(createDesktopPreviewPayload(fileEvent, mediaUrl)))
+      (await openDesktopFilePreview(createDesktopPreviewPayloadFromEntry(file, mediaUrl)))
     ) {
       return;
     }
 
-    setViewingFile(fileEvent);
+    if (mediaUrl) {
+      setViewingFile({ file, mediaUrl });
+    }
   };
 
-  if (isSpaceRoom) return null;
+  if (!isDesktopTauri || isSpaceRoom) return null;
 
   if (!loading && !error && files.length === 0) return null;
 
@@ -77,19 +82,28 @@ export function FilesPanel({ room }: FilesPanelProps) {
 
         {!loading && !error && files.length > 0 && (
           <Box direction="Column" gap="100">
-            {files.map((fileEvent) => (
+            {visibleFiles.map((fileEvent) => (
               <FileMenuItem
-                key={fileEvent.getId()}
-                fileEvent={fileEvent}
+                key={fileEvent.eventId}
+                file={fileEvent}
                 onClick={() => handleOpenFile(fileEvent)}
               />
             ))}
+            {hasMoreFiles && (
+              <Text align="Center" size="T200" priority="300">
+                {t('room.filesLimited', { count: FILES_PANEL_VISIBLE_LIMIT })}
+              </Text>
+            )}
           </Box>
         )}
       </Box>
 
       {viewingFile && (
-        <FileViewerOverlay fileEvent={viewingFile} requestClose={() => setViewingFile(null)} />
+        <RoomMediaViewerOverlay
+          file={viewingFile.file}
+          mediaUrl={viewingFile.mediaUrl}
+          requestClose={() => setViewingFile(null)}
+        />
       )}
     </>
   );

@@ -168,6 +168,7 @@
     "files": "Files",
     "noFiles": "No Files",
     "filesLoadFailed": "Failed to load files",
+    "filesLimited": "Only showing the {{count}} most recent files",
     "powerTagCreator": "Creator",
     "powerTagOwner": "Owner",
     "powerTagAdmin": "Admin",

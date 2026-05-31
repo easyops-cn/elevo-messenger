@@ -43,6 +43,7 @@ import { useRoomsUnread } from '../../state/hooks/unread';
 import { useAllHomeRooms } from './home/useAllHomeRooms';
 import { sendSystemNotification, type SystemNotificationHandle } from '../../utils/notification';
 import { TodosSyncFeature } from './todos/TodosSyncFeature';
+import { RoomMediaIndexSyncFeature } from './RoomMediaIndexSyncFeature';
 
 function SystemEmojiFeature() {
   const [twitterEmoji] = useSetting(settingsAtom, 'twitterEmoji');
@@ -394,6 +395,7 @@ export function ClientNonUIFeatures({ children }: ClientNonUIFeaturesProps) {
       <MessageNotifications />
       <ClientToolSdkHandler />
       <TodosSyncFeature />
+      <RoomMediaIndexSyncFeature />
       {children}
     </>
   );
