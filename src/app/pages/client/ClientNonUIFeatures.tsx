@@ -372,24 +372,11 @@ function TrayBadgeFeature() {
   const homeRooms = useAllHomeRooms();
   const homeUnread = useRoomsUnread(homeRooms, roomToUnreadAtom);
   const allInvites = useAtomValue(allInvitesAtom);
-  const { state, previous } = useAtomValue(syncStateAtom);
+  const { state } = useAtomValue(syncStateAtom);
   const inviteCount = allInvites.length;
   const totalUnread = (homeUnread?.total ?? 0) + inviteCount;
 
-  let syncStatus: 'connecting' | 'reconnecting' | 'error' | null = null;
-  if (
-    state === SyncState.Prepared ||
-    state === SyncState.Catchup ||
-    (state === SyncState.Syncing &&
-      previous !== SyncState.Prepared &&
-      previous !== SyncState.Syncing)
-  ) {
-    syncStatus = 'connecting';
-  } else if (state === SyncState.Reconnecting) {
-    syncStatus = 'reconnecting';
-  } else if (state === SyncState.Error) {
-    syncStatus = 'error';
-  }
+  const syncStatus = state === SyncState.Error ? 'error' : null;
 
   useEffect(() => {
     if (!isDesktopTauri) return;
