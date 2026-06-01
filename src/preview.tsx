@@ -70,9 +70,21 @@ function PreviewApp() {
       waveform: payload.waveform,
       langName: payload.langName,
       loadBlob: () =>
-        loadMediaBlob(payload.mediaUrl, payload.mimeType, payload.encInfo, payload.createdAt),
+        loadMediaBlob(
+          payload.mediaUrl,
+          payload.mimeType,
+          payload.encInfo,
+          payload.createdAt,
+          payload.cacheScope,
+        ),
       loadFilePath: () =>
-        loadMediaFilePath(payload.mediaUrl, payload.mimeType, payload.encInfo, payload.createdAt),
+        loadMediaFilePath(
+          payload.mediaUrl,
+          payload.mimeType,
+          payload.encInfo,
+          payload.createdAt,
+          payload.cacheScope,
+        ),
     };
   }, [payload]);
 

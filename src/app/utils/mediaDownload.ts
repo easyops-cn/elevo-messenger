@@ -1,17 +1,24 @@
 import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
-import { loadCachedMediaBlob, loadCachedMediaFilePath, loadCachedMediaUrl } from './mediaCache';
+import {
+  CachedMediaRequest,
+  loadCachedMediaBlob,
+  loadCachedMediaFilePath,
+  loadCachedMediaUrl,
+} from './mediaCache';
 
 export const loadMediaBlob = async (
   mediaUrl: string,
   mimeType: string,
   encInfo?: EncryptedAttachmentInfo,
   createdAt?: number,
+  cacheScope?: CachedMediaRequest['cacheScope'],
 ): Promise<Blob> =>
   loadCachedMediaBlob({
     mediaUrl,
     mimeType,
     encInfo,
     createdAt,
+    cacheScope,
   });
 
 export const loadMediaBlobUrl = async (
@@ -19,12 +26,14 @@ export const loadMediaBlobUrl = async (
   mimeType: string,
   encInfo?: EncryptedAttachmentInfo,
   createdAt?: number,
+  cacheScope?: CachedMediaRequest['cacheScope'],
 ): Promise<string> =>
   loadCachedMediaUrl({
     mediaUrl,
     mimeType,
     encInfo,
     createdAt,
+    cacheScope,
   });
 
 export const loadMediaFilePath = async (
@@ -32,10 +41,12 @@ export const loadMediaFilePath = async (
   mimeType: string,
   encInfo?: EncryptedAttachmentInfo,
   createdAt?: number,
+  cacheScope?: CachedMediaRequest['cacheScope'],
 ): Promise<string> =>
   loadCachedMediaFilePath({
     mediaUrl,
     mimeType,
     encInfo,
     createdAt,
+    cacheScope,
   });

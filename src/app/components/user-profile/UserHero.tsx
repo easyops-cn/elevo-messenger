@@ -39,6 +39,7 @@ export function UserHero({ userId, avatarUrl, presence }: UserHeroProps) {
         name: userId,
         mimeType: 'image/*',
         mediaUrl: avatarUrl,
+        cacheScope: 'avatar',
       })
     ) {
       return;
