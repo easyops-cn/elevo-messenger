@@ -23,6 +23,28 @@ type ThreadMenuItemProps = {
   onClick: MouseEventHandler<HTMLButtonElement>;
 };
 
+function ThreadReplyRelationIcon() {
+  return (
+    <svg
+      width="18"
+      height="20"
+      viewBox="0 0 18 20"
+      fill="none"
+      aria-hidden
+      focusable="false"
+      style={{ display: 'block', opacity: 0.45 }}
+    >
+      <path
+        d="M9 3V6C9 8.20914 10.7909 10 13 10H16"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: ThreadMenuItemProps) {
   const mx = useMatrixClient();
   const { t } = useTranslation();
@@ -39,7 +61,9 @@ export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: Thr
   const {
     rootSummary,
     rootIsRedacted,
+    rootSenderId,
     rootSenderName,
+    rootAvatarUrl,
     latestReplySummary,
     latestReplySenderId,
     latestReplySenderName,
@@ -47,12 +71,16 @@ export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: Thr
     latestTs,
   } = useMemo(() => {
     const root = threadEvent
-      ? getLatestMessageText(room, threadEvent, mx.getSafeUserId(), false, t, true, true)
+      ? getLatestMessageText(room, threadEvent, mx.getSafeUserId(), false, t, false, false)
       : undefined;
     const rIsRedacted = threadEvent?.isRedacted() ?? false;
-    const rSenderId = rIsRedacted ? threadEvent?.getSender() : undefined;
+    const rSenderId = threadEvent?.getSender();
     const rSenderName = rSenderId
       ? (getMemberDisplayName(room, rSenderId) ?? getMxIdLocalPart(rSenderId) ?? rSenderId)
+      : undefined;
+    const rootAvatarMxcUrl = rSenderId ? room.getMember(rSenderId)?.getMxcAvatarUrl() : undefined;
+    const rootAvatar = rootAvatarMxcUrl
+      ? mx.mxcUrlToHttp(rootAvatarMxcUrl, 64, 64, 'crop', undefined, false, useAuthentication)
       : undefined;
     const latestReplyId = threadLastReply?.getId();
     const editedLastReply =
@@ -88,7 +116,9 @@ export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: Thr
     return {
       rootSummary: root,
       rootIsRedacted: rIsRedacted,
+      rootSenderId: rSenderId,
       rootSenderName: rSenderName,
+      rootAvatarUrl: rootAvatar,
       latestReplySummary: latestSummary,
       latestReplySenderId: senderId,
       latestReplySenderName: senderName,
@@ -106,14 +136,41 @@ export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: Thr
       onClick={onClick}
     >
       <Box grow="Yes" direction="Column" gap="100">
-        <Text size="T300" truncate>
-          {rootIsRedacted ? (
-            <MessageDeletedContent before={`${rootSenderName}: `} />
-          ) : (
-            (rootSummary ?? t('message.threadLatestReplyFallback'))
-          )}
-        </Text>
         <Box alignItems="Center" gap="100">
+          {rootSenderId && (
+            <Box shrink="No">
+              <Avatar size="100" radii="Pill">
+                <UserAvatar
+                  userId={rootSenderId}
+                  src={rootAvatarUrl ?? undefined}
+                  alt={rootSenderName ?? rootSenderId}
+                  renderFallback={() => <Icon size="50" src={Icons.User} filled />}
+                />
+              </Avatar>
+            </Box>
+          )}
+          <Text size="T300" truncate style={{ flexGrow: 1 }}>
+            {rootIsRedacted ? (
+              <MessageDeletedContent />
+            ) : (
+              (rootSummary ?? t('message.threadLatestReplyFallback'))
+            )}
+          </Text>
+        </Box>
+        <Box alignItems="Center" gap="100">
+          <Box
+            shrink="No"
+            style={{
+              width: toRem(18),
+              height: toRem(20),
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'currentColor',
+            }}
+          >
+            <ThreadReplyRelationIcon />
+          </Box>
           {latestReplySenderId && (
             <Box shrink="No" style={{ position: 'relative' }}>
               <Avatar size="100" radii="Pill">
