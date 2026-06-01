@@ -63,7 +63,6 @@ export function useAuthenticatedMediaUrl(
     loadCachedMediaUrl({
       mediaUrl: url,
       mimeType: 'application/octet-stream',
-      cacheVariant: 'authenticated-media',
       cacheScope,
     })
       .then((newUrl) => {

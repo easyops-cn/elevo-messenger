@@ -6,7 +6,6 @@ export type CachedMediaRequest = {
   mediaUrl: string;
   mimeType: string;
   encInfo?: EncryptedAttachmentInfo;
-  cacheVariant?: string;
   cacheScope?: 'dated' | 'avatar';
   createdAt?: number;
 };
@@ -152,7 +151,6 @@ const getCacheKey = async (request: CachedMediaRequest): Promise<string> => {
     mediaUrl: request.mediaUrl,
     mimeType: request.mimeType,
     encInfo: request.encInfo,
-    cacheVariant: request.cacheVariant,
     cacheScope: request.cacheScope,
   };
   return sha256(stableStringify(payload));
