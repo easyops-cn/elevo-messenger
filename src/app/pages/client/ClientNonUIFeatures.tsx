@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   RoomEvent,
   RoomEventHandlerMap,
+  SyncState,
   type EventTimelineSetHandlerMap,
   type MatrixEvent,
   type Room,
@@ -38,6 +39,7 @@ import {
   isDesktopTauri,
   type SdkMessagePayload,
 } from '../../plugins/useTauriOpener';
+import { syncStateAtom } from '../../state/syncState';
 import { useRoomNavigate } from '../../hooks/useRoomNavigate';
 import { useRoomsUnread } from '../../state/hooks/unread';
 import { useAllHomeRooms } from './home/useAllHomeRooms';
@@ -370,15 +372,31 @@ function TrayBadgeFeature() {
   const homeRooms = useAllHomeRooms();
   const homeUnread = useRoomsUnread(homeRooms, roomToUnreadAtom);
   const allInvites = useAtomValue(allInvitesAtom);
+  const { state, previous } = useAtomValue(syncStateAtom);
   const inviteCount = allInvites.length;
   const totalUnread = (homeUnread?.total ?? 0) + inviteCount;
 
+  let syncStatus: 'connecting' | 'reconnecting' | 'error' | null = null;
+  if (
+    state === SyncState.Prepared ||
+    state === SyncState.Catchup ||
+    (state === SyncState.Syncing &&
+      previous !== SyncState.Prepared &&
+      previous !== SyncState.Syncing)
+  ) {
+    syncStatus = 'connecting';
+  } else if (state === SyncState.Reconnecting) {
+    syncStatus = 'reconnecting';
+  } else if (state === SyncState.Error) {
+    syncStatus = 'error';
+  }
+
   useEffect(() => {
     if (!isDesktopTauri) return;
-    invoke('update_tray_badge', { count: totalUnread }).catch(() => {
+    invoke('update_tray_badge', { count: totalUnread, syncStatus }).catch(() => {
       // Ignore errors from tray badge update (e.g. tray not yet initialized).
     });
-  }, [totalUnread]);
+  }, [totalUnread, syncStatus]);
 
   return null;
 }
