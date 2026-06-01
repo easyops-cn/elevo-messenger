@@ -1,9 +1,11 @@
 import { Badge, Box, Icon, IconButton, Icons, Spinner, Text, as, toRem } from 'folds';
 import React, { ReactNode } from 'react';
 import { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
+import { useTranslation } from 'react-i18next';
 import { AsyncStatus } from '../../hooks/useAsyncCallback';
 import { useMediaDownload } from '../../hooks/useMediaDownload';
 import { mimeTypeToExt } from '../../utils/mimeTypes';
+import { FolderOpenIcon } from '../../icons/FolderOpenIcon';
 
 const badgeStyles = { maxWidth: toRem(100) };
 
@@ -21,12 +23,20 @@ export function FileDownloadButton({
   encInfo,
   createdAt,
 }: FileDownloadButtonProps) {
-  const [downloadState, download] = useMediaDownload(url, mimeType, filename, encInfo, createdAt);
+  const { t } = useTranslation();
+  const [downloadState, download, action] = useMediaDownload(
+    url,
+    mimeType,
+    filename,
+    encInfo,
+    createdAt,
+  );
 
   const downloading = downloadState.status === AsyncStatus.Loading;
   const hasError = downloadState.status === AsyncStatus.Error;
   return (
     <IconButton
+      aria-label={t(action.labelKey)}
       disabled={downloading}
       onClick={download}
       variant={hasError ? 'Critical' : 'SurfaceVariant'}
@@ -36,7 +46,7 @@ export function FileDownloadButton({
       {downloading ? (
         <Spinner size="100" variant={hasError ? 'Critical' : 'Secondary'} />
       ) : (
-        <Icon size="100" src={Icons.Download} />
+        <Icon size="100" src={action.kind === 'open-folder' ? FolderOpenIcon : Icons.Download} />
       )}
     </IconButton>
   );
