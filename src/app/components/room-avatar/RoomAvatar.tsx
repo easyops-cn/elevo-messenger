@@ -30,7 +30,7 @@ export function RoomAvatar({ roomId, src, alt, fallbackAsIcon, renderFallback }:
   const isDirect = mDirects.has(roomId);
 
   const [error, setError] = useState(false);
-  const authSrc = useAuthenticatedMediaUrl(src);
+  const authSrc = useAuthenticatedMediaUrl(src, { cacheScope: 'avatar' });
 
   const colorId = useMemo(() => {
     if ((!authSrc || error) && isDirect) {
@@ -78,6 +78,6 @@ export const RoomIcon = forwardRef<
     joinRule?: JoinRule;
     roomType?: string;
   }
->(({ joinRule, roomType, ...props }, ref) => (
-  <Icon src={getRoomIconSrc(Icons, roomType, joinRule)} {...props} ref={ref} />
-));
+>(function LegacyRoomIcon({ joinRule, roomType, ...props }, ref) {
+  return <Icon src={getRoomIconSrc(Icons, roomType, joinRule)} {...props} ref={ref} />;
+});

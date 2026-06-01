@@ -14,7 +14,7 @@ type UserAvatarProps = {
 };
 export function UserAvatar({ className, userId, src, alt, renderFallback }: UserAvatarProps) {
   const [error, setError] = useState(false);
-  const authSrc = useAuthenticatedMediaUrl(src);
+  const authSrc = useAuthenticatedMediaUrl(src, { cacheScope: 'avatar' });
 
   const handleLoad: ReactEventHandler<HTMLImageElement> = (evt) => {
     evt.currentTarget.setAttribute('data-image-loaded', 'true');

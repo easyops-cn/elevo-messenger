@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { useMatrixClient } from './useMatrixClient';
 import { NO_SERVICE_WORKER } from '../utils/noServiceWorker';
-import { loadCachedMediaUrl } from '../utils/mediaCache';
+import { CachedMediaRequest, loadCachedMediaUrl } from '../utils/mediaCache';
+
+type AuthenticatedMediaUrlOptions = {
+  cacheScope?: CachedMediaRequest['cacheScope'];
+};
 
 const MEDIA_PATHS = ['/_matrix/client/v1/media/download', '/_matrix/client/v1/media/thumbnail'];
 
@@ -19,8 +23,12 @@ function isAuthenticatedMediaUrl(url: string): boolean {
  * when service worker is disabled. When SW is enabled, returns
  * the URL as-is (SW handles auth injection).
  */
-export function useAuthenticatedMediaUrl(url: string | null | undefined): string | undefined {
+export function useAuthenticatedMediaUrl(
+  url: string | null | undefined,
+  options?: AuthenticatedMediaUrlOptions,
+): string | undefined {
   const mx = useMatrixClient();
+  const cacheScope = options?.cacheScope;
   const [blobUrl, setBlobUrl] = useState<string | undefined>(() => {
     if (!url) return undefined;
     if (!NO_SERVICE_WORKER) return url;
@@ -56,6 +64,7 @@ export function useAuthenticatedMediaUrl(url: string | null | undefined): string
       mediaUrl: url,
       mimeType: 'application/octet-stream',
       cacheVariant: 'authenticated-media',
+      cacheScope,
     })
       .then((newUrl) => {
         if (!cancelled) {
@@ -75,7 +84,7 @@ export function useAuthenticatedMediaUrl(url: string | null | undefined): string
     return () => {
       cancelled = true;
     };
-  }, [url, mx]);
+  }, [url, mx, cacheScope]);
 
   useEffect(
     () => () => {

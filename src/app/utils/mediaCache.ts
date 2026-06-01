@@ -7,6 +7,7 @@ export type CachedMediaRequest = {
   mimeType: string;
   encInfo?: EncryptedAttachmentInfo;
   cacheVariant?: string;
+  cacheScope?: 'dated' | 'avatar';
   createdAt?: number;
 };
 
@@ -152,6 +153,7 @@ const getCacheKey = async (request: CachedMediaRequest): Promise<string> => {
     mimeType: request.mimeType,
     encInfo: request.encInfo,
     cacheVariant: request.cacheVariant,
+    cacheScope: request.cacheScope,
   };
   return sha256(stableStringify(payload));
 };
@@ -169,8 +171,19 @@ const getObjectDir = (createdAt: number): string => {
   return `${MEDIA_CACHE_OBJECTS_DIR}/${year}/${month}/${day}`;
 };
 
-const getRelativePath = (key: string, mimeType: string, createdAt: number): string =>
-  `${getObjectDir(createdAt)}/${key}.${safeExt(mimeType)}`;
+const getObjectDirForRequest = (request: CachedMediaRequest, createdAt: number): string => {
+  if (request.cacheScope === 'avatar') {
+    return `${MEDIA_CACHE_OBJECTS_DIR}/avatar`;
+  }
+  return getObjectDir(createdAt);
+};
+
+const getRelativePath = (
+  key: string,
+  mimeType: string,
+  request: CachedMediaRequest,
+  createdAt: number,
+): string => `${getObjectDirForRequest(request, createdAt)}/${key}.${safeExt(mimeType)}`;
 
 const getCachedEntry = async (
   db: SqlDatabase,
@@ -257,10 +270,10 @@ const writeCachedBlob = async (
   const mimeType = request.mimeType || blob.type || FALLBACK_MIMETYPE;
   const existing = await getCachedEntry(db, key);
   const createdAt = existing?.createdAt ?? getCreatedAt(request);
-  const relativePath = existing?.relativePath ?? getRelativePath(key, mimeType, createdAt);
+  const relativePath = existing?.relativePath ?? getRelativePath(key, mimeType, request, createdAt);
   const bytes = new Uint8Array(await blob.arrayBuffer());
 
-  await ensureCacheDirs(fs, getObjectDir(createdAt));
+  await ensureCacheDirs(fs, getObjectDirForRequest(request, createdAt));
   await fs.writeFile(relativePath, bytes, { baseDir: fs.BaseDirectory[MEDIA_CACHE_BASE_DIR] });
 
   await upsertCachedEntry(db, {

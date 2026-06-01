@@ -11,7 +11,7 @@ export const MxcAvatarImage = React.forwardRef<
   HTMLImageElement,
   ComponentProps<typeof FoldsAvatarImage>
 >(({ src, ...props }, ref) => {
-  const authSrc = useAuthenticatedMediaUrl(src);
+  const authSrc = useAuthenticatedMediaUrl(src, { cacheScope: 'avatar' });
   return <FoldsAvatarImage {...props} src={authSrc} ref={ref} />;
 });
 MxcAvatarImage.displayName = 'MxcAvatarImage';

@@ -56,7 +56,13 @@ export function UserHero({ userId, avatarUrl, presence }: UserHeroProps) {
         }}
       >
         {avatarUrl && (
-          <MxcImg className={css.UserHeroCover} src={avatarUrl} alt={userId} draggable={false} />
+          <MxcImg
+            className={css.UserHeroCover}
+            src={avatarUrl}
+            alt={userId}
+            cacheScope="avatar"
+            draggable={false}
+          />
         )}
       </div>
       <div className={css.UserHeroAvatarContainer}>
