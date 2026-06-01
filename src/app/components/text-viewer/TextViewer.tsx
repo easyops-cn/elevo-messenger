@@ -7,6 +7,9 @@ import { copyToClipboard } from '../../utils/dom';
 import { saveFile } from '../../utils/file-saver';
 import { ShikiCode } from '../../plugins/shiki';
 import type { FilePreviewDownloadAction } from '../file-preview';
+import { useTimeoutToggle } from '../../hooks/useTimeoutToggle';
+import { CopyIcon } from '../../icons/CopyIcon';
+import { CheckIcon } from '../../icons/CheckIcon';
 
 type TextViewerContentProps = {
   text: string;
@@ -55,9 +58,11 @@ export const TextViewer = as<'div', TextViewerProps>(
     ref,
   ) => {
     const { t } = useTranslation();
+    const [copied, setCopied] = useTimeoutToggle();
 
     const handleCopy = () => {
       copyToClipboard(text);
+      setCopied();
     };
 
     const handleDownload = async () => {
@@ -97,7 +102,8 @@ export const TextViewer = as<'div', TextViewerProps>(
               <Text size="B300">{downloadAction?.label ?? t('viewer.download')}</Text>
             </Chip>
             <Chip variant="Primary" radii="300" onClick={handleCopy}>
-              <Text size="B300">Copy All</Text>
+              <Icon size="50" src={copied ? CheckIcon : CopyIcon} />
+              <Text size="B300">{t('common.copy')}</Text>
             </Chip>
           </Box>
         </Header>
