@@ -71,7 +71,7 @@ export const FilePreview = as<'div', FilePreviewProps>(
       downloadAction !== 'open-folder'
         ? t('viewer.download')
         : platform() === 'macos'
-          ? t('viewer.showInFinder')
+          ? t('viewer.revealInFinder')
           : t('viewer.openContainingFolder');
     const actionIcon = downloadAction === 'open-folder' ? FolderOpenIcon : Icons.Download;
     const viewerDownloadAction: FilePreviewDownloadAction = {

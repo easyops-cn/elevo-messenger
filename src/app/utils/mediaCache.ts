@@ -108,6 +108,11 @@ const initDatabase = async (db: SqlDatabase): Promise<void> => {
   `);
 };
 
+export const getMediaCacheDatabase = async (): Promise<SqlDatabase | undefined> => {
+  const modules = await getTauriModules();
+  return modules?.db;
+};
+
 const stableStringify = (value: unknown): string => {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
@@ -148,9 +153,6 @@ const getCacheKey = async (request: CachedMediaRequest): Promise<string> => {
     encInfo: request.encInfo,
     cacheVariant: request.cacheVariant,
   };
-  if (typeof request.createdAt === 'number' && Number.isFinite(request.createdAt)) {
-    payload.createdAt = request.createdAt;
-  }
   return sha256(stableStringify(payload));
 };
 

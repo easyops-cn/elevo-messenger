@@ -25,6 +25,15 @@ export const AUDIO_MIME_TYPES = [
 
 export const APPLICATION_MIME_TYPES = [
   'application/pdf',
+  'application/zip',
+  'application/x-zip-compressed',
+  'application/x-7z-compressed',
+  'application/x-rar-compressed',
+  'application/vnd.rar',
+  'application/gzip',
+  'application/x-gzip',
+  'application/x-tar',
+  'application/x-bzip2',
   'application/json',
   'application/x-sh',
   'application/ecmascript',
@@ -95,6 +104,18 @@ export const READABLE_EXT_TO_MIME_TYPE: Record<string, string> = {
   sql: 'text/sql',
 };
 
+export const EXT_TO_MIME_TYPE: Record<string, string> = {
+  zip: 'application/zip',
+  '7z': 'application/x-7z-compressed',
+  rar: 'application/vnd.rar',
+  gz: 'application/gzip',
+  gzip: 'application/gzip',
+  tgz: 'application/gzip',
+  tar: 'application/x-tar',
+  bz2: 'application/x-bzip2',
+  ...READABLE_EXT_TO_MIME_TYPE,
+};
+
 export const ALLOWED_BLOB_MIME_TYPES = [
   ...IMAGE_MIME_TYPES,
   ...VIDEO_MIME_TYPES,
@@ -118,8 +139,16 @@ export const getBlobSafeMimeType = (mimeType: string) => {
   return type;
 };
 
+const inferFileMimeType = (file: File): string | undefined => {
+  const ext = getFileNameExt(file.name).toLowerCase();
+  return EXT_TO_MIME_TYPE[ext];
+};
+
 export const safeFile = (f: File) => {
-  const safeType = getBlobSafeMimeType(f.type);
+  const inferredType = inferFileMimeType(f);
+  const sourceType =
+    f.type && f.type !== FALLBACK_MIMETYPE ? f.type : (inferredType ?? FALLBACK_MIMETYPE);
+  const safeType = getBlobSafeMimeType(sourceType);
   if (safeType !== f.type) {
     return new File([f], f.name, { type: safeType });
   }

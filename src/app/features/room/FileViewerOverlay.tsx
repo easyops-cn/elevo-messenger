@@ -21,6 +21,11 @@ import {
   mxcUrlToHttp,
 } from '../../utils/matrix';
 import {
+  getRoomMediaAudioInfo,
+  getRoomMediaEncryptedInfo,
+  type RoomMediaEntry,
+} from '../../utils/roomMediaIndex';
+import {
   type DesktopPreviewPayload,
   type DesktopPreviewViewerType,
 } from '../../utils/desktopPreview';
@@ -32,7 +37,13 @@ type FileViewerOverlayProps = {
   requestClose: () => void;
 };
 
-function getFileType(mimetype: string, filename: string): ViewerType | null {
+type RoomMediaViewerOverlayProps = {
+  file: RoomMediaEntry;
+  mediaUrl: string;
+  requestClose: () => void;
+};
+
+export function getFileType(mimetype: string, filename: string): ViewerType | null {
   if (mimetype.startsWith('image/')) return 'image';
   if (mimetype.startsWith('video/')) return 'video';
   if (mimetype.startsWith('audio/')) return 'audio';
@@ -73,6 +84,70 @@ export const getFileViewerInfo = (fileEvent: MatrixEvent) => {
     audioWaveform,
     viewerType,
     desktopViewerType,
+  };
+};
+
+export const getRoomMediaViewerInfo = (entry: RoomMediaEntry) => {
+  const msc1767Audio = entry.content['org.matrix.msc1767.audio'];
+  const filename = entry.filename;
+  const mimetype = entry.mimeType;
+  const fileSize = entry.size;
+  const url = entry.mediaMxc;
+  const encInfo = getRoomMediaEncryptedInfo(entry);
+  const audioInfo = getRoomMediaAudioInfo(entry);
+  const audioWaveform =
+    msc1767Audio && typeof msc1767Audio === 'object' && 'waveform' in msc1767Audio
+      ? Array.isArray(msc1767Audio.waveform)
+        ? (msc1767Audio.waveform as number[])
+        : undefined
+      : undefined;
+  const viewerType = getFileType(mimetype, filename);
+  const desktopViewerType: DesktopPreviewViewerType = viewerType ?? 'file';
+
+  return {
+    filename,
+    mimetype,
+    fileSize,
+    url,
+    encInfo,
+    audioInfo,
+    audioWaveform,
+    viewerType,
+    desktopViewerType,
+  };
+};
+
+export const createDesktopPreviewPayloadFromEntry = (
+  entry: RoomMediaEntry,
+  mediaUrl: string,
+): DesktopPreviewPayload => {
+  const {
+    filename,
+    mimetype,
+    fileSize,
+    encInfo,
+    audioInfo,
+    audioWaveform,
+    viewerType,
+    desktopViewerType,
+  } = getRoomMediaViewerInfo(entry);
+
+  return {
+    viewerType: desktopViewerType,
+    name: filename,
+    mimeType: mimetype,
+    size: fileSize,
+    createdAt: entry.eventTs,
+    duration: audioInfo.duration,
+    mediaUrl,
+    encInfo,
+    waveform: audioWaveform,
+    langName:
+      viewerType === 'text'
+        ? READABLE_TEXT_MIME_TYPES.includes(mimetype)
+          ? mimeTypeToExt(mimetype)
+          : mimeTypeToExt(READABLE_EXT_TO_MIME_TYPE[getFileNameExt(filename)] ?? mimetype)
+        : undefined,
   };
 };
 
@@ -165,6 +240,81 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
   ]);
 
   if (!previewItem) return null;
+
+  return (
+    <Overlay open backdrop={<OverlayBackdrop />}>
+      <OverlayCenter>
+        <FocusTrap
+          focusTrapOptions={{
+            initialFocus: false,
+            fallbackFocus: '[data-file-viewer-overlay]',
+            onDeactivate: requestClose,
+            clickOutsideDeactivates: true,
+            escapeDeactivates: stopPropagation,
+          }}
+        >
+          <Modal
+            data-file-viewer-overlay
+            tabIndex={-1}
+            className={ModalWide}
+            size="500"
+            onContextMenu={(evt: React.MouseEvent) => evt.stopPropagation()}
+          >
+            <FilePreview item={previewItem} requestClose={requestClose} />
+          </Modal>
+        </FocusTrap>
+      </OverlayCenter>
+    </Overlay>
+  );
+}
+
+export function RoomMediaViewerOverlay({
+  file,
+  mediaUrl,
+  requestClose,
+}: RoomMediaViewerOverlayProps) {
+  const {
+    filename,
+    mimetype,
+    fileSize,
+    encInfo,
+    audioInfo,
+    audioWaveform,
+    viewerType,
+    desktopViewerType,
+  } = getRoomMediaViewerInfo(file);
+  const loadBlob = useCallback(async () => {
+    return encInfo
+      ? downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimetype, encInfo))
+      : downloadMedia(mediaUrl);
+  }, [encInfo, mediaUrl, mimetype]);
+  const previewItem = useMemo<FilePreviewItem>(
+    () => ({
+      viewerType: desktopViewerType,
+      name: filename,
+      mimeType: mimetype,
+      size: fileSize,
+      duration: audioInfo.duration,
+      waveform: audioWaveform,
+      langName:
+        viewerType === 'text'
+          ? READABLE_TEXT_MIME_TYPES.includes(mimetype)
+            ? mimeTypeToExt(mimetype)
+            : mimeTypeToExt(READABLE_EXT_TO_MIME_TYPE[getFileNameExt(filename)] ?? mimetype)
+          : undefined,
+      loadBlob,
+    }),
+    [
+      audioInfo.duration,
+      audioWaveform,
+      desktopViewerType,
+      fileSize,
+      filename,
+      loadBlob,
+      mimetype,
+      viewerType,
+    ],
+  );
 
   return (
     <Overlay open backdrop={<OverlayBackdrop />}>

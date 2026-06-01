@@ -1,24 +1,23 @@
 import React, { MouseEventHandler } from 'react';
-import type { MatrixEvent } from 'matrix-js-sdk';
 import { Icon, MenuItem, Text, config, toRem } from 'folds';
 import { getFileTypeIcon } from '../../utils/common';
 import { RelativeTime } from '../../components/RelativeTime';
+import type { RoomMediaEntry } from '../../utils/roomMediaIndex';
 
 type FileMenuItemProps = {
-  fileEvent: MatrixEvent;
+  file: RoomMediaEntry;
   onClick?: MouseEventHandler<HTMLButtonElement>;
 };
 
-export function FileMenuItem({ fileEvent, onClick }: FileMenuItemProps) {
-  const content = fileEvent.getContent();
-  const filename = content.filename ?? content.body ?? 'Unnamed File';
-  const mimetype = content.info?.mimetype ?? '';
+export function FileMenuItem({ file, onClick }: FileMenuItemProps) {
+  const { filename } = file;
+  const mimetype = file.mimeType;
   const icon = getFileTypeIcon(mimetype);
-  const eventTs = fileEvent.getTs();
+  const eventTs = file.eventTs;
 
   return (
     <MenuItem
-      data-event-id={fileEvent.getId()}
+      data-event-id={file.eventId}
       style={{ padding: `0 ${config.space.S200}`, height: toRem(32) }}
       variant="Background"
       radii="400"

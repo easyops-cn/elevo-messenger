@@ -16,6 +16,7 @@ import {
 } from 'folds';
 import { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
 import FocusTrap from 'focus-trap-react';
+import { useTranslation } from 'react-i18next';
 import { IFileInfo } from '../../../../types/matrix/common';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import { useMediaDownload } from '../../../hooks/useMediaDownload';
@@ -32,6 +33,7 @@ import { mxcUrlToHttp } from '../../../utils/matrix';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { ModalWide } from '../../../styles/Modal.css';
 import { loadMediaBlob, loadMediaBlobUrl } from '../../../utils/mediaDownload';
+import { FolderOpenIcon } from '../../../icons/FolderOpenIcon';
 
 const renderErrorButton = (retry: () => void, text: string) => (
   <TooltipProvider
@@ -283,10 +285,17 @@ export function DownloadFile({
   createdAt,
   onOpenDesktop,
 }: DownloadFileProps) {
-  const [downloadState, download] = useMediaDownload(url, mimeType, body, encInfo, createdAt);
+  const { t } = useTranslation();
+  const [downloadState, download, action] = useMediaDownload(
+    url,
+    mimeType,
+    body,
+    encInfo,
+    createdAt,
+  );
 
   return downloadState.status === AsyncStatus.Error ? (
-    renderErrorButton(download, `Retry Download (${bytesToSize(info.size ?? 0)})`)
+    renderErrorButton(download, `${t('upload.retry')} (${bytesToSize(info.size ?? 0)})`)
   ) : (
     <Button
       variant="Secondary"
@@ -302,11 +311,15 @@ export function DownloadFile({
         downloadState.status === AsyncStatus.Loading ? (
           <Spinner fill="Soft" size="100" variant="Secondary" />
         ) : (
-          <Icon size="100" src={Icons.Download} filled />
+          <Icon
+            size="100"
+            src={action.kind === 'open-folder' ? FolderOpenIcon : Icons.Download}
+            filled
+          />
         )
       }
     >
-      <Text size="B400" truncate>{`Download (${bytesToSize(info.size ?? 0)})`}</Text>
+      <Text size="B400" truncate>{`${t(action.labelKey)} (${bytesToSize(info.size ?? 0)})`}</Text>
     </Button>
   );
 }
