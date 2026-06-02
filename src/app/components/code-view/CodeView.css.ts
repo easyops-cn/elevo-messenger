@@ -36,6 +36,15 @@ export const HeaderTitle = style({
   minWidth: 0,
 });
 
+export const HeaderIcon = style({
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  color: color.Primary.Main,
+  flexShrink: 0,
+  lineHeight: 0,
+});
+
 export const HeaderMeta = style({
   display: 'inline-flex',
   alignItems: 'center',

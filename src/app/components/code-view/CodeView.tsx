@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
 import * as css from './CodeView.css';
 import type { CodeViewPayload } from './types';
+import { FileDiffIcon } from '../../icons/FileDiffIcon';
 import { UNKNOWN_FILE } from '../message/elevo/diffSummary';
 import { useTheme } from '../../hooks/useTheme';
 import {
@@ -350,6 +351,7 @@ export const CodeView = as<'div', CodeViewProps>(
                 <Icon size="50" src={Icons.ArrowLeft} />
               </IconButton>
             )}
+            <Icon className={css.HeaderIcon} src={FileDiffIcon} size="100" />
             <Text size="T300" truncate title={title}>
               {title}
             </Text>
