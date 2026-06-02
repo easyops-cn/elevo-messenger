@@ -655,3 +655,50 @@ export const getLatestMessageText = (
     showUsername,
     showSelfName,
   );
+
+const isThreadSummaryCommand = (token: string): boolean => token === '/thread' || token === '/plan';
+
+const isThreadSummaryMention = (token: string): boolean => {
+  if (token === '@room') return true;
+  if (token.startsWith('@')) return true;
+
+  const sigil = token[0];
+  return (
+    (sigil === '#' || sigil === '!' || sigil === '$') &&
+    token.includes(':') &&
+    token.indexOf(':') > 1
+  );
+};
+
+export const trimThreadSummaryPrefix = (summary: string): string => {
+  let cursor = 0;
+  let consumedPrefix = false;
+
+  while (cursor < summary.length) {
+    while (cursor < summary.length && /[^\S\n]/.test(summary[cursor])) {
+      cursor += 1;
+    }
+
+    const tokenStart = cursor;
+    while (cursor < summary.length && !/[\s]/.test(summary[cursor])) {
+      cursor += 1;
+    }
+
+    const token = summary.slice(tokenStart, cursor);
+    if (!token) break;
+
+    if (isThreadSummaryCommand(token)) {
+      consumedPrefix = true;
+      continue;
+    }
+    if (isThreadSummaryMention(token)) {
+      consumedPrefix = true;
+      continue;
+    }
+
+    cursor = tokenStart;
+    break;
+  }
+
+  return consumedPrefix ? summary.slice(cursor).trim() || summary : summary;
+};
