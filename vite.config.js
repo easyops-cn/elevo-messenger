@@ -3,8 +3,6 @@ import react from '@vitejs/plugin-react';
 import { wasm } from '@rollup/plugin-wasm';
 import { viteStaticCopy } from 'vite-plugin-static-copy';
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
-import inject from '@rollup/plugin-inject';
 import { VitePWA } from 'vite-plugin-pwa';
 import fs from 'fs';
 import path from 'path';
@@ -21,7 +19,7 @@ const copyFiles = {
     {
       src: 'node_modules/pdfjs-dist/build/pdf.worker.min.mjs',
       dest: '',
-      rename: 'pdf.worker.min.js',
+      rename: { stripBase: true, name: 'pdf.worker.min.js' },
     },
     {
       src: 'netlify.toml',
@@ -118,33 +116,35 @@ export default defineConfig({
         ]),
   ],
   optimizeDeps: {
-    esbuildOptions: {
-      supported: {
-        'top-level-await': true,
+    rolldownOptions: {
+      transform: {
+        define: {
+          global: 'globalThis',
+        },
+        inject: {
+          Buffer: ['buffer', 'Buffer'],
+        },
       },
+    },
+  },
+  environments: {
+    client: {
+      keepProcessEnv: false,
       define: {
         global: 'globalThis',
       },
-      plugins: [
-        // Enable esbuild polyfill plugins
-        NodeGlobalsPolyfillPlugin({
-          process: false,
-          buffer: true,
-        }),
-      ],
-    },
-  },
-  esbuild: {
-    supported: {
-      'top-level-await': true,
     },
   },
   build: {
     outDir: 'dist',
     sourcemap: false,
     copyPublicDir: false,
-    rollupOptions: {
-      plugins: [inject({ Buffer: ['buffer', 'Buffer'] })],
+    rolldownOptions: {
+      transform: {
+        inject: {
+          Buffer: ['buffer', 'Buffer'],
+        },
+      },
       input: {
         main: path.resolve(__dirname, 'index.html'),
         preview: path.resolve(__dirname, 'preview.html'),
