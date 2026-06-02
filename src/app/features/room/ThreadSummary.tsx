@@ -14,6 +14,7 @@ import {
   getLatestMessageText,
   getLatestMessageTextFromContent,
   getMemberDisplayName,
+  trimThreadSummaryPrefix,
 } from '../../utils/room';
 
 type ThreadSummaryProps = {
@@ -68,7 +69,7 @@ export function ThreadSummary({ mEvent, room, thread, onOpenThread }: ThreadSumm
         ? getEditedEvent(lastReplyId, threadLastReply, thread.timelineSet)
         : undefined;
     const latestReplyContent = editedLastReply?.getContent()['m.new_content'];
-    const summary =
+    const latestReplySummary =
       threadLastReply && latestReplyContent
         ? getLatestMessageTextFromContent(
             room,
@@ -83,6 +84,7 @@ export function ThreadSummary({ mEvent, room, thread, onOpenThread }: ThreadSumm
         : threadLastReply
           ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t, false)
           : undefined;
+    const summary = latestReplySummary ? trimThreadSummaryPrefix(latestReplySummary) : undefined;
 
     const lastReplySenderId = threadLastReply?.getSender();
     const lastReplySenderName = lastReplySenderId

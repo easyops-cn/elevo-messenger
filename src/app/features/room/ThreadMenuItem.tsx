@@ -11,6 +11,7 @@ import {
   getLatestMessageText,
   getLatestMessageTextFromContent,
   getMemberDisplayName,
+  trimThreadSummaryPrefix,
 } from '../../utils/room';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { RelativeTime } from '../../components/RelativeTime';
@@ -70,9 +71,10 @@ export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: Thr
     latestReplyAvatarUrl,
     latestTs,
   } = useMemo(() => {
-    const root = threadEvent
+    const rootText = threadEvent
       ? getLatestMessageText(room, threadEvent, mx.getSafeUserId(), false, t, false, false)
       : undefined;
+    const root = rootText ? trimThreadSummaryPrefix(rootText) : undefined;
     const rIsRedacted = threadEvent?.isRedacted() ?? false;
     const rSenderId = threadEvent?.getSender();
     const rSenderName = rSenderId
@@ -88,7 +90,7 @@ export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: Thr
         ? getEditedEvent(latestReplyId, threadLastReply, thread.timelineSet)
         : undefined;
     const latestReplyContent = editedLastReply?.getContent()['m.new_content'];
-    const latestSummary =
+    const latestReplyText =
       threadLastReply && latestReplyContent
         ? getLatestMessageTextFromContent(
             room,
@@ -103,6 +105,7 @@ export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: Thr
         : threadLastReply
           ? getLatestMessageText(room, threadLastReply, mx.getSafeUserId(), false, t, false)
           : undefined;
+    const latestSummary = latestReplyText ? trimThreadSummaryPrefix(latestReplyText) : undefined;
     const senderId = threadLastReply?.getSender();
     const senderName = senderId
       ? (getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId)
