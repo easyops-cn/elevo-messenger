@@ -37,6 +37,7 @@ import { MatrixEvent, Room, MsgType } from 'matrix-js-sdk';
 import { Relations } from 'matrix-js-sdk/lib/models/relations';
 import classNames from 'classnames';
 import { RoomPinnedEventsEventContent } from 'matrix-js-sdk/lib/types';
+import { writeImage } from '@tauri-apps/plugin-clipboard-manager';
 import {
   AvatarBase,
   BubbleLayout,
@@ -72,6 +73,7 @@ import { getViaServers } from '../../../plugins/via-servers';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { useRoomPinnedEvents } from '../../../hooks/useRoomPinnedEvents';
 import { MessageEvent, StateEvent } from '../../../../types/matrix/room';
+import { IImageContent } from '../../../../types/matrix/common';
 import { Avatar } from '../../../components/avatar';
 import { EllipsisVerticalIcon } from '../../../icons/EllipsisVerticalIcon';
 import { SmilePlusIcon } from '../../../icons/SmilePlusIcon';
@@ -86,7 +88,11 @@ import { UserIcon } from '../../../icons/UserIcon';
 import { SmileIcon } from '../../../icons/SmileIcon';
 import { CircleAlertIcon } from '../../../icons/CircleAlertIcon';
 import { CodeIcon } from '../../../icons/CodeIcon';
+import { CopyIcon } from '../../../icons/CopyIcon';
 import { useRoomThread } from '../RoomThreadContext';
+import { isDesktopTauri } from '../../../plugins/useTauriOpener';
+import { FALLBACK_MIMETYPE } from '../../../utils/mimeTypes';
+import { loadMediaBlob } from '../../../utils/mediaDownload';
 
 export type ReactionHandler = (keyOrMxc: string, shortcode: string) => void;
 
@@ -355,6 +361,87 @@ export const MessageCopyLinkItem = as<
     >
       <Text className={css.MessageMenuItemText} as="span" size="T300" truncate>
         {t('message.copyLink')}
+      </Text>
+    </MenuItem>
+  );
+});
+
+const imageBlobToPngBytes = async (blob: Blob): Promise<Uint8Array> => {
+  const bitmap = await createImageBitmap(blob);
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = bitmap.width;
+    canvas.height = bitmap.height;
+    const context = canvas.getContext('2d');
+    if (!context) throw new Error('Failed to create canvas context');
+    context.drawImage(bitmap, 0, 0);
+
+    const pngBlob = await new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((value) => {
+        if (value) resolve(value);
+        else reject(new Error('Failed to encode image'));
+      }, 'image/png');
+    });
+
+    return new Uint8Array(await pngBlob.arrayBuffer());
+  } finally {
+    bitmap.close();
+  }
+};
+
+export const MessageCopyImageItem = as<
+  'button',
+  {
+    mEvent: MatrixEvent;
+    onClose?: () => void;
+  }
+>(({ mEvent, onClose, ...props }, ref) => {
+  const mx = useMatrixClient();
+  const useAuth = useMediaAuthentication();
+  const { t } = useTranslation();
+  const content = mEvent.getContent<IImageContent>();
+  const url = content.file?.url ?? content.url;
+  const mimeType = content.info?.mimetype ?? FALLBACK_MIMETYPE;
+  const [copyState, copyImage] = useAsyncCallback(
+    useCallback(async () => {
+      if (!url) throw new Error('Invalid media URL');
+      const mediaUrl = mxcUrlToHttp(mx, url, useAuth);
+      if (!mediaUrl) throw new Error('Invalid media URL');
+
+      const blob = await loadMediaBlob(mediaUrl, mimeType, content.file, mEvent.getTs());
+      await writeImage(await imageBlobToPngBytes(blob));
+      onClose?.();
+    }, [content.file, mEvent, mimeType, mx, onClose, url, useAuth]),
+  );
+
+  if (!url) return null;
+
+  const loading = copyState.status === AsyncStatus.Loading;
+
+  return (
+    <MenuItem
+      size="300"
+      after={
+        loading ? (
+          <Spinner fill="Solid" variant="Secondary" size="200" />
+        ) : (
+          <Icon size="100" src={CopyIcon} />
+        )
+      }
+      radii="300"
+      onClick={() => {
+        if (!loading) copyImage();
+      }}
+      aria-disabled={loading}
+      {...props}
+      ref={ref}
+    >
+      <Text className={css.MessageMenuItemText} as="span" size="T300" truncate>
+        {copyState.status === AsyncStatus.Error
+          ? t('message.failedCopyImage')
+          : loading
+            ? t('message.copyingImage')
+            : t('message.copyImage')}
       </Text>
     </MenuItem>
   );
@@ -1136,6 +1223,9 @@ export const Message = as<'div', MessageProps>(
                               mEvent={mEvent}
                               onClose={closeMenu}
                             />
+                          )}
+                          {isDesktopTauri && msgType === MsgType.Image && (
+                            <MessageCopyImageItem mEvent={mEvent} onClose={closeMenu} />
                           )}
                           <MessageCopyLinkItem room={room} mEvent={mEvent} onClose={closeMenu} />
                           {canPinEvent && (
