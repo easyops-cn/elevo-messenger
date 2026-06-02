@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { getCurrentWindow } from '@tauri-apps/api/window';
-import { SyncStatusText } from './SyncStatusText';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import * as css from './TitleBar.css';
 import { isMacOS } from '../../utils/user-agent';
@@ -145,7 +144,6 @@ export function TitleBar() {
           <span className={css.AppTitle}>Elevo Messenger</span>
         </div>
       )}
-      <SyncStatusText side={isMacOS() ? 'left' : 'center'} />
       {isMacOS() ? <div className={css.TrafficLightSpacer} /> : <WindowControls />}
     </div>
   );
