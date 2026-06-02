@@ -84,20 +84,6 @@ To build the app:
 npm run build # Compiles the app into the dist/ directory
 ```
 
-### Running with Docker
-This repository includes a Dockerfile, which builds the application from source and serves it with Nginx on port 80. To
-use this locally, you can build the container like so:
-```
-docker build -t elevo-messenger:latest .
-```
-
-You can then run the container you've built with a command similar to this:
-```
-docker run -p 8080:80 elevo-messenger:latest
-```
-
-This will forward your `localhost` port 8080 to the container's port 80. You can visit the app in your browser by navigating to `http://localhost:8080`.
-
 ## License
 This project is forked from [cinnyapp/cinny](https://github.com/cinnyapp/cinny), which is licensed under AGPL-3.0.
 
