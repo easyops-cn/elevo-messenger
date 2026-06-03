@@ -284,7 +284,7 @@ export function CodeBlock({ children }: { children: ChildNode[] }) {
           />
         </div>
       </Scroll>
-      {largeCodeBlock && (
+      {largeCodeBlock && !expanded && (
         <Box className={css.CodeBlockBottomShadow}>
           <Button
             className={css.CodeBlockExpandButton}
@@ -295,9 +295,25 @@ export function CodeBlock({ children }: { children: ChildNode[] }) {
             onClick={toggleExpand}
             aria-expanded={expanded}
             aria-controls="code-block-content"
-            after={<Icon size="50" src={expanded ? Icons.ChevronTop : Icons.ChevronBottom} />}
+            after={<Icon size="50" src={Icons.ChevronBottom} />}
           >
-            <Text size="B300">{expanded ? t('common.collapse') : t('common.expand')}</Text>
+            <Text size="B300">{t('common.expand')}</Text>
+          </Button>
+        </Box>
+      )}
+      {largeCodeBlock && expanded && (
+        <Box className={css.CodeBlockCollapseFooter}>
+          <Button
+            size="300"
+            variant="Secondary"
+            fill="Soft"
+            radii="Pill"
+            onClick={toggleExpand}
+            aria-expanded={expanded}
+            aria-controls="code-block-content"
+            after={<Icon size="50" src={Icons.ChevronTop} />}
+          >
+            <Text size="B300">{t('common.collapse')}</Text>
           </Button>
         </Box>
       )}

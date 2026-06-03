@@ -124,6 +124,11 @@ export const CodeBlockBottomShadow = style({
 export const CodeBlockExpandButton = style({
   pointerEvents: 'auto',
 });
+export const CodeBlockCollapseFooter = style({
+  display: 'flex',
+  justifyContent: 'center',
+  padding: `${config.space.S100} ${config.space.S200} ${config.space.S200}`,
+});
 
 export const List = style([
   DefaultReset,
