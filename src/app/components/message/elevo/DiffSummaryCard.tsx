@@ -1,8 +1,8 @@
-import React, { CSSProperties, useMemo } from 'react';
+import React, { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Button, Icon, Text } from 'folds';
 import * as css from './DiffSummaryCard.css';
-import { summarizeUnifiedDiff, UNKNOWN_FILE } from './diffSummary';
+import { type DiffSummary, UNKNOWN_FILE } from './diffSummary';
 import { FileDiffIcon } from '../../../icons/FileDiffIcon';
 import { useOpenCodeView } from '../../../utils/codeView';
 
@@ -21,19 +21,20 @@ function DiffLineCount({ added, deleted }: DiffLineCountProps) {
 }
 
 type DiffSummaryCardProps = {
-  diff: string;
+  summary: DiffSummary;
   style?: CSSProperties;
 };
 
-export function DiffSummaryCard({ diff, style }: DiffSummaryCardProps) {
+export function DiffSummaryCard({ summary, style }: DiffSummaryCardProps) {
   const { t } = useTranslation();
   const openCodeView = useOpenCodeView();
-  const summary = useMemo(() => summarizeUnifiedDiff(diff), [diff]);
+
   const fileLabel = (path: string) => (path === UNKNOWN_FILE ? t('message.diffUnknownFile') : path);
+  const totalFiles = summary.totalFiles ?? summary.files.length;
   const title =
-    summary.files.length === 1
+    totalFiles === 1
       ? t('message.diffEditedOneFile', { path: fileLabel(summary.files[0].path) })
-      : t('message.diffEditedFiles', { count: summary.files.length });
+      : t('message.diffEditedFiles', { count: totalFiles });
 
   const openDiff = () => {
     openCodeView({ title, files: summary.files, added: summary.added, deleted: summary.deleted });
@@ -62,11 +63,30 @@ export function DiffSummaryCard({ diff, style }: DiffSummaryCardProps) {
                 {label}
               </div>
               <div className={css.FileMeta}>
+                {file.patchOmitted && (
+                  <Text as="span" size="B300" priority="300">
+                    {t('message.diffPatchOmitted')}
+                  </Text>
+                )}
                 <DiffLineCount added={file.added} deleted={file.deleted} />
               </div>
             </div>
           );
         })}
+        {summary.remainingFiles && summary.remainingFiles.length > 0 && (
+          <div className={css.FileRow}>
+            <div className={css.FilePath}>
+              {t('message.diffAdditionalFiles', { count: summary.remainingFiles.length })}
+            </div>
+            <div className={css.FileMeta}>
+              {summary.truncated && (
+                <Text as="span" size="B300" priority="300">
+                  {t('message.diffTruncated')}
+                </Text>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </Box>
   );

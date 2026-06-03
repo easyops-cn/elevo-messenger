@@ -1,17 +1,224 @@
 export type DiffFileSummary = {
   path: string;
+  oldPath?: string;
+  status?: string;
   added: number;
   deleted: number;
   lines: string[];
+  patchOmitted?: boolean;
+  sizeBytes?: number;
+};
+
+export type DiffRemainingFileSummary = {
+  path: string;
+  oldPath?: string;
+  status?: string;
+  added: number;
+  deleted: number;
+  sizeBytes?: number;
 };
 
 export type DiffSummary = {
   files: DiffFileSummary[];
+  remainingFiles?: DiffRemainingFileSummary[];
+  totalFiles?: number;
+  tooLargeFiles?: number;
+  truncated?: boolean;
   added: number;
   deleted: number;
 };
 
+export type DiffHunkMetadata = {
+  header: string;
+  oldStart?: number;
+  oldLines?: number;
+  newStart?: number;
+  newLines?: number;
+};
+
+export type ElevoDiffContent = {
+  body?: unknown;
+  diff?: unknown;
+  summary?: unknown;
+  files?: unknown;
+  remainingFiles?: unknown;
+  limits?: unknown;
+};
+
+type StructuredDiffFile = {
+  path: string;
+  oldPath?: string;
+  status: 'added' | 'deleted' | 'renamed' | 'modified' | 'unknown';
+  added: number;
+  deleted: number;
+  hunks: DiffHunkMetadata[];
+  tooLarge: boolean;
+  sizeBytes: number;
+  patch?: string;
+};
+
+type StructuredDiffSummary = {
+  files: number;
+  detailedFiles: number;
+  remainingFiles: number;
+  tooLargeFiles: number;
+  added: number;
+  deleted: number;
+  truncated: boolean;
+};
+
 export const UNKNOWN_FILE = 'Unknown files';
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function getNumber(value: unknown): number | undefined {
+  return typeof value === 'number' && Number.isFinite(value) ? value : undefined;
+}
+
+function getString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined;
+}
+
+function parseStructuredSummary(value: unknown): StructuredDiffSummary | undefined {
+  if (!isRecord(value)) return undefined;
+  const files = getNumber(value.files);
+  const detailedFiles = getNumber(value.detailedFiles);
+  const remainingFiles = getNumber(value.remainingFiles);
+  const tooLargeFiles = getNumber(value.tooLargeFiles);
+  const added = getNumber(value.added);
+  const deleted = getNumber(value.deleted);
+  const truncated = typeof value.truncated === 'boolean' ? value.truncated : undefined;
+  if (
+    files === undefined ||
+    detailedFiles === undefined ||
+    remainingFiles === undefined ||
+    tooLargeFiles === undefined ||
+    added === undefined ||
+    deleted === undefined ||
+    truncated === undefined
+  ) {
+    return undefined;
+  }
+
+  return { files, detailedFiles, remainingFiles, tooLargeFiles, added, deleted, truncated };
+}
+
+function parseHunks(value: unknown): DiffHunkMetadata[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((hunk): DiffHunkMetadata | undefined => {
+      if (!isRecord(hunk)) return undefined;
+      const header = getString(hunk.header);
+      if (!header) return undefined;
+      return {
+        header,
+        oldStart: getNumber(hunk.oldStart),
+        oldLines: getNumber(hunk.oldLines),
+        newStart: getNumber(hunk.newStart),
+        newLines: getNumber(hunk.newLines),
+      };
+    })
+    .filter((hunk): hunk is DiffHunkMetadata => hunk !== undefined);
+}
+
+function parseStructuredFile(value: unknown): StructuredDiffFile | undefined {
+  if (!isRecord(value)) return undefined;
+  const path = getString(value.path);
+  const status = getString(value.status);
+  const added = getNumber(value.added);
+  const deleted = getNumber(value.deleted);
+  const tooLarge = typeof value.tooLarge === 'boolean' ? value.tooLarge : undefined;
+  const sizeBytes = getNumber(value.sizeBytes);
+  if (
+    !path ||
+    !status ||
+    added === undefined ||
+    deleted === undefined ||
+    tooLarge === undefined ||
+    sizeBytes === undefined
+  ) {
+    return undefined;
+  }
+
+  return {
+    path,
+    oldPath: getString(value.oldPath),
+    status: ['added', 'deleted', 'renamed', 'modified', 'unknown'].includes(status)
+      ? (status as StructuredDiffFile['status'])
+      : 'unknown',
+    added,
+    deleted,
+    hunks: parseHunks(value.hunks),
+    tooLarge,
+    sizeBytes,
+    patch: getString(value.patch),
+  };
+}
+
+function parseRemainingFile(value: unknown): DiffRemainingFileSummary | undefined {
+  if (!isRecord(value)) return undefined;
+  const path = getString(value.path);
+  const added = getNumber(value.added);
+  const deleted = getNumber(value.deleted);
+  if (!path || added === undefined || deleted === undefined) return undefined;
+  return {
+    path,
+    oldPath: getString(value.oldPath),
+    status: getString(value.status),
+    added,
+    deleted,
+    sizeBytes: getNumber(value.sizeBytes),
+  };
+}
+
+function buildOmittedPatchLines(file: StructuredDiffFile): string[] {
+  return [
+    ...file.hunks.map((hunk) => hunk.header),
+    `# Patch omitted for ${file.path}: +${file.added} -${file.deleted}`,
+  ];
+}
+
+export function summarizeElevoDiffContent(content: ElevoDiffContent): DiffSummary | undefined {
+  const structuredSummary = parseStructuredSummary(content.summary);
+  const structuredFiles = Array.isArray(content.files)
+    ? content.files.map(parseStructuredFile).filter((file): file is StructuredDiffFile => !!file)
+    : [];
+
+  if (structuredSummary && structuredFiles.length === structuredSummary.detailedFiles) {
+    const remainingFiles = Array.isArray(content.remainingFiles)
+      ? content.remainingFiles
+          .map(parseRemainingFile)
+          .filter((file): file is DiffRemainingFileSummary => !!file)
+      : [];
+
+    return {
+      files: structuredFiles.map((file) => ({
+        path: file.path,
+        oldPath: file.oldPath,
+        status: file.status,
+        added: file.added,
+        deleted: file.deleted,
+        lines: file.patch ? file.patch.split('\n') : buildOmittedPatchLines(file),
+        patchOmitted: !file.patch,
+        sizeBytes: file.sizeBytes,
+      })),
+      remainingFiles,
+      totalFiles: structuredSummary.files,
+      tooLargeFiles: structuredSummary.tooLargeFiles,
+      truncated: structuredSummary.truncated,
+      added: structuredSummary.added,
+      deleted: structuredSummary.deleted,
+    };
+  }
+
+  if (typeof content.diff === 'string' && content.diff.length > 0) {
+    return summarizeUnifiedDiff(content.diff);
+  }
+
+  return undefined;
+}
 
 function normalizeDiffFile(file: string): string | undefined {
   const trimmed = file.trim();
@@ -102,6 +309,7 @@ export function summarizeUnifiedDiff(diff: string): DiffSummary {
 
   return {
     files: files.length > 0 ? files : [{ path: UNKNOWN_FILE, added, deleted, lines: [] }],
+    totalFiles: files.length > 0 ? files.length : 1,
     added,
     deleted,
   };
