@@ -59,6 +59,7 @@ import {
   createFileRefElement,
   getTaskReference,
   createTaskRefElement,
+  createCommandElement,
 } from '../../components/editor';
 import { EmojiBoard, EmojiBoardTab } from '../../components/emoji-board';
 import { UseStateProvider } from '../../components/UseStateProvider';
@@ -123,6 +124,7 @@ import { SmileIcon } from '../../icons/SmileIcon';
 import { MicIcon } from '../../icons/MicIcon';
 import { SendHorizontalIcon } from '../../icons/SendHorizontalIcon';
 import { CaseSensitiveIcon } from '../../icons/CaseSensitiveIcon';
+import { MessageSquareTextIcon } from '../../icons/MessageSquareTextIcon';
 import { useRoomScrollToBottom } from './RoomScrollToBottomContext';
 import { useRoomThread } from './RoomThreadContext';
 
@@ -194,8 +196,13 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
   const [toolbar, setToolbar] = useSetting(settingsAtom, 'editorToolbar');
   const [autocompleteQuery, setAutocompleteQuery] =
     useState<AutocompleteQuery<AutocompletePrefix>>();
+  const [beginCommand, setBeginCommand] = useState(() => getBeginCommand(editor));
 
   const sendTypingStatus = useTypingStatusUpdater(mx, roomId);
+
+  const updateBeginCommand = useCallback(() => {
+    setBeginCommand(getBeginCommand(editor));
+  }, [editor]);
 
   const removeExistingFileRef = useCallback(() => {
     const [fileRefEntry] = Editor.nodes(editor, {
@@ -332,7 +339,8 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
 
   useEffect(() => {
     Transforms.insertFragment(editor, msgDraft);
-  }, [editor, msgDraft]);
+    updateBeginCommand();
+  }, [editor, msgDraft, updateBeginCommand]);
 
   useEffect(
     () => () => {
@@ -593,8 +601,9 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
         ? getAutocompleteQuery<AutocompletePrefix>(editor, prevWordRange, AUTOCOMPLETE_PREFIXES)
         : undefined;
       setAutocompleteQuery(query);
+      updateBeginCommand();
     },
-    [editor, sendTypingStatus, hideActivity],
+    [editor, sendTypingStatus, hideActivity, updateBeginCommand],
   );
 
   const handleCloseAutocomplete = useCallback(() => {
@@ -626,6 +635,46 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
       URL.revokeObjectURL(blobUrl);
     }
   };
+
+  const handleToggleThreadCommand = useCallback(() => {
+    ReactEditor.focus(editor);
+
+    const activeCommand = getBeginCommand(editor);
+    if (activeCommand === 'thread') {
+      const [, commandPath] = Editor.nodes(editor, {
+        at: [],
+        match: (n) => SlateElement.isElement(n) && n.type === 'command' && n.command === 'thread',
+      }).next().value ?? [undefined, undefined];
+
+      if (commandPath) {
+        const nextPath = Path.next(commandPath);
+        if (Node.has(editor, nextPath)) {
+          const nextNode = Node.get(editor, nextPath);
+          if (SlateText.isText(nextNode) && nextNode.text.startsWith(' ')) {
+            Transforms.delete(editor, {
+              at: {
+                anchor: { path: nextPath, offset: 0 },
+                focus: { path: nextPath, offset: 1 },
+              },
+            });
+          }
+        }
+
+        Transforms.removeNodes(editor, { at: commandPath });
+      }
+      updateBeginCommand();
+      return;
+    }
+
+    Transforms.select(editor, Editor.start(editor, []));
+    Transforms.insertNodes(editor, createCommandElement('thread'));
+    Transforms.collapse(editor, { edge: 'end' });
+    moveCursor(editor, true);
+    updateBeginCommand();
+  }, [editor, updateBeginCommand]);
+
+  const showThreadCommandButton = !!commands.thread && !threadRootId;
+  const threadCommandActive = beginCommand === 'thread';
 
   return (
     <div ref={ref}>
@@ -731,6 +780,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
         placeholder={t('room.sendMessage')}
         onKeyDown={handleKeyDown}
         onKeyUp={handleKeyUp}
+        onChange={updateBeginCommand}
         onPaste={handlePaste}
         top={
           <>
@@ -807,6 +857,20 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
               >
                 <Icon size="100" src={CaseSensitiveIcon} />
               </IconButton>
+              {showThreadCommandButton && (
+                <IconButton
+                  variant="Surface"
+                  size="300"
+                  radii="Pill"
+                  fill="None"
+                  aria-pressed={threadCommandActive}
+                  aria-label={t('room.thread')}
+                  title={t('room.thread')}
+                  onClick={handleToggleThreadCommand}
+                >
+                  <Icon size="100" src={MessageSquareTextIcon} filled={threadCommandActive} />
+                </IconButton>
+              )}
               <UseStateProvider initial={undefined}>
                 {(emojiBoardTab: EmojiBoardTab | undefined, setEmojiBoardTab) => (
                   <PopOut
