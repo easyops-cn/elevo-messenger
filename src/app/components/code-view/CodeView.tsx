@@ -391,9 +391,23 @@ export const CodeView = as<'div', CodeViewProps>(
                             />
                           </span>
                         </button>
-                        {expanded && file.lines.length > 0 && (
-                          <HighlightedDiff path={file.path} lines={file.lines} />
-                        )}
+                        {expanded &&
+                          file.lines.length > 0 &&
+                          (file.patchOmitted ? (
+                            <div className={css.OmittedPatch}>
+                              {file.lines.map((line, index) => (
+                                <Text
+                                  key={`${index}:${line}`}
+                                  className={css.OmittedPatchLine}
+                                  priority="300"
+                                >
+                                  {line}
+                                </Text>
+                              ))}
+                            </div>
+                          ) : (
+                            <HighlightedDiff path={file.path} lines={file.lines} />
+                          ))}
                       </section>
                     );
                   })}

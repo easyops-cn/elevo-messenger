@@ -221,6 +221,19 @@ export const NoCode = style({
   padding: `${config.space.S300}`,
 });
 
+export const OmittedPatch = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: config.space.S100,
+  padding: config.space.S300,
+  backgroundColor: color.Background.Container,
+});
+
+export const OmittedPatchLine = style({
+  fontFamily: 'monospace',
+  fontSize: toRem(12),
+});
+
 export const Empty = style({
   height: '100%',
   minHeight: toRem(180),

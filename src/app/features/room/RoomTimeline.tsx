@@ -59,6 +59,7 @@ import {
   makeMentionCustomProps,
   renderMatrixMention,
 } from '../../plugins/react-custom-html-parser';
+import { summarizeElevoDiffContent } from '../../components/message/elevo/diffSummary';
 import {
   decryptAllTimelineEvent,
   getEditedEvent,
@@ -1382,7 +1383,8 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
         const reactions = reactionRelations && reactionRelations.getSortedAnnotationsByKey();
         const hasReactions = reactions && reactions.length > 0;
         const highlighted = focusItem?.eventId === mEventId && focusItem.highlight;
-        const { diff } = mEvent.getContent<{ diff?: unknown }>();
+        const content = mEvent.getContent<Record<string, unknown>>();
+        const diffSummary = summarizeElevoDiffContent(content);
 
         return (
           <Message
@@ -1424,8 +1426,8 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
           >
             {mEvent.isRedacted() ? (
               <RedactedContent reason={mEvent.getUnsigned().redacted_because?.content.reason} />
-            ) : typeof diff === 'string' && diff.length > 0 ? (
-              <DiffSummaryCard diff={diff} />
+            ) : diffSummary ? (
+              <DiffSummaryCard summary={diffSummary} />
             ) : (
               <Text>
                 <MessageBrokenContent />
