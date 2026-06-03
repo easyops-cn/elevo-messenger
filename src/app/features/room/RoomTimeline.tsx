@@ -18,6 +18,7 @@ import {
   IContent,
   MatrixClient,
   MatrixEvent,
+  RelationType,
   Room,
   RoomEvent,
   RoomEventHandlerMap,
@@ -138,6 +139,34 @@ const getLiveTimeline = (room: Room, thread: Thread | undefined): EventTimeline 
     return thread.liveTimeline;
   }
   return room.getLiveTimeline();
+};
+
+const getThreadRelationRootId = (mEvent: MatrixEvent): string | undefined => {
+  const relation = mEvent.getWireContent()?.['m.relates_to'];
+
+  if (relation?.rel_type === RelationType.Thread && typeof relation.event_id === 'string') {
+    return relation.event_id;
+  }
+
+  return undefined;
+};
+
+const eventBelongsToTimeline = (mEvent: MatrixEvent, thread: Thread | undefined): boolean => {
+  const threadRootId = getThreadRelationRootId(mEvent);
+
+  if (thread) {
+    return mEvent.getId() === thread.id || threadRootId === thread.id;
+  }
+
+  return threadRootId === undefined;
+};
+
+const eventMatchesTimelineRoot = (mEvent: MatrixEvent, thread: Thread | undefined): boolean => {
+  if (thread) {
+    return mEvent.getId() === thread.id || mEvent.threadRootId === thread.id;
+  }
+
+  return !mEvent.threadRootId;
 };
 
 const getEventTimeline = (
@@ -397,22 +426,14 @@ const useLiveEventArrive = (
       data,
     ) => {
       if (eventRoom?.roomId !== room.roomId || !data.liveEvent) return;
-      if (
-        thread
-          ? mEvent.getId() !== thread.id && mEvent.threadRootId !== thread.id
-          : !!mEvent.threadRootId
-      ) {
+      if (!eventBelongsToTimeline(mEvent, thread)) {
         return;
       }
       onArrive(mEvent);
     };
     const handleRedaction: RoomEventHandlerMap[RoomEvent.Redaction] = (mEvent, eventRoom) => {
       if (eventRoom?.roomId !== room.roomId) return;
-      if (
-        thread
-          ? mEvent.getId() !== thread.id && mEvent.threadRootId !== thread.id
-          : !!mEvent.threadRootId
-      ) {
+      if (!eventMatchesTimelineRoot(mEvent, thread)) {
         return;
       }
       onArrive(mEvent);
