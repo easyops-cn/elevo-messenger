@@ -15,6 +15,7 @@ const copyFiles = {
     {
       src: 'node_modules/@element-hq/element-call-embedded/dist/*',
       dest: 'public/element-call',
+      rename: { stripBase: true },
     },
     {
       src: 'node_modules/pdfjs-dist/build/pdf.worker.min.mjs',
@@ -34,12 +35,14 @@ const copyFiles = {
       dest: '',
     },
     {
-      src: 'public/res/android',
-      dest: 'public/',
+      src: 'public/res/android/*',
+      dest: 'public/android',
+      rename: { stripBase: true },
     },
     {
-      src: 'public/locales',
-      dest: 'public/',
+      src: 'public/locales/*',
+      dest: 'public/locales',
+      rename: { stripBase: true },
     },
   ],
 };
