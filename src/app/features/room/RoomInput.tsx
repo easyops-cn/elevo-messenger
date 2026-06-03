@@ -342,6 +342,19 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     updateBeginCommand();
   }, [editor, msgDraft, updateBeginCommand]);
 
+  useEffect(() => {
+    if (!replyDraft?.fork) return;
+
+    const plainText = toPlainText(editor.children, isMarkdown).trimStart();
+    if (/^\/fork\b/i.test(plainText)) return;
+
+    ReactEditor.focus(editor);
+    Transforms.select(editor, Editor.start(editor, []));
+    Transforms.insertText(editor, '/fork ');
+    Transforms.collapse(editor, { edge: 'end' });
+    updateBeginCommand();
+  }, [editor, replyDraft, isMarkdown, updateBeginCommand]);
+
   useEffect(
     () => () => {
       if (!isEmptyEditor(editor)) {
@@ -518,10 +531,6 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     const taskRef = getTaskReference(editor);
     if (taskRef) {
       content['vip.elevo.task_reference'] = taskRef;
-    }
-
-    if (isForkCommand && replyDraft?.agentSession) {
-      content['vip.elevo.agent_session'] = replyDraft.agentSession;
     }
 
     if (replyDraft && replyDraft.userId !== mx.getUserId()) {

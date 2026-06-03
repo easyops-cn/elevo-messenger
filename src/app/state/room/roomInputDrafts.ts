@@ -55,6 +55,7 @@ export type IReplyDraft = {
     threadId: string;
     turnId: string;
   };
+  fork?: boolean;
 };
 const createReplyDraftAtom = () => atom<IReplyDraft | undefined>(undefined);
 export type TReplyDraftAtom = ReturnType<typeof createReplyDraftAtom>;
