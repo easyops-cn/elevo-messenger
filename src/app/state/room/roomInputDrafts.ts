@@ -49,6 +49,12 @@ export type IReplyDraft = {
   body: string;
   formattedBody?: string | undefined;
   relation?: IEventRelation | undefined;
+  agentSession?: {
+    provider: 'codex-agent';
+    conversationId: string;
+    threadId: string;
+    turnId: string;
+  };
 };
 const createReplyDraftAtom = () => atom<IReplyDraft | undefined>(undefined);
 export type TReplyDraftAtom = ReturnType<typeof createReplyDraftAtom>;

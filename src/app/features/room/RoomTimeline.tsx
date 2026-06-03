@@ -1023,6 +1023,22 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
       if (!replyEvt) return;
       const editedReply = getEditedEvent(replyId, replyEvt, activeTimelineSet);
       const content: IContent = editedReply?.getContent()['m.new_content'] ?? replyEvt.getContent();
+      const agentSession =
+        content['vip.elevo.agent_session'] &&
+        typeof content['vip.elevo.agent_session'] === 'object' &&
+        (content['vip.elevo.agent_session'] as { provider?: unknown }).provider === 'codex-agent' &&
+        typeof (content['vip.elevo.agent_session'] as { conversationId?: unknown })
+          .conversationId === 'string' &&
+        typeof (content['vip.elevo.agent_session'] as { threadId?: unknown }).threadId ===
+          'string' &&
+        typeof (content['vip.elevo.agent_session'] as { turnId?: unknown }).turnId === 'string'
+          ? (content['vip.elevo.agent_session'] as {
+              provider: 'codex-agent';
+              conversationId: string;
+              threadId: string;
+              turnId: string;
+            })
+          : undefined;
       const { body, formatted_body: formattedBody } = content;
       const { 'm.relates_to': relation } =
         startThread || thread
@@ -1036,6 +1052,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
           body,
           formattedBody,
           relation,
+          agentSession,
         });
         setTimeout(() => ReactEditor.focus(editor), 100);
       }
