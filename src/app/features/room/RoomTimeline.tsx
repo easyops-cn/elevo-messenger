@@ -163,6 +163,12 @@ const getEventTimeline = (
   return timelineSet.getTimelineForEvent(eventId) ?? undefined;
 };
 
+const getEventThreadRootId = (mEvent: MatrixEvent): string | undefined => {
+  const eventId = mEvent.getId();
+  const threadRootId = mEvent.threadRootId;
+  return threadRootId && threadRootId !== eventId ? threadRootId : undefined;
+};
+
 const getFirstLinkedTimeline = (timeline: EventTimeline, direction: Direction): EventTimeline => {
   const linkedTm = timeline.getNeighbouringTimeline(direction);
   if (!linkedTm) return timeline;
@@ -758,6 +764,21 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
       highlight = true,
       onScroll: ((scrolled: boolean) => void) | undefined = undefined,
     ) => {
+      const targetEvent = room.findEventById(evtId);
+      const targetThreadRootId = targetEvent && getEventThreadRootId(targetEvent);
+
+      if (thread && targetEvent && !targetThreadRootId && evtId !== thread.id) {
+        setThreadChat({ open: false, threadRootId: undefined });
+        navigateRoom(room.roomId, evtId);
+        return;
+      }
+
+      if (!thread && targetThreadRootId) {
+        setThreadChat({ open: true, threadRootId: targetThreadRootId });
+        navigateRoom(room.roomId, evtId);
+        return;
+      }
+
       const evtTimeline = getEventTimeline(room, evtId, thread);
       const absoluteIndex =
         evtTimeline && getEventIdAbsoluteIndex(timeline.linkedTimelines, evtTimeline, evtId);
@@ -806,7 +827,16 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
         loadEventTimeline(evtId);
       }
     },
-    [room, thread, timeline, scrollToElement, loadEventTimeline, toggleAutoScroll],
+    [
+      room,
+      thread,
+      timeline,
+      setThreadChat,
+      navigateRoom,
+      scrollToElement,
+      loadEventTimeline,
+      toggleAutoScroll,
+    ],
   );
 
   useLiveTimelineRefresh(
