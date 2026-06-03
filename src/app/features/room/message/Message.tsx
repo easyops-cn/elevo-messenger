@@ -78,6 +78,7 @@ import { Avatar } from '../../../components/avatar';
 import { EllipsisVerticalIcon } from '../../../icons/EllipsisVerticalIcon';
 import { SmilePlusIcon } from '../../../icons/SmilePlusIcon';
 import { ReplyIcon } from '../../../icons/ReplyIcon';
+import { ForkSplitIcon } from '../../../icons/ForkSplitIcon';
 import { PencilIcon } from '../../../icons/PencilIcon';
 import { MessageSquarePlusIcon } from '../../../icons/MessageSquarePlusIcon';
 import { CheckCheckIcon } from '../../../icons/CheckCheckIcon';
@@ -773,6 +774,7 @@ export type MessageProps = {
   onReplyClick: (
     ev: Parameters<MouseEventHandler<HTMLButtonElement>>[0],
     startThread?: boolean,
+    fork?: boolean,
   ) => void;
   onEditId?: (eventId?: string) => void;
   onReactionToggle: (targetEventId: string, key: string, shortcode?: string) => void;
@@ -835,6 +837,15 @@ export const Message = as<'div', MessageProps>(
     const senderAvatarMxc = getMemberAvatarMxc(room, senderId);
 
     const msgType = mEvent.getContent()?.msgtype;
+    const agentSession = mEvent.getContent()?.['vip.elevo.agent_session'];
+    const canFork =
+      msgType === MsgType.Text &&
+      agentSession &&
+      typeof agentSession === 'object' &&
+      (agentSession as { provider?: unknown }).provider === 'codex-agent' &&
+      typeof (agentSession as { conversationId?: unknown }).conversationId === 'string' &&
+      typeof (agentSession as { threadId?: unknown }).threadId === 'string' &&
+      typeof (agentSession as { turnId?: unknown }).turnId === 'string';
     const transparent =
       mEvent.getType() === MessageEvent.Sticker ||
       msgType === MsgType.Audio ||
@@ -1078,6 +1089,19 @@ export const Message = as<'div', MessageProps>(
                 >
                   <Icon src={ReplyIcon} size="100" />
                 </IconButton>
+                {canFork && (
+                  <IconButton
+                    onClick={(ev: React.MouseEvent<HTMLButtonElement>) =>
+                      onReplyClick(ev, false, true)
+                    }
+                    data-event-id={mEvent.getId()}
+                    variant="SurfaceVariant"
+                    size="300"
+                    radii="300"
+                  >
+                    <Icon src={ForkSplitIcon} size="100" />
+                  </IconButton>
+                )}
                 {canReplyInThread && !isThreadedMessage && (
                   <IconButton
                     onClick={(ev: React.MouseEvent<HTMLButtonElement>) => onReplyClick(ev, true)}
@@ -1168,6 +1192,27 @@ export const Message = as<'div', MessageProps>(
                               {t('common.reply')}
                             </Text>
                           </MenuItem>
+                          {canFork && (
+                            <MenuItem
+                              size="300"
+                              after={<Icon size="100" src={ForkSplitIcon} />}
+                              radii="300"
+                              data-event-id={mEvent.getId()}
+                              onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
+                                onReplyClick(evt, false, true);
+                                closeMenu();
+                              }}
+                            >
+                              <Text
+                                className={css.MessageMenuItemText}
+                                as="span"
+                                size="T300"
+                                truncate
+                              >
+                                Fork
+                              </Text>
+                            </MenuItem>
+                          )}
                           {canReplyInThread && !isThreadedMessage && (
                             <MenuItem
                               size="300"

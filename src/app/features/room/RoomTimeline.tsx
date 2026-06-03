@@ -1012,8 +1012,12 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
     [mx, room, editor],
   );
 
-  const handleReplyClick: MouseEventHandler<HTMLButtonElement> = useCallback(
-    (evt, startThread = false) => {
+  const handleReplyClick = useCallback(
+    (
+      evt: Parameters<MouseEventHandler<HTMLButtonElement>>[0],
+      startThread = false,
+      fork = false,
+    ) => {
       const replyId = evt.currentTarget.getAttribute('data-event-id');
       if (!replyId) {
         console.warn('Button should have "data-event-id" attribute!');
@@ -1053,6 +1057,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
           formattedBody,
           relation,
           agentSession,
+          fork,
         });
         setTimeout(() => ReactEditor.focus(editor), 100);
       }
