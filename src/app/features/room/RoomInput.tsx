@@ -501,6 +501,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     if (plainText === '') return;
 
     const body = plainText;
+    const isForkCommand = /^\/fork\b/i.test(body.trimStart());
     const formattedBody = customHtml;
     const mentionData = getMentions(mx, roomId, editor);
     const fileRef = getFileReference(editor);
@@ -517,6 +518,10 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     const taskRef = getTaskReference(editor);
     if (taskRef) {
       content['vip.elevo.task_reference'] = taskRef;
+    }
+
+    if (isForkCommand && replyDraft?.agentSession) {
+      content['vip.elevo.agent_session'] = replyDraft.agentSession;
     }
 
     if (replyDraft && replyDraft.userId !== mx.getUserId()) {
@@ -536,7 +541,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
           event_id: replyDraft.eventId,
         },
       };
-      if (replyDraft?.relation?.rel_type === RelationType.Thread) {
+      if (!isForkCommand && replyDraft?.relation?.rel_type === RelationType.Thread) {
         content['m.relates_to'].event_id = replyDraft.relation.event_id;
         content['m.relates_to'].rel_type = RelationType.Thread;
         content['m.relates_to'].is_falling_back =
@@ -544,7 +549,11 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
       }
     }
 
-    mx.sendMessage(roomId, threadRootId || null, content as RoomMessageEventContent);
+    mx.sendMessage(
+      roomId,
+      isForkCommand ? null : threadRootId || null,
+      content as RoomMessageEventContent,
+    );
     resetEditor(editor);
     resetEditorHistory(editor);
     setReplyDraft(undefined);
