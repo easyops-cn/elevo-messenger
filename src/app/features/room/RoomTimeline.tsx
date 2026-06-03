@@ -15,6 +15,7 @@ import {
   EventTimeline,
   EventTimelineSet,
   EventTimelineSetHandlerMap,
+  IEventRelation,
   IContent,
   MatrixClient,
   MatrixEvent,
@@ -39,6 +40,7 @@ import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useVirtualPaginator, ItemRange } from '../../hooks/useVirtualPaginator';
 import { useAlive } from '../../hooks/useAlive';
 import {
+  FORKS_FROM_RELATION,
   Reply,
   MessageBase,
   MessageBrokenContent,
@@ -132,6 +134,18 @@ const TimelineDivider = as<'div'>(({ children, ...props }, ref) => (
 
 const getTimelineSet = (room: Room, thread: Thread | undefined): EventTimelineSet =>
   thread ? thread.timelineSet : room.getUnfilteredTimelineSet();
+
+type ElevoEventRelation = IEventRelation & {
+  [FORKS_FROM_RELATION]?: {
+    event_id?: unknown;
+  };
+};
+
+const getForkEventId = (mEvent: MatrixEvent): string | undefined => {
+  const relatesTo = mEvent.getWireContent()?.['m.relates_to'] as ElevoEventRelation | undefined;
+  const eventId = relatesTo?.[FORKS_FROM_RELATION]?.event_id;
+  return typeof eventId === 'string' ? eventId : undefined;
+};
 
 const getLiveTimeline = (room: Room, thread: Thread | undefined): EventTimeline => {
   if (thread) {
@@ -1128,6 +1142,8 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
           getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId;
 
         const { replyEventId, isThreadRoot } = mEvent;
+        const forkEventId = getForkEventId(mEvent);
+        const relationReplyEventId = forkEventId ?? replyEventId;
         const replyToThread = mEvent.getThread();
         const showThreadSummary = !thread && isThreadRoot && !!replyToThread;
 
@@ -1154,12 +1170,13 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
             onReactionToggle={handleReactionToggle}
             onEditId={handleEdit}
             reply={
-              replyEventId && (
+              relationReplyEventId && (
                 <Reply
                   room={room}
                   timelineSet={timelineSet}
                   eventId={mEventId}
-                  replyEventId={replyEventId}
+                  replyEventId={relationReplyEventId}
+                  relationKey={forkEventId ? FORKS_FROM_RELATION : 'm.in_reply_to'}
                   onClick={handleOpenReply}
                 />
               )
@@ -1218,6 +1235,8 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
         const highlighted = focusItem?.eventId === mEventId && focusItem.highlight;
 
         const { replyEventId, isThreadRoot } = mEvent;
+        const forkEventId = getForkEventId(mEvent);
+        const relationReplyEventId = forkEventId ?? replyEventId;
         const replyToThread = mEvent.getThread();
         const showThreadSummary = !thread && isThreadRoot && !!replyToThread;
 
@@ -1244,12 +1263,13 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
             onReactionToggle={handleReactionToggle}
             onEditId={handleEdit}
             reply={
-              replyEventId && (
+              relationReplyEventId && (
                 <Reply
                   room={room}
                   timelineSet={timelineSet}
                   eventId={mEventId}
-                  replyEventId={replyEventId}
+                  replyEventId={relationReplyEventId}
+                  relationKey={forkEventId ? FORKS_FROM_RELATION : 'm.in_reply_to'}
                   onClick={handleOpenReply}
                 />
               )

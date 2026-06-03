@@ -1,5 +1,11 @@
 import { Box, Icon, Line, Text, as, color, toRem } from 'folds';
-import { EventTimelineSet, MsgType, Room, THREAD_RELATION_TYPE } from 'matrix-js-sdk';
+import {
+  EventTimelineSet,
+  IEventRelation,
+  MsgType,
+  Room,
+  THREAD_RELATION_TYPE,
+} from 'matrix-js-sdk';
 import React, { MouseEventHandler, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
 import { useTranslation } from 'react-i18next';
@@ -12,6 +18,13 @@ import { MessageBadEncryptedContent, MessageDeletedContent, MessageFailedContent
 import { scaleSystemEmoji } from '../../plugins/react-custom-html-parser';
 import { useRoomEvent } from '../../hooks/useRoomEvent';
 import { MessageSquareTextIcon } from '../../icons/MessageSquareTextIcon';
+
+export const FORKS_FROM_RELATION = 'vip.elevo.forks_from';
+type ElevoEventRelation = IEventRelation & {
+  [FORKS_FROM_RELATION]?: {
+    event_id?: unknown;
+  };
+};
 
 type ReplyLayoutProps = {
   username?: string;
@@ -57,11 +70,15 @@ type ReplyProps = {
   timelineSet?: EventTimelineSet | undefined;
   eventId: string;
   replyEventId: string;
+  relationKey?: 'm.in_reply_to' | typeof FORKS_FROM_RELATION;
   onClick?: MouseEventHandler | undefined;
 };
 
 export const Reply = as<'div', ReplyProps>(
-  ({ room, timelineSet, eventId, replyEventId, onClick, ...props }, ref) => {
+  (
+    { room, timelineSet, eventId, replyEventId, relationKey = 'm.in_reply_to', onClick, ...props },
+    ref,
+  ) => {
     const { t } = useTranslation();
     const placeholderWidth = useMemo(() => randomNumberBetween(40, 400), []);
     const getFromLocalTimeline = useCallback(
@@ -72,13 +89,20 @@ export const Reply = as<'div', ReplyProps>(
     const mainEvent = useRoomEvent(room, eventId);
 
     if (mainEvent) {
-      const inReplyTo = mainEvent.getWireContent()?.['m.relates_to']?.['m.in_reply_to'];
+      const relatesTo = mainEvent.getWireContent()?.['m.relates_to'] as
+        | ElevoEventRelation
+        | undefined;
+      const inReplyTo = relatesTo?.[relationKey];
       if (!inReplyTo) {
         return null;
       }
 
       const relation = mainEvent.getRelation();
-      if (relation?.rel_type === THREAD_RELATION_TYPE.name && relation?.is_falling_back) {
+      if (
+        relationKey === 'm.in_reply_to' &&
+        relation?.rel_type === THREAD_RELATION_TYPE.name &&
+        relation?.is_falling_back
+      ) {
         return null;
       }
     }

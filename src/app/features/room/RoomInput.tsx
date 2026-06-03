@@ -545,16 +545,25 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
       content.formatted_body = formattedBody;
     }
     if (replyDraft) {
-      content['m.relates_to'] = {
-        'm.in_reply_to': {
-          event_id: replyDraft.eventId,
-        },
-      };
-      if (!isForkCommand && replyDraft?.relation?.rel_type === RelationType.Thread) {
-        content['m.relates_to'].event_id = replyDraft.relation.event_id;
-        content['m.relates_to'].rel_type = RelationType.Thread;
-        content['m.relates_to'].is_falling_back =
-          replyDraft.eventId === replyDraft.relation.event_id;
+      if (isForkCommand) {
+        content['m.relates_to'] = {
+          // Use a custom relation to avoid thread fallback
+          ['vip.elevo.forks_from' as 'm.in_reply_to']: {
+            event_id: replyDraft.eventId,
+          },
+        };
+      } else {
+        content['m.relates_to'] = {
+          'm.in_reply_to': {
+            event_id: replyDraft.eventId,
+          },
+        };
+        if (replyDraft?.relation?.rel_type === RelationType.Thread) {
+          content['m.relates_to'].event_id = replyDraft.relation.event_id;
+          content['m.relates_to'].rel_type = RelationType.Thread;
+          content['m.relates_to'].is_falling_back =
+            replyDraft.eventId === replyDraft.relation.event_id;
+        }
       }
     }
 
