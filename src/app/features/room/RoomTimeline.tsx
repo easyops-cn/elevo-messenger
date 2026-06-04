@@ -199,14 +199,6 @@ const getTimelinesEventsCount = (timelines: EventTimeline[]): number => {
 const timelineIncludesEvent = (timelines: EventTimeline[], eventId: string): boolean =>
   timelines.some((timeline) => timeline.getEvents().some((evt) => evt.getId() === eventId));
 
-const findCurrentFirstEventTimeline = (
-  timelineSet: EventTimelineSet,
-  timelines: EventTimeline[],
-) => {
-  const firstEventId = timelines[0]?.getEvents()[0]?.getId();
-  return firstEventId ? timelineSet.getTimelineForEvent(firstEventId) : undefined;
-};
-
 const getTimelineAndBaseIndex = (
   timelines: EventTimeline[],
   index: number,
@@ -383,24 +375,7 @@ const useTimelinePagination = (
 
       fetching = false;
       if (alive()) {
-        const firstEventTimeline =
-          !backwards &&
-          findCurrentFirstEventTimeline(timelineToPaginate.getTimelineSet(), lTimelines);
-        const firstEventTimelineChanged =
-          firstEventTimeline && firstEventTimeline !== lTimelines[0];
-        if (firstEventTimelineChanged) {
-          console.warn(
-            'First event timeline changed when paginating from:',
-            lTimelines[0],
-            'to:',
-            firstEventTimeline,
-          );
-        }
-        recalibratePagination(
-          firstEventTimelineChanged ? [firstEventTimeline, ...lTimelines.slice(1)] : lTimelines,
-          timelinesEventsCount,
-          backwards,
-        );
+        recalibratePagination(lTimelines, timelinesEventsCount, backwards);
       }
     };
   }, [mx, alive, setTimeline, limit]);
