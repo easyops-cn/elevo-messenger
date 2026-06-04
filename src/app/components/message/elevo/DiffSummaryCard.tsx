@@ -4,7 +4,6 @@ import { Box, Button, Icon, Text } from 'folds';
 import * as css from './DiffSummaryCard.css';
 import { type DiffSummary, UNKNOWN_FILE } from './diffSummary';
 import { FileDiffIcon } from '../../../icons/FileDiffIcon';
-import { CompactPath } from '../../path/CompactPath';
 import { useOpenCodeView } from '../../../utils/codeView';
 
 type DiffLineCountProps = {
@@ -60,7 +59,9 @@ export function DiffSummaryCard({ summary, style }: DiffSummaryCardProps) {
           const label = fileLabel(file.path);
           return (
             <div className={css.FileRow} key={file.path}>
-              <CompactPath className={css.FilePath} path={label} />
+              <div className={css.FilePath} title={label}>
+                {label}
+              </div>
               <div className={css.FileMeta}>
                 {file.patchOmitted && (
                   <Text as="span" size="B300" priority="300">

@@ -132,13 +132,6 @@ export const TreeDirectory = style({
   color: elevoColor.Text.Secondary,
 });
 
-export const TreePath = style({
-  minWidth: 0,
-  overflow: 'hidden',
-  fontFamily: 'monospace',
-  fontSize: toRem(12),
-});
-
 export const TreeFileButton = recipe({
   base: {
     display: 'grid',
@@ -227,6 +220,8 @@ export const FileHeader = style({
 export const FilePath = style({
   minWidth: 0,
   overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
   textAlign: 'left',
   fontFamily: 'monospace',
 });

@@ -6,7 +6,6 @@ import classNames from 'classnames';
 import * as css from './CodeView.css';
 import type { CodeViewPayload } from './types';
 import { FileDiffIcon } from '../../icons/FileDiffIcon';
-import { CompactPath } from '../path/CompactPath';
 import { UNKNOWN_FILE } from '../message/elevo/diffSummary';
 import { useTheme } from '../../hooks/useTheme';
 import {
@@ -290,13 +289,16 @@ function FileTree({ node, activeFileKey, onSelect }: FileTreeProps) {
           <li className={css.TreeItem} key={`dir:${compacted.name}`}>
             <div className={css.TreeDirectory}>
               <Icon src={Icons.ChevronBottom} size="50" />
-              <CompactPath className={css.TreePath} path={compacted.name} />
+              <Text as="span" size="B300" truncate title={compacted.name}>
+                {compacted.name}
+              </Text>
             </div>
             <FileTree node={compacted.node} activeFileKey={activeFileKey} onSelect={onSelect} />
           </li>
         );
       })}
       {files.map((entry) => {
+        const basename = entry.segments[entry.segments.length - 1];
         return (
           <li className={css.TreeItem} key={`file:${entry.key}`}>
             <button
@@ -306,7 +308,9 @@ function FileTree({ node, activeFileKey, onSelect }: FileTreeProps) {
               onClick={() => onSelect(entry)}
             >
               <Icon src={FileDiffIcon} size="50" />
-              <CompactPath className={css.TreePath} path={entry.label} />
+              <Text as="span" size="B300" truncate>
+                {basename}
+              </Text>
             </button>
           </li>
         );
@@ -537,7 +541,9 @@ export const CodeView = as<'div', CodeViewProps>(
                             onClick={() => toggleFile(entry.key)}
                             aria-expanded={expanded}
                           >
-                            <CompactPath className={css.FilePath} path={label} />
+                            <Text as="span" size="T200" className={css.FilePath} title={label}>
+                              {label}
+                            </Text>
                             <span className={css.FileMeta}>
                               <DiffLineCount added={file.added} deleted={file.deleted} />
                               <Icon
