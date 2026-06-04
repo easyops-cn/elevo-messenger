@@ -282,13 +282,12 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
   const linkedWorkspaces: WorkspaceItem[] =
     (workspacesStateEvent?.getContent() as { workspaces?: WorkspaceItem[] } | undefined)
       ?.workspaces ?? [];
-  const linkedWorkspaceIds: string[] = linkedWorkspaces.map((w) => w.id);
+  const firstWorkspace = linkedWorkspaces[0];
   const workspaceExplorerUrl =
-    elevoConfig.workspaces?.explorerUrl && linkedWorkspaceIds.length > 0
-      ? `${elevoConfig.workspaces.explorerUrl}?ids=${linkedWorkspaceIds.join(',')}`
+    elevoConfig.workspaces?.explorerUrl && firstWorkspace
+      ? `${elevoConfig.workspaces.explorerUrl}?ids=${firstWorkspace.id}`
       : null;
 
-  const firstWorkspace = linkedWorkspaces[0];
   const firstTenant = (elevoConfig.workspaces?.tenants ?? []).find(
     (tenant) => tenant.id === firstWorkspace?.owner_tenant_id,
   );

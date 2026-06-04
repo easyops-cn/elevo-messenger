@@ -60,11 +60,11 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
   const [syncError, setSyncError] = useState<string | null>(null);
 
   const handleAdd = async (ws: WorkspaceItem) => {
-    if (linkedWorkspaces.some((w) => w.id === ws.id)) return;
+    if (linkedWorkspaces.length === 1 && linkedWorkspaces[0].id === ws.id) return;
     await mx.sendStateEvent(
       room.roomId,
       ELEVO_WORKSPACES_STATE_KEY as any,
-      { workspaces: [...linkedWorkspaces, ws] },
+      { workspaces: [ws] },
       '',
     );
   };
@@ -300,7 +300,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                   )}
                 </Box>
 
-                {/* Add Workspace (Moderator only) */}
+                {/* Bind Workspace (Moderator only) */}
                 {isModerator && (
                   <Box direction="Column" gap="100">
                     <Text size="L400">{t('workspaces.addWorkspace')}</Text>

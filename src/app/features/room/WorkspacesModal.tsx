@@ -208,7 +208,7 @@ export function AddWorkspaceModal({
                             as="button"
                             variant="Surface"
                             radii="400"
-                            disabled={adding || linkedIds.has(ws.id)}
+                            disabled={adding}
                             onClick={() => {
                               setAdding(true);
                               onAdd(ws)
