@@ -135,6 +135,8 @@
     "hideSidePanel": "Hide Side Panel",
     "showSidePanel": "Show Side Panel",
     "closeThread": "Close Thread",
+    "maximizeThread": "Maximize Thread",
+    "restoreThread": "Restore Thread",
     "moreOptions": "More Options",
     "tasks": "Tasks",
     "workspaces": "Workspaces",

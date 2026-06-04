@@ -35,6 +35,9 @@ import { MessageEvent } from '../../../types/matrix/room';
 import { stopPropagation } from '../../utils/keyboard';
 import { PencilIcon } from '../../icons/PencilIcon';
 import { XIcon } from '../../icons/XIcon';
+import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
+import { PanelExpandRightIcon } from '../../icons/PanelExpandRightIcon';
+import { PanelCollapseRightIcon } from '../../icons/PanelCollapseRightIcon';
 
 const THREAD_TOPIC_MAX_LENGTH = 120;
 const THREAD_TOPIC_EVENT_TYPE = MessageEvent.ThreadTopic as unknown as keyof TimelineEvents;
@@ -150,10 +153,17 @@ function ThreadTopicDialog({ roomId, rootEventId, topic, requestClose }: ThreadT
   );
 }
 
-export function ThreadChatView({ eventId }: { eventId?: string }) {
+type ThreadChatViewProps = {
+  eventId?: string;
+  maximized?: boolean;
+  onMaximizedChange?: (maximized: boolean) => void;
+};
+
+export function ThreadChatView({ eventId, maximized, onMaximizedChange }: ThreadChatViewProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
   const room = useRoom();
+  const screenSize = useScreenSizeContext();
   const [threadChat, setThreadChat] = useThreadChat(room.roomId);
   const { threadRootId } = threadChat;
   const [thread, setThread] = useState<Thread | null>(null);
@@ -201,14 +211,17 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
     };
   }, [mx, thread]);
 
-  const handleClose = () => setThreadChat({ open: false, threadRootId: undefined });
+  const handleClose = () => {
+    onMaximizedChange?.(false);
+    setThreadChat({ open: false, threadRootId: undefined });
+  };
   const threadTopic = useThreadTopic(room, thread?.rootEvent);
   const threadRootEventId = thread?.rootEvent?.getId();
   const canSetThreadTopic =
     !!threadRootEventId && thread?.rootEvent?.getSender() === mx.getSafeUserId();
 
   return (
-    <PageMain isSidePanel>
+    <PageMain isSidePanel={!maximized}>
       <Page>
         <PageHeader>
           <Box grow="Yes" alignItems="Center" gap="200">
@@ -236,6 +249,31 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
                       onClick={() => setTopicDialogOpen(true)}
                     >
                       <Icon src={PencilIcon} size="50" />
+                    </IconButton>
+                  )}
+                </TooltipProvider>
+              )}
+              {screenSize === ScreenSize.Desktop && (
+                <TooltipProvider
+                  position="Bottom"
+                  align="End"
+                  offset={4}
+                  tooltip={
+                    <Tooltip>
+                      <Text>
+                        {maximized ? t('room.restoreThread') : t('room.maximizeThread')}
+                      </Text>
+                    </Tooltip>
+                  }
+                >
+                  {(triggerRef) => (
+                    <IconButton
+                      ref={triggerRef}
+                      variant="Surface"
+                      onClick={() => onMaximizedChange?.(!maximized)}
+                      aria-pressed={maximized}
+                    >
+                      <Icon src={maximized ? PanelCollapseRightIcon : PanelExpandRightIcon} />
                     </IconButton>
                   )}
                 </TooltipProvider>
