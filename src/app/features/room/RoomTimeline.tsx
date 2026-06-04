@@ -345,12 +345,15 @@ const useTimelinePagination = (
       const paginationToken = timelineToPaginate.getPaginationToken(
         backwards ? Direction.Backward : Direction.Forward,
       );
-      if (
-        !paginationToken &&
-        getTimelinesEventsCount(lTimelines) !==
+
+      // Do not paginate if there is no pagination token
+      if (!paginationToken) {
+        if (
+          getTimelinesEventsCount(lTimelines) !==
           getTimelinesEventsCount(getLinkedTimelines(timelineToPaginate))
-      ) {
-        recalibratePagination(lTimelines, timelinesEventsCount, backwards);
+        ) {
+          recalibratePagination(lTimelines, timelinesEventsCount, backwards);
+        }
         return;
       }
 
@@ -362,6 +365,7 @@ const useTimelinePagination = (
         }),
       );
       if (err) {
+        console.error('debugging paginating, failed to paginate timeline:', err);
         // TODO: handle pagination error.
         return;
       }
