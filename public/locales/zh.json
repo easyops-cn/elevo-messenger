@@ -1082,13 +1082,13 @@
     "saved": "已保存！",
     "linkedWorkspaces": "已关联的工作空间",
     "noWorkspacesLinked": "暂无已关联的工作空间",
-    "noWorkspacesLinkedDesc": "点击下方的添加工作空间按钮来关联。",
+    "noWorkspacesLinkedDesc": "点击下方的绑定工作空间按钮来关联。",
     "sync": "同步",
     "remove": "移除",
-    "addWorkspace": "添加工作空间",
+    "addWorkspace": "绑定工作空间",
     "browseAvailable": "浏览可用工作空间",
     "browseAvailableDesc": "获取您账户可访问的工作空间",
-    "add": "添加",
+    "add": "绑定",
     "searchWorkspaces": "搜索工作空间",
     "failedToLoad": "加载失败",
     "noMatchFound": "未找到匹配",
@@ -1107,7 +1107,7 @@
     "oauthExpired": "连接已过期",
     "oauthExpiredDesc": "您的工作空间令牌已过期，请在设置 > 链接中重新连接。",
     "oauthNotConnected": "工作空间未连接",
-    "oauthNotConnectedDesc": "连接您的 Elevo 工作空间账户以浏览和添加工作空间。"
+    "oauthNotConnectedDesc": "连接您的 Elevo 工作空间账户以浏览和绑定工作空间。"
   },
   "links": {
     "connectionList": "连接列表",
