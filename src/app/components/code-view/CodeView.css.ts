@@ -91,7 +91,6 @@ export const SplitContent = style({
 export const TreePane = style({
   minHeight: 0,
   borderRight: border,
-  backgroundColor: color.Surface.Container,
   '@media': {
     '(max-width: 760px)': {
       borderRight: 0,
