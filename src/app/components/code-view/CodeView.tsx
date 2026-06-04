@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Box, Chip, Header, Icon, IconButton, Icons, Scroll, Text, as } from 'folds';
 import type { ThemedToken } from 'shiki';
 import { useTranslation } from 'react-i18next';
@@ -210,6 +210,100 @@ export function DiffLineCount({ added, deleted }: DiffLineCountProps) {
   );
 }
 
+type CodeViewFile = CodeViewPayload['files'][number];
+
+type FileEntry = {
+  key: string;
+  file: CodeViewFile;
+  label: string;
+  segments: string[];
+};
+
+type FileTreeNode = {
+  name: string;
+  children: Map<string, FileTreeNode>;
+  files: FileEntry[];
+};
+
+function createFileTreeNode(name: string): FileTreeNode {
+  return { name, children: new Map(), files: [] };
+}
+
+function getPathSegments(path: string, label: string): string[] {
+  if (path === UNKNOWN_FILE) return [label];
+  const segments = path.split('/').filter((segment) => segment.length > 0);
+  return segments.length > 0 ? segments : [label];
+}
+
+function buildFileTree(entries: FileEntry[]): FileTreeNode {
+  const root = createFileTreeNode('');
+
+  entries.forEach((entry) => {
+    const parentSegments = entry.segments.slice(0, -1);
+    let node = root;
+
+    parentSegments.forEach((segment) => {
+      const child = node.children.get(segment) ?? createFileTreeNode(segment);
+      node.children.set(segment, child);
+      node = child;
+    });
+
+    node.files.push(entry);
+  });
+
+  return root;
+}
+
+type FileTreeProps = {
+  node: FileTreeNode;
+  activeFileKey?: string;
+  onSelect: (entry: FileEntry) => void;
+};
+
+function FileTree({ node, activeFileKey, onSelect }: FileTreeProps) {
+  const childNodes = Array.from(node.children.values()).sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+  const files = [...node.files].sort((a, b) =>
+    a.segments[a.segments.length - 1].localeCompare(b.segments[b.segments.length - 1]),
+  );
+
+  return (
+    <ul className={css.TreeList}>
+      {childNodes.map((child) => (
+        <li className={css.TreeItem} key={`dir:${child.name}`}>
+          <div className={css.TreeDirectory}>
+            <Icon src={Icons.ChevronBottom} size="50" />
+            <Text as="span" size="B300" truncate title={child.name}>
+              {child.name}
+            </Text>
+          </div>
+          <FileTree node={child} activeFileKey={activeFileKey} onSelect={onSelect} />
+        </li>
+      ))}
+      {files.map((entry) => {
+        const basename = entry.segments[entry.segments.length - 1];
+        return (
+          <li className={css.TreeItem} key={`file:${entry.key}`}>
+            <button
+              className={css.TreeFileButton({ active: activeFileKey === entry.key })}
+              type="button"
+              title={entry.label}
+              onClick={() => onSelect(entry)}
+            >
+              <Icon src={Icons.File} size="50" />
+              <Text as="span" size="B300" truncate>
+                {basename}
+              </Text>
+              <DiffLineCount added={entry.file.added} deleted={entry.file.deleted} />
+            </button>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
 type HighlightedDiffProps = {
   path: string;
   lines: string[];
@@ -306,35 +400,75 @@ type CodeViewProps = {
 export const CodeView = as<'div', CodeViewProps>(
   ({ className, payload, hideCloseButton, requestClose, ...props }, ref) => {
     const { t } = useTranslation();
+    const fileRefs = useRef(new Map<string, HTMLElement>());
+    const [activeFileKey, setActiveFileKey] = useState<string | undefined>();
+    const [pendingScrollFileKey, setPendingScrollFileKey] = useState<string | undefined>();
+    const fileEntries = useMemo<FileEntry[]>(
+      () =>
+        payload.files.map((file, index) => {
+          const label = file.path === UNKNOWN_FILE ? t('message.diffUnknownFile') : file.path;
+          return {
+            key: `${index}:${file.path}`,
+            file,
+            label,
+            segments: getPathSegments(file.path, label),
+          };
+        }),
+      [payload.files, t],
+    );
+    const fileTree = useMemo(() => buildFileTree(fileEntries), [fileEntries]);
     const [expandedFiles, setExpandedFiles] = useState<ReadonlySet<string>>(
-      () => new Set(payload.files.map((file) => file.path)),
+      () => new Set(fileEntries.map((entry) => entry.key)),
     );
 
     useEffect(() => {
-      setExpandedFiles(new Set(payload.files.map((file) => file.path)));
-    }, [payload.files]);
+      setExpandedFiles(new Set(fileEntries.map((entry) => entry.key)));
+      setActiveFileKey(fileEntries[0]?.key);
+    }, [fileEntries]);
 
-    const allExpanded = expandedFiles.size === payload.files.length;
+    useLayoutEffect(() => {
+      if (!pendingScrollFileKey) return;
+      fileRefs.current
+        .get(pendingScrollFileKey)
+        ?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      setPendingScrollFileKey(undefined);
+    }, [expandedFiles, pendingScrollFileKey]);
+
+    const allExpanded = expandedFiles.size === fileEntries.length;
     const title =
       payload.title ??
       (payload.files.length === 1
         ? payload.files[0].path
         : t('message.diffEditedFiles', { count: payload.files.length }));
 
-    const fileLabel = (path: string) =>
-      path === UNKNOWN_FILE ? t('message.diffUnknownFile') : path;
-
     const toggleAll = () => {
-      setExpandedFiles(allExpanded ? new Set() : new Set(payload.files.map((file) => file.path)));
+      setExpandedFiles(allExpanded ? new Set() : new Set(fileEntries.map((entry) => entry.key)));
     };
 
-    const toggleFile = (path: string) => {
+    const toggleFile = (fileKey: string) => {
       setExpandedFiles((current) => {
         const next = new Set(current);
-        if (next.has(path)) next.delete(path);
-        else next.add(path);
+        if (next.has(fileKey)) next.delete(fileKey);
+        else next.add(fileKey);
         return next;
       });
+    };
+
+    const selectFile = (entry: FileEntry) => {
+      setActiveFileKey(entry.key);
+      setExpandedFiles((current) => {
+        if (current.has(entry.key)) return current;
+        return new Set(current).add(entry.key);
+      });
+
+      window.requestAnimationFrame(() => {
+        setPendingScrollFileKey(entry.key);
+      });
+    };
+
+    const setFileRef = (fileKey: string) => (element: HTMLElement | null) => {
+      if (element) fileRefs.current.set(fileKey, element);
+      else fileRefs.current.delete(fileKey);
     };
 
     return (
@@ -365,60 +499,73 @@ export const CodeView = as<'div', CodeViewProps>(
         </Header>
 
         <Box grow="Yes" className={css.Content}>
-          <Scroll hideTrack variant="Background" visibility="Hover">
-            <div className={css.ScrollContent}>
-              {payload.files.length > 0 ? (
-                <div className={css.FileList}>
-                  {payload.files.map((file) => {
-                    const expanded = expandedFiles.has(file.path);
-                    const label = fileLabel(file.path);
-                    return (
-                      <section className={css.FilePanel} key={file.path}>
-                        <button
-                          className={css.FileHeader}
-                          type="button"
-                          onClick={() => toggleFile(file.path)}
-                          aria-expanded={expanded}
+          {fileEntries.length > 0 ? (
+            <div className={css.SplitContent}>
+              <aside className={css.TreePane} aria-label="Changed files">
+                <Scroll hideTrack visibility="Hover">
+                  <div className={css.TreeContent}>
+                    <FileTree node={fileTree} activeFileKey={activeFileKey} onSelect={selectFile} />
+                  </div>
+                </Scroll>
+              </aside>
+              <Scroll hideTrack variant="Background" visibility="Hover">
+                <div className={css.ScrollContent}>
+                  <div className={css.FileList}>
+                    {fileEntries.map((entry) => {
+                      const { file, label } = entry;
+                      const expanded = expandedFiles.has(entry.key);
+                      return (
+                        <section
+                          className={css.FilePanel}
+                          key={entry.key}
+                          ref={setFileRef(entry.key)}
                         >
-                          <Text as="span" size="T200" className={css.FilePath} title={label}>
-                            {label}
-                          </Text>
-                          <span className={css.FileMeta}>
-                            <DiffLineCount added={file.added} deleted={file.deleted} />
-                            <Icon
-                              src={expanded ? Icons.ChevronBottom : Icons.ChevronRight}
-                              size="50"
-                            />
-                          </span>
-                        </button>
-                        {expanded &&
-                          file.lines.length > 0 &&
-                          (file.patchOmitted ? (
-                            <div className={css.OmittedPatch}>
-                              {file.lines.map((line, index) => (
-                                <Text
-                                  key={`${index}:${line}`}
-                                  className={css.OmittedPatchLine}
-                                  priority="300"
-                                >
-                                  {line}
-                                </Text>
-                              ))}
-                            </div>
-                          ) : (
-                            <HighlightedDiff path={file.path} lines={file.lines} />
-                          ))}
-                      </section>
-                    );
-                  })}
+                          <button
+                            className={css.FileHeader}
+                            type="button"
+                            onClick={() => toggleFile(entry.key)}
+                            aria-expanded={expanded}
+                          >
+                            <Text as="span" size="T200" className={css.FilePath} title={label}>
+                              {label}
+                            </Text>
+                            <span className={css.FileMeta}>
+                              <DiffLineCount added={file.added} deleted={file.deleted} />
+                              <Icon
+                                src={expanded ? Icons.ChevronBottom : Icons.ChevronRight}
+                                size="50"
+                              />
+                            </span>
+                          </button>
+                          {expanded &&
+                            file.lines.length > 0 &&
+                            (file.patchOmitted ? (
+                              <div className={css.OmittedPatch}>
+                                {file.lines.map((line, index) => (
+                                  <Text
+                                    key={`${index}:${line}`}
+                                    className={css.OmittedPatchLine}
+                                    priority="300"
+                                  >
+                                    {line}
+                                  </Text>
+                                ))}
+                              </div>
+                            ) : (
+                              <HighlightedDiff path={file.path} lines={file.lines} />
+                            ))}
+                        </section>
+                      );
+                    })}
+                  </div>
                 </div>
-              ) : (
-                <Box className={css.Empty} alignItems="Center" justifyContent="Center">
-                  <Text priority="300">No diff content</Text>
-                </Box>
-              )}
+              </Scroll>
             </div>
-          </Scroll>
+          ) : (
+            <Box className={css.Empty} alignItems="Center" justifyContent="Center">
+              <Text priority="300">No diff content</Text>
+            </Box>
+          )}
         </Box>
       </Box>
     );
