@@ -74,6 +74,102 @@ export const Content = style({
   minHeight: 0,
 });
 
+export const SplitContent = style({
+  display: 'grid',
+  gridTemplateColumns: `${toRem(320)} minmax(0, 1fr)`,
+  width: '100%',
+  height: '100%',
+  minHeight: 0,
+  '@media': {
+    '(max-width: 760px)': {
+      gridTemplateColumns: 'minmax(0, 1fr)',
+      gridTemplateRows: `${toRem(168)} minmax(0, 1fr)`,
+    },
+  },
+});
+
+export const TreePane = style({
+  minHeight: 0,
+  borderRight: border,
+  '@media': {
+    '(max-width: 760px)': {
+      borderRight: 0,
+      borderBottom: border,
+    },
+  },
+});
+
+export const TreeContent = style({
+  padding: config.space.S200,
+});
+
+export const TreeList = style({
+  display: 'flex',
+  flexDirection: 'column',
+  gap: config.space.S100,
+  margin: 0,
+  padding: 0,
+  listStyle: 'none',
+  selectors: {
+    '& &': {
+      paddingLeft: config.space.S300,
+    },
+  },
+});
+
+export const TreeItem = style({
+  minWidth: 0,
+});
+
+export const TreeDirectory = style({
+  display: 'grid',
+  gridTemplateColumns: `${toRem(20)} minmax(0, 1fr)`,
+  alignItems: 'center',
+  gap: config.space.S100,
+  minHeight: toRem(28),
+  padding: `0 ${config.space.S100}`,
+  color: elevoColor.Text.Secondary,
+});
+
+export const TreeFileButton = recipe({
+  base: {
+    display: 'grid',
+    gridTemplateColumns: `${toRem(20)} minmax(0, 1fr)`,
+    alignItems: 'center',
+    gap: config.space.S100,
+    width: '100%',
+    minHeight: toRem(30),
+    padding: `0 ${config.space.S100}`,
+    border: 0,
+    borderRadius: config.radii.R300,
+    backgroundColor: 'transparent',
+    color: 'inherit',
+    cursor: 'pointer',
+    textAlign: 'left',
+    selectors: {
+      '&:hover': {
+        backgroundColor: color.Surface.ContainerHover,
+      },
+      '&:active': {
+        backgroundColor: color.Surface.ContainerActive,
+      },
+      '&:focus-visible': {
+        outline: `${config.borderWidth.B300} solid ${color.Primary.Main}`,
+        outlineOffset: toRem(1),
+      },
+    },
+  },
+  variants: {
+    active: {
+      true: {
+        backgroundColor: color.Primary.Container,
+        color: color.Primary.OnContainer,
+      },
+      false: {},
+    },
+  },
+});
+
 export const ScrollContent = style({
   padding: config.space.S300,
 });
