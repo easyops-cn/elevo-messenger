@@ -76,7 +76,7 @@ export const Content = style({
 
 export const SplitContent = style({
   display: 'grid',
-  gridTemplateColumns: `${toRem(260)} minmax(0, 1fr)`,
+  gridTemplateColumns: `${toRem(320)} minmax(0, 1fr)`,
   width: '100%',
   height: '100%',
   minHeight: 0,
@@ -135,7 +135,7 @@ export const TreeDirectory = style({
 export const TreeFileButton = recipe({
   base: {
     display: 'grid',
-    gridTemplateColumns: `${toRem(20)} minmax(0, 1fr) auto`,
+    gridTemplateColumns: `${toRem(20)} minmax(0, 1fr)`,
     alignItems: 'center',
     gap: config.space.S100,
     width: '100%',

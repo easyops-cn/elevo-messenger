@@ -254,6 +254,19 @@ function buildFileTree(entries: FileEntry[]): FileTreeNode {
   return root;
 }
 
+function compactDirectoryNode(node: FileTreeNode): { name: string; node: FileTreeNode } {
+  let name = node.name;
+  let current = node;
+
+  while (current.files.length === 0 && current.children.size === 1) {
+    const child = Array.from(current.children.values())[0];
+    name = `${name}/${child.name}`;
+    current = child;
+  }
+
+  return { name, node: current };
+}
+
 type FileTreeProps = {
   node: FileTreeNode;
   activeFileKey?: string;
@@ -270,17 +283,20 @@ function FileTree({ node, activeFileKey, onSelect }: FileTreeProps) {
 
   return (
     <ul className={css.TreeList}>
-      {childNodes.map((child) => (
-        <li className={css.TreeItem} key={`dir:${child.name}`}>
-          <div className={css.TreeDirectory}>
-            <Icon src={Icons.ChevronBottom} size="50" />
-            <Text as="span" size="B300" truncate title={child.name}>
-              {child.name}
-            </Text>
-          </div>
-          <FileTree node={child} activeFileKey={activeFileKey} onSelect={onSelect} />
-        </li>
-      ))}
+      {childNodes.map((child) => {
+        const compacted = compactDirectoryNode(child);
+        return (
+          <li className={css.TreeItem} key={`dir:${compacted.name}`}>
+            <div className={css.TreeDirectory}>
+              <Icon src={Icons.ChevronBottom} size="50" />
+              <Text as="span" size="B300" truncate title={compacted.name}>
+                {compacted.name}
+              </Text>
+            </div>
+            <FileTree node={compacted.node} activeFileKey={activeFileKey} onSelect={onSelect} />
+          </li>
+        );
+      })}
       {files.map((entry) => {
         const basename = entry.segments[entry.segments.length - 1];
         return (
@@ -291,11 +307,10 @@ function FileTree({ node, activeFileKey, onSelect }: FileTreeProps) {
               title={entry.label}
               onClick={() => onSelect(entry)}
             >
-              <Icon src={Icons.File} size="50" />
+              <Icon src={FileDiffIcon} size="50" />
               <Text as="span" size="B300" truncate>
                 {basename}
               </Text>
-              <DiffLineCount added={entry.file.added} deleted={entry.file.deleted} />
             </button>
           </li>
         );
