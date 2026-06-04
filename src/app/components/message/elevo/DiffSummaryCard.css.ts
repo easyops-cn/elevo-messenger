@@ -78,8 +78,6 @@ export const FilePath = style({
   fontSize: toRem(12),
   color: elevoColor.Text.Secondary,
   overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
 });
 
 export const FileMeta = style({
