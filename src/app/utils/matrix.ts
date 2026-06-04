@@ -304,6 +304,9 @@ export const downloadMedia = async (src: string): Promise<Blob> => {
     }
   }
   const res = await fetch(src, { method: 'GET', headers });
+  if (!res.ok) {
+    throw new Error(`Failed to download media: ${res.status} ${res.statusText}`);
+  }
   const blob = await res.blob();
   return blob;
 };
