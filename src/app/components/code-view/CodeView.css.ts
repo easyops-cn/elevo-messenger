@@ -241,6 +241,8 @@ export const CodePre = style({
   fontFamily: 'monospace',
   fontSize: toRem(13),
   lineHeight: toRem(20),
+  userSelect: 'none',
+  WebkitUserSelect: 'none',
 });
 
 export const CodeGrid = style({
@@ -307,6 +309,14 @@ export const LineCode = style({
   padding: `0 ${config.space.S300}`,
   whiteSpace: 'pre',
 });
+
+export const LineBody = style([
+  LineCode,
+  {
+    userSelect: 'text',
+    WebkitUserSelect: 'text',
+  },
+]);
 
 export const NoCode = style({
   display: 'block',

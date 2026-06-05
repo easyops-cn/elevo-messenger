@@ -1,4 +1,12 @@
-import React, { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  CSSProperties,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { Box, Chip, Header, Icon, IconButton, Icons, Scroll, Text, as } from 'folds';
 import type { ThemedToken } from 'shiki';
 import { useTranslation } from 'react-i18next';
@@ -339,6 +347,7 @@ type HighlightedDiffProps = {
 
 function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
   const theme = useTheme();
+  const codePreRef = useRef<HTMLPreElement>(null);
   const { rows, codeRows, hunks, showLineNumbers } = useMemo(() => parseDiffRows(lines), [lines]);
   const [tokenLines, setTokenLines] = useState<HighlightedTokenLines>([]);
 
@@ -355,6 +364,50 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
     };
   }, [path, hunks, rows.length, theme.kind]);
 
+  const handleCopy = useCallback((event: React.ClipboardEvent<HTMLPreElement>) => {
+    const root = codePreRef.current;
+    const selection = window.getSelection();
+    if (!root || !selection || selection.isCollapsed || selection.rangeCount === 0) return;
+
+    const ranges = Array.from({ length: selection.rangeCount }, (_, index) =>
+      selection.getRangeAt(index),
+    ).filter((range) => range.intersectsNode(root));
+    if (ranges.length === 0) return;
+
+    const selectedText = Array.from(
+      root.querySelectorAll<HTMLElement>('[data-code-view-line="body"]'),
+    )
+      .flatMap((line) => {
+        const lineText = ranges
+          .map((range) => {
+            if (!range.intersectsNode(line)) return '';
+
+            const lineRange = document.createRange();
+            lineRange.selectNodeContents(line);
+
+            if (line.contains(range.startContainer)) {
+              lineRange.setStart(range.startContainer, range.startOffset);
+            }
+            if (line.contains(range.endContainer)) {
+              lineRange.setEnd(range.endContainer, range.endOffset);
+            }
+
+            const text = lineRange.toString();
+            lineRange.detach();
+            return text;
+          })
+          .join('');
+
+        return ranges.some((range) => range.intersectsNode(line)) ? [lineText] : [];
+      })
+      .join('\n');
+
+    if (selectedText.length === 0) return;
+
+    event.clipboardData.setData('text/plain', selectedText);
+    event.preventDefault();
+  }, []);
+
   if (codeRows.length === 0) {
     return (
       <div className={css.CodeBlock}>
@@ -367,7 +420,7 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
 
   return (
     <div className={css.CodeBlock}>
-      <pre className={css.CodePre}>
+      <pre className={css.CodePre} onCopy={handleCopy} ref={codePreRef}>
         <code className={css.CodeGrid}>
           {rows.map((row, rowIndex) => {
             if (row.type === 'hunk') {
@@ -401,7 +454,7 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
                     <span className={css.LineNumber}>{row.newLine ?? ''}</span>
                   </>
                 )}
-                <span className={css.LineCode}>
+                <span className={css.LineBody} data-code-view-line="body">
                   {(tokenLines[row.rowIndex] ?? [{ content: row.code } as ThemedToken]).map(
                     (token, tokenIndex) => (
                       <span key={tokenIndex} style={getTokenStyle(token)}>
