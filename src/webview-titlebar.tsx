@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
@@ -24,6 +24,8 @@ const DEFAULT_STATE: WebviewTitlebarState = {
   canGoBack: false,
   canGoForward: false,
 };
+
+const isMacOS = () => /Mac OS|Macintosh|MacIntel/.test(window.navigator.userAgent);
 
 function IconButton({
   label,
@@ -136,6 +138,128 @@ function GlobeIcon() {
   );
 }
 
+function MinimizeIcon() {
+  return (
+    <svg width="10" height="1" viewBox="0 0 10 1" fill="currentColor" aria-hidden="true">
+      <rect width="10" height="1" />
+    </svg>
+  );
+}
+
+function MaximizeIcon() {
+  return (
+    <svg
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1"
+      aria-hidden="true"
+    >
+      <rect x="0.5" y="0.5" width="9" height="9" />
+    </svg>
+  );
+}
+
+function RestoreIcon() {
+  return (
+    <svg
+      width="10"
+      height="10"
+      viewBox="0 0 10 10"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1"
+      aria-hidden="true"
+    >
+      <rect x="0.5" y="2.5" width="7" height="7" />
+      <polyline points="2.5,2.5 2.5,0.5 9.5,0.5 9.5,7.5 7.5,7.5" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
+      <path d="M1.41 0L5 3.59L8.59 0L10 1.41L6.41 5L10 8.59L8.59 10L5 6.41L1.41 10L0 8.59L3.59 5L0 1.41L1.41 0Z" />
+    </svg>
+  );
+}
+
+function WindowControls({ label }: { label: string }) {
+  const [maximized, setMaximized] = useState(false);
+
+  useEffect(() => {
+    if (!label) return undefined;
+
+    let cancelled = false;
+    const updateMaximized = () => {
+      invoke<boolean>('webview_titlebar_is_maximized', { label })
+        .then((value) => {
+          if (!cancelled) setMaximized(value);
+        })
+        .catch((error) => {
+          console.error('[webview-titlebar] is_maximized failed:', error);
+        });
+    };
+    updateMaximized();
+
+    const unlistenPromise = listen<WebviewTitlebarState>('webview-titlebar-state', (event) => {
+      if (event.payload.label === label) updateMaximized();
+    });
+
+    return () => {
+      cancelled = true;
+      unlistenPromise.then((unlisten) => unlisten());
+    };
+  }, [label]);
+
+  const runWindowCommand = useCallback(
+    (command: string) => {
+      if (!label) return;
+      invoke(command, { label }).catch((error) => {
+        console.error(`[webview-titlebar] ${command} failed:`, error);
+      });
+    },
+    [label],
+  );
+
+  if (isMacOS()) return <div className="WebviewTitlebar-trafficLightSpacer" />;
+
+  return (
+    <div className="WebviewTitlebar-windowControls">
+      <button
+        className="WebviewTitlebar-windowButton"
+        type="button"
+        aria-label="Minimize"
+        title="Minimize"
+        onClick={() => runWindowCommand('webview_titlebar_minimize')}
+      >
+        <MinimizeIcon />
+      </button>
+      <button
+        className="WebviewTitlebar-windowButton"
+        type="button"
+        aria-label={maximized ? 'Restore' : 'Maximize'}
+        title={maximized ? 'Restore' : 'Maximize'}
+        onClick={() => runWindowCommand('webview_titlebar_toggle_maximize')}
+      >
+        {maximized ? <RestoreIcon /> : <MaximizeIcon />}
+      </button>
+      <button
+        className="WebviewTitlebar-windowButton WebviewTitlebar-closeButton"
+        type="button"
+        aria-label="Close"
+        title="Close"
+        onClick={() => runWindowCommand('webview_titlebar_close')}
+      >
+        <CloseIcon />
+      </button>
+    </div>
+  );
+}
+
 function WebviewTitlebar() {
   const [state, setState] = useState<WebviewTitlebarState>(
     window.__ElevoWebviewTitlebar_initialState__ ?? DEFAULT_STATE,
@@ -169,6 +293,7 @@ function WebviewTitlebar() {
 
   return (
     <div className="WebviewTitlebar">
+      {isMacOS() ? <div className="WebviewTitlebar-trafficLightSpacer" /> : null}
       <IconButton
         label="Back"
         disabled={!state.canGoBack}
@@ -190,6 +315,7 @@ function WebviewTitlebar() {
         <GlobeIcon />
         <span className="WebviewTitlebar-titleText">{title}</span>
       </div>
+      <WindowControls label={label} />
     </div>
   );
 }
