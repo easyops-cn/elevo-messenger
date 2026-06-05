@@ -153,9 +153,10 @@ interface RoomInputProps {
   fileDropContainerRef: RefObject<HTMLElement>;
   roomId: string;
   room: Room;
+  enableSdkInputEvents?: boolean;
 }
 export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function LegacyRoomInput(
-  { editor, fileDropContainerRef, roomId, room },
+  { editor, fileDropContainerRef, roomId, room, enableSdkInputEvents = true },
   ref,
 ) {
   const thread = useRoomThread();
@@ -227,6 +228,8 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
 
   const handleWorkspaceFileSelect = useCallback(
     (payload: SdkMessagePayload<WorkspaceExplorerMessage>) => {
+      if (!enableSdkInputEvents) return;
+
       const { data } = payload;
       if (data?.type === 'select-file') {
         removeExistingFileRef();
@@ -245,7 +248,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
         }
       }
     },
-    [editor, removeExistingFileRef],
+    [editor, enableSdkInputEvents, removeExistingFileRef],
   );
   useSdkMessageListener<WorkspaceExplorerMessage>('workspace-explorer', handleWorkspaceFileSelect);
 
@@ -272,6 +275,8 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
 
   const handleTaskSelect = useCallback(
     (payload: SdkMessagePayload<TaskManagementMessage>) => {
+      if (!enableSdkInputEvents) return;
+
       const { data } = payload;
       if (data?.type === 'select-task') {
         removeExistingTaskRef();
@@ -290,7 +295,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
         }
       }
     },
-    [editor, removeExistingTaskRef],
+    [editor, enableSdkInputEvents, removeExistingTaskRef],
   );
   useSdkMessageListener<TaskManagementMessage>('tasks-management', handleTaskSelect);
 

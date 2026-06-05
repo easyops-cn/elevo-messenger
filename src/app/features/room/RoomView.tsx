@@ -53,7 +53,15 @@ const shouldFocusMessageField = (evt: KeyboardEvent): boolean => {
   return true;
 };
 
-export function RoomView({ eventId, thread }: { eventId?: string; thread?: Thread }) {
+export function RoomView({
+  eventId,
+  thread,
+  enableSdkInputEvents,
+}: {
+  eventId?: string;
+  thread?: Thread;
+  enableSdkInputEvents?: boolean;
+}) {
   const roomViewRef = useRef<HTMLDivElement>(null);
 
   const room = useRoom();
@@ -110,6 +118,7 @@ export function RoomView({ eventId, thread }: { eventId?: string; thread?: Threa
                       editor={editor}
                       roomId={roomId}
                       fileDropContainerRef={roomViewRef}
+                      enableSdkInputEvents={enableSdkInputEvents}
                     />
                   )}
                   {!canMessage && (

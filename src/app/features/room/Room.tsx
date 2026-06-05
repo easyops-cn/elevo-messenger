@@ -89,7 +89,7 @@ export function Room() {
               <Box grow="Yes" direction="Column">
                 <RoomViewHeader />
                 <Box grow="Yes">
-                  <RoomView eventId={mainEventId} />
+                  <RoomView eventId={mainEventId} enableSdkInputEvents={!showThreadPanel} />
                 </Box>
               </Box>
             )}
