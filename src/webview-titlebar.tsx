@@ -2,11 +2,22 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import { ChevronLeftIcon } from './app/icons/ChevronLeftIcon';
+import { ChevronRightIcon } from './app/icons/ChevronRightIcon';
+import { GlobeIcon } from './app/icons/GlobeIcon';
+import { RefreshCwIcon } from './app/icons/RefreshCwIcon';
+import { ShieldBanIcon } from './app/icons/ShieldBanIcon';
+import { ShieldCheckIcon } from './app/icons/ShieldCheckIcon';
+import { WindowCloseIcon } from './app/icons/WindowCloseIcon';
+import { WindowMaximizeIcon } from './app/icons/WindowMaximizeIcon';
+import { WindowMinimizeIcon } from './app/icons/WindowMinimizeIcon';
+import { WindowRestoreIcon } from './app/icons/WindowRestoreIcon';
 import './webviewTitlebar.css';
 
 type WebviewTitlebarState = {
   label: string;
   title: string;
+  url: string;
   canGoBack: boolean;
   canGoForward: boolean;
 };
@@ -21,11 +32,20 @@ declare global {
 const DEFAULT_STATE: WebviewTitlebarState = {
   label: '',
   title: '',
+  url: '',
   canGoBack: false,
   canGoForward: false,
 };
 
 const isMacOS = () => /Mac OS|Macintosh|MacIntel/.test(window.navigator.userAgent);
+
+function TitlebarIcon({ children, size = 16 }: { children: React.ReactNode; size?: number }) {
+  return (
+    <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true">
+      {children}
+    </svg>
+  );
+}
 
 function IconButton({
   label,
@@ -49,141 +69,6 @@ function IconButton({
     >
       {children}
     </button>
-  );
-}
-
-function ChevronLeftIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path
-        d="m15 18-6-6 6-6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function ChevronRightIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-      <path
-        d="m9 18 6-6-6-6"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function RefreshIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true">
-      <path
-        d="M21 12a9 9 0 0 1-9 9 9.7 9.7 0 0 1-6.74-2.74L3 16"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M3 12a9 9 0 0 1 9-9 9.7 9.7 0 0 1 6.74 2.74L21 8"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M21 3v5h-5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M3 21v-5h5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function GlobeIcon() {
-  return (
-    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-      <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" strokeWidth="2" />
-      <path
-        d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M2 12h20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function MinimizeIcon() {
-  return (
-    <svg width="10" height="1" viewBox="0 0 10 1" fill="currentColor" aria-hidden="true">
-      <rect width="10" height="1" />
-    </svg>
-  );
-}
-
-function MaximizeIcon() {
-  return (
-    <svg
-      width="10"
-      height="10"
-      viewBox="0 0 10 10"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1"
-      aria-hidden="true"
-    >
-      <rect x="0.5" y="0.5" width="9" height="9" />
-    </svg>
-  );
-}
-
-function RestoreIcon() {
-  return (
-    <svg
-      width="10"
-      height="10"
-      viewBox="0 0 10 10"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1"
-      aria-hidden="true"
-    >
-      <rect x="0.5" y="2.5" width="7" height="7" />
-      <polyline points="2.5,2.5 2.5,0.5 9.5,0.5 9.5,7.5 7.5,7.5" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg width="10" height="10" viewBox="0 0 10 10" fill="currentColor" aria-hidden="true">
-      <path d="M1.41 0L5 3.59L8.59 0L10 1.41L6.41 5L10 8.59L8.59 10L5 6.41L1.41 10L0 8.59L3.59 5L0 1.41L1.41 0Z" />
-    </svg>
   );
 }
 
@@ -236,7 +121,9 @@ function WindowControls({ label }: { label: string }) {
         title="Minimize"
         onClick={() => runWindowCommand('webview_titlebar_minimize')}
       >
-        <MinimizeIcon />
+        <TitlebarIcon size={14}>
+          <WindowMinimizeIcon />
+        </TitlebarIcon>
       </button>
       <button
         className="WebviewTitlebar-windowButton"
@@ -245,7 +132,9 @@ function WindowControls({ label }: { label: string }) {
         title={maximized ? 'Restore' : 'Maximize'}
         onClick={() => runWindowCommand('webview_titlebar_toggle_maximize')}
       >
-        {maximized ? <RestoreIcon /> : <MaximizeIcon />}
+        <TitlebarIcon size={14}>
+          {maximized ? <WindowRestoreIcon /> : <WindowMaximizeIcon />}
+        </TitlebarIcon>
       </button>
       <button
         className="WebviewTitlebar-windowButton WebviewTitlebar-closeButton"
@@ -254,9 +143,63 @@ function WindowControls({ label }: { label: string }) {
         title="Close"
         onClick={() => runWindowCommand('webview_titlebar_close')}
       >
-        <CloseIcon />
+        <TitlebarIcon size={14}>
+          <WindowCloseIcon />
+        </TitlebarIcon>
       </button>
     </div>
+  );
+}
+
+const isLocalhost = (hostname: string) =>
+  hostname === 'localhost' ||
+  hostname === '127.0.0.1' ||
+  hostname === '[::1]' ||
+  hostname === '::1';
+
+function SecurityIcon({ url }: { url: string }) {
+  const security = useMemo(() => {
+    try {
+      const parsed = new URL(url);
+
+      if (parsed.protocol === 'https:') return 'secure';
+      if (parsed.protocol === 'http:' && !isLocalhost(parsed.hostname)) return 'insecure';
+    } catch {
+      return 'default';
+    }
+
+    return 'default';
+  }, [url]);
+
+  if (security === 'secure') {
+    return (
+      <span className="WebviewTitlebar-securityIcon" title="Secure connection">
+        <TitlebarIcon>
+          <ShieldCheckIcon />
+        </TitlebarIcon>
+      </span>
+    );
+  }
+
+  if (security === 'insecure') {
+    return (
+      <span
+        className="WebviewTitlebar-securityIcon WebviewTitlebar-securityIconInsecure"
+        title="Insecure connection"
+      >
+        <TitlebarIcon>
+          <ShieldBanIcon />
+        </TitlebarIcon>
+      </span>
+    );
+  }
+
+  return (
+    <span className="WebviewTitlebar-securityIcon" title="Connection">
+      <TitlebarIcon>
+        <GlobeIcon />
+      </TitlebarIcon>
+    </span>
   );
 }
 
@@ -299,20 +242,26 @@ function WebviewTitlebar() {
         disabled={!state.canGoBack}
         onClick={() => runCommand('webview_titlebar_go_back')}
       >
-        <ChevronLeftIcon />
+        <TitlebarIcon size={18}>
+          <ChevronLeftIcon />
+        </TitlebarIcon>
       </IconButton>
       <IconButton
         label="Forward"
         disabled={!state.canGoForward}
         onClick={() => runCommand('webview_titlebar_go_forward')}
       >
-        <ChevronRightIcon />
+        <TitlebarIcon size={18}>
+          <ChevronRightIcon />
+        </TitlebarIcon>
       </IconButton>
       <IconButton label="Refresh" onClick={() => runCommand('webview_titlebar_reload')}>
-        <RefreshIcon />
+        <TitlebarIcon size={17}>
+          <RefreshCwIcon />
+        </TitlebarIcon>
       </IconButton>
       <div className="WebviewTitlebar-title" title={title}>
-        <GlobeIcon />
+        <SecurityIcon url={state.url} />
         <span className="WebviewTitlebar-titleText">{title}</span>
       </div>
       <WindowControls label={label} />

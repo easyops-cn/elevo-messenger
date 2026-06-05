@@ -55,7 +55,9 @@
 
 .WebviewTitlebar-title {
   min-width: 0;
-  flex: 1 1 auto;
+  max-width: min(520px, 45vw);
+  flex: 0 1 auto;
+  margin-right: auto;
   height: 30px;
   display: flex;
   align-items: center;
@@ -67,6 +69,18 @@
   box-shadow: inset 0 0 0 1px rgba(33, 38, 45, 0.11);
   font-size: 13px;
   line-height: 1;
+}
+
+.WebviewTitlebar-securityIcon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  display: inline-flex;
+  color: inherit;
+}
+
+.WebviewTitlebar-securityIconInsecure {
+  color: #d1242f;
 }
 
 .WebviewTitlebar-titleText {
@@ -141,6 +155,10 @@
     color: #b8c0cc;
     background: #2a3038;
     box-shadow: inset 0 0 0 1px rgba(205, 217, 229, 0.12);
+  }
+
+  .WebviewTitlebar-securityIconInsecure {
+    color: #ff7b72;
   }
 
   .WebviewTitlebar-windowButton:hover {
