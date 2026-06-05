@@ -91,6 +91,7 @@ export const SplitContent = style({
 export const TreePane = style({
   minHeight: 0,
   borderRight: border,
+  paddingLeft: config.space.S400,
   '@media': {
     '(max-width: 760px)': {
       borderRight: 0,
@@ -100,7 +101,7 @@ export const TreePane = style({
 });
 
 export const TreeContent = style({
-  padding: config.space.S200,
+  padding: `${config.space.S200} 0`,
 });
 
 export const TreeList = style({
@@ -110,11 +111,6 @@ export const TreeList = style({
   margin: 0,
   padding: 0,
   listStyle: 'none',
-  selectors: {
-    '& &': {
-      paddingLeft: config.space.S300,
-    },
-  },
 });
 
 export const TreeItem = style({
@@ -126,8 +122,9 @@ export const TreeDirectory = style({
   gridTemplateColumns: `${toRem(20)} minmax(0, 1fr)`,
   alignItems: 'center',
   gap: config.space.S100,
+  width: '100%',
   minHeight: toRem(28),
-  padding: `0 ${config.space.S100}`,
+  padding: `0 ${config.space.S100} 0 calc(${config.space.S100} + var(--code-view-tree-item-indent, 0px))`,
   color: elevoColor.Text.Secondary,
 });
 
@@ -139,7 +136,7 @@ export const TreeFileButton = recipe({
     gap: config.space.S100,
     width: '100%',
     minHeight: toRem(30),
-    padding: `0 ${config.space.S100}`,
+    padding: `0 ${config.space.S100} 0 calc(${config.space.S100} + var(--code-view-tree-item-indent, 0px))`,
     border: 0,
     borderRadius: config.radii.R300,
     backgroundColor: 'transparent',
@@ -162,8 +159,7 @@ export const TreeFileButton = recipe({
   variants: {
     active: {
       true: {
-        backgroundColor: color.Primary.Container,
-        color: color.Primary.OnContainer,
+        backgroundColor: color.Surface.ContainerActive,
       },
       false: {},
     },
@@ -171,7 +167,7 @@ export const TreeFileButton = recipe({
 });
 
 export const ScrollContent = style({
-  padding: config.space.S300,
+  padding: `${config.space.S300} 0 ${config.space.S300} ${config.space.S400}`,
 });
 
 export const FileList = style({

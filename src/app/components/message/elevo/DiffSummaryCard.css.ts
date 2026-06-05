@@ -39,6 +39,10 @@ export const Title = style({
   minWidth: 0,
 });
 
+export const ReviewButton = style({
+  flexShrink: 0,
+});
+
 export const LineCount = style({
   display: 'inline-flex',
   alignItems: 'center',

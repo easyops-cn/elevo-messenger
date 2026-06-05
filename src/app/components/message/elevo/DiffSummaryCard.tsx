@@ -31,10 +31,7 @@ export function DiffSummaryCard({ summary, style }: DiffSummaryCardProps) {
 
   const fileLabel = (path: string) => (path === UNKNOWN_FILE ? t('message.diffUnknownFile') : path);
   const totalFiles = summary.totalFiles ?? summary.files.length;
-  const title =
-    totalFiles === 1
-      ? t('message.diffEditedOneFile', { path: fileLabel(summary.files[0].path) })
-      : t('message.diffEditedFiles', { count: totalFiles });
+  const title = t('message.diffEditedFile', { count: totalFiles });
 
   const openDiff = () => {
     openCodeView({ title, files: summary.files, added: summary.added, deleted: summary.deleted });
@@ -50,7 +47,14 @@ export function DiffSummaryCard({ summary, style }: DiffSummaryCardProps) {
           </Text>
           <DiffLineCount added={summary.added} deleted={summary.deleted} />
         </div>
-        <Button size="300" radii="300" variant="Secondary" fill="Soft" onClick={openDiff}>
+        <Button
+          className={css.ReviewButton}
+          size="300"
+          radii="300"
+          variant="Secondary"
+          fill="Soft"
+          onClick={openDiff}
+        >
           <Text size="B300">Review</Text>
         </Button>
       </div>

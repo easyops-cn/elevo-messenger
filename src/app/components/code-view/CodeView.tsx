@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Box, Chip, Header, Icon, IconButton, Icons, Scroll, Text, as } from 'folds';
 import type { ThemedToken } from 'shiki';
 import { useTranslation } from 'react-i18next';
@@ -6,6 +6,7 @@ import classNames from 'classnames';
 import * as css from './CodeView.css';
 import type { CodeViewPayload } from './types';
 import { FileDiffIcon } from '../../icons/FileDiffIcon';
+import { FolderOpenIcon } from '../../icons/FolderOpenIcon';
 import { UNKNOWN_FILE } from '../message/elevo/diffSummary';
 import { useTheme } from '../../hooks/useTheme';
 import {
@@ -270,10 +271,16 @@ function compactDirectoryNode(node: FileTreeNode): { name: string; node: FileTre
 type FileTreeProps = {
   node: FileTreeNode;
   activeFileKey?: string;
+  level?: number;
   onSelect: (entry: FileEntry) => void;
 };
 
-function FileTree({ node, activeFileKey, onSelect }: FileTreeProps) {
+const getTreeItemStyle = (level: number): CSSProperties =>
+  ({
+    '--code-view-tree-item-indent': `${level}rem`,
+  }) as CSSProperties;
+
+function FileTree({ node, activeFileKey, level = 0, onSelect }: FileTreeProps) {
   const childNodes = Array.from(node.children.values()).sort((a, b) =>
     a.name.localeCompare(b.name),
   );
@@ -287,13 +294,18 @@ function FileTree({ node, activeFileKey, onSelect }: FileTreeProps) {
         const compacted = compactDirectoryNode(child);
         return (
           <li className={css.TreeItem} key={`dir:${compacted.name}`}>
-            <div className={css.TreeDirectory}>
-              <Icon src={Icons.ChevronBottom} size="50" />
+            <div className={css.TreeDirectory} style={getTreeItemStyle(level)}>
+              <Icon src={FolderOpenIcon} size="50" />
               <Text as="span" size="B300" truncate title={compacted.name}>
                 {compacted.name}
               </Text>
             </div>
-            <FileTree node={compacted.node} activeFileKey={activeFileKey} onSelect={onSelect} />
+            <FileTree
+              node={compacted.node}
+              activeFileKey={activeFileKey}
+              level={level + 1}
+              onSelect={onSelect}
+            />
           </li>
         );
       })}
@@ -303,6 +315,7 @@ function FileTree({ node, activeFileKey, onSelect }: FileTreeProps) {
           <li className={css.TreeItem} key={`file:${entry.key}`}>
             <button
               className={css.TreeFileButton({ active: activeFileKey === entry.key })}
+              style={getTreeItemStyle(level)}
               type="button"
               title={entry.label}
               onClick={() => onSelect(entry)}
@@ -450,11 +463,7 @@ export const CodeView = as<'div', CodeViewProps>(
     }, [expandedFiles, pendingScrollFileKey]);
 
     const allExpanded = expandedFiles.size === fileEntries.length;
-    const title =
-      payload.title ??
-      (payload.files.length === 1
-        ? payload.files[0].path
-        : t('message.diffEditedFiles', { count: payload.files.length }));
+    const title = payload.title ?? t('message.diffEditedFile', { count: payload.files.length });
 
     const toggleAll = () => {
       setExpandedFiles(allExpanded ? new Set() : new Set(fileEntries.map((entry) => entry.key)));

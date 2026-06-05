@@ -248,7 +248,7 @@ function ApplyPatchOperationCard({
     if (body === null) return;
     const file = buildApplyPatchFileSummary(codeViewPath, body);
     openCodeView({
-      title: t('message.diffEditedOneFile', { path: codeViewPath }),
+      title: t('message.diffEditedFile', { count: 1 }),
       files: [file],
       added: file.added,
       deleted: file.deleted,
