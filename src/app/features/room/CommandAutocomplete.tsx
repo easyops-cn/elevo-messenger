@@ -1,4 +1,10 @@
-import React, { KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect, useMemo } from 'react';
+import React, {
+  KeyboardEvent as ReactKeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Editor } from 'slate';
 import { Box, config, MenuItem, Text } from 'folds';
 import { Room } from 'matrix-js-sdk';
@@ -13,7 +19,7 @@ import {
 import { UseAsyncSearchOptions, useAsyncSearch } from '../../hooks/useAsyncSearch';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useKeyDown } from '../../hooks/useKeyDown';
-import { onTabPress } from '../../utils/keyboard';
+import { onAutocompleteItemKeyDown, onAutocompleteNavigation } from '../../utils/keyboard';
 
 type CommandAutoCompleteHandler = (commandName: string) => void;
 
@@ -47,11 +53,16 @@ export function CommandAutocomplete({
   );
 
   const autoCompleteNames = result ? result.items : commandNames;
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     if (query.text) search(query.text);
     else resetSearch();
   }, [query.text, search, resetSearch]);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [query.text, autoCompleteNames.length]);
 
   const handleAutocomplete: CommandAutoCompleteHandler = (commandName) => {
     const cmdEl = createCommandElement(commandName);
@@ -61,12 +72,9 @@ export function CommandAutocomplete({
   };
 
   useKeyDown(window, (evt: KeyboardEvent) => {
-    onTabPress(evt, () => {
-      if (autoCompleteNames.length === 0) {
-        return;
-      }
-      const cmdName = autoCompleteNames[0];
-      handleAutocomplete(cmdName);
+    onAutocompleteNavigation(evt, autoCompleteNames.length, activeIndex, setActiveIndex, () => {
+      const cmdName = autoCompleteNames[activeIndex];
+      if (cmdName) handleAutocomplete(cmdName);
     });
   });
 
@@ -79,14 +87,16 @@ export function CommandAutocomplete({
       }
       requestClose={requestClose}
     >
-      {autoCompleteNames.map((commandName) => (
+      {autoCompleteNames.map((commandName, index) => (
         <MenuItem
           key={commandName}
           as="button"
           radii="300"
           style={{ height: 'unset' }}
+          aria-selected={activeIndex === index}
+          onMouseEnter={() => setActiveIndex(index)}
           onKeyDown={(evt: ReactKeyboardEvent<HTMLButtonElement>) =>
-            onTabPress(evt, () => handleAutocomplete(commandName))
+            onAutocompleteItemKeyDown(evt, () => handleAutocomplete(commandName))
           }
           onClick={() => handleAutocomplete(commandName)}
         >

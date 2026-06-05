@@ -1,6 +1,5 @@
 import React, { ReactNode } from 'react';
 import FocusTrap from 'focus-trap-react';
-import { isKeyHotkey } from 'is-hotkey';
 import { Header, Menu, Scroll, config } from 'folds';
 
 import * as css from './AutocompleteMenu.css';
@@ -32,8 +31,6 @@ export function AutocompleteMenu({ headerContent, requestClose, children }: Auto
             returnFocusOnDeactivate: false,
             clickOutsideDeactivates: true,
             allowOutsideClick: true,
-            isKeyForward: (evt: KeyboardEvent) => isKeyHotkey('arrowdown', evt),
-            isKeyBackward: (evt: KeyboardEvent) => isKeyHotkey('arrowup', evt),
             escapeDeactivates: stopPropagation,
           }}
         >

@@ -1,4 +1,4 @@
-import React, { useEffect, KeyboardEvent as ReactKeyboardEvent } from 'react';
+import React, { useEffect, KeyboardEvent as ReactKeyboardEvent, useState } from 'react';
 import { Editor } from 'slate';
 import { Avatar, Icon, Icons, MenuItem, Text } from 'folds';
 import { Room, RoomMember } from 'matrix-js-sdk';
@@ -12,7 +12,7 @@ import {
   UseAsyncSearchOptions,
   useAsyncSearch,
 } from '../../../hooks/useAsyncSearch';
-import { onTabPress } from '../../../utils/keyboard';
+import { onAutocompleteItemKeyDown, onAutocompleteNavigation } from '../../../utils/keyboard';
 import { createMentionElement, moveCursor, replaceWithElement } from '../utils';
 import { useKeyDown } from '../../../hooks/useKeyDown';
 import { getMxIdLocalPart } from '../../../utils/matrix';
@@ -27,17 +27,23 @@ function UnknownMentionItem({
   userId,
   name,
   handleAutocomplete,
+  selected,
+  onMouseEnter,
 }: {
   userId: string;
   name: string;
   handleAutocomplete: MentionAutoCompleteHandler;
+  selected: boolean;
+  onMouseEnter: () => void;
 }) {
   return (
     <MenuItem
       as="button"
       radii="300"
+      aria-selected={selected}
+      onMouseEnter={onMouseEnter}
       onKeyDown={(evt: ReactKeyboardEvent<HTMLButtonElement>) =>
-        onTabPress(evt, () => handleAutocomplete(userId, name))
+        onAutocompleteItemKeyDown(evt, () => handleAutocomplete(userId, name))
       }
       onClick={() => handleAutocomplete(userId, name)}
       before={
@@ -96,11 +102,18 @@ export function UserMentionAutocomplete({
   const autoCompleteMembers = (result ? result.items.slice(0, 20) : members.slice(0, 20)).filter(
     (m) => withAllowedMembership(m) && m.userId !== currentUserId,
   );
+  const showRoomMention = query.text === 'room';
+  const itemCount = autoCompleteMembers.length + (showRoomMention ? 1 : 0);
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     if (query.text) search(query.text);
     else resetSearch();
   }, [query.text, search, resetSearch]);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [query.text, itemCount]);
 
   const handleAutocomplete: MentionAutoCompleteHandler = (uId, name) => {
     const mentionEl = createMentionElement(
@@ -114,15 +127,13 @@ export function UserMentionAutocomplete({
   };
 
   useKeyDown(window, (evt: KeyboardEvent) => {
-    onTabPress(evt, () => {
-      if (query.text === 'room') {
+    onAutocompleteNavigation(evt, itemCount, activeIndex, setActiveIndex, () => {
+      if (showRoomMention && activeIndex === 0) {
         handleAutocomplete(roomAliasOrId, '@room');
         return;
       }
-      if (autoCompleteMembers.length > 0) {
-        const roomMember = autoCompleteMembers[0];
-        handleAutocomplete(roomMember.userId, roomMember.name);
-      }
+      const roomMember = autoCompleteMembers[showRoomMention ? activeIndex - 1 : activeIndex];
+      if (roomMember) handleAutocomplete(roomMember.userId, roomMember.name);
     });
   });
 
@@ -130,20 +141,23 @@ export function UserMentionAutocomplete({
     getMemberDisplayName(room, member.userId) ?? getMxIdLocalPart(member.userId) ?? member.userId;
 
   // TODO: support @room
-  if (autoCompleteMembers.length === 0) {
+  if (itemCount === 0) {
     return null;
   }
 
   return (
     <AutocompleteMenu headerContent={<Text size="L400">Mentions</Text>} requestClose={requestClose}>
-      {query.text === 'room' && (
+      {showRoomMention && (
         <UnknownMentionItem
           userId={roomAliasOrId}
           name="@room"
           handleAutocomplete={handleAutocomplete}
+          selected={activeIndex === 0}
+          onMouseEnter={() => setActiveIndex(0)}
         />
       )}
-      {autoCompleteMembers.map((roomMember) => {
+      {autoCompleteMembers.map((roomMember, memberIndex) => {
+        const index = showRoomMention ? memberIndex + 1 : memberIndex;
         const avatarMxcUrl = roomMember.getMxcAvatarUrl();
         const avatarUrl = avatarMxcUrl
           ? mx.mxcUrlToHttp(avatarMxcUrl, 32, 32, 'crop', undefined, false, useAuthentication)
@@ -153,8 +167,12 @@ export function UserMentionAutocomplete({
             key={roomMember.userId}
             as="button"
             radii="300"
+            aria-selected={activeIndex === index}
+            onMouseEnter={() => setActiveIndex(index)}
             onKeyDown={(evt: ReactKeyboardEvent<HTMLButtonElement>) =>
-              onTabPress(evt, () => handleAutocomplete(roomMember.userId, getName(roomMember)))
+              onAutocompleteItemKeyDown(evt, () =>
+                handleAutocomplete(roomMember.userId, getName(roomMember)),
+              )
             }
             onClick={() => handleAutocomplete(roomMember.userId, getName(roomMember))}
             after={

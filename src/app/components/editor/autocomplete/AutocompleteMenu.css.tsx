@@ -34,6 +34,10 @@ globalStyle(`${AutocompleteMenu} button:focus`, {
   outline: 'none',
 });
 
+globalStyle(`${AutocompleteMenu} button[aria-selected='true']`, {
+  backgroundColor: color.Surface.ContainerHover,
+});
+
 export const AutocompleteMenuHeader = style([
   DefaultReset,
   { padding: `0 ${config.space.S300}`, flexShrink: 0 },

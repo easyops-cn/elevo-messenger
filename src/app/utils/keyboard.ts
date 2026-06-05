@@ -18,6 +18,39 @@ export const onTabPress = (evt: KeyboardEventLike, callback: () => void) => {
   }
 };
 
+export const onAutocompleteItemKeyDown = (evt: KeyboardEventLike, callback: () => void) => {
+  onTabPress(evt, callback);
+
+  if (isKeyHotkey('backspace', evt)) {
+    evt.preventDefault();
+  }
+};
+
+export const onAutocompleteNavigation = (
+  evt: KeyboardEventLike,
+  itemCount: number,
+  activeIndex: number,
+  setActiveIndex: (index: number) => void,
+  selectActiveItem: () => void,
+) => {
+  if (itemCount === 0) return;
+
+  if (isKeyHotkey('arrowdown', evt)) {
+    evt.preventDefault();
+    setActiveIndex((activeIndex + 1) % itemCount);
+  }
+
+  if (isKeyHotkey('arrowup', evt)) {
+    evt.preventDefault();
+    setActiveIndex((activeIndex - 1 + itemCount) % itemCount);
+  }
+
+  if (isKeyHotkey('tab', evt)) {
+    evt.preventDefault();
+    selectActiveItem();
+  }
+};
+
 export const preventScrollWithArrowKey: KeyboardEventHandler = (evt) => {
   if (isKeyHotkey(['arrowup', 'arrowright', 'arrowdown', 'arrowleft'], evt)) {
     evt.preventDefault();

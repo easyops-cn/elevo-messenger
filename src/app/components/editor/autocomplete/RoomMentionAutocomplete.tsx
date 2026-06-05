@@ -1,4 +1,10 @@
-import React, { KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect } from 'react';
+import React, {
+  KeyboardEvent as ReactKeyboardEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Editor } from 'slate';
 import { Avatar, Icon, MenuItem, Text } from 'folds';
 import { JoinRule, MatrixClient } from 'matrix-js-sdk';
@@ -11,7 +17,7 @@ import { AutocompleteQuery } from './autocompleteQuery';
 import { AutocompleteMenu } from './AutocompleteMenu';
 import { getMxIdServer, isRoomAlias } from '../../../utils/matrix';
 import { UseAsyncSearchOptions, useAsyncSearch } from '../../../hooks/useAsyncSearch';
-import { onTabPress } from '../../../utils/keyboard';
+import { onAutocompleteItemKeyDown, onAutocompleteNavigation } from '../../../utils/keyboard';
 import { useKeyDown } from '../../../hooks/useKeyDown';
 import { mDirectAtom } from '../../../state/mDirectList';
 import { allRoomsAtom } from '../../../state/room-list/roomList';
@@ -30,9 +36,13 @@ const roomAliasFromQueryText = (mx: MatrixClient, text: string) =>
 function UnknownRoomMentionItem({
   query,
   handleAutocomplete,
+  selected,
+  onMouseEnter,
 }: {
   query: AutocompleteQuery<string>;
   handleAutocomplete: MentionAutoCompleteHandler;
+  selected: boolean;
+  onMouseEnter: () => void;
 }) {
   const mx = useMatrixClient();
   const roomAlias: string = roomAliasFromQueryText(mx, query.text);
@@ -43,7 +53,11 @@ function UnknownRoomMentionItem({
     <MenuItem
       as="button"
       radii="300"
-      onKeyDown={(evt: ReactKeyboardEvent<HTMLButtonElement>) => onTabPress(evt, handleSelect)}
+      aria-selected={selected}
+      onMouseEnter={onMouseEnter}
+      onKeyDown={(evt: ReactKeyboardEvent<HTMLButtonElement>) =>
+        onAutocompleteItemKeyDown(evt, handleSelect)
+      }
       onClick={handleSelect}
       before={
         <Avatar size="200">
@@ -98,11 +112,25 @@ export function RoomMentionAutocomplete({
   );
 
   const autoCompleteRoomIds = result ? result.items.slice(0, 20) : allRooms.slice(0, 20);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const autoCompleteRooms = useMemo(
+    () =>
+      autoCompleteRoomIds.flatMap((rId) => {
+        const room = mx.getRoom(rId);
+        return room ? [room] : [];
+      }),
+    [mx, autoCompleteRoomIds],
+  );
+  const itemCount = autoCompleteRooms.length || 1;
 
   useEffect(() => {
     if (query.text) search(query.text);
     else resetSearch();
   }, [query.text, search, resetSearch]);
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [query.text, itemCount]);
 
   const handleAutocomplete: MentionAutoCompleteHandler = (roomAliasOrId, name) => {
     const mentionRoom = mx.getRoom(roomAliasOrId);
@@ -120,28 +148,30 @@ export function RoomMentionAutocomplete({
   };
 
   useKeyDown(window, (evt: KeyboardEvent) => {
-    onTabPress(evt, () => {
-      if (autoCompleteRoomIds.length === 0) {
+    onAutocompleteNavigation(evt, itemCount, activeIndex, setActiveIndex, () => {
+      if (autoCompleteRooms.length === 0) {
         const alias = roomAliasFromQueryText(mx, query.text);
         handleAutocomplete(alias, alias);
         return;
       }
-      const rId = autoCompleteRoomIds[0];
-      const r = mx.getRoom(rId);
-      const name = r?.name ?? rId;
-      handleAutocomplete(r?.getCanonicalAlias() ?? rId, name);
+      const room = autoCompleteRooms[activeIndex];
+      if (room) handleAutocomplete(room.getCanonicalAlias() ?? room.roomId, room.name);
     });
   });
 
   return (
     <AutocompleteMenu headerContent={<Text size="L400">Rooms</Text>} requestClose={requestClose}>
-      {autoCompleteRoomIds.length === 0 ? (
-        <UnknownRoomMentionItem query={query} handleAutocomplete={handleAutocomplete} />
+      {autoCompleteRooms.length === 0 ? (
+        <UnknownRoomMentionItem
+          query={query}
+          handleAutocomplete={handleAutocomplete}
+          selected={activeIndex === 0}
+          onMouseEnter={() => setActiveIndex(0)}
+        />
       ) : (
-        autoCompleteRoomIds.map((rId) => {
-          const room = mx.getRoom(rId);
-          if (!room) return null;
+        autoCompleteRooms.map((room, index) => {
           const dm = mDirects.has(room.roomId);
+          const rId = room.roomId;
 
           const handleSelect = () => handleAutocomplete(room.getCanonicalAlias() ?? rId, room.name);
 
@@ -150,8 +180,10 @@ export function RoomMentionAutocomplete({
               key={rId}
               as="button"
               radii="300"
+              aria-selected={activeIndex === index}
+              onMouseEnter={() => setActiveIndex(index)}
               onKeyDown={(evt: ReactKeyboardEvent<HTMLButtonElement>) =>
-                onTabPress(evt, handleSelect)
+                onAutocompleteItemKeyDown(evt, handleSelect)
               }
               onClick={handleSelect}
               after={
