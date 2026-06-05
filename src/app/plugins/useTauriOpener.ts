@@ -40,7 +40,7 @@ function labelFromUrl(href: string, roomId: string): string {
 /**
  * Open a URL in a side panel docked to the right of the main window.
  * The Rust backend handles the layout: exits fullscreen, resizes/repositions
- * the main window, and places the panel at 1/3 screen width on the right.
+ * the main window, and places the panel at 1/2 screen width on the right.
  * Falls back to system browser on non-desktop or non-allowlisted domains.
  *
  * @param href - The URL to open in the side panel.
