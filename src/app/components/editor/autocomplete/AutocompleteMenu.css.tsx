@@ -1,5 +1,5 @@
-import { style } from '@vanilla-extract/css';
-import { DefaultReset, config } from 'folds';
+import { globalStyle, style } from '@vanilla-extract/css';
+import { DefaultReset, color, config } from 'folds';
 
 export const AutocompleteMenuBase = style([
   DefaultReset,
@@ -28,6 +28,11 @@ export const AutocompleteMenu = style([
     flexDirection: 'column',
   },
 ]);
+
+globalStyle(`${AutocompleteMenu} button:focus`, {
+  backgroundColor: color.Surface.ContainerHover,
+  outline: 'none',
+});
 
 export const AutocompleteMenuHeader = style([
   DefaultReset,
