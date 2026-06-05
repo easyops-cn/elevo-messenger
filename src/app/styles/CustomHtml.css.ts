@@ -41,10 +41,9 @@ export const BlockQuote = style([
 ]);
 
 const BaseCode = style({
-  color: color.SurfaceVariant.OnContainer,
-  background: color.SurfaceVariant.Container,
-  border: `${config.borderWidth.B300} solid ${color.SurfaceVariant.ContainerLine}`,
-  borderRadius: config.radii.R400,
+  color: color.Background.OnContainer,
+  background: color.Background.ContainerActive,
+  borderRadius: config.radii.R300,
 });
 const CodeFont = style({
   fontFamily: 'monospace',
@@ -55,7 +54,7 @@ export const Code = style([
   BaseCode,
   CodeFont,
   {
-    padding: `0 ${config.space.S100}`,
+    padding: `2px ${config.space.S100}`,
   },
 ]);
 
