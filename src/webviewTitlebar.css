@@ -1,0 +1,181 @@
+.WebviewTitlebarBody {
+  margin: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  color: #20242a;
+  background: #f5f6f8;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+}
+
+.WebviewTitlebar {
+  box-sizing: border-box;
+  width: 100vw;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-bottom: 1px solid rgba(33, 38, 45, 0.14);
+  background: #f5f6f8;
+}
+
+.WebviewTitlebar-trafficLightSpacer {
+  width: 70px;
+  flex: 0 0 70px;
+}
+
+.WebviewTitlebar-button {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  display: inline-grid;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  color: #2d333b;
+  background: transparent;
+  cursor: default;
+}
+
+.WebviewTitlebar-button:not(:disabled):hover {
+  background: rgba(33, 38, 45, 0.08);
+}
+
+.WebviewTitlebar-button:disabled {
+  color: rgba(45, 51, 59, 0.34);
+}
+
+.WebviewTitlebar-title {
+  min-width: 0;
+  max-width: min(520px, 45vw);
+  flex: 0 1 auto;
+  margin-right: auto;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border-radius: 6px;
+  color: #4f5863;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(33, 38, 45, 0.11);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.WebviewTitlebar-securityIcon {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  display: inline-flex;
+  color: inherit;
+}
+
+.WebviewTitlebar-securityIconInsecure {
+  color: #d1242f;
+}
+
+.WebviewTitlebar-titleText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.WebviewTitlebar-windowControls {
+  height: 40px;
+  flex: 0 0 auto;
+  display: flex;
+  align-self: stretch;
+  margin: -5px -10px -5px 4px;
+}
+
+.WebviewTitlebar-windowButton {
+  width: 46px;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  color: inherit;
+  background: transparent;
+  cursor: default;
+}
+
+.WebviewTitlebar-windowButton:hover {
+  background: rgba(33, 38, 45, 0.08);
+}
+
+.WebviewTitlebar-windowButton:active {
+  background: rgba(33, 38, 45, 0.13);
+}
+
+.WebviewTitlebar-closeButton:hover {
+  color: #ffffff;
+  background: #e81123;
+}
+
+.WebviewTitlebar-closeButton:active {
+  color: #ffffff;
+  background: #bf0f1d;
+}
+
+@media (prefers-color-scheme: dark) {
+  .WebviewTitlebarBody {
+    color: #d8dee9;
+    background: #1f2328;
+  }
+
+  .WebviewTitlebar {
+    border-bottom-color: rgba(205, 217, 229, 0.12);
+    background: #1f2328;
+  }
+
+  .WebviewTitlebar-button {
+    color: #d8dee9;
+  }
+
+  .WebviewTitlebar-button:not(:disabled):hover {
+    background: rgba(205, 217, 229, 0.1);
+  }
+
+  .WebviewTitlebar-button:disabled {
+    color: rgba(216, 222, 233, 0.32);
+  }
+
+  .WebviewTitlebar-title {
+    color: #b8c0cc;
+    background: #2a3038;
+    box-shadow: inset 0 0 0 1px rgba(205, 217, 229, 0.12);
+  }
+
+  .WebviewTitlebar-securityIconInsecure {
+    color: #ff7b72;
+  }
+
+  .WebviewTitlebar-windowButton:hover {
+    background: rgba(205, 217, 229, 0.1);
+  }
+
+  .WebviewTitlebar-windowButton:active {
+    background: rgba(205, 217, 229, 0.15);
+  }
+
+  .WebviewTitlebar-closeButton:hover {
+    color: #ffffff;
+    background: #e81123;
+  }
+
+  .WebviewTitlebar-closeButton:active {
+    color: #ffffff;
+    background: #bf0f1d;
+  }
+}
