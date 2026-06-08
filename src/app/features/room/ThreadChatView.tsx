@@ -36,8 +36,8 @@ import { stopPropagation } from '../../utils/keyboard';
 import { PencilIcon } from '../../icons/PencilIcon';
 import { XIcon } from '../../icons/XIcon';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
-import { PanelExpandRightIcon } from '../../icons/PanelExpandRightIcon';
-import { PanelCollapseRightIcon } from '../../icons/PanelCollapseRightIcon';
+import { Maximize2Icon } from '../../icons/Maximize2Icon';
+import { Minimize2Icon } from '../../icons/Minimize2Icon';
 
 const THREAD_TOPIC_MAX_LENGTH = 120;
 const THREAD_TOPIC_EVENT_TYPE = MessageEvent.ThreadTopic as unknown as keyof TimelineEvents;
@@ -225,16 +225,14 @@ export function ThreadChatView({ eventId, maximized, onMaximizedChange }: Thread
       <Page>
         <PageHeader>
           <Box grow="Yes" alignItems="Center" gap="200">
-            <Box grow="Yes">
+            <Box grow="Yes" alignItems="Center" gap="100">
               <Text size="H5" truncate>
                 {threadTopic ?? t('room.thread')}
               </Text>
-            </Box>
-            <Box shrink="No" alignItems="Center" gap="100">
               {canSetThreadTopic && (
                 <TooltipProvider
                   position="Bottom"
-                  align="End"
+                  align="Start"
                   offset={4}
                   tooltip={
                     <Tooltip>
@@ -253,6 +251,8 @@ export function ThreadChatView({ eventId, maximized, onMaximizedChange }: Thread
                   )}
                 </TooltipProvider>
               )}
+            </Box>
+            <Box shrink="No" alignItems="Center" gap="100">
               {screenSize === ScreenSize.Desktop && (
                 <TooltipProvider
                   position="Bottom"
@@ -260,9 +260,7 @@ export function ThreadChatView({ eventId, maximized, onMaximizedChange }: Thread
                   offset={4}
                   tooltip={
                     <Tooltip>
-                      <Text>
-                        {maximized ? t('room.restoreThread') : t('room.maximizeThread')}
-                      </Text>
+                      <Text>{maximized ? t('room.restoreThread') : t('room.maximizeThread')}</Text>
                     </Tooltip>
                   }
                 >
@@ -273,7 +271,7 @@ export function ThreadChatView({ eventId, maximized, onMaximizedChange }: Thread
                       onClick={() => onMaximizedChange?.(!maximized)}
                       aria-pressed={maximized}
                     >
-                      <Icon src={maximized ? PanelCollapseRightIcon : PanelExpandRightIcon} />
+                      <Icon src={maximized ? Minimize2Icon : Maximize2Icon} />
                     </IconButton>
                   )}
                 </TooltipProvider>
