@@ -80,14 +80,24 @@ export function EmoticonAutocomplete({
     requestClose();
   };
 
-  useKeyDown(window, (evt: KeyboardEvent) => {
-    onAutocompleteNavigation(evt, autoCompleteEmoticon.length, activeIndex, setActiveIndex, () => {
-      const emoticon = autoCompleteEmoticon[activeIndex];
-      if (!emoticon) return;
-      const key = 'url' in emoticon ? emoticon.url : emoticon.unicode;
-      handleAutocomplete(key, emoticon.shortcode);
-    });
-  });
+  useKeyDown(
+    window,
+    (evt: KeyboardEvent) => {
+      onAutocompleteNavigation(
+        evt,
+        autoCompleteEmoticon.length,
+        activeIndex,
+        setActiveIndex,
+        () => {
+          const emoticon = autoCompleteEmoticon[activeIndex];
+          if (!emoticon) return;
+          const key = 'url' in emoticon ? emoticon.url : emoticon.unicode;
+          handleAutocomplete(key, emoticon.shortcode);
+        },
+      );
+    },
+    true,
+  );
 
   return autoCompleteEmoticon.length === 0 ? null : (
     <AutocompleteMenu headerContent={<Text size="L400">Emojis</Text>} requestClose={requestClose}>

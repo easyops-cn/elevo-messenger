@@ -126,16 +126,20 @@ export function UserMentionAutocomplete({
     requestClose();
   };
 
-  useKeyDown(window, (evt: KeyboardEvent) => {
-    onAutocompleteNavigation(evt, itemCount, activeIndex, setActiveIndex, () => {
-      if (showRoomMention && activeIndex === 0) {
-        handleAutocomplete(roomAliasOrId, '@room');
-        return;
-      }
-      const roomMember = autoCompleteMembers[showRoomMention ? activeIndex - 1 : activeIndex];
-      if (roomMember) handleAutocomplete(roomMember.userId, roomMember.name);
-    });
-  });
+  useKeyDown(
+    window,
+    (evt: KeyboardEvent) => {
+      onAutocompleteNavigation(evt, itemCount, activeIndex, setActiveIndex, () => {
+        if (showRoomMention && activeIndex === 0) {
+          handleAutocomplete(roomAliasOrId, '@room');
+          return;
+        }
+        const roomMember = autoCompleteMembers[showRoomMention ? activeIndex - 1 : activeIndex];
+        if (roomMember) handleAutocomplete(roomMember.userId, roomMember.name);
+      });
+    },
+    true,
+  );
 
   const getName = (member: RoomMember) =>
     getMemberDisplayName(room, member.userId) ?? getMxIdLocalPart(member.userId) ?? member.userId;

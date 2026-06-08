@@ -1,10 +1,14 @@
 import { useEffect } from 'react';
 
-export const useKeyDown = (target: Window, callback: (evt: KeyboardEvent) => void) => {
+export const useKeyDown = (
+  target: Window,
+  callback: (evt: KeyboardEvent) => void,
+  options?: boolean | AddEventListenerOptions,
+) => {
   useEffect(() => {
-    target.addEventListener('keydown', callback);
+    target.addEventListener('keydown', callback, options);
     return () => {
-      target.removeEventListener('keydown', callback);
+      target.removeEventListener('keydown', callback, options);
     };
-  }, [target, callback]);
+  }, [target, callback, options]);
 };

@@ -147,17 +147,21 @@ export function RoomMentionAutocomplete({
     requestClose();
   };
 
-  useKeyDown(window, (evt: KeyboardEvent) => {
-    onAutocompleteNavigation(evt, itemCount, activeIndex, setActiveIndex, () => {
-      if (autoCompleteRooms.length === 0) {
-        const alias = roomAliasFromQueryText(mx, query.text);
-        handleAutocomplete(alias, alias);
-        return;
-      }
-      const room = autoCompleteRooms[activeIndex];
-      if (room) handleAutocomplete(room.getCanonicalAlias() ?? room.roomId, room.name);
-    });
-  });
+  useKeyDown(
+    window,
+    (evt: KeyboardEvent) => {
+      onAutocompleteNavigation(evt, itemCount, activeIndex, setActiveIndex, () => {
+        if (autoCompleteRooms.length === 0) {
+          const alias = roomAliasFromQueryText(mx, query.text);
+          handleAutocomplete(alias, alias);
+          return;
+        }
+        const room = autoCompleteRooms[activeIndex];
+        if (room) handleAutocomplete(room.getCanonicalAlias() ?? room.roomId, room.name);
+      });
+    },
+    true,
+  );
 
   return (
     <AutocompleteMenu headerContent={<Text size="L400">Rooms</Text>} requestClose={requestClose}>

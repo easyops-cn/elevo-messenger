@@ -9,6 +9,7 @@ export interface KeyboardEventLike {
   metaKey: boolean;
   shiftKey: boolean;
   preventDefault(): void;
+  stopPropagation(): void;
 }
 
 export const onTabPress = (evt: KeyboardEventLike, callback: () => void) => {
@@ -37,16 +38,19 @@ export const onAutocompleteNavigation = (
 
   if (isKeyHotkey('arrowdown', evt)) {
     evt.preventDefault();
+    evt.stopPropagation();
     setActiveIndex((activeIndex + 1) % itemCount);
   }
 
   if (isKeyHotkey('arrowup', evt)) {
     evt.preventDefault();
+    evt.stopPropagation();
     setActiveIndex((activeIndex - 1 + itemCount) % itemCount);
   }
 
   if (isKeyHotkey('tab', evt)) {
     evt.preventDefault();
+    evt.stopPropagation();
     selectActiveItem();
   }
 };
