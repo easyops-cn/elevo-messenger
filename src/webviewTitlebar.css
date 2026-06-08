@@ -69,6 +69,7 @@
   box-shadow: inset 0 0 0 1px rgba(33, 38, 45, 0.11);
   font-size: 13px;
   line-height: 1;
+  user-select: text;
 }
 
 .WebviewTitlebar-securityIcon {
@@ -88,6 +89,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  user-select: text;
 }
 
 .WebviewTitlebar-windowControls {

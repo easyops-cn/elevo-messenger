@@ -157,6 +157,14 @@ const isLocalhost = (hostname: string) =>
   hostname === '[::1]' ||
   hostname === '::1';
 
+const isInteractiveTarget = (target: EventTarget | null) =>
+  target instanceof HTMLElement &&
+  Boolean(
+    target.closest(
+      'button, a, input, select, textarea, label, summary, [role="button"], .WebviewTitlebar-title',
+    ),
+  );
+
 function SecurityIcon({ url }: { url: string }) {
   const security = useMemo(() => {
     try {
@@ -234,8 +242,20 @@ function WebviewTitlebar() {
     });
   };
 
+  const handleMouseDown = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!label || event.button !== 0 || isInteractiveTarget(event.target)) return;
+
+    event.preventDefault();
+    invoke(
+      event.detail === 2 ? 'webview_titlebar_toggle_maximize' : 'webview_titlebar_start_dragging',
+      { label },
+    ).catch((error) => {
+      console.error('[webview-titlebar] drag failed:', error);
+    });
+  };
+
   return (
-    <div className="WebviewTitlebar">
+    <div className="WebviewTitlebar" onMouseDown={handleMouseDown}>
       {isMacOS() ? <div className="WebviewTitlebar-trafficLightSpacer" /> : null}
       <IconButton
         label="Back"
