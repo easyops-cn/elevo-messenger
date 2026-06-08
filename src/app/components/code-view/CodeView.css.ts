@@ -117,6 +117,14 @@ export const TreeItem = style({
   minWidth: 0,
 });
 
+export const TreeFileIconAdded = style({
+  color: color.Success.Main,
+});
+
+export const TreeFileIconDeleted = style({
+  color: color.Critical.Main,
+});
+
 export const TreeDirectory = style({
   display: 'grid',
   gridTemplateColumns: `${toRem(20)} minmax(0, 1fr)`,

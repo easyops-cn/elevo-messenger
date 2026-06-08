@@ -14,6 +14,8 @@ import classNames from 'classnames';
 import * as css from './CodeView.css';
 import type { CodeViewPayload } from './types';
 import { FileDiffIcon } from '../../icons/FileDiffIcon';
+import { FileMinusIcon } from '../../icons/FileMinusIcon';
+import { FilePlusIcon } from '../../icons/FilePlusIcon';
 import { FolderOpenIcon } from '../../icons/FolderOpenIcon';
 import { UNKNOWN_FILE } from '../message/elevo/diffSummary';
 import { useTheme } from '../../hooks/useTheme';
@@ -26,6 +28,7 @@ import {
   type HighlightedTokenLines,
   type ShikiThemeName,
 } from '../../plugins/shiki';
+import { ExternalLinkIcon } from '../../icons/ExternalLinkIcon';
 
 type DiffRowType = 'add' | 'delete' | 'context';
 
@@ -235,6 +238,18 @@ type FileTreeNode = {
   files: FileEntry[];
 };
 
+function getFileStatusIcon(file: CodeViewFile) {
+  if (file.status === 'added') return FilePlusIcon;
+  if (file.status === 'deleted') return FileMinusIcon;
+  return FileDiffIcon;
+}
+
+function getFileStatusIconClassName(file: CodeViewFile): string | undefined {
+  if (file.status === 'added') return css.TreeFileIconAdded;
+  if (file.status === 'deleted') return css.TreeFileIconDeleted;
+  return undefined;
+}
+
 function createFileTreeNode(name: string): FileTreeNode {
   return { name, children: new Map(), files: [] };
 }
@@ -320,6 +335,7 @@ function FileTree({ node, activeFileKey, level = 0, onSelect }: FileTreeProps) {
       })}
       {files.map((entry) => {
         const basename = entry.segments[entry.segments.length - 1];
+        const FileStatusIcon = getFileStatusIcon(entry.file);
         return (
           <li className={css.TreeItem} key={`file:${entry.key}`}>
             <button
@@ -329,7 +345,11 @@ function FileTree({ node, activeFileKey, level = 0, onSelect }: FileTreeProps) {
               title={entry.label}
               onClick={() => onSelect(entry)}
             >
-              <Icon src={FileDiffIcon} size="50" />
+              <Icon
+                className={getFileStatusIconClassName(entry.file)}
+                src={FileStatusIcon}
+                size="50"
+              />
               <Text as="span" size="B300" truncate>
                 {basename}
               </Text>
@@ -644,8 +664,8 @@ export const CodeView = as<'div', CodeViewProps>(
                                 fill="Soft"
                                 onClick={() => openWorkspacePanel(fullFileUrl, roomId)}
                               >
-                                <Icon src={FolderOpenIcon} size="50" />
-                                <Text size="B300">{t('message.viewFullFile')}</Text>
+                                <Text size="T200">{t('message.viewFullFile')}</Text>
+                                <Icon src={ExternalLinkIcon} size="50" />
                               </Button>
                             )}
                           </div>

@@ -270,14 +270,37 @@ export function summarizeUnifiedDiff(diff: string): DiffSummary {
       return;
     }
 
+    if (line.startsWith('new file mode ')) {
+      const file = getCurrentFile();
+      file.status = 'added';
+      file.lines.push(line);
+      return;
+    }
+
+    if (line.startsWith('deleted file mode ')) {
+      const file = getCurrentFile();
+      file.status = 'deleted';
+      file.lines.push(line);
+      return;
+    }
+
     if (line.startsWith('+++ ')) {
-      setCurrentFile(normalizeDiffFile(line.slice(4)));
-      getCurrentFile().lines.push(line);
+      const newPath = normalizeDiffFile(line.slice(4));
+      setCurrentFile(newPath);
+      const file = getCurrentFile();
+      if (!newPath) file.status = 'deleted';
+      file.lines.push(line);
       return;
     }
 
     if (line.startsWith('--- ')) {
       const oldPath = normalizeDiffFile(line.slice(4));
+      if (!oldPath) {
+        const file = getCurrentFile();
+        file.status = 'added';
+        file.lines.push(line);
+        return;
+      }
       if (!currentFile || !oldPath || oldPath !== currentFile.path) {
         pendingHeaderLines = [line];
       } else {
