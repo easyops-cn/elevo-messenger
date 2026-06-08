@@ -5,6 +5,7 @@ import * as css from './DiffSummaryCard.css';
 import { type DiffSummary, UNKNOWN_FILE } from './diffSummary';
 import { FileDiffIcon } from '../../../icons/FileDiffIcon';
 import { useOpenCodeView } from '../../../utils/codeView';
+import type { CodeViewWorkspaceContext } from '../../code-view';
 
 type DiffLineCountProps = {
   added: number;
@@ -22,10 +23,11 @@ function DiffLineCount({ added, deleted }: DiffLineCountProps) {
 
 type DiffSummaryCardProps = {
   summary: DiffSummary;
+  codeViewWorkspace?: CodeViewWorkspaceContext;
   style?: CSSProperties;
 };
 
-export function DiffSummaryCard({ summary, style }: DiffSummaryCardProps) {
+export function DiffSummaryCard({ summary, codeViewWorkspace, style }: DiffSummaryCardProps) {
   const { t } = useTranslation();
   const openCodeView = useOpenCodeView();
 
@@ -34,7 +36,13 @@ export function DiffSummaryCard({ summary, style }: DiffSummaryCardProps) {
   const title = t('message.diffEditedFile', { count: totalFiles });
 
   const openDiff = () => {
-    openCodeView({ title, files: summary.files, added: summary.added, deleted: summary.deleted });
+    openCodeView({
+      title,
+      files: summary.files,
+      added: summary.added,
+      deleted: summary.deleted,
+      ...codeViewWorkspace,
+    });
   };
 
   return (

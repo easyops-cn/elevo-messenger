@@ -11,6 +11,7 @@ import { MessageLayout, settingsAtom } from '../../../state/settings';
 import { useSetting } from '../../../state/hooks/settings';
 import { useOpenCodeView } from '../../../utils/codeView';
 import type { DiffFileSummary } from './diffSummary';
+import type { CodeViewWorkspaceContext } from '../../code-view';
 
 const ToolCallSchema = z.object({
   name: z.string(),
@@ -222,12 +223,14 @@ type ApplyPatchOperationCardProps = {
   operation: ApplyPatchOperation;
   iconClassName: string;
   status: ToolCallData['status'];
+  codeViewWorkspace?: CodeViewWorkspaceContext;
 };
 
 function ApplyPatchOperationCard({
   operation,
   iconClassName,
   status,
+  codeViewWorkspace,
 }: ApplyPatchOperationCardProps) {
   const { t } = useTranslation();
   const openCodeView = useOpenCodeView();
@@ -252,6 +255,7 @@ function ApplyPatchOperationCard({
       files: [file],
       added: file.added,
       deleted: file.deleted,
+      ...codeViewWorkspace,
     });
   };
 
@@ -323,9 +327,10 @@ function getTodosForRender(data: ToolCallData): TodoItem[] | undefined {
 
 type ToolCallCardProps = {
   data: ToolCallData;
+  codeViewWorkspace?: CodeViewWorkspaceContext;
   style?: CSSProperties;
 };
-export function ToolCallCard({ data, style }: ToolCallCardProps) {
+export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardProps) {
   const { t } = useTranslation();
   const [messageLayout] = useSetting(settingsAtom, 'messageLayout');
 
@@ -452,6 +457,7 @@ export function ToolCallCard({ data, style }: ToolCallCardProps) {
             operation={op}
             iconClassName={iconClassName}
             status={data.status}
+            codeViewWorkspace={codeViewWorkspace}
           />
         ))}
       </Box>

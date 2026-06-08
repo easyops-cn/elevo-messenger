@@ -871,6 +871,7 @@
     "diffPatchOmitted": "Patch omitted",
     "diffTruncated": "Truncated",
     "diffUnknownFile": "Unknown files",
+    "viewFullFile": "View full file",
     "expandFileDiff": "Expand changes for {{path}}",
     "collapseFileDiff": "Collapse changes for {{path}}",
     "viewReactions": "View Reactions",

@@ -37,6 +37,7 @@ import { parseGeoUri } from '../../utils/common';
 import { Attachment, AttachmentBox, AttachmentContent, AttachmentHeader } from './attachment';
 import { FileHeader, FileDownloadButton } from './FileHeader';
 import { VoiceMessage } from './content/VoiceMessage';
+import type { CodeViewWorkspaceContext } from '../code-view';
 
 export function MBadEncrypted() {
   return (
@@ -82,6 +83,7 @@ type MTextProps = {
   content: Record<string, unknown>;
   renderBody: (props: RenderBodyProps) => ReactNode;
   renderUrlsPreview?: (urls: string[]) => ReactNode;
+  codeViewWorkspace?: CodeViewWorkspaceContext;
   style?: CSSProperties;
   eventId?: string;
   senderId?: string;
@@ -92,6 +94,7 @@ export function MText({
   content,
   renderBody,
   renderUrlsPreview,
+  codeViewWorkspace,
   style,
   eventId,
   senderId,
@@ -169,7 +172,7 @@ export function MText({
   }
 
   if (toolCall) {
-    return <ToolCallCard data={toolCall} style={style} />;
+    return <ToolCallCard data={toolCall} codeViewWorkspace={codeViewWorkspace} style={style} />;
   }
 
   if (reasoning) {
