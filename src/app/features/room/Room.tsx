@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Box } from 'folds';
 import { useParams } from 'react-router-dom';
 import { isKeyHotkey } from 'is-hotkey';
@@ -33,6 +33,7 @@ export function Room() {
   const powerLevels = usePowerLevels(room);
   const chat = useAtomValue(callChatAtom);
   const [threadChat, setThreadChat] = useThreadChat(room.roomId);
+  const [threadMaximized, setThreadMaximized] = useState(false);
 
   const getLocalEvent = useCallback(() => {
     if (!eventId) return;
@@ -52,6 +53,10 @@ export function Room() {
     }
   }, [isThreadEvent, threadRootId, setThreadChat]);
 
+  useEffect(() => {
+    setThreadMaximized(false);
+  }, [room.roomId, threadChat.open, threadChat.threadRootId]);
+
   useKeyDown(
     window,
     useCallback(
@@ -67,7 +72,10 @@ export function Room() {
   const callView = room.isCallRoom();
 
   const showThreadPanel = !callView && threadChat.open;
-  const showMainRoomView = !showThreadPanel || screenSize === ScreenSize.Desktop;
+  const maximizedThreadPanel =
+    showThreadPanel && threadMaximized && screenSize === ScreenSize.Desktop;
+  const showMainRoomView =
+    !showThreadPanel || (screenSize === ScreenSize.Desktop && !maximizedThreadPanel);
 
   const showCallView = callView && (screenSize === ScreenSize.Desktop || !chat);
   const showRoomView = !callView && showMainRoomView;
@@ -95,7 +103,13 @@ export function Room() {
             )}
           </PageMain>
         )}
-        {showThreadPanel && <ThreadChatView eventId={threadEventId} />}
+        {showThreadPanel && (
+          <ThreadChatView
+            eventId={threadEventId}
+            maximized={threadMaximized}
+            onMaximizedChange={setThreadMaximized}
+          />
+        )}
         {callView && chat && <CallChatView />}
         {!callView && screenSize === ScreenSize.Desktop && showSidePanel && !showThreadPanel && (
           <RoomSidePanel key={room.roomId} room={room} />
