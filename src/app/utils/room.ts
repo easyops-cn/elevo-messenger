@@ -443,6 +443,58 @@ export const getEventReactions = (timelineSet: EventTimelineSet, eventId: string
 export const getEventEdits = (timelineSet: EventTimelineSet, eventId: string, eventType: string) =>
   timelineSet.relations.getChildEventsForEvent(eventId, RelationType.Replace, eventType);
 
+export const getThreadTopicRelations = (
+  relationSource: Pick<EventTimelineSet, 'relations'>,
+  eventId: string,
+) =>
+  relationSource.relations.getChildEventsForEvent(
+    eventId,
+    RelationType.Reference,
+    MessageEvent.ThreadTopic,
+  );
+
+export type ThreadTopicContent = {
+  topic: string;
+  'm.relates_to': {
+    event_id: string;
+    rel_type: RelationType.Reference;
+  };
+};
+
+export const getThreadTopicContent = (eventId: string, topic: string): ThreadTopicContent => ({
+  topic: topic.trim(),
+  'm.relates_to': {
+    event_id: eventId,
+    rel_type: RelationType.Reference,
+  },
+});
+
+export const getLatestThreadTopic = (
+  rootEvent: MatrixEvent | undefined,
+  topicEvents: MatrixEvent[] | undefined,
+): string | undefined => {
+  const rootEventId = rootEvent?.getId();
+  const rootSender = rootEvent?.getSender();
+  if (!rootEventId || !rootSender || !topicEvents) return undefined;
+
+  return topicEvents
+    .filter((event) => {
+      const content = event.getContent();
+      const topic = content.topic;
+      return (
+        event.getType() === MessageEvent.ThreadTopic &&
+        event.getSender() === rootSender &&
+        event.getAssociatedId() === rootEventId &&
+        !event.isRedacted() &&
+        typeof topic === 'string' &&
+        topic.trim().length > 0
+      );
+    })
+    .sort((eventA, eventB) => eventB.getTs() - eventA.getTs())[0]
+    ?.getContent()
+    .topic.trim();
+};
+
 export const getLatestEdit = (
   targetEvent: MatrixEvent,
   editEvents: MatrixEvent[],

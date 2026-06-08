@@ -182,7 +182,13 @@
     "joinOldRoom": "加入旧房间",
     "changedRoomName": "{{name}} 更改了房间名称",
     "changedRoomTopic": "{{name}} 更改了房间话题",
-    "changedRoomAvatar": "{{name}} 更改了房间头像"
+    "changedRoomAvatar": "{{name}} 更改了房间头像",
+    "threadTopic": "子话题主题",
+    "threadTopicSet": "设置子话题主题",
+    "threadTopicEdit": "编辑子话题主题",
+    "threadTopicSave": "保存主题",
+    "threadTopicSaving": "保存中...",
+    "threadTopicSaveFailed": "保存子话题主题失败，请重试。"
   },
   "memberEvent": {
     "brokenEvent": "异常的成员事件",

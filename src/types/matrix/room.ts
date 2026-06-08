@@ -47,6 +47,7 @@ export enum MessageEvent {
   RoomRedaction = 'm.room.redaction',
   Reaction = 'm.reaction',
   ElevoDiff = 'vip.elevo.diff',
+  ThreadTopic = 'vip.elevo.thread_topic',
 }
 
 export enum RoomType {
