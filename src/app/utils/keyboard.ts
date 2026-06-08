@@ -22,6 +22,11 @@ export const onTabPress = (evt: KeyboardEventLike, callback: () => void) => {
 export const onAutocompleteItemKeyDown = (evt: KeyboardEventLike, callback: () => void) => {
   onTabPress(evt, callback);
 
+  if (isKeyHotkey('enter', evt)) {
+    evt.preventDefault();
+    callback();
+  }
+
   if (isKeyHotkey('backspace', evt)) {
     evt.preventDefault();
   }
@@ -48,7 +53,7 @@ export const onAutocompleteNavigation = (
     setActiveIndex((activeIndex - 1 + itemCount) % itemCount);
   }
 
-  if (isKeyHotkey('tab', evt)) {
+  if (isKeyHotkey('tab', evt) || isKeyHotkey('enter', evt)) {
     evt.preventDefault();
     evt.stopPropagation();
     selectActiveItem();
