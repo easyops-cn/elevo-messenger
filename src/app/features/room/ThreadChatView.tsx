@@ -271,7 +271,7 @@ export function ThreadChatView({ eventId, maximized, onMaximizedChange }: Thread
                       onClick={() => onMaximizedChange?.(!maximized)}
                       aria-pressed={maximized}
                     >
-                      <Icon src={maximized ? Minimize2Icon : Maximize2Icon} />
+                      <Icon src={maximized ? Minimize2Icon : Maximize2Icon} size="50" />
                     </IconButton>
                   )}
                 </TooltipProvider>
