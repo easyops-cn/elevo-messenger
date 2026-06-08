@@ -21,6 +21,11 @@ import { getMemberDisplayName, getMemberSearchStr } from '../../../utils/room';
 import { UserAvatar } from '../../user-avatar';
 import { useMediaAuthentication } from '../../../hooks/useMediaAuthentication';
 import { Membership } from '../../../../types/matrix/room';
+import {
+  getRecentUserMentionIds,
+  putRecentUserMention,
+  sortByRecentUserIds,
+} from './recentUserMentions';
 
 type MentionAutoCompleteHandler = (userId: string, name: string) => void;
 
@@ -103,9 +108,16 @@ export function UserMentionAutocomplete({
 
   const [result, search, resetSearch] = useAsyncSearch(members, getRoomMemberStr, SEARCH_OPTIONS);
   const currentUserId = mx.getUserId();
-  const autoCompleteMembers = (result ? result.items.slice(0, 20) : members.slice(0, 20)).filter(
-    (m) => withAllowedMembership(m) && m.userId !== currentUserId,
+  const [recentUserIds, setRecentUserIds] = useState(() =>
+    getRecentUserMentionIds(currentUserId, roomId),
   );
+  const autoCompleteMembers = sortByRecentUserIds(
+    (result ? result.items : members).filter(
+      (m) => withAllowedMembership(m) && m.userId !== currentUserId,
+    ),
+    recentUserIds,
+    (m) => m.userId,
+  ).slice(0, 20);
   const showRoomMention = query.text === 'room';
   const itemCount = autoCompleteMembers.length + (showRoomMention ? 1 : 0);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -123,7 +135,15 @@ export function UserMentionAutocomplete({
     setActiveIndex(0);
   }, [query.text, itemCount]);
 
-  const handleAutocomplete: MentionAutoCompleteHandler = (uId, name) => {
+  useEffect(() => {
+    setRecentUserIds(getRecentUserMentionIds(currentUserId, roomId));
+  }, [currentUserId, roomId]);
+
+  const handleAutocomplete = (uId: string, name: string, rememberRecentUser = true) => {
+    if (rememberRecentUser) {
+      setRecentUserIds(putRecentUserMention(currentUserId, roomId, uId));
+    }
+
     const mentionEl = createMentionElement(
       uId,
       name.startsWith('@') ? name : `@${name}`,
@@ -139,7 +159,7 @@ export function UserMentionAutocomplete({
     (evt: KeyboardEvent) => {
       onAutocompleteNavigation(evt, itemCount, activeIndex, setActiveIndex, () => {
         if (showRoomMention && activeIndex === 0) {
-          handleAutocomplete(roomAliasOrId, '@room');
+          handleAutocomplete(roomAliasOrId, '@room', false);
           return;
         }
         const roomMember = autoCompleteMembers[showRoomMention ? activeIndex - 1 : activeIndex];
