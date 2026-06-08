@@ -33,6 +33,8 @@ import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
 import { getThreadTopicContent } from '../../utils/room';
 import { MessageEvent } from '../../../types/matrix/room';
 import { stopPropagation } from '../../utils/keyboard';
+import { PencilIcon } from '../../icons/PencilIcon';
+import { XIcon } from '../../icons/XIcon';
 
 const THREAD_TOPIC_MAX_LENGTH = 120;
 const THREAD_TOPIC_EVENT_TYPE = MessageEvent.ThreadTopic as unknown as keyof TimelineEvents;
@@ -213,7 +215,7 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
                 {threadTopic ?? t('room.thread')}
               </Text>
             </Box>
-            <Box shrink="No" alignItems="Center">
+            <Box shrink="No" alignItems="Center" gap="100">
               {canSetThreadTopic && (
                 <TooltipProvider
                   position="Bottom"
@@ -231,7 +233,7 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
                       variant="Surface"
                       onClick={() => setTopicDialogOpen(true)}
                     >
-                      <Icon src={Icons.Pencil} />
+                      <Icon src={PencilIcon} size="50" />
                     </IconButton>
                   )}
                 </TooltipProvider>
@@ -248,7 +250,7 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
               >
                 {(triggerRef) => (
                   <IconButton ref={triggerRef} variant="Surface" onClick={handleClose}>
-                    <Icon src={Icons.Cross} />
+                    <Icon src={XIcon} size="50" />
                   </IconButton>
                 )}
               </TooltipProvider>
