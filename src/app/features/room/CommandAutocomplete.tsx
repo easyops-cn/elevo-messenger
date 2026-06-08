@@ -15,6 +15,7 @@ import {
   createCommandElement,
   moveCursor,
   replaceWithElement,
+  useActiveAutocompleteItemFocus,
 } from '../../components/editor';
 import { UseAsyncSearchOptions, useAsyncSearch } from '../../hooks/useAsyncSearch';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
@@ -54,6 +55,10 @@ export function CommandAutocomplete({
 
   const autoCompleteNames = result ? result.items : commandNames;
   const [activeIndex, setActiveIndex] = useState(0);
+  const registerItemRef = useActiveAutocompleteItemFocus<HTMLButtonElement>(
+    activeIndex,
+    autoCompleteNames.length,
+  );
 
   useEffect(() => {
     if (query.text) search(query.text);
@@ -91,6 +96,7 @@ export function CommandAutocomplete({
         <MenuItem
           key={commandName}
           as="button"
+          ref={registerItemRef(index)}
           radii="300"
           style={{ height: 'unset' }}
           aria-selected={activeIndex === index}

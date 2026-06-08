@@ -15,6 +15,7 @@ import { getDirectRoomAvatarUrl, getRoomAvatarUrl } from '../../../utils/room';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { AutocompleteQuery } from './autocompleteQuery';
 import { AutocompleteMenu } from './AutocompleteMenu';
+import { useActiveAutocompleteItemFocus } from './useActiveAutocompleteItemFocus';
 import { getMxIdServer, isRoomAlias } from '../../../utils/matrix';
 import { UseAsyncSearchOptions, useAsyncSearch } from '../../../hooks/useAsyncSearch';
 import { onAutocompleteItemKeyDown, onAutocompleteNavigation } from '../../../utils/keyboard';
@@ -38,11 +39,13 @@ function UnknownRoomMentionItem({
   handleAutocomplete,
   selected,
   onMouseEnter,
+  itemRef,
 }: {
   query: AutocompleteQuery<string>;
   handleAutocomplete: MentionAutoCompleteHandler;
   selected: boolean;
   onMouseEnter: () => void;
+  itemRef: (element: HTMLButtonElement | null) => void;
 }) {
   const mx = useMatrixClient();
   const roomAlias: string = roomAliasFromQueryText(mx, query.text);
@@ -52,6 +55,7 @@ function UnknownRoomMentionItem({
   return (
     <MenuItem
       as="button"
+      ref={itemRef}
       radii="300"
       aria-selected={selected}
       onMouseEnter={onMouseEnter}
@@ -122,6 +126,7 @@ export function RoomMentionAutocomplete({
     [mx, autoCompleteRoomIds],
   );
   const itemCount = autoCompleteRooms.length || 1;
+  const registerItemRef = useActiveAutocompleteItemFocus<HTMLButtonElement>(activeIndex, itemCount);
 
   useEffect(() => {
     if (query.text) search(query.text);
@@ -167,6 +172,7 @@ export function RoomMentionAutocomplete({
           handleAutocomplete={handleAutocomplete}
           selected={activeIndex === 0}
           onMouseEnter={() => setActiveIndex(0)}
+          itemRef={registerItemRef(0)}
         />
       ) : (
         autoCompleteRooms.map((room, index) => {
@@ -179,6 +185,7 @@ export function RoomMentionAutocomplete({
             <MenuItem
               key={rId}
               as="button"
+              ref={registerItemRef(index)}
               radii="300"
               aria-selected={activeIndex === index}
               onMouseEnter={() => setActiveIndex(index)}

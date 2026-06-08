@@ -5,6 +5,7 @@ import { Room } from 'matrix-js-sdk';
 
 import { AutocompleteQuery } from './autocompleteQuery';
 import { AutocompleteMenu } from './AutocompleteMenu';
+import { useActiveAutocompleteItemFocus } from './useActiveAutocompleteItemFocus';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { UseAsyncSearchOptions, useAsyncSearch } from '../../../hooks/useAsyncSearch';
 import { onAutocompleteItemKeyDown, onAutocompleteNavigation } from '../../../utils/keyboard';
@@ -63,6 +64,10 @@ export function EmoticonAutocomplete({
   );
   const autoCompleteEmoticon = result ? result.items.slice(0, 20) : recentEmoji;
   const [activeIndex, setActiveIndex] = useState(0);
+  const registerItemRef = useActiveAutocompleteItemFocus<HTMLButtonElement>(
+    activeIndex,
+    autoCompleteEmoticon.length,
+  );
 
   useEffect(() => {
     if (query.text) search(query.text);
@@ -100,6 +105,7 @@ export function EmoticonAutocomplete({
           <MenuItem
             key={emoticon.shortcode + key}
             as="button"
+            ref={registerItemRef(index)}
             radii="300"
             aria-selected={activeIndex === index}
             onMouseEnter={() => setActiveIndex(index)}
