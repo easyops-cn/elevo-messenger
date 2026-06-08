@@ -1,4 +1,4 @@
-import React, { FormEventHandler, useCallback, useEffect, useState } from 'react';
+import React, { FormEventHandler, useCallback, useEffect, useRef, useState } from 'react';
 import {
   Box,
   Button,
@@ -49,6 +49,7 @@ type ThreadTopicDialogProps = {
 function ThreadTopicDialog({ roomId, rootEventId, topic, requestClose }: ThreadTopicDialogProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
+  const topicInputRef = useRef<HTMLInputElement>(null);
 
   const [submitState, submit] = useAsyncCallback(
     useCallback(
@@ -84,7 +85,7 @@ function ThreadTopicDialog({ roomId, rootEventId, topic, requestClose }: ThreadT
       <OverlayCenter>
         <FocusTrap
           focusTrapOptions={{
-            initialFocus: false,
+            initialFocus: () => topicInputRef.current,
             onDeactivate: requestClose,
             clickOutsideDeactivates: true,
             escapeDeactivates: stopPropagation,
@@ -116,6 +117,7 @@ function ThreadTopicDialog({ roomId, rootEventId, topic, requestClose }: ThreadT
               <Box direction="Column" gap="100">
                 <Text size="L400">{t('room.threadTopic')}</Text>
                 <Input
+                  ref={topicInputRef}
                   name="topicInput"
                   variant="Background"
                   defaultValue={topic}
