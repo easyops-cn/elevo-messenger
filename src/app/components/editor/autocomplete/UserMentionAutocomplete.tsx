@@ -5,6 +5,7 @@ import { Room, RoomMember } from 'matrix-js-sdk';
 
 import { AutocompleteQuery } from './autocompleteQuery';
 import { AutocompleteMenu } from './AutocompleteMenu';
+import { useActiveAutocompleteItemScroll } from './useActiveAutocompleteItemScroll';
 import { useRoomMembers } from '../../../hooks/useRoomMembers';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import {
@@ -29,16 +30,19 @@ function UnknownMentionItem({
   handleAutocomplete,
   selected,
   onMouseEnter,
+  itemRef,
 }: {
   userId: string;
   name: string;
   handleAutocomplete: MentionAutoCompleteHandler;
   selected: boolean;
   onMouseEnter: () => void;
+  itemRef: (element: HTMLButtonElement | null) => void;
 }) {
   return (
     <MenuItem
       as="button"
+      ref={itemRef}
       radii="300"
       aria-selected={selected}
       onMouseEnter={onMouseEnter}
@@ -105,6 +109,10 @@ export function UserMentionAutocomplete({
   const showRoomMention = query.text === 'room';
   const itemCount = autoCompleteMembers.length + (showRoomMention ? 1 : 0);
   const [activeIndex, setActiveIndex] = useState(0);
+  const registerItemRef = useActiveAutocompleteItemScroll<HTMLButtonElement>(
+    activeIndex,
+    itemCount,
+  );
 
   useEffect(() => {
     if (query.text) search(query.text);
@@ -158,6 +166,7 @@ export function UserMentionAutocomplete({
           handleAutocomplete={handleAutocomplete}
           selected={activeIndex === 0}
           onMouseEnter={() => setActiveIndex(0)}
+          itemRef={registerItemRef(0)}
         />
       )}
       {autoCompleteMembers.map((roomMember, memberIndex) => {
@@ -170,6 +179,7 @@ export function UserMentionAutocomplete({
           <MenuItem
             key={roomMember.userId}
             as="button"
+            ref={registerItemRef(index)}
             radii="300"
             aria-selected={activeIndex === index}
             onMouseEnter={() => setActiveIndex(index)}
