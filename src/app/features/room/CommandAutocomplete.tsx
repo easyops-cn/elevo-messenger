@@ -71,12 +71,16 @@ export function CommandAutocomplete({
     requestClose();
   };
 
-  useKeyDown(window, (evt: KeyboardEvent) => {
-    onAutocompleteNavigation(evt, autoCompleteNames.length, activeIndex, setActiveIndex, () => {
-      const cmdName = autoCompleteNames[activeIndex];
-      if (cmdName) handleAutocomplete(cmdName);
-    });
-  });
+  useKeyDown(
+    window,
+    (evt: KeyboardEvent) => {
+      onAutocompleteNavigation(evt, autoCompleteNames.length, activeIndex, setActiveIndex, () => {
+        const cmdName = autoCompleteNames[activeIndex];
+        if (cmdName) handleAutocomplete(cmdName);
+      });
+    },
+    true,
+  );
 
   return autoCompleteNames.length === 0 ? null : (
     <AutocompleteMenu
