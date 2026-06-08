@@ -35,6 +35,7 @@ import { useMatrixClient } from '../hooks/useMatrixClient';
 import { useMediaAuthentication } from '../hooks/useMediaAuthentication';
 import { mxcUrlToHttp } from '../utils/matrix';
 import { openDesktopFilePreview } from '../utils/desktopPreview';
+import type { CodeViewWorkspaceContext } from './code-view';
 
 type RenderMessageContentProps = {
   displayName: string;
@@ -49,6 +50,7 @@ type RenderMessageContentProps = {
   htmlReactParserOptions: HTMLReactParserOptions;
   linkifyOpts: Opts;
   outlineAttachment?: boolean;
+  codeViewWorkspace?: CodeViewWorkspaceContext;
 };
 export function RenderMessageContent({
   displayName,
@@ -63,6 +65,7 @@ export function RenderMessageContent({
   htmlReactParserOptions,
   linkifyOpts,
   outlineAttachment,
+  codeViewWorkspace,
 }: RenderMessageContentProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
@@ -95,6 +98,7 @@ export function RenderMessageContent({
             />
           )}
           renderUrlsPreview={urlPreview ? renderUrlsPreview : undefined}
+          codeViewWorkspace={codeViewWorkspace}
           eventId={eventId}
           senderId={senderId}
         />
@@ -191,6 +195,7 @@ export function RenderMessageContent({
           />
         )}
         renderUrlsPreview={urlPreview ? renderUrlsPreview : undefined}
+        codeViewWorkspace={codeViewWorkspace}
         eventId={eventId}
         senderId={senderId}
       />

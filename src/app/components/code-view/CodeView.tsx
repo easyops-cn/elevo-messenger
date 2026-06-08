@@ -7,7 +7,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { Box, Chip, Header, Icon, IconButton, Icons, Scroll, Text, as } from 'folds';
+import { Box, Button, Chip, Header, Icon, IconButton, Icons, Scroll, Text, as } from 'folds';
 import type { ThemedToken } from 'shiki';
 import { useTranslation } from 'react-i18next';
 import classNames from 'classnames';
@@ -17,6 +17,7 @@ import { FileDiffIcon } from '../../icons/FileDiffIcon';
 import { FolderOpenIcon } from '../../icons/FolderOpenIcon';
 import { UNKNOWN_FILE } from '../message/elevo/diffSummary';
 import { useTheme } from '../../hooks/useTheme';
+import { openWorkspacePanel } from '../../plugins/useTauriOpener';
 import {
   codeToTokensBase,
   getPlainTokenLines,
@@ -472,6 +473,16 @@ function HighlightedDiff({ path, lines }: HighlightedDiffProps) {
   );
 }
 
+function getFullFileUrl(workspaceExplorerUrl: string, filePath: string): string | undefined {
+  try {
+    const url = new URL(workspaceExplorerUrl);
+    url.searchParams.set('file', filePath);
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}
+
 type CodeViewProps = {
   payload: CodeViewPayload;
   hideCloseButton?: boolean;
@@ -591,29 +602,53 @@ export const CodeView = as<'div', CodeViewProps>(
                     {fileEntries.map((entry) => {
                       const { file, label } = entry;
                       const expanded = expandedFiles.has(entry.key);
+                      const fullFileUrl =
+                        payload.workspaceExplorerUrl && file.path !== UNKNOWN_FILE
+                          ? getFullFileUrl(payload.workspaceExplorerUrl, file.path)
+                          : undefined;
+                      const roomId = payload.roomId;
                       return (
                         <section
                           className={css.FilePanel}
                           key={entry.key}
                           ref={setFileRef(entry.key)}
                         >
-                          <button
-                            className={css.FileHeader}
-                            type="button"
-                            onClick={() => toggleFile(entry.key)}
-                            aria-expanded={expanded}
-                          >
-                            <Text as="span" size="T200" className={css.FilePath} title={label}>
-                              {label}
-                            </Text>
-                            <span className={css.FileMeta}>
-                              <DiffLineCount added={file.added} deleted={file.deleted} />
-                              <Icon
-                                src={expanded ? Icons.ChevronBottom : Icons.ChevronRight}
-                                size="50"
-                              />
-                            </span>
-                          </button>
+                          <div className={css.FileHeader}>
+                            <button
+                              className={css.FileHeaderToggle}
+                              type="button"
+                              onClick={() => toggleFile(entry.key)}
+                              aria-expanded={expanded}
+                              aria-label={t(
+                                expanded ? 'message.collapseFileDiff' : 'message.expandFileDiff',
+                                { path: label },
+                              )}
+                            >
+                              <Text as="span" size="T200" className={css.FilePath} title={label}>
+                                {label}
+                              </Text>
+                              <span className={css.FileMeta}>
+                                <DiffLineCount added={file.added} deleted={file.deleted} />
+                                <Icon
+                                  src={expanded ? Icons.ChevronBottom : Icons.ChevronRight}
+                                  size="50"
+                                />
+                              </span>
+                            </button>
+                            {roomId && fullFileUrl && (
+                              <Button
+                                className={css.FullFileButton}
+                                size="300"
+                                radii="300"
+                                variant="Secondary"
+                                fill="Soft"
+                                onClick={() => openWorkspacePanel(fullFileUrl, roomId)}
+                              >
+                                <Icon src={FolderOpenIcon} size="50" />
+                                <Text size="B300">{t('message.viewFullFile')}</Text>
+                              </Button>
+                            )}
+                          </div>
                           {expanded &&
                             file.lines.length > 0 &&
                             (file.patchOmitted ? (

@@ -193,23 +193,39 @@ export const FileHeader = style({
   gap: config.space.S200,
   width: '100%',
   padding: `${config.space.S200} ${config.space.S300}`,
-  border: 0,
   borderBottom: border,
   backgroundColor: color.SurfaceVariant.Container,
+  color: 'inherit',
+});
+
+export const FileHeaderToggle = style({
+  display: 'grid',
+  gridTemplateColumns: 'minmax(0, 1fr) auto',
+  alignItems: 'center',
+  gap: config.space.S200,
+  minWidth: 0,
+  padding: 0,
+  border: 0,
+  backgroundColor: 'transparent',
   color: 'inherit',
   cursor: 'pointer',
   selectors: {
     '&:hover': {
-      backgroundColor: color.SurfaceVariant.ContainerHover,
+      color: color.Primary.Main,
     },
     '&:active': {
-      backgroundColor: color.SurfaceVariant.ContainerActive,
+      color: color.Primary.Main,
     },
     '&:focus-visible': {
       outline: `${config.borderWidth.B300} solid ${color.Primary.Main}`,
-      outlineOffset: toRem(-2),
+      outlineOffset: toRem(2),
     },
   },
+});
+
+export const FullFileButton = style({
+  whiteSpace: 'nowrap',
+  flexShrink: 0,
 });
 
 export const FilePath = style({

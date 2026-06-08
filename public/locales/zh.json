@@ -871,6 +871,7 @@
     "diffPatchOmitted": "Patch 已省略",
     "diffTruncated": "已裁剪",
     "diffUnknownFile": "未知文件",
+    "viewFullFile": "查看完整文件",
     "expandFileDiff": "展开 {{path}} 的变更",
     "collapseFileDiff": "收起 {{path}} 的变更",
     "viewReactions": "查看反应",

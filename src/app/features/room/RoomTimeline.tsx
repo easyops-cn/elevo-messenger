@@ -112,6 +112,10 @@ import { ThreadSummary } from './ThreadSummary';
 import { useRoomScrollToBottom } from './RoomScrollToBottomContext';
 import { useRoomThread } from './RoomThreadContext';
 import { useAutoScroll } from '../../hooks/useAutoScroll';
+import { useElevoConfig } from '../../hooks/useElevoConfig';
+import { useStateEvent } from '../../hooks/useStateEvent';
+import type { WorkspaceItem } from './WorkspacesModal';
+import type { CodeViewWorkspaceContext } from '../../components/code-view';
 
 const TimelineFloat = as<'div', css.TimelineFloatVariants>(
   ({ position, className, ...props }, ref) => (
@@ -511,6 +515,19 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
   const [showHiddenEvents] = useSetting(settingsAtom, 'showHiddenEvents');
   const [showDeveloperTools] = useSetting(settingsAtom, 'developerTools');
   const { listenScrollToBottomRequest } = useRoomScrollToBottom();
+  const elevoConfig = useElevoConfig();
+  const workspacesStateEvent = useStateEvent(room, StateEvent.ElevoWorkspaces);
+  const linkedWorkspaces: WorkspaceItem[] =
+    (workspacesStateEvent?.getContent() as { workspaces?: WorkspaceItem[] } | undefined)
+      ?.workspaces ?? [];
+  const firstWorkspace = linkedWorkspaces[0];
+  const codeViewWorkspace = useMemo<CodeViewWorkspaceContext | undefined>(() => {
+    if (!elevoConfig.workspaces?.explorerUrl || !firstWorkspace) return undefined;
+    return {
+      roomId: room.roomId,
+      workspaceExplorerUrl: `${elevoConfig.workspaces.explorerUrl}?ids=${firstWorkspace.id}`,
+    };
+  }, [elevoConfig.workspaces?.explorerUrl, firstWorkspace, room.roomId]);
 
   const [hour24Clock] = useSetting(settingsAtom, 'hour24Clock');
   const [dateFormatString] = useSetting(settingsAtom, 'dateFormatString');
@@ -1232,6 +1249,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
                 htmlReactParserOptions={htmlReactParserOptions}
                 linkifyOpts={linkifyOpts}
                 outlineAttachment={messageLayout === MessageLayout.Bubble}
+                codeViewWorkspace={codeViewWorkspace}
               />
             )}
           </Message>
@@ -1349,6 +1367,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
                       htmlReactParserOptions={htmlReactParserOptions}
                       linkifyOpts={linkifyOpts}
                       outlineAttachment={messageLayout === MessageLayout.Bubble}
+                      codeViewWorkspace={codeViewWorkspace}
                     />
                   );
                 }
@@ -1478,7 +1497,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
             {mEvent.isRedacted() ? (
               <RedactedContent reason={mEvent.getUnsigned().redacted_because?.content.reason} />
             ) : diffSummary ? (
-              <DiffSummaryCard summary={diffSummary} />
+              <DiffSummaryCard summary={diffSummary} codeViewWorkspace={codeViewWorkspace} />
             ) : (
               <Text>
                 <MessageBrokenContent />

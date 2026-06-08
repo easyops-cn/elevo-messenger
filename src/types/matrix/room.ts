@@ -37,6 +37,7 @@ export enum StateEvent {
   SpaceParent = 'm.space.parent',
 
   PoniesRoomEmotes = 'im.ponies.room_emotes',
+  ElevoWorkspaces = 'vip.elevo.workspaces',
 }
 
 export enum MessageEvent {
