@@ -16,7 +16,6 @@ import {
   getMemberDisplayName,
   trimThreadSummaryPrefix,
 } from '../../utils/room';
-import { useThreadTopic } from '../../hooks/useThreadTopic';
 
 type ThreadSummaryProps = {
   mEvent: MatrixEvent;
@@ -32,7 +31,6 @@ export function ThreadSummary({ mEvent, room, thread, onOpenThread }: ThreadSumm
 
   const mEventId = mEvent.getId() ?? thread.id;
   const [editVersion, setEditVersion] = useState(0);
-  const threadTopic = useThreadTopic(room, mEvent);
   const hasThreadUnreadBadge = useThreadUnreadBadge({
     room,
     thread,
@@ -151,11 +149,7 @@ export function ThreadSummary({ mEvent, room, thread, onOpenThread }: ThreadSumm
       }}
     >
       <Box alignItems="Center" gap="100" grow="Yes">
-        {threadTopic ? (
-          <Text size="T200" truncate>
-            {threadTopic}
-          </Text>
-        ) : threadLastReplySenderId ? (
+        {threadLastReplySenderId ? (
           <>
             <Avatar size="100" radii="Pill">
               <UserAvatar
