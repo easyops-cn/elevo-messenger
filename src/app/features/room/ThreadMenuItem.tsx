@@ -16,6 +16,7 @@ import {
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { RelativeTime } from '../../components/RelativeTime';
 import { MessageDeletedContent } from '../../components/message';
+import { useThreadTopic } from '../../hooks/useThreadTopic';
 
 type ThreadMenuItemProps = {
   useAuthentication: boolean;
@@ -58,6 +59,7 @@ export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: Thr
 
   const threadEvent = thread.rootEvent;
   const threadLastReply = thread.replyToEvent;
+  const threadTopic = useThreadTopic(room, threadEvent);
 
   const {
     rootSummary,
@@ -153,7 +155,9 @@ export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: Thr
             </Box>
           )}
           <Text size="T300" truncate style={{ flexGrow: 1 }}>
-            {rootIsRedacted ? (
+            {threadTopic ? (
+              threadTopic
+            ) : rootIsRedacted ? (
               <MessageDeletedContent />
             ) : (
               (rootSummary ?? t('message.threadLatestReplyFallback'))

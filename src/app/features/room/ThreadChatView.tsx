@@ -1,13 +1,150 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Text, TooltipProvider, Tooltip, Icon, Icons, IconButton } from 'folds';
+import React, { FormEventHandler, useCallback, useEffect, useState } from 'react';
+import {
+  Box,
+  Button,
+  Dialog,
+  Header,
+  Icon,
+  Icons,
+  IconButton,
+  Input,
+  Overlay,
+  OverlayBackdrop,
+  OverlayCenter,
+  Spinner,
+  Text,
+  TooltipProvider,
+  Tooltip,
+  color,
+  config,
+} from 'folds';
 import { useTranslation } from 'react-i18next';
 import { RoomEvent, type RoomEventHandlerMap, type Thread } from 'matrix-js-sdk';
+import type { TimelineEvents } from 'matrix-js-sdk/lib/@types/event';
+import FocusTrap from 'focus-trap-react';
 import { Page, PageHeader, PageMain } from '../../components/page';
 import { useThreadChat } from '../../state/threadChat';
 import { RoomView } from './RoomView';
 import { useRoom } from '../../hooks/useRoom';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { PageSpinner } from '../../components/PageSpinner';
+import { useThreadTopic } from '../../hooks/useThreadTopic';
+import { AsyncStatus, useAsyncCallback } from '../../hooks/useAsyncCallback';
+import { getThreadTopicContent } from '../../utils/room';
+import { MessageEvent } from '../../../types/matrix/room';
+import { stopPropagation } from '../../utils/keyboard';
+
+const THREAD_TOPIC_MAX_LENGTH = 120;
+const THREAD_TOPIC_EVENT_TYPE = MessageEvent.ThreadTopic as unknown as keyof TimelineEvents;
+
+type ThreadTopicDialogProps = {
+  roomId: string;
+  rootEventId: string;
+  topic?: string;
+  requestClose: () => void;
+};
+
+function ThreadTopicDialog({ roomId, rootEventId, topic, requestClose }: ThreadTopicDialogProps) {
+  const { t } = useTranslation();
+  const mx = useMatrixClient();
+
+  const [submitState, submit] = useAsyncCallback(
+    useCallback(
+      (nextTopic: string) =>
+        mx.sendEvent(
+          roomId,
+          THREAD_TOPIC_EVENT_TYPE,
+          getThreadTopicContent(
+            rootEventId,
+            nextTopic,
+          ) as TimelineEvents[typeof THREAD_TOPIC_EVENT_TYPE],
+        ),
+      [mx, roomId, rootEventId],
+    ),
+  );
+
+  const submitting = submitState.status === AsyncStatus.Loading;
+
+  const handleSubmit: FormEventHandler<HTMLFormElement> = (evt) => {
+    evt.preventDefault();
+    if (submitting) return;
+
+    const target = evt.target as HTMLFormElement | undefined;
+    const topicInput = target?.topicInput as HTMLInputElement | undefined;
+    const nextTopic = topicInput?.value.trim();
+    if (!nextTopic || nextTopic === topic) return;
+
+    submit(nextTopic).then(requestClose);
+  };
+
+  return (
+    <Overlay open backdrop={<OverlayBackdrop />}>
+      <OverlayCenter>
+        <FocusTrap
+          focusTrapOptions={{
+            initialFocus: false,
+            onDeactivate: requestClose,
+            clickOutsideDeactivates: true,
+            escapeDeactivates: stopPropagation,
+          }}
+        >
+          <Dialog variant="Surface">
+            <Header
+              style={{
+                padding: `0 ${config.space.S200} 0 ${config.space.S400}`,
+                borderBottomWidth: config.borderWidth.B300,
+              }}
+              variant="Surface"
+              size="500"
+            >
+              <Box grow="Yes">
+                <Text size="H4">{t('room.threadTopic')}</Text>
+              </Box>
+              <IconButton size="300" onClick={requestClose} radii="300">
+                <Icon src={Icons.Cross} />
+              </IconButton>
+            </Header>
+            <Box
+              as="form"
+              onSubmit={handleSubmit}
+              style={{ padding: config.space.S400 }}
+              direction="Column"
+              gap="400"
+            >
+              <Box direction="Column" gap="100">
+                <Text size="L400">{t('room.threadTopic')}</Text>
+                <Input
+                  name="topicInput"
+                  variant="Background"
+                  defaultValue={topic}
+                  maxLength={THREAD_TOPIC_MAX_LENGTH}
+                  required
+                />
+                {submitState.status === AsyncStatus.Error && (
+                  <Text style={{ color: color.Critical.Main }} size="T300">
+                    {t('room.threadTopicSaveFailed')}
+                  </Text>
+                )}
+              </Box>
+              <Button
+                type="submit"
+                variant="Primary"
+                before={
+                  submitting ? <Spinner fill="Solid" variant="Primary" size="200" /> : undefined
+                }
+                aria-disabled={submitting}
+              >
+                <Text size="B400">
+                  {submitting ? t('room.threadTopicSaving') : t('room.threadTopicSave')}
+                </Text>
+              </Button>
+            </Box>
+          </Dialog>
+        </FocusTrap>
+      </OverlayCenter>
+    </Overlay>
+  );
+}
 
 export function ThreadChatView({ eventId }: { eventId?: string }) {
   const { t } = useTranslation();
@@ -17,6 +154,7 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
   const { threadRootId } = threadChat;
   const [thread, setThread] = useState<Thread | null>(null);
   const [ready, setReady] = useState(false);
+  const [topicDialogOpen, setTopicDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!threadRootId) return;
@@ -60,6 +198,10 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
   }, [mx, thread]);
 
   const handleClose = () => setThreadChat({ open: false, threadRootId: undefined });
+  const threadTopic = useThreadTopic(room, thread?.rootEvent);
+  const threadRootEventId = thread?.rootEvent?.getId();
+  const canSetThreadTopic =
+    !!threadRootEventId && thread?.rootEvent?.getSender() === mx.getSafeUserId();
 
   return (
     <PageMain isSidePanel>
@@ -68,10 +210,32 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
           <Box grow="Yes" alignItems="Center" gap="200">
             <Box grow="Yes">
               <Text size="H5" truncate>
-                {t('room.thread')}
+                {threadTopic ?? t('room.thread')}
               </Text>
             </Box>
             <Box shrink="No" alignItems="Center">
+              {canSetThreadTopic && (
+                <TooltipProvider
+                  position="Bottom"
+                  align="End"
+                  offset={4}
+                  tooltip={
+                    <Tooltip>
+                      <Text>{t(threadTopic ? 'room.threadTopicEdit' : 'room.threadTopicSet')}</Text>
+                    </Tooltip>
+                  }
+                >
+                  {(triggerRef) => (
+                    <IconButton
+                      ref={triggerRef}
+                      variant="Surface"
+                      onClick={() => setTopicDialogOpen(true)}
+                    >
+                      <Icon src={Icons.Pencil} />
+                    </IconButton>
+                  )}
+                </TooltipProvider>
+              )}
               <TooltipProvider
                 position="Bottom"
                 align="End"
@@ -98,6 +262,14 @@ export function ThreadChatView({ eventId }: { eventId?: string }) {
             <PageSpinner />
           )}
         </Box>
+        {topicDialogOpen && threadRootEventId && (
+          <ThreadTopicDialog
+            roomId={room.roomId}
+            rootEventId={threadRootEventId}
+            topic={threadTopic}
+            requestClose={() => setTopicDialogOpen(false)}
+          />
+        )}
       </Page>
     </PageMain>
   );

@@ -182,7 +182,13 @@
     "joinOldRoom": "Join Old Room",
     "changedRoomName": "{{name}} changed room name",
     "changedRoomTopic": "{{name}} changed room topic",
-    "changedRoomAvatar": "{{name}} changed room avatar"
+    "changedRoomAvatar": "{{name}} changed room avatar",
+    "threadTopic": "Thread topic",
+    "threadTopicSet": "Set thread topic",
+    "threadTopicEdit": "Edit thread topic",
+    "threadTopicSave": "Save topic",
+    "threadTopicSaving": "Saving...",
+    "threadTopicSaveFailed": "Failed to save thread topic. Please try again."
   },
   "memberEvent": {
     "brokenEvent": "Broken membership event",
