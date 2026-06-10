@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { z } from 'zod/v4';
 import classNames from 'classnames';
 import { Box, Icon, Icons, Text, toRem } from 'folds';
+import { structuredPatch } from 'diff';
 import * as css from './ToolCallCard.css';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { SquareAsteriskIcon } from '../../../icons/SquareAsteriskIcon';
@@ -46,8 +47,20 @@ const ToolCallDiffInputSchema = z.object({
   path: z.string().optional(),
 });
 
+const EditToolReplaceInputSchema = z.object({
+  replace_all: z.boolean().optional(),
+  file_path: z.string(),
+  old_string: z.string(),
+  new_string: z.string(),
+});
+
+const WriteToolInputSchema = z.object({
+  file_path: z.string(),
+  content: z.string(),
+});
+
 type ApplyPatchOperation =
-  | { kind: 'add'; path: string; content: string }
+  | { kind: 'add'; path: string; content: string; variant?: 'Write' }
   | { kind: 'delete'; path: string }
   | { kind: 'update'; path: string; moveTo?: string; diff: string };
 
@@ -185,18 +198,71 @@ function normalizeAddToolDiff(diff: string): string {
   return [hunkHeader, ...lines.map((line) => `+${line}`)].join('\n');
 }
 
+function buildReplaceDiff(filePath: string, oldStr: string, newStr: string): string {
+  const patch = structuredPatch(filePath, filePath, oldStr, newStr);
+  const lines: string[] = [];
+  patch.hunks.forEach((hunk) => {
+    lines.push('@@');
+    lines.push(...hunk.lines);
+  });
+  return lines.join('\n');
+}
+
 function getToolCallDiffForRender(data: ToolCallData): ApplyPatchOperation[] | undefined {
   const parsedInput = tryParseJson(data.input);
-  const result = ToolCallDiffInputSchema.safeParse(parsedInput);
-  if (!result.success) return undefined;
 
-  const path = result.data.path ?? '';
+  // Edit tool with replace_all / old_string / new_string format
   if (data.name === 'Edit') {
-    return [{ kind: 'update', path, diff: result.data.diff }];
+    const replaceResult = EditToolReplaceInputSchema.safeParse(parsedInput);
+    if (replaceResult.success) {
+      const { file_path, old_string, new_string } = replaceResult.data;
+      return [
+        {
+          kind: 'update',
+          path: file_path,
+          diff: buildReplaceDiff(file_path, old_string, new_string),
+        },
+      ];
+    }
+
+    // Edit tool with diff / path format (legacy)
+    const diffResult = ToolCallDiffInputSchema.safeParse(parsedInput);
+    if (diffResult.success) {
+      const path = diffResult.data.path ?? '';
+      return [{ kind: 'update', path, diff: diffResult.data.diff }];
+    }
+    return undefined;
   }
+
+  // Write tool — treat as creating a new file
+  if (data.name === 'Write') {
+    const writeResult = WriteToolInputSchema.safeParse(parsedInput);
+    if (writeResult.success) {
+      const { file_path, content } = writeResult.data;
+      return [
+        { kind: 'add', variant: 'Write', path: file_path, content: normalizeAddToolDiff(content) },
+      ];
+    }
+    return undefined;
+  }
+
+  // Add tool — treat as creating a new file
   if (data.name === 'Add') {
-    return [{ kind: 'add', path, content: normalizeAddToolDiff(result.data.diff) }];
+    const addResult = WriteToolInputSchema.safeParse(parsedInput);
+    if (addResult.success) {
+      const { file_path, content } = addResult.data;
+      return [{ kind: 'add', path: file_path, content: normalizeAddToolDiff(content) }];
+    }
+
+    // Add tool with diff / path format (legacy)
+    const diffResult = ToolCallDiffInputSchema.safeParse(parsedInput);
+    if (diffResult.success) {
+      const path = diffResult.data.path ?? '';
+      return [{ kind: 'add', path, content: normalizeAddToolDiff(diffResult.data.diff) }];
+    }
+    return undefined;
   }
+
   return undefined;
 }
 
@@ -235,7 +301,12 @@ function ApplyPatchOperationCard({
   const { t } = useTranslation();
   const openCodeView = useOpenCodeView();
 
-  const label = operation.kind === 'add' ? 'Add' : operation.kind === 'delete' ? 'Delete' : 'Edit';
+  const label =
+    operation.kind === 'add'
+      ? operation.variant || 'Add'
+      : operation.kind === 'delete'
+        ? 'Delete'
+        : 'Edit';
 
   const body =
     operation.kind === 'add'
