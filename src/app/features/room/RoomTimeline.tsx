@@ -538,7 +538,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
 
   const threadOrRoomId = thread?.id || room.roomId;
   const setReplyDraft = useSetAtom(threadOrRoomIdToReplyDraftAtomFamily(threadOrRoomId));
-  const [, setThreadChat] = useThreadChat(room.roomId);
+  const [threadChat, setThreadChat] = useThreadChat(room.roomId);
   const powerLevels = usePowerLevelsContext();
   const creators = useRoomCreators(room);
 
@@ -1225,6 +1225,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
                   mEvent={mEvent}
                   room={room}
                   thread={replyToThread}
+                  active={threadChat.open && threadChat.threadRootId === mEventId}
                   onOpenThread={handleOpenThread}
                 />
               )
@@ -1319,6 +1320,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
                   mEvent={mEvent}
                   room={room}
                   thread={replyToThread}
+                  active={threadChat.open && threadChat.threadRootId === mEventId}
                   onOpenThread={handleOpenThread}
                 />
               )

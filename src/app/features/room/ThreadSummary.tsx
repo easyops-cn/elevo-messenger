@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { MatrixEvent, RelationType, Room, RoomEvent, type Thread } from 'matrix-js-sdk';
-import { Badge, Box, Chip, Icon, Icons, Text, config, toRem } from 'folds';
+import { Badge, Box, Chip, Icon, Icons, Text, color, config, toRem } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { MessageSquareTextIcon } from '../../icons/MessageSquareTextIcon';
 import { Avatar } from '../../components/avatar';
@@ -21,10 +21,11 @@ type ThreadSummaryProps = {
   mEvent: MatrixEvent;
   room: Room;
   thread: Thread;
+  active?: boolean;
   onOpenThread: React.MouseEventHandler;
 };
 
-export function ThreadSummary({ mEvent, room, thread, onOpenThread }: ThreadSummaryProps) {
+export function ThreadSummary({ mEvent, room, thread, active, onOpenThread }: ThreadSummaryProps) {
   const mx = useMatrixClient();
   const useAuthentication = useMediaAuthentication();
   const { t } = useTranslation();
@@ -142,10 +143,12 @@ export function ThreadSummary({ mEvent, room, thread, onOpenThread }: ThreadSumm
         </>
       }
       onClick={onOpenThread}
+      aria-pressed={active}
       style={{
         marginTop: config.space.S200,
         width: 'fit-content',
         maxWidth: `min(${toRem(600)}, 100%)`,
+        ...(active ? { backgroundColor: color.SurfaceVariant.ContainerActive } : undefined),
       }}
     >
       <Box alignItems="Center" gap="100" grow="Yes">
