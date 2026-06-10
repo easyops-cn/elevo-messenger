@@ -89,6 +89,26 @@ type MTextProps = {
   senderId?: string;
 };
 
+function parseJsonInput(input: unknown): unknown {
+  if (typeof input !== 'string') return input;
+
+  try {
+    return JSON.parse(input);
+  } catch {
+    return input;
+  }
+}
+
+function getExitPlanModePlan(toolCall: ReturnType<typeof parseToolCall>): string | undefined {
+  if (!toolCall || toolCall.name !== 'ExitPlanMode') return undefined;
+
+  const input = parseJsonInput(toolCall.input);
+  if (typeof input !== 'object' || input === null || Array.isArray(input)) return undefined;
+
+  const plan = (input as Record<string, unknown>).plan;
+  return typeof plan === 'string' && plan.trim() ? plan : undefined;
+}
+
 export function MText({
   edited,
   content,
@@ -172,6 +192,25 @@ export function MText({
   }
 
   if (toolCall) {
+    const exitPlan = getExitPlanModePlan(toolCall);
+
+    if (exitPlan) {
+      return (
+        <Box direction="Column" gap="300" style={style}>
+          <ToolCallCard data={toolCall} codeViewWorkspace={codeViewWorkspace} />
+          <PlanCard
+            content={{
+              body: exitPlan,
+              msgtype: 'm.text',
+              'vip.elevo.plan': true,
+            }}
+            renderBody={renderBody}
+            renderUrlsPreview={renderUrlsPreview}
+          />
+        </Box>
+      );
+    }
+
     return <ToolCallCard data={toolCall} codeViewWorkspace={codeViewWorkspace} style={style} />;
   }
 

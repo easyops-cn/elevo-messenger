@@ -355,6 +355,7 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
     () => getApplyPatchForRender(data) ?? getToolCallDiffForRender(data),
     [data],
   );
+  const showToolDetails = data.name !== 'ExitPlanMode';
 
   const prettierToolName = useMemo(
     () =>
@@ -366,11 +367,22 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
   const toolTitle = useMemo(() => {
     if (data.title) return data.title;
 
+    switch (prettierToolName) {
+      case 'EnterPlanMode':
+      case 'ExitPlanMode':
+        return '';
+    }
+
     if (typeof data.input === 'string') {
       try {
         const input = JSON.parse(data.input);
         let title = '';
         switch (prettierToolName) {
+          case 'Agent':
+            if (typeof input.description === 'string') {
+              title = input.description;
+            }
+            break;
           case 'Bash':
             if (typeof input.description === 'string') {
               title = input.description;
@@ -467,16 +479,17 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
   return (
     <Box style={style} direction="Column" gap="200">
       <div
-        className={css.ToolCallHeader({ interactive: true })}
-        onClick={() => setBodyExpanded((v) => !v)}
+        className={css.ToolCallHeader({ interactive: showToolDetails })}
+        onClick={showToolDetails ? () => setBodyExpanded((v) => !v) : undefined}
         onKeyDown={(e) => {
+          if (!showToolDetails) return;
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             setBodyExpanded((v) => !v);
           }
         }}
-        role="button"
-        tabIndex={0}
+        role={showToolDetails ? 'button' : undefined}
+        tabIndex={showToolDetails ? 0 : undefined}
       >
         <div className={iconClassName}>
           {data.status === 'inprogress' && (
@@ -492,7 +505,7 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
           ) : null}
         </Text>
       </div>
-      {bodyExpanded && (
+      {showToolDetails && bodyExpanded && (
         <div className={css.ToolCallBody}>
           <div className={css.InlineRow}>
             <Text size="T200" className={css.InlineLabel}>

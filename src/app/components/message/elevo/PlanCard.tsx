@@ -1,11 +1,14 @@
 import React, { CSSProperties, ReactNode, useMemo } from 'react';
 import { Box, Chip, Header, Icon, Text } from 'folds';
 import { useTranslation } from 'react-i18next';
+import DOMPurify from 'dompurify';
+import { marked } from 'marked';
 import { MText } from '../MsgTypeRenderers';
 import { copyToClipboard } from '../../../utils/dom';
 import { useTimeoutToggle } from '../../../hooks/useTimeoutToggle';
 import { CopyIcon } from '../../../icons/CopyIcon';
 import { CheckIcon } from '../../../icons/CheckIcon';
+import { trimReplyFromBody } from '../../../utils/room';
 import * as css from './PlanCard.css';
 
 type RenderBodyProps = {
@@ -44,6 +47,16 @@ export function PlanCard({ content, renderBody, renderUrlsPreview, style }: Plan
   const planContent = useMemo(() => {
     const nextContent = { ...content };
     delete nextContent['vip.elevo.plan'];
+
+    if (typeof nextContent.body === 'string' && typeof nextContent.formatted_body !== 'string') {
+      const parsed = marked.parse(trimReplyFromBody(nextContent.body), {
+        gfm: true,
+        breaks: true,
+      });
+      nextContent.format = 'org.matrix.custom.html';
+      nextContent.formatted_body = DOMPurify.sanitize(typeof parsed === 'string' ? parsed : '');
+    }
+
     return nextContent;
   }, [content]);
 
