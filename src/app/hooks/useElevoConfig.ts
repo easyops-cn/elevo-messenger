@@ -11,6 +11,11 @@ export type OAuthConfig = {
   clientId: string;
 };
 
+export type BridgeProviderConfig = {
+  id: string;
+  name: string;
+};
+
 export type FeatureConfig = {
   federation: boolean;
   deviceVerification: boolean;
@@ -22,6 +27,7 @@ export type FeatureConfig = {
 export type WorkspacesConfig = {
   apiBaseUrl?: string;
   explorerUrl?: string;
+  bridgeProvider?: BridgeProviderConfig;
   tenants?: TenantConfig[];
   oauth?: OAuthConfig;
 };

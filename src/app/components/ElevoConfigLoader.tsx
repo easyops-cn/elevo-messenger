@@ -5,6 +5,7 @@ import {
   ElevoConfigProvider,
   TenantConfig,
   OAuthConfig,
+  BridgeProviderConfig,
   DEFAULT_ELEVO_CONFIG,
 } from '../hooks/useElevoConfig';
 import { trimTrailingSlash } from '../utils/common';
@@ -31,11 +32,19 @@ export const fetchElevoConfig = async (baseUrl: string): Promise<ElevoConfig> =>
     const oauth: OAuthConfig | undefined = data.workspaces?.oauth?.client_id
       ? { clientId: data.workspaces.oauth.client_id }
       : undefined;
+    const bridgeProvider: BridgeProviderConfig | undefined =
+      data.workspaces?.bridge_provider?.id && data.workspaces?.bridge_provider?.name
+        ? {
+            id: data.workspaces.bridge_provider.id,
+            name: data.workspaces.bridge_provider.name,
+          }
+        : undefined;
     return {
       todos: data.todos ? { api: data.todos.api } : undefined,
       workspaces: {
         apiBaseUrl: data.workspaces?.api?.base_url,
         explorerUrl: data.workspaces?.explorer?.base_url,
+        bridgeProvider,
         tenants,
         oauth,
       },

@@ -17,6 +17,8 @@ import {
   AddWorkspaceModal,
   WorkspaceItem,
   ELEVO_WORKSPACES_STATE_KEY,
+  getBridgeWorkspacesUrl,
+  getWorkspaceKey,
 } from '../../room/WorkspacesModal';
 
 type WorkspacesProps = {
@@ -30,6 +32,9 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
   const powerLevels = usePowerLevels(room);
   const elevoConfig = useElevoConfig();
   const baseUrl = elevoConfig.workspaces?.apiBaseUrl ?? '';
+  const homeserverUrl = mx.getHomeserverUrl();
+  const matrixToken = mx.getAccessToken() ?? '';
+  const bridgeProvider = elevoConfig.workspaces?.bridgeProvider;
   const tenantsById = new Map(
     (elevoConfig.workspaces?.tenants ?? []).map((tenant) => [tenant.id, tenant.name]),
   );
@@ -59,8 +64,20 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
   const [syncingId, setSyncingId] = useState<string | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
 
+  const getWorkspaceSourceName = (ws: WorkspaceItem): string | undefined => {
+    if (ws.bridge_provider && ws.bridge_provider === bridgeProvider?.id) {
+      return bridgeProvider.name;
+    }
+    return ws.owner_tenant_id ? tenantsById.get(ws.owner_tenant_id) : undefined;
+  };
+
   const handleAdd = async (ws: WorkspaceItem) => {
-    if (linkedWorkspaces.length === 1 && linkedWorkspaces[0].id === ws.id) return;
+    if (
+      linkedWorkspaces.length === 1 &&
+      getWorkspaceKey(linkedWorkspaces[0]) === getWorkspaceKey(ws)
+    ) {
+      return;
+    }
     await mx.sendStateEvent(
       room.roomId,
       ELEVO_WORKSPACES_STATE_KEY as any,
@@ -79,20 +96,44 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
   };
 
   const handleSync = async (ws: WorkspaceItem) => {
-    if (!baseUrl || !token) return;
+    if (ws.bridge_provider) {
+      if (!homeserverUrl || !matrixToken) return;
+    } else if (!baseUrl || !token) return;
+
     setSyncingId(ws.id);
     setSyncError(null);
     try {
-      const res = await fetch(`${baseUrl}/api/v1/shares/${ws.id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data = await res.json();
-      const fresh: WorkspaceItem = data.share;
+      let fresh: WorkspaceItem;
+      if (ws.bridge_provider) {
+        const res = await fetch(
+          `${getBridgeWorkspacesUrl(homeserverUrl, ws.bridge_provider)}/${encodeURIComponent(ws.id)}`,
+          {
+            headers: { Authorization: `Bearer ${matrixToken}` },
+          },
+        );
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        fresh = {
+          id: data.id,
+          name: data.name,
+          bridge_provider: ws.bridge_provider,
+        };
+      } else {
+        const res = await fetch(`${baseUrl}/api/v1/shares/${ws.id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        fresh = data.share;
+      }
       await mx.sendStateEvent(
         room.roomId,
         ELEVO_WORKSPACES_STATE_KEY as any,
-        { workspaces: linkedWorkspaces.map((w) => (w.id === ws.id ? fresh : w)) },
+        {
+          workspaces: linkedWorkspaces.map((w) =>
+            getWorkspaceKey(w) === getWorkspaceKey(ws) ? fresh : w,
+          ),
+        },
         '',
       );
     } catch (e: any) {
@@ -102,7 +143,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
     }
   };
 
-  const linkedIds = new Set(linkedWorkspaces.map((w) => w.id));
+  const linkedIds = new Set(linkedWorkspaces.map((w) => getWorkspaceKey(w)));
   const isConnecting = connectState.status === AsyncStatus.Loading;
 
   return (
@@ -241,57 +282,61 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                       />
                     </SequenceCard>
                   ) : (
-                    linkedWorkspaces.map((ws) => (
-                      <SequenceCard
-                        key={ws.id}
-                        className={SequenceCardStyle}
-                        variant="SurfaceVariant"
-                        direction="Column"
-                        gap="400"
-                      >
-                        <SettingTile
-                          title={ws.name}
-                          description={ws.description || undefined}
-                          after={
-                            isModerator ? (
-                              <Box gap="100" shrink="No">
-                                <IconButton
-                                  size="300"
-                                  variant="Secondary"
-                                  fill="None"
-                                  radii="300"
-                                  onClick={() => handleSync(ws)}
-                                  disabled={syncingId === ws.id}
-                                  title={t('workspaces.sync')}
-                                >
-                                  {syncingId === ws.id ? (
-                                    <Spinner size="100" variant="Secondary" />
-                                  ) : (
-                                    <Icon src={Icons.Reload} size="100" />
-                                  )}
-                                </IconButton>
-                                <IconButton
-                                  size="300"
-                                  variant="Critical"
-                                  fill="None"
-                                  radii="300"
-                                  onClick={() => handleRemove(ws.id)}
-                                  title={t('workspaces.remove')}
-                                >
-                                  <Icon src={Icons.Cross} size="100" />
-                                </IconButton>
-                              </Box>
-                            ) : undefined
-                          }
+                    linkedWorkspaces.map((ws) => {
+                      const sourceName = getWorkspaceSourceName(ws);
+
+                      return (
+                        <SequenceCard
+                          key={getWorkspaceKey(ws)}
+                          className={SequenceCardStyle}
+                          variant="SurfaceVariant"
+                          direction="Column"
+                          gap="400"
                         >
-                          {tenantsById.has(ws.owner_tenant_id) && (
-                            <Text size="T200" priority="300">
-                              {tenantsById.get(ws.owner_tenant_id)}
-                            </Text>
-                          )}
-                        </SettingTile>
-                      </SequenceCard>
-                    ))
+                          <SettingTile
+                            title={ws.name}
+                            description={ws.description || undefined}
+                            after={
+                              isModerator ? (
+                                <Box gap="100" shrink="No">
+                                  <IconButton
+                                    size="300"
+                                    variant="Secondary"
+                                    fill="None"
+                                    radii="300"
+                                    onClick={() => handleSync(ws)}
+                                    disabled={syncingId === ws.id}
+                                    title={t('workspaces.sync')}
+                                  >
+                                    {syncingId === ws.id ? (
+                                      <Spinner size="100" variant="Secondary" />
+                                    ) : (
+                                      <Icon src={Icons.Reload} size="100" />
+                                    )}
+                                  </IconButton>
+                                  <IconButton
+                                    size="300"
+                                    variant="Critical"
+                                    fill="None"
+                                    radii="300"
+                                    onClick={() => handleRemove(ws.id)}
+                                    title={t('workspaces.remove')}
+                                  >
+                                    <Icon src={Icons.Cross} size="100" />
+                                  </IconButton>
+                                </Box>
+                              ) : undefined
+                            }
+                          >
+                            {sourceName && (
+                              <Text size="T200" priority="300">
+                                {sourceName}
+                              </Text>
+                            )}
+                          </SettingTile>
+                        </SequenceCard>
+                      );
+                    })
                   )}
                   {syncError && (
                     <Text size="T200" style={{ color: 'var(--mx-danger)' }}>
@@ -340,6 +385,9 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
           linkedIds={linkedIds}
           baseUrl={baseUrl}
           token={token ?? ''}
+          homeserverUrl={homeserverUrl}
+          matrixToken={matrixToken}
+          bridgeProvider={bridgeProvider}
           tenantNames={tenantsById}
           onAdd={handleAdd}
           requestClose={() => setShowAddModal(false)}

@@ -84,7 +84,10 @@ type RoomMenuProps = {
   room: Room;
   requestClose: () => void;
 };
-const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(({ room, requestClose }, ref) => {
+const RoomMenu = forwardRef<HTMLDivElement, RoomMenuProps>(function LegacyRoomMenu(
+  { room, requestClose },
+  ref,
+) {
   const mx = useMatrixClient();
   const { t } = useTranslation();
   const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
@@ -297,7 +300,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
       : firstTenant.tasks_web_template_url
     : null;
   const tasksUrl =
-    tasksUrlTemplate && firstWorkspace
+    tasksUrlTemplate && firstWorkspace?.source_path
       ? tasksUrlTemplate.replace('{{source_path}}', firstWorkspace.source_path)
       : null;
 
