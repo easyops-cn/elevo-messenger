@@ -38,6 +38,8 @@ import { XIcon } from '../../icons/XIcon';
 import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
 import { Maximize2Icon } from '../../icons/Maximize2Icon';
 import { Minimize2Icon } from '../../icons/Minimize2Icon';
+import { MessageSquareTextIcon } from '../../icons/MessageSquareTextIcon';
+import * as css from './ThreadChatView.css';
 
 const THREAD_TOPIC_MAX_LENGTH = 120;
 const THREAD_TOPIC_EVENT_TYPE = MessageEvent.ThreadTopic as unknown as keyof TimelineEvents;
@@ -223,9 +225,10 @@ export function ThreadChatView({ eventId, maximized, onMaximizedChange }: Thread
   return (
     <PageMain isSidePanel={!maximized}>
       <Page>
-        <PageHeader>
+        <PageHeader className={css.ThreadHeader}>
           <Box grow="Yes" alignItems="Center" gap="200">
-            <Box grow="Yes" alignItems="Center" gap="100">
+            <Box className={css.ThreadTitle} grow="Yes" alignItems="Center" gap="200">
+              <Icon src={MessageSquareTextIcon} size="100" />
               <Text size="H5" truncate>
                 {threadTopic ?? t('room.thread')}
               </Text>
@@ -242,6 +245,7 @@ export function ThreadChatView({ eventId, maximized, onMaximizedChange }: Thread
                 >
                   {(triggerRef) => (
                     <IconButton
+                      className={css.ThreadTopicEditButton}
                       ref={triggerRef}
                       variant="Surface"
                       onClick={() => setTopicDialogOpen(true)}
