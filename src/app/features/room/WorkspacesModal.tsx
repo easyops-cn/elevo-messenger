@@ -19,6 +19,8 @@ import {
   toRem,
 } from 'folds';
 import { SearchIcon } from '../../icons/SearchIcon';
+import { BridgeProviderConfig } from '../../hooks/useElevoConfig';
+import { trimLeadingSlash, trimTrailingSlash } from '../../utils/common';
 
 export const ELEVO_WORKSPACES_STATE_KEY = 'vip.elevo.workspaces';
 const PAGE_SIZE = 100;
@@ -26,28 +28,46 @@ const PAGE_SIZE = 100;
 export type WorkspaceItem = {
   id: string;
   name: string;
-  description: string;
-  source_path: string;
-  owner_tenant_id: string;
-  visibility: string;
-  created_at: string;
-  updated_at: string;
-  metadata: Record<string, unknown>;
+  description?: string;
+  source_path?: string;
+  owner_tenant_id?: string;
+  visibility?: string;
+  created_at?: string;
+  updated_at?: string;
+  metadata?: Record<string, unknown>;
+  bridge_provider?: string;
 };
 
 type AddWorkspaceModalProps = {
   linkedIds: Set<string>;
   baseUrl: string;
   token: string;
+  homeserverUrl: string;
+  matrixToken: string;
+  bridgeProvider?: BridgeProviderConfig;
   tenantNames: Map<string, string>;
   onAdd: (ws: WorkspaceItem) => Promise<void>;
   requestClose: () => void;
 };
 
+type BridgeWorkspace = {
+  id: string;
+  name: string;
+};
+
+export const getWorkspaceKey = (ws: WorkspaceItem): string =>
+  `${ws.bridge_provider ? `bridge:${ws.bridge_provider}` : 'elevo'}:${ws.id}`;
+
+export const getBridgeWorkspacesUrl = (homeserverUrl: string, bridgeProvider: string): string =>
+  `${trimTrailingSlash(homeserverUrl)}/${trimLeadingSlash(trimTrailingSlash(bridgeProvider))}/workspaces`;
+
 export function AddWorkspaceModal({
   linkedIds,
   baseUrl,
   token,
+  homeserverUrl,
+  matrixToken,
+  bridgeProvider,
   tenantNames,
   onAdd,
   requestClose,
@@ -65,18 +85,49 @@ export function AddWorkspaceModal({
 
   const fetchAvailable = useCallback(
     async (page: number) => {
-      if (!baseUrl || !token) return;
+      const canFetchElevo = !!baseUrl && !!token;
+      const bridgeProviderId = bridgeProvider?.id;
+      const canFetchBridge = !!homeserverUrl && !!matrixToken && !!bridgeProviderId;
+      if (!canFetchElevo && !canFetchBridge) return;
       setLoadingAvailable(true);
       setAvailableError(null);
       try {
-        const res = await fetch(
-          `${baseUrl}/api/v1/me/accessible-shares?page=${page}&page_size=${PAGE_SIZE}`,
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
-        setAvailableWorkspaces(data.items ?? []);
-        setAvailableTotal(data.total ?? 0);
+        let elevoRequest: Promise<{ items: WorkspaceItem[]; total: number }> | undefined;
+        let bridgeRequest: Promise<WorkspaceItem[]> | undefined;
+
+        if (canFetchElevo) {
+          elevoRequest = fetch(
+            `${baseUrl}/api/v1/me/accessible-shares?page=${page}&page_size=${PAGE_SIZE}`,
+            {
+              headers: { Authorization: `Bearer ${token}` },
+            },
+          ).then(async (res) => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            return { items: data.items ?? [], total: data.total ?? 0 };
+          });
+        }
+
+        if (canFetchBridge) {
+          bridgeRequest = fetch(getBridgeWorkspacesUrl(homeserverUrl, bridgeProviderId), {
+            headers: { Authorization: `Bearer ${matrixToken}` },
+          }).then(async (res) => {
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            return ((data.workspaces ?? []) as BridgeWorkspace[]).map((ws) => ({
+              id: ws.id,
+              name: ws.name,
+              bridge_provider: bridgeProviderId,
+            }));
+          });
+        }
+
+        const [bridgeWorkspaces = [], elevoResult] = await Promise.all([
+          bridgeRequest,
+          elevoRequest,
+        ]);
+        setAvailableWorkspaces([...bridgeWorkspaces, ...(elevoResult?.items ?? [])]);
+        setAvailableTotal(elevoResult?.total ?? 0);
         setAvailablePage(page);
       } catch (e: any) {
         setAvailableError(e.message ?? t('workspaces.failedToFetch'));
@@ -84,13 +135,15 @@ export function AddWorkspaceModal({
         setLoadingAvailable(false);
       }
     },
-    [baseUrl, token, t],
+    [baseUrl, token, homeserverUrl, matrixToken, bridgeProvider, t],
   );
 
   useEffect(() => {
     fetchAvailable(1);
   }, [fetchAvailable]);
 
+  const canFetchWorkspaceSource =
+    (!!baseUrl && !!token) || (!!homeserverUrl && !!matrixToken && !!bridgeProvider?.id);
   const totalPages = Math.ceil(availableTotal / PAGE_SIZE);
 
   const filteredWorkspaces = availableWorkspaces.filter((ws) => {
@@ -98,6 +151,13 @@ export function AddWorkspaceModal({
     const q = query.trim().toLowerCase();
     return ws.name.toLowerCase().includes(q) || ws.description?.toLowerCase().includes(q);
   });
+
+  const getWorkspaceSourceName = (ws: WorkspaceItem): string | undefined => {
+    if (ws.bridge_provider && ws.bridge_provider === bridgeProvider?.id) {
+      return bridgeProvider.name;
+    }
+    return ws.owner_tenant_id ? tenantNames.get(ws.owner_tenant_id) : undefined;
+  };
 
   return (
     <Overlay open>
@@ -135,7 +195,7 @@ export function AddWorkspaceModal({
               />
             </Box>
             <Box grow="Yes">
-              {!token ? (
+              {!canFetchWorkspaceSource ? (
                 <Box
                   justifyContent="Center"
                   alignItems="Center"
@@ -202,46 +262,50 @@ export function AddWorkspaceModal({
                   {!loadingAvailable && filteredWorkspaces.length > 0 && (
                     <Scroll ref={scrollRef} size="300" hideTrack>
                       <div style={{ padding: config.space.S400, paddingRight: config.space.S200 }}>
-                        {filteredWorkspaces.map((ws) => (
-                          <MenuItem
-                            key={ws.id}
-                            as="button"
-                            variant="Surface"
-                            radii="400"
-                            disabled={adding}
-                            onClick={() => {
-                              setAdding(true);
-                              onAdd(ws)
-                                .then(requestClose)
-                                .finally(() => setAdding(false));
-                            }}
-                            before={
-                              linkedIds.has(ws.id) ? (
-                                <Icon size="200" src={Icons.Check} />
-                              ) : (
-                                <span style={{ display: 'inline-block', width: toRem(20) }} />
-                              )
-                            }
-                            after={
-                              tenantNames.has(ws.owner_tenant_id) ? (
-                                <Text size="T200" priority="300" truncate>
-                                  <b>{tenantNames.get(ws.owner_tenant_id)}</b>
+                        {filteredWorkspaces.map((ws) => {
+                          const sourceName = getWorkspaceSourceName(ws);
+
+                          return (
+                            <MenuItem
+                              key={getWorkspaceKey(ws)}
+                              as="button"
+                              variant="Surface"
+                              radii="400"
+                              disabled={adding}
+                              onClick={() => {
+                                setAdding(true);
+                                onAdd(ws)
+                                  .then(requestClose)
+                                  .finally(() => setAdding(false));
+                              }}
+                              before={
+                                linkedIds.has(getWorkspaceKey(ws)) ? (
+                                  <Icon size="200" src={Icons.Check} />
+                                ) : (
+                                  <span style={{ display: 'inline-block', width: toRem(20) }} />
+                                )
+                              }
+                              after={
+                                sourceName ? (
+                                  <Text size="T200" priority="300" truncate>
+                                    <b>{sourceName}</b>
+                                  </Text>
+                                ) : undefined
+                              }
+                            >
+                              <Box grow="Yes" direction="Column" style={{ minWidth: 0 }}>
+                                <Text size="T300" truncate>
+                                  {ws.name}
                                 </Text>
-                              ) : undefined
-                            }
-                          >
-                            <Box grow="Yes" direction="Column" style={{ minWidth: 0 }}>
-                              <Text size="T300" truncate>
-                                {ws.name}
-                              </Text>
-                              {ws.description ? (
-                                <Text size="T200" priority="300" truncate>
-                                  {ws.description}
-                                </Text>
-                              ) : null}
-                            </Box>
-                          </MenuItem>
-                        ))}
+                                {ws.description ? (
+                                  <Text size="T200" priority="300" truncate>
+                                    {ws.description}
+                                  </Text>
+                                ) : null}
+                              </Box>
+                            </MenuItem>
+                          );
+                        })}
                       </div>
                     </Scroll>
                   )}
