@@ -9,7 +9,6 @@ import {
   CodeBlockElement,
   CodeLineElement,
   EmoticonElement,
-  FileRefElement,
   HeadingElement,
   HeadingLevel,
   InlineElement,
@@ -20,12 +19,7 @@ import {
   type TaskRefStatus,
   UnorderedListElement,
 } from './slate';
-import {
-  createEmoticonElement,
-  createFileRefElement,
-  createMentionElement,
-  createTaskRefElement,
-} from './utils';
+import { createEmoticonElement, createMentionElement, createTaskRefElement } from './utils';
 import {
   parseMatrixToRoom,
   parseMatrixToRoomEvent,
@@ -103,13 +97,7 @@ const getInlineMarkElement = (
 
 const getInlineNonMarkElement = (
   node: Element,
-): MentionElement | EmoticonElement | FileRefElement | TaskRefElement | undefined => {
-  if (node.name === 'span' && node.attribs['data-file-ref'] !== undefined) {
-    const path = node.attribs['data-file-ref'];
-    const rawText = getText(node);
-    const name = rawText.replace(/^\[/, '').replace(/\]$/, '');
-    return createFileRefElement(path, name || path, '', '');
-  }
+): MentionElement | EmoticonElement | TaskRefElement | undefined => {
   if (node.name === 'span' && node.attribs['data-task-ref'] !== undefined) {
     const id = node.attribs['data-task-ref'];
     const status = node.attribs['data-task-status'] as TaskRefStatus | undefined;

@@ -1,4 +1,4 @@
-import { color, Icon, Icons, Scroll, Text, toRem } from 'folds';
+import { color, Scroll, Text, toRem } from 'folds';
 import React from 'react';
 import {
   RenderElementProps,
@@ -12,7 +12,6 @@ import * as css from '../../styles/CustomHtml.css';
 import {
   CommandElement,
   EmoticonElement,
-  FileRefElement,
   LinkElement,
   MentionElement,
   TaskRefElement,
@@ -123,30 +122,6 @@ function RenderLinkElement({
       <InlineChromiumBugfix />
       {children}
     </a>
-  );
-}
-
-function RenderFileRefElement({
-  attributes,
-  element,
-  children,
-}: { element: FileRefElement } & RenderElementProps) {
-  const selected = useSelected();
-  const focused = useFocused();
-
-  return (
-    <span
-      {...attributes}
-      className={css.FileRef({
-        focus: selected && focused,
-      })}
-      contentEditable={false}
-      title={element.path}
-    >
-      <Icon src={Icons.File} style={{ width: toRem(12), height: toRem(12) }} />
-      {` ${element.name}`}
-      {children}
-    </span>
   );
 }
 
@@ -287,12 +262,6 @@ export function RenderElement({ attributes, element, children }: RenderElementPr
         <RenderCommandElement attributes={attributes} element={element}>
           {children}
         </RenderCommandElement>
-      );
-    case BlockType.FileRef:
-      return (
-        <RenderFileRefElement attributes={attributes} element={element}>
-          {children}
-        </RenderFileRefElement>
       );
     case BlockType.TaskRef:
       return (

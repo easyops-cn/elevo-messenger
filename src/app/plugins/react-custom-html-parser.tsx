@@ -510,18 +510,6 @@ export const getReactCustomHtmlParser = (
           );
         }
 
-        if (name === 'span' && 'data-file-ref' in attribs) {
-          const filePath = attribs['data-file-ref'];
-          const rawText = extractTextFromChildren(children);
-          const fileName = rawText.replace(/^\[/, '').replace(/\]$/, '');
-          return (
-            <span className={css.FileRef()} title={filePath}>
-              <Icon src={Icons.File} style={{ width: toRem(14), height: toRem(14) }} />
-              {` ${fileName}`}
-            </span>
-          );
-        }
-
         if (name === 'span' && 'data-task-ref' in attribs) {
           const taskId = attribs['data-task-ref'];
           const taskStatus = attribs['data-task-status'] as TaskRefStatus | undefined;

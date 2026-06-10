@@ -26,6 +26,7 @@ import {
   PopOut,
   Scroll,
   Text,
+  color,
   config,
   toRem,
 } from 'folds';
@@ -55,8 +56,6 @@ import {
   getBeginCommand,
   trimCommand,
   getMentions,
-  getFileReference,
-  createFileRefElement,
   getTaskReference,
   createTaskRefElement,
 } from '../../components/editor';
@@ -123,17 +122,21 @@ import { SmileIcon } from '../../icons/SmileIcon';
 import { MicIcon } from '../../icons/MicIcon';
 import { SendHorizontalIcon } from '../../icons/SendHorizontalIcon';
 import { CaseSensitiveIcon } from '../../icons/CaseSensitiveIcon';
+import { FileIcon } from '../../icons/FileIcon';
+import { EyeOffIcon } from '../../icons/EyeOffIcon';
 import { useRoomScrollToBottom } from './RoomScrollToBottomContext';
 import { useRoomThread } from './RoomThreadContext';
 
+type SelectedFileReference = {
+  path: string;
+  name: string;
+  workspaceId: string;
+  workspaceName: string;
+};
+
 interface WorkspaceExplorerMessage {
   type: 'select-file';
-  file: null | {
-    path: string;
-    name: string;
-    workspaceId: string;
-    workspaceName: string;
-  };
+  file: null | SelectedFileReference;
 }
 
 interface TaskManagementMessage {
@@ -196,32 +199,13 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
   const [autocompleteQuery, setAutocompleteQuery] =
     useState<AutocompleteQuery<AutocompletePrefix>>();
   const [, setBeginCommand] = useState(() => getBeginCommand(editor));
+  const [selectedFileRef, setSelectedFileRef] = useState<SelectedFileReference | null>(null);
+  const [fileRefActive, setFileRefActive] = useState(false);
 
   const sendTypingStatus = useTypingStatusUpdater(mx, roomId);
 
   const updateBeginCommand = useCallback(() => {
     setBeginCommand(getBeginCommand(editor));
-  }, [editor]);
-
-  const removeExistingFileRef = useCallback(() => {
-    const [fileRefEntry] = Editor.nodes(editor, {
-      at: [],
-      match: (n) => SlateElement.isElement(n) && n.type === 'file-ref',
-    });
-
-    if (fileRefEntry) {
-      const [, fileRefPath] = fileRefEntry;
-      const nextPath = Path.next(fileRefPath);
-
-      if (Node.has(editor, nextPath)) {
-        const nextNode = Node.get(editor, nextPath);
-        if (SlateText.isText(nextNode) && /^\s$/.test(nextNode.text)) {
-          Transforms.removeNodes(editor, { at: nextPath });
-        }
-      }
-
-      Transforms.removeNodes(editor, { at: fileRefPath });
-    }
   }, [editor]);
 
   const handleWorkspaceFileSelect = useCallback(
@@ -230,23 +214,11 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
 
       const { data } = payload;
       if (data?.type === 'select-file') {
-        removeExistingFileRef();
-        if (data.file) {
-          const element = createFileRefElement(
-            data.file.path,
-            data.file.name,
-            data.file.workspaceId,
-            data.file.workspaceName,
-          );
-          ReactEditor.focus(editor);
-          Transforms.select(editor, Editor.end(editor, []));
-          Transforms.insertNodes(editor, element);
-          Transforms.collapse(editor, { edge: 'end' });
-          moveCursor(editor, true);
-        }
+        setSelectedFileRef(data.file);
+        setFileRefActive(!!data.file);
       }
     },
-    [editor, enableSdkInputEvents, removeExistingFileRef],
+    [enableSdkInputEvents],
   );
   useSdkMessageListener<WorkspaceExplorerMessage>('workspace-explorer', handleWorkspaceFileSelect);
 
@@ -514,13 +486,21 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
       // No command: use plain text as-is
     }
 
-    if (plainText === '') return;
+    const fileRef =
+      fileRefActive && selectedFileRef
+        ? {
+            path: selectedFileRef.path,
+            workspaceId: selectedFileRef.workspaceId,
+            workspaceName: selectedFileRef.workspaceName,
+          }
+        : null;
 
-    const body = plainText;
+    if (plainText === '' && !fileRef) return;
+
+    const body = plainText || selectedFileRef?.name || '';
     const isForkCommand = /^\/fork\b/i.test(body.trimStart());
-    const formattedBody = customHtml;
+    const formattedBody = customHtml || body;
     const mentionData = getMentions(mx, roomId, editor);
-    const fileRef = getFileReference(editor);
 
     const content: IContent = {
       msgtype: msgType,
@@ -577,6 +557,8 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     );
     resetEditor(editor);
     resetEditorHistory(editor);
+    setSelectedFileRef(null);
+    setFileRefActive(false);
     setReplyDraft(undefined);
     sendTypingStatus(false);
   }, [
@@ -589,6 +571,8 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     setReplyDraft,
     isMarkdown,
     commands,
+    selectedFileRef,
+    fileRefActive,
     emitScrollToBottomRequest,
   ]);
 
@@ -919,6 +903,35 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
                   </PopOut>
                 )}
               </UseStateProvider>
+              {selectedFileRef && (
+                <>
+                  <Line variant="Surface" direction="Vertical" style={{ height: toRem(12) }} />
+                  <IconButton
+                    variant="Surface"
+                    size="300"
+                    radii="300"
+                    fill="None"
+                    aria-label={selectedFileRef.name}
+                    title={selectedFileRef.path}
+                    onClick={() => setFileRefActive((active) => !active)}
+                    style={{
+                      maxWidth: toRem(180),
+                      gap: config.space.S100,
+                      opacity: fileRefActive ? 1 : 0.35,
+                      color: fileRefActive ? color.Primary.Main : undefined,
+                    }}
+                  >
+                    <Icon
+                      size="50"
+                      src={fileRefActive ? FileIcon : EyeOffIcon}
+                      filled={fileRefActive}
+                    />
+                    <Text size="T200" truncate>
+                      {selectedFileRef.name}
+                    </Text>
+                  </IconButton>
+                </>
+              )}
             </Box>
             <Box alignItems="Center" gap="100">
               <IconButton

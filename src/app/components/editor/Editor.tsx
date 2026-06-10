@@ -33,7 +33,6 @@ const withInline = (editor: Editor): Editor => {
       BlockType.Emoticon,
       BlockType.Link,
       BlockType.Command,
-      BlockType.FileRef,
       BlockType.TaskRef,
     ].includes(element.type) || isInline(element);
 
@@ -44,13 +43,9 @@ const withVoid = (editor: Editor): Editor => {
   const { isVoid } = editor;
 
   editor.isVoid = (element) =>
-    [
-      BlockType.Mention,
-      BlockType.Emoticon,
-      BlockType.Command,
-      BlockType.FileRef,
-      BlockType.TaskRef,
-    ].includes(element.type) || isVoid(element);
+    [BlockType.Mention, BlockType.Emoticon, BlockType.Command, BlockType.TaskRef].includes(
+      element.type,
+    ) || isVoid(element);
 
   return editor;
 };

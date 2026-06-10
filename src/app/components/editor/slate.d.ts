@@ -46,14 +46,6 @@ export type CommandElement = {
   command: string;
   children: Text[];
 };
-export type FileRefElement = {
-  type: BlockType.FileRef;
-  path: string;
-  name: string;
-  workspaceId: string;
-  workspaceName: string;
-  children: Text[];
-};
 export type TaskRefStatus = 'todo' | 'in_progress' | 'done' | 'cancelled';
 
 export type TaskRefElement = {
@@ -71,7 +63,6 @@ export type InlineElement =
   | MentionElement
   | EmoticonElement
   | CommandElement
-  | FileRefElement
   | TaskRefElement;
 
 export type ParagraphElement = {
@@ -117,7 +108,6 @@ export type CustomElement =
   | MentionElement
   | EmoticonElement
   | CommandElement
-  | FileRefElement
   | TaskRefElement
   | ParagraphElement
   | HeadingElement

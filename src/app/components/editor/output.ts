@@ -81,8 +81,6 @@ const elementToCustomHtml = (node: CustomElement, children: string): string => {
       return `<a href="${encodeURI(node.href)}">${node.children}</a>`;
     case BlockType.Command:
       return `/${sanitizeText(node.command)}`;
-    case BlockType.FileRef:
-      return `<span data-file-ref="${sanitizeText(node.path)}">[${sanitizeText(node.name)}]</span>`;
     case BlockType.TaskRef:
       return `<span data-task-ref="${sanitizeText(node.id)}" data-task-status="${sanitizeText(node.status)}">[${sanitizeText(node.title)}]</span>`;
     default:
@@ -163,8 +161,6 @@ const elementToPlainText = (node: CustomElement, children: string): string => {
       return `[${node.children}](${node.href})`;
     case BlockType.Command:
       return `/${node.command}`;
-    case BlockType.FileRef:
-      return `[File: ${node.name}]`;
     case BlockType.TaskRef:
       return `[Task: ${node.title}]`;
     default:
@@ -237,32 +233,6 @@ export const getMentions = (mx: MatrixClient, roomId: string, editor: Editor): M
   editor.children.forEach(parseMentions);
 
   return mentionData;
-};
-
-export type FileRefData = {
-  path: string;
-  workspaceId: string;
-  workspaceName: string;
-};
-export const getFileReference = (editor: Editor): FileRefData | null => {
-  const collect = (node: Descendant): FileRefData | null => {
-    if (Text.isText(node)) return null;
-    if (node.type === BlockType.FileRef) {
-      return { path: node.path, workspaceId: node.workspaceId, workspaceName: node.workspaceName };
-    }
-
-    for (const child of node.children) {
-      const found = collect(child);
-      if (found) return found;
-    }
-    return null;
-  };
-
-  for (const child of editor.children) {
-    const found = collect(child);
-    if (found) return found;
-  }
-  return null;
 };
 
 export type TaskRefData = {
