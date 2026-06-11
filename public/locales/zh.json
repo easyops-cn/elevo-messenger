@@ -1218,6 +1218,17 @@
     "error403": "无权访问该 workspace。",
     "error404": "未找到。",
     "error502": "服务暂不可用，请稍后重试。",
-    "errorGeneric": "出现错误，请重试。"
+    "errorGeneric": "出现错误，请重试。",
+    "createTask": {
+      "title": "创建任务",
+      "assignee": "负责人",
+      "assigneePlaceholder": "选择负责人",
+      "searchMembers": "搜索成员",
+      "request": "需求",
+      "requestPlaceholder": "描述任务内容…",
+      "withPlan": "同时生成计划",
+      "cancel": "取消",
+      "submit": "创建"
+    }
   }
 }

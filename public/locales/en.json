@@ -1218,6 +1218,17 @@
     "error403": "You do not have access to this workspace.",
     "error404": "Not found.",
     "error502": "Service temporarily unavailable. Please try again later.",
-    "errorGeneric": "Something went wrong. Please try again."
+    "errorGeneric": "Something went wrong. Please try again.",
+    "createTask": {
+      "title": "Create task",
+      "assignee": "Assignee",
+      "assigneePlaceholder": "Select assignee",
+      "searchMembers": "Search members",
+      "request": "Requirement",
+      "requestPlaceholder": "Describe the task...",
+      "withPlan": "Also write a plan",
+      "cancel": "Cancel",
+      "submit": "Create"
+    }
   }
 }
