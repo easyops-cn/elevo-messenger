@@ -77,12 +77,27 @@ async function authedFetch(url: string): Promise<Response> {
 const tasksApiBase = (baseUrl: string, workspaceId: string): string =>
   `${baseUrl}/${encodeURIComponent(workspaceId)}/tasks`;
 
-/** GET `.../tasks/stats` — counts aggregated by status. */
+/**
+ * GET `.../tasks/stats` — counts aggregated by status.
+ *
+ * When `token` is provided (e.g. the main-window side panel, which holds the
+ * live Matrix token directly), it is used as the Bearer token. Otherwise the
+ * shared token cache is used with transparent refresh (the board window path).
+ */
 export async function fetchWorkspaceTaskStats(
   baseUrl: string,
   workspaceId: string,
+  token?: string,
 ): Promise<TaskStats> {
-  const res = await authedFetch(`${tasksApiBase(baseUrl, workspaceId)}/stats`);
+  const url = `${tasksApiBase(baseUrl, workspaceId)}/stats`;
+  if (token != null) {
+    const res = await rawFetch(url, token);
+    if (!res.ok) {
+      throw new TaskApiError(await extractErrorMessage(res), res.status);
+    }
+    return res.json();
+  }
+  const res = await authedFetch(url);
   return res.json();
 }
 

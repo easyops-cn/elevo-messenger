@@ -47,11 +47,19 @@ export function TasksPanel({ room }: TasksPanelProps) {
 
   useEffect(() => {
     if (!workspace?.bridge_provider || !homeserverUrl) return undefined;
+    const token = mx.getAccessToken();
+    if (!token) {
+      setError(true);
+      return undefined;
+    }
     let cancelled = false;
     setLoading(true);
     setError(false);
     const baseUrl = getTaskBoardBaseUrl(homeserverUrl, workspace.bridge_provider);
-    fetchWorkspaceTaskStats(baseUrl, workspace.id)
+    // The side panel lives in the main window and holds the live Matrix token
+    // directly, so pass it explicitly rather than relying on the board
+    // window's SDK-bridge token cache.
+    fetchWorkspaceTaskStats(baseUrl, workspace.id, token)
       .then((data) => {
         if (!cancelled) setStats(data);
       })
@@ -64,7 +72,7 @@ export function TasksPanel({ room }: TasksPanelProps) {
     return () => {
       cancelled = true;
     };
-  }, [workspace?.id, workspace?.bridge_provider, homeserverUrl]);
+  }, [workspace?.id, workspace?.bridge_provider, homeserverUrl, mx]);
 
   // The board window can only be opened on desktop; hide the panel elsewhere.
   if (!workspace?.bridge_provider || !isDesktopTauri) return null;
