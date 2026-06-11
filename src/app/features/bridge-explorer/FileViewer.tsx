@@ -41,7 +41,7 @@ export function FileViewer({ path }: FileViewerProps) {
         if (meta.canReadContent === false || meta.classification === 'binary') {
           return;
         }
-        const result = await fetchFileContent(baseUrl, workspaceId, path);
+        const result = await fetchFileContent(baseUrl, workspaceId, path, meta.classification);
         setContent(result);
       })
       .catch(setError)
