@@ -146,7 +146,6 @@ export const TaskCard = style([
   {
     display: 'block',
     width: '100%',
-    minWidth: 0,
     textAlign: 'left',
     cursor: 'pointer',
     padding: config.space.S300,
@@ -170,9 +169,6 @@ export const ClampTwo = style({
   WebkitLineClamp: 2,
   WebkitBoxOrient: 'vertical',
   overflow: 'hidden',
-  minWidth: 0,
-  overflowWrap: 'anywhere',
-  wordBreak: 'break-word',
 });
 
 export const ClampThree = style({
@@ -180,9 +176,6 @@ export const ClampThree = style({
   WebkitLineClamp: 3,
   WebkitBoxOrient: 'vertical',
   overflow: 'hidden',
-  minWidth: 0,
-  overflowWrap: 'anywhere',
-  wordBreak: 'break-word',
 });
 
 /* ---- Detail dialog ---- */

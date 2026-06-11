@@ -29,6 +29,7 @@ function TaskCard({ task, onOpen }: { task: TaskSummary; onOpen: (task: TaskSumm
       className={css.TaskCard}
       direction="Column"
       gap="200"
+      shrink="No"
       onClick={() => onOpen(task)}
     >
       <Text className={css.ClampTwo} size="T300" title={task.title}>
