@@ -3,6 +3,7 @@ import { useElementSizeObserver } from './useElementSizeObserver';
 
 export const TABLET_BREAKPOINT = 1124;
 export const MOBILE_BREAKPOINT = 750;
+export const WIDE_DESKTOP_BREAKPOINT = 1600;
 
 export enum ScreenSize {
   Desktop = 'Desktop',
@@ -25,6 +26,17 @@ export const useScreenSize = (): ScreenSize => {
   );
 
   return size;
+};
+
+export const useScreenWidth = (): number => {
+  const [width, setWidth] = useState<number>(document.body.clientWidth);
+
+  useElementSizeObserver(
+    useCallback(() => document.body, []),
+    useCallback((clientWidth) => setWidth(clientWidth), []),
+  );
+
+  return width;
 };
 
 const ScreenSizeContext = createContext<ScreenSize | null>(null);

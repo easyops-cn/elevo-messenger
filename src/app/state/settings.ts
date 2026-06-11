@@ -62,7 +62,7 @@ const defaultSettings: Settings = {
   pageZoom: 100,
   hideActivity: false,
 
-  showRoomSidePanel: false,
+  showRoomSidePanel: true,
   threadChatStates: {},
   memberSortFilterIndex: 0,
   enterForNewline: false,

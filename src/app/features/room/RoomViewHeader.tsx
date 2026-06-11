@@ -46,7 +46,12 @@ import { roomToUnreadAtom } from '../../state/room/roomToUnread';
 import { copyToClipboard } from '../../utils/dom';
 import { LeaveRoomPrompt } from '../../components/leave-room-prompt';
 import { useRoomName, useRoomTopic } from '../../hooks/useRoomMeta';
-import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
+import {
+  ScreenSize,
+  WIDE_DESKTOP_BREAKPOINT,
+  useScreenSizeContext,
+  useScreenWidth,
+} from '../../hooks/useScreenSize';
 import { stopPropagation } from '../../utils/keyboard';
 import { getMatrixToRoom } from '../../plugins/matrix-to';
 import { getViaServers } from '../../plugins/via-servers';
@@ -318,6 +323,8 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
 
   const [showCallChat, setShowCallChat] = useAtom(callChatAtom);
   const [threadChat, setThreadChat] = useThreadChat(room.roomId);
+  const screenWidth = useScreenWidth();
+  const wideDesktop = screenSize === ScreenSize.Desktop && screenWidth >= WIDE_DESKTOP_BREAKPOINT;
 
   const handleSearchClick = () => {
     const searchParams: _SearchPathSearchParams = {
@@ -346,7 +353,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
       return;
     }
 
-    if (threadChat.open) {
+    if (threadChat.open && !wideDesktop) {
       setThreadChat({ open: false, threadRootId: undefined });
       return;
     }
@@ -617,7 +624,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                   <Tooltip>
                     {callView ? (
                       <Text>{showCallChat ? 'Close Chat' : 'Open Chat'}</Text>
-                    ) : threadChat.open ? (
+                    ) : threadChat.open && !wideDesktop ? (
                       <Text>{t('room.closeThread')}</Text>
                     ) : (
                       <Text>

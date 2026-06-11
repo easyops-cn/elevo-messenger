@@ -5,7 +5,12 @@ import { isKeyHotkey } from 'is-hotkey';
 import { useAtomValue } from 'jotai';
 import { RoomView } from './RoomView';
 import { RoomSidePanel } from './RoomSidePanel';
-import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
+import {
+  ScreenSize,
+  WIDE_DESKTOP_BREAKPOINT,
+  useScreenSizeContext,
+  useScreenWidth,
+} from '../../hooks/useScreenSize';
 import { useSetting } from '../../state/hooks/settings';
 import { settingsAtom } from '../../state/settings';
 import { PowerLevelsContextProvider, usePowerLevels } from '../../hooks/usePowerLevels';
@@ -30,6 +35,7 @@ export function Room() {
   const [showSidePanel] = useSetting(settingsAtom, 'showRoomSidePanel');
   const [hideActivity] = useSetting(settingsAtom, 'hideActivity');
   const screenSize = useScreenSizeContext();
+  const screenWidth = useScreenWidth();
   const powerLevels = usePowerLevels(room);
   const chat = useAtomValue(callChatAtom);
   const [threadChat, setThreadChat] = useThreadChat(room.roomId);
@@ -79,6 +85,11 @@ export function Room() {
 
   const showCallView = callView && (screenSize === ScreenSize.Desktop || !chat);
   const showRoomView = !callView && showMainRoomView;
+  const showRoomSidePanel =
+    !callView &&
+    screenSize === ScreenSize.Desktop &&
+    showSidePanel &&
+    (!showThreadPanel || (screenWidth >= WIDE_DESKTOP_BREAKPOINT && !maximizedThreadPanel));
 
   return (
     <PowerLevelsContextProvider value={powerLevels}>
@@ -111,9 +122,7 @@ export function Room() {
           />
         )}
         {callView && chat && <CallChatView />}
-        {!callView && screenSize === ScreenSize.Desktop && showSidePanel && !showThreadPanel && (
-          <RoomSidePanel key={room.roomId} room={room} />
-        )}
+        {showRoomSidePanel && <RoomSidePanel key={room.roomId} room={room} />}
       </Box>
     </PowerLevelsContextProvider>
   );
