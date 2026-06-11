@@ -190,7 +190,9 @@
     "threadTopicEdit": "编辑子话题主题",
     "threadTopicSave": "保存主题",
     "threadTopicSaving": "保存中...",
-    "threadTopicSaveFailed": "保存子话题主题失败，请重试。"
+    "threadTopicSaveFailed": "保存子话题主题失败，请重试。",
+    "starThread": "标星子话题",
+    "unstarThread": "取消标星子话题"
   },
   "memberEvent": {
     "brokenEvent": "异常的成员事件",

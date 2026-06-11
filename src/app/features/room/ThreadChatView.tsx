@@ -39,6 +39,8 @@ import { ScreenSize, useScreenSizeContext } from '../../hooks/useScreenSize';
 import { Maximize2Icon } from '../../icons/Maximize2Icon';
 import { Minimize2Icon } from '../../icons/Minimize2Icon';
 import { MessageSquareTextIcon } from '../../icons/MessageSquareTextIcon';
+import { StarIcon } from '../../icons/StarIcon';
+import { useToggleStarredThread } from '../../hooks/useStarredThreads';
 import * as css from './ThreadChatView.css';
 
 const THREAD_TOPIC_MAX_LENGTH = 120;
@@ -221,6 +223,8 @@ export function ThreadChatView({ eventId, maximized, onMaximizedChange }: Thread
   const threadRootEventId = thread?.rootEvent?.getId();
   const canSetThreadTopic =
     !!threadRootEventId && thread?.rootEvent?.getSender() === mx.getSafeUserId();
+  const { isStarred, toggle } = useToggleStarredThread();
+  const threadStarred = !!threadRootEventId && isStarred(room.roomId, threadRootEventId);
 
   return (
     <PageMain isSidePanel={!maximized}>
@@ -257,6 +261,29 @@ export function ThreadChatView({ eventId, maximized, onMaximizedChange }: Thread
               )}
             </Box>
             <Box shrink="No" alignItems="Center" gap="100">
+              {threadRootEventId && (
+                <TooltipProvider
+                  position="Bottom"
+                  align="End"
+                  offset={4}
+                  tooltip={
+                    <Tooltip>
+                      <Text>{t(threadStarred ? 'room.unstarThread' : 'room.starThread')}</Text>
+                    </Tooltip>
+                  }
+                >
+                  {(triggerRef) => (
+                    <IconButton
+                      className={css.ThreadStarButton}
+                      ref={triggerRef}
+                      variant="Surface"
+                      onClick={() => toggle(room.roomId, threadRootEventId, threadTopic)}
+                    >
+                      <Icon src={StarIcon} filled={threadStarred} size="50" />
+                    </IconButton>
+                  )}
+                </TooltipProvider>
+              )}
               {screenSize === ScreenSize.Desktop && (
                 <TooltipProvider
                   position="Bottom"
