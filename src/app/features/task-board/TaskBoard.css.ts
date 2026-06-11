@@ -71,10 +71,6 @@ export const Board = style([
   {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
-    // Constrain the single row to the container height; without this the auto
-    // row grows to the tallest column's content and the per-column scroll
-    // never kicks in, so cards overflow the column boundary.
-    gridTemplateRows: 'minmax(0, 1fr)',
     gap: config.space.S300,
     padding: config.space.S300,
     height: '100%',
@@ -150,6 +146,7 @@ export const TaskCard = style([
   {
     display: 'block',
     width: '100%',
+    minWidth: 0,
     textAlign: 'left',
     cursor: 'pointer',
     padding: config.space.S300,
@@ -173,6 +170,9 @@ export const ClampTwo = style({
   WebkitLineClamp: 2,
   WebkitBoxOrient: 'vertical',
   overflow: 'hidden',
+  minWidth: 0,
+  overflowWrap: 'anywhere',
+  wordBreak: 'break-word',
 });
 
 export const ClampThree = style({
@@ -180,6 +180,9 @@ export const ClampThree = style({
   WebkitLineClamp: 3,
   WebkitBoxOrient: 'vertical',
   overflow: 'hidden',
+  minWidth: 0,
+  overflowWrap: 'anywhere',
+  wordBreak: 'break-word',
 });
 
 /* ---- Detail dialog ---- */
