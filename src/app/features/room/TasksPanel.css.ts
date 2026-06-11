@@ -1,52 +1,55 @@
 import { style } from '@vanilla-extract/css';
-import { DefaultReset, color, config, toRem } from 'folds';
+import { DefaultReset, color, config } from 'folds';
 
-export const StatsCard = style([
+export const StateBox = style([
   DefaultReset,
   {
-    width: '100%',
-    textAlign: 'left',
-    cursor: 'pointer',
-    padding: config.space.S300,
-    borderRadius: config.radii.R400,
-    borderWidth: config.borderWidth.B300,
-    borderStyle: 'solid',
-    borderColor: color.SurfaceVariant.ContainerLine,
-    backgroundColor: color.SurfaceVariant.Container,
-    color: color.SurfaceVariant.OnContainer,
-    selectors: {
-      '&:hover': { backgroundColor: color.SurfaceVariant.ContainerHover },
-      '&:focus-visible': {
-        outline: `${config.borderWidth.B400} solid ${color.Primary.Main}`,
-      },
-    },
+    paddingInline: config.space.S200,
+    paddingBlock: config.space.S100,
   },
 ]);
 
-export const StatusGrid = style([
+export const ErrorText = style([DefaultReset, { color: color.Critical.Main }]);
+
+export const StatsGrid = style([
   DefaultReset,
   {
     display: 'grid',
     gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
     gap: config.space.S200,
+    paddingInline: config.space.S200,
   },
 ]);
 
-export const StatusCount = style([DefaultReset, { marginLeft: 'auto' }]);
-
-export const ErrorText = style([DefaultReset, { color: color.Critical.Main }]);
-
-export const StatusDot = style([
+/** Borderless, tinted 2x2 stat card. Background/text tone set per status. */
+export const StatCard = style([
   DefaultReset,
   {
-    width: toRem(8),
-    height: toRem(8),
-    borderRadius: '50%',
-    flexShrink: 0,
+    display: 'flex',
+    gap: config.space.S200,
+    padding: config.space.S300,
+    borderRadius: config.radii.R400,
   },
 ]);
 
-export const dotBacklog = style({ backgroundColor: color.Secondary.Main });
-export const dotPlanned = style({ backgroundColor: color.Primary.Main });
-export const dotInProgress = style({ backgroundColor: color.Warning.Main });
-export const dotCompleted = style({ backgroundColor: color.Success.Main });
+export const StatCount = style([DefaultReset, { lineHeight: 1 }]);
+
+export const StatIcon = style([DefaultReset, { flexShrink: 0, opacity: config.opacity.P500 }]);
+
+/* Per-status tone: tinted container background + matching foreground. */
+export const toneBacklog = style({
+  backgroundColor: color.Secondary.Container,
+  color: color.Secondary.OnContainer,
+});
+export const tonePlanned = style({
+  backgroundColor: color.Primary.Container,
+  color: color.Primary.OnContainer,
+});
+export const toneInProgress = style({
+  backgroundColor: color.Warning.Container,
+  color: color.Warning.OnContainer,
+});
+export const toneCompleted = style({
+  backgroundColor: color.Success.Container,
+  color: color.Success.OnContainer,
+});

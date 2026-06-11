@@ -131,21 +131,13 @@ export const ColumnBody = style([
   },
 ]);
 
-/* status dot colors */
-export const StatusDot = style([
-  DefaultReset,
-  {
-    width: toRem(10),
-    height: toRem(10),
-    borderRadius: '50%',
-    flexShrink: 0,
-  },
-]);
+/* status icon tones (applied to folds Icon via currentColor) */
+export const ColumnIcon = style([DefaultReset, { flexShrink: 0 }]);
 
-export const dotBacklog = style({ backgroundColor: color.Secondary.Main });
-export const dotPlanned = style({ backgroundColor: color.Primary.Main });
-export const dotInProgress = style({ backgroundColor: color.Warning.Main });
-export const dotCompleted = style({ backgroundColor: color.Success.Main });
+export const toneBacklog = style({ color: color.Secondary.Main });
+export const tonePlanned = style({ color: color.Primary.Main });
+export const toneInProgress = style({ color: color.Warning.Main });
+export const toneCompleted = style({ color: color.Success.Main });
 
 /* ---- Task card ---- */
 

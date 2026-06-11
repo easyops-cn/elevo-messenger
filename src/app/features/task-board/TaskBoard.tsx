@@ -6,6 +6,7 @@ import { TaskBoardProvider, createContextValue } from './TaskBoardContext';
 import { TaskDetailDialog } from './TaskDetailDialog';
 import { InlineError, useErrorMessage } from './InlineError';
 import { fetchWorkspaceTasks } from './api';
+import { STATUS_ICON } from './statusIcons';
 import { TASK_STATUSES, type TaskStatus, type TaskBoardPayload, type TaskSummary } from './types';
 import * as css from './TaskBoard.css';
 
@@ -13,11 +14,11 @@ type TaskBoardProps = {
   payload: TaskBoardPayload;
 };
 
-const STATUS_DOT: Record<TaskStatus, string> = {
-  backlog: css.dotBacklog,
-  planned: css.dotPlanned,
-  in_progress: css.dotInProgress,
-  completed: css.dotCompleted,
+const STATUS_TONE: Record<TaskStatus, string> = {
+  backlog: css.toneBacklog,
+  planned: css.tonePlanned,
+  in_progress: css.toneInProgress,
+  completed: css.toneCompleted,
 };
 
 function TaskCard({ task, onOpen }: { task: TaskSummary; onOpen: (task: TaskSummary) => void }) {
@@ -116,7 +117,11 @@ export function TaskBoard({ payload }: TaskBoardProps) {
                   return (
                     <Box key={status} className={css.Column} direction="Column">
                       <Box className={css.ColumnHeader} alignItems="Center">
-                        <span className={`${css.StatusDot} ${STATUS_DOT[status]}`} />
+                        <Icon
+                          className={`${css.ColumnIcon} ${STATUS_TONE[status]}`}
+                          size="100"
+                          src={STATUS_ICON[status]}
+                        />
                         <Text size="T300">{t(`taskBoard.status_${status}`)}</Text>
                         <Text className={css.ColumnCount} size="T200" priority="300">
                           {list.length}

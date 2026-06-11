@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Box, Spinner, Text } from 'folds';
+import { Box, Icon, Spinner, Text } from 'folds';
 import { Room } from 'matrix-js-sdk';
 import { useTranslation } from 'react-i18next';
 
@@ -7,27 +7,25 @@ import * as panelCss from './RoomSidePanel.css';
 import * as css from './TasksPanel.css';
 import { useStateEvent } from '../../hooks/useStateEvent';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
-import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
-import { useOpenTaskBoard } from '../task-board/useOpenTaskBoard';
 import { fetchWorkspaceTaskStats, getTaskBoardBaseUrl } from '../task-board/api';
+import { STATUS_ICON } from '../task-board/statusIcons';
 import { TASK_STATUSES, type TaskStats, type TaskStatus } from '../task-board/types';
 
 type TasksPanelProps = {
   room: Room;
 };
 
-const STATUS_DOT: Record<TaskStatus, string> = {
-  backlog: css.dotBacklog,
-  planned: css.dotPlanned,
-  in_progress: css.dotInProgress,
-  completed: css.dotCompleted,
+const STATUS_TONE: Record<TaskStatus, string> = {
+  backlog: css.toneBacklog,
+  planned: css.tonePlanned,
+  in_progress: css.toneInProgress,
+  completed: css.toneCompleted,
 };
 
 export function TasksPanel({ room }: TasksPanelProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
-  const openTaskBoard = useOpenTaskBoard();
 
   const workspacesStateEvent = useStateEvent(room, ELEVO_WORKSPACES_STATE_KEY as never);
   // MVP: a room may bind several workspaces; surface the first bridge-provider
@@ -74,8 +72,8 @@ export function TasksPanel({ room }: TasksPanelProps) {
     };
   }, [workspace?.id, workspace?.bridge_provider, homeserverUrl, mx]);
 
-  // The board window can only be opened on desktop; hide the panel elsewhere.
-  if (!workspace?.bridge_provider || !isDesktopTauri) return null;
+  // Shown wherever the room is bound to a bridge workspace (desktop + web).
+  if (!workspace?.bridge_provider) return null;
 
   return (
     <Box direction="Column" gap="100">
@@ -83,47 +81,41 @@ export function TasksPanel({ room }: TasksPanelProps) {
         {t('taskBoard.panelTitle')}
       </Text>
 
-      <Box
-        as="button"
-        type="button"
-        className={css.StatsCard}
-        direction="Column"
-        gap="300"
-        onClick={() => openTaskBoard(workspace)}
-      >
-        <Box alignItems="Center" justifyContent="SpaceBetween">
-          <Text size="T200" priority="300">
-            {t('taskBoard.totalTasks')}
-          </Text>
-          {loading ? (
-            <Spinner size="100" />
-          ) : (
-            <Text size="H4">{error ? '—' : (stats?.total ?? 0)}</Text>
-          )}
+      {loading && (
+        <Box justifyContent="Center" className={css.StateBox}>
+          <Spinner size="100" />
         </Box>
+      )}
 
-        {!error && (
-          <Box className={css.StatusGrid}>
-            {TASK_STATUSES.map((status) => (
-              <Box key={status} alignItems="Center" gap="200">
-                <span className={`${css.StatusDot} ${STATUS_DOT[status]}`} />
-                <Text size="T200" priority="400">
-                  {t(`taskBoard.status_${status}`)}
-                </Text>
-                <Text className={css.StatusCount} size="T200" priority="300">
-                  {stats?.byStatus?.[status] ?? 0}
-                </Text>
-              </Box>
-            ))}
-          </Box>
-        )}
-
-        {error && (
+      {!loading && error && (
+        <Box className={css.StateBox}>
           <Text className={css.ErrorText} size="T200" priority="400">
             {t('taskBoard.statsFailed')}
           </Text>
-        )}
-      </Box>
+        </Box>
+      )}
+
+      {!loading && !error && (
+        <Box className={css.StatsGrid}>
+          {TASK_STATUSES.map((status) => (
+            <Box
+              key={status}
+              className={`${css.StatCard} ${STATUS_TONE[status]}`}
+              alignItems="Center"
+            >
+              <Box grow="Yes" direction="Column" gap="100">
+                <Text className={css.StatCount} size="H3">
+                  {stats?.byStatus?.[status] ?? 0}
+                </Text>
+                <Text size="T200" priority="400">
+                  {t(`taskBoard.status_${status}`)}
+                </Text>
+              </Box>
+              <Icon className={css.StatIcon} size="200" src={STATUS_ICON[status]} />
+            </Box>
+          ))}
+        </Box>
+      )}
     </Box>
   );
 }
