@@ -8,6 +8,7 @@ import { ThreadMenuItem } from './ThreadMenuItem';
 import { useRoomThreads } from '../../hooks/useRoomThreads';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useThreadChat } from '../../state/threadChat';
+import { useStarredThreadsByRoom } from '../../hooks/useStarredThreads';
 
 type ThreadsPanelProps = {
   room: Room;
@@ -20,17 +21,22 @@ export function ThreadsPanel({ room }: ThreadsPanelProps) {
   const useAuthentication = useMediaAuthentication();
   const [, setThreadChat] = useThreadChat(room.roomId);
   const [showAllThreads, setShowAllThreads] = useState(false);
+  const { threadIds: starredThreadIds } = useStarredThreadsByRoom(room.roomId);
 
   const { threads, loading, error, retry } = useRoomThreads(room);
 
   const sortedThreads = useMemo(
     () =>
       [...threads].sort((a, b) => {
+        const aStarred = starredThreadIds.has(a.id);
+        const bStarred = starredThreadIds.has(b.id);
+        if (aStarred !== bStarred) return aStarred ? -1 : 1;
+
         const aTs = a.replyToEvent?.getTs() ?? a.rootEvent?.getTs() ?? 0;
         const bTs = b.replyToEvent?.getTs() ?? b.rootEvent?.getTs() ?? 0;
         return bTs - aTs;
       }),
-    [threads],
+    [starredThreadIds, threads],
   );
 
   const shouldShowThreadsPreview =

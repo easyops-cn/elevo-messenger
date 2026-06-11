@@ -17,6 +17,7 @@ import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { RelativeTime } from '../../components/RelativeTime';
 import { MessageDeletedContent } from '../../components/message';
 import { useThreadTopic } from '../../hooks/useThreadTopic';
+import * as css from './ThreadMenuItem.css';
 
 type ThreadMenuItemProps = {
   useAuthentication: boolean;
@@ -134,13 +135,22 @@ export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: Thr
 
   return (
     <MenuItem
+      as="div"
+      className={css.ThreadMenuItem}
       data-event-id={thread.id}
       style={{ padding: `0 ${config.space.S200}`, height: toRem(52) }}
       variant="Background"
       radii="400"
-      onClick={onClick}
     >
-      <Box grow="Yes" direction="Column" gap="100">
+      <Box
+        as="button"
+        className={css.ThreadMenuItemButton}
+        grow="Yes"
+        direction="Column"
+        gap="100"
+        data-event-id={thread.id}
+        onClick={onClick}
+      >
         <Box alignItems="Center" gap="100">
           {rootSenderId && (
             <Box shrink="No">

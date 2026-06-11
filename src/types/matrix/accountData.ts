@@ -15,6 +15,7 @@ export enum AccountDataEvent {
   SecretStorageDefaultKey = 'm.secret_storage.default_key',
 
   ElevoLinks = 'vip.elevo.links',
+  StarredThreads = 'vip.elevo.starred_threads',
 
   CrossSigningMaster = 'm.cross_signing.master',
   CrossSigningSelf = 'm.cross_signing.self',
@@ -78,4 +79,15 @@ export type WorkspaceOAuthConnection = {
 
 export type LinksContent = {
   workspaces?: WorkspaceOAuthConnection;
+};
+
+export type StarredThreadEntry = {
+  roomId: string;
+  threadId: string;
+  title?: string;
+  starredAt: number;
+};
+
+export type StarredThreadsContent = {
+  threads?: StarredThreadEntry[];
 };

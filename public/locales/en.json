@@ -190,7 +190,9 @@
     "threadTopicEdit": "Edit thread topic",
     "threadTopicSave": "Save topic",
     "threadTopicSaving": "Saving...",
-    "threadTopicSaveFailed": "Failed to save thread topic. Please try again."
+    "threadTopicSaveFailed": "Failed to save thread topic. Please try again.",
+    "starThread": "Star Thread",
+    "unstarThread": "Unstar Thread"
   },
   "memberEvent": {
     "brokenEvent": "Broken membership event",

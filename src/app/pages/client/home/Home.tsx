@@ -30,7 +30,7 @@ import {
 import { useAllHomeRooms } from './useAllHomeRooms';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { VirtualTile } from '../../../components/virtualizer';
-import { RoomNavItem } from '../../../features/room-nav';
+import { RoomNavItem, StarredThreadNavItem } from '../../../features/room-nav';
 import { allInvitesAtom } from '../../../state/room-list/inviteList';
 import { UnreadBadge } from '../../../components/unread-badge';
 import { useNavToActivePathMapper } from '../../../hooks/useNavToActivePathMapper';
@@ -57,6 +57,22 @@ import { elevoColor } from '../../../../config.css';
 import { useHomeRooms } from './useHomeRooms';
 import { useDirectRooms } from '../direct/useDirectRooms';
 import { useClientConfig } from '../../../hooks/useClientConfig';
+import { useStarredThreads } from '../../../hooks/useStarredThreads';
+
+type HomeNavEntry =
+  | {
+      type: 'room';
+      roomId: string;
+    }
+  | {
+      type: 'thread';
+      roomId: string;
+      threadId: string;
+      title?: string;
+    };
+
+const getHomeNavEntryKey = (entry: HomeNavEntry): string =>
+  entry.type === 'room' ? `room:${entry.roomId}` : `thread:${entry.roomId}:${entry.threadId}`;
 
 function HomeHeader() {
   const mx = useMatrixClient();
@@ -191,6 +207,7 @@ export function Home() {
   const [tick, setTick] = useState(0);
   const bumpTick = useCallback(() => setTick((v) => v + 1), []);
   const roomIdSet = useMemo(() => new Set(rooms), [rooms]);
+  const starredThreads = useStarredThreads();
 
   useEffect(() => {
     const handleTimelineEvent: RoomEventHandlerMap[RoomEvent.Timeline] = (
@@ -216,13 +233,47 @@ export function Home() {
     [mx, rooms, tick],
   );
 
+  const navEntries = useMemo<HomeNavEntry[]>(() => {
+    const starredByRoom = new Map<string, typeof starredThreads>();
+    starredThreads.forEach((entry) => {
+      if (!roomIdSet.has(entry.roomId) || !mx.getRoom(entry.roomId)) return;
+      const roomThreads = starredByRoom.get(entry.roomId) ?? [];
+      roomThreads.push(entry);
+      starredByRoom.set(entry.roomId, roomThreads);
+    });
+
+    return sortedRooms.flatMap<HomeNavEntry>((roomId) => {
+      const roomThreads = starredByRoom
+        .get(roomId)
+        ?.slice()
+        .sort((a, b) => b.starredAt - a.starredAt);
+
+      return [
+        { type: 'room', roomId },
+        ...(roomThreads?.map((entry) => ({
+          type: 'thread' as const,
+          roomId,
+          threadId: entry.threadId,
+          title: entry.title,
+        })) ?? []),
+      ];
+    });
+  }, [mx, roomIdSet, sortedRooms, starredThreads]);
+
+  const navEntryKeys = useMemo(() => navEntries.map(getHomeNavEntryKey).join('\n'), [navEntries]);
+
   const virtualizer = useVirtualizer({
-    count: sortedRooms.length,
+    count: navEntries.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 49,
+    getItemKey: (index) => getHomeNavEntryKey(navEntries[index]),
+    estimateSize: (index) => (navEntries[index]?.type === 'thread' ? 32 : 49),
     overscan: 10,
     gap: 4,
   });
+
+  useEffect(() => {
+    virtualizer.measure();
+  }, [navEntryKeys, virtualizer]);
 
   return (
     <PageNav stretch>
@@ -334,29 +385,40 @@ export function Home() {
                 }}
               >
                 {virtualizer.getVirtualItems().map((vItem) => {
-                  const roomId = sortedRooms[vItem.index];
+                  const entry = navEntries[vItem.index];
+                  const roomId = entry.roomId;
                   const room = mx.getRoom(roomId);
                   if (!room) return null;
                   const selected = selectedRoomId === roomId;
                   const isDirect = mDirects.has(room.roomId);
+                  const key = getHomeNavEntryKey(entry);
 
                   return (
                     <VirtualTile
                       virtualItem={vItem}
-                      key={roomId}
+                      key={key}
                       ref={virtualizer.measureElement}
                       style={{ top: vItem.start }}
                     >
-                      <RoomNavItem
-                        room={room}
-                        selected={selected}
-                        linkPath={getHomeRoomPath(getCanonicalAliasOrRoomId(mx, roomId))}
-                        notificationMode={getRoomNotificationMode(
-                          notificationPreferences,
-                          room.roomId,
-                        )}
-                        direct={isDirect}
-                      />
+                      {entry.type === 'room' ? (
+                        <RoomNavItem
+                          room={room}
+                          selected={selected}
+                          linkPath={getHomeRoomPath(getCanonicalAliasOrRoomId(mx, roomId))}
+                          notificationMode={getRoomNotificationMode(
+                            notificationPreferences,
+                            room.roomId,
+                          )}
+                          direct={isDirect}
+                        />
+                      ) : (
+                        <StarredThreadNavItem
+                          room={room}
+                          threadId={entry.threadId}
+                          title={entry.title}
+                          roomSelected={selected}
+                        />
+                      )}
                     </VirtualTile>
                   );
                 })}

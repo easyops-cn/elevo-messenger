@@ -17,3 +17,15 @@ export const ThreadTopicEditButton = style({
     },
   },
 });
+
+export const ThreadStarButton = style({
+  opacity: 0,
+  selectors: {
+    [`${ThreadHeader}:hover &`]: {
+      opacity: 1,
+    },
+    '&:focus-visible': {
+      opacity: 1,
+    },
+  },
+});
