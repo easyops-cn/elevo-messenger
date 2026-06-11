@@ -57,11 +57,22 @@ export const StatCard = style([
   DefaultReset,
   {
     display: 'flex',
+    flexDirection: 'column',
     gap: config.space.S200,
     padding: config.space.S300,
     borderRadius: config.radii.R400,
     backgroundColor: color.Surface.Container,
     color: color.Surface.OnContainer,
+  },
+]);
+
+export const StatValueRow = style([
+  DefaultReset,
+  {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: config.space.S100,
   },
 ]);
 

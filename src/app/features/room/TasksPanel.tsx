@@ -118,19 +118,19 @@ export function TasksPanel({ room }: TasksPanelProps) {
           {TASK_STATUSES.map((status) => {
             const inner = (
               <>
-                <Box grow="Yes" direction="Column" gap="100">
+                <Box className={css.StatValueRow} alignItems="Center">
                   <Text className={css.StatCount} size="H3">
                     {stats?.byStatus?.[status] ?? 0}
                   </Text>
-                  <Text size="T200" priority="400">
-                    {t(`taskBoard.status_${status}`)}
-                  </Text>
+                  <Icon
+                    className={`${css.StatIcon} ${STATUS_TONE[status]}`}
+                    size="200"
+                    src={STATUS_ICON[status]}
+                  />
                 </Box>
-                <Icon
-                  className={`${css.StatIcon} ${STATUS_TONE[status]}`}
-                  size="200"
-                  src={STATUS_ICON[status]}
-                />
+                <Text size="T200" priority="400">
+                  {t(`taskBoard.status_${status}`)}
+                </Text>
               </>
             );
 
@@ -142,7 +142,6 @@ export function TasksPanel({ room }: TasksPanelProps) {
                   as="button"
                   type="button"
                   className={`${css.StatCard} ${css.StatCardClickable}`}
-                  alignItems="Center"
                   onClick={() => openTaskBoard(workspace)}
                 >
                   {inner}
@@ -150,7 +149,7 @@ export function TasksPanel({ room }: TasksPanelProps) {
               );
             }
             return (
-              <Box key={status} className={css.StatCard} alignItems="Center">
+              <Box key={status} className={css.StatCard}>
                 {inner}
               </Box>
             );
