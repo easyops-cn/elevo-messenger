@@ -1190,5 +1190,34 @@
     "error404": "Not found.",
     "error502": "Service temporarily unavailable. Please try again later.",
     "errorGeneric": "Something went wrong. Please try again."
+  },
+  "taskBoard": {
+    "panelTitle": "Tasks",
+    "totalTasks": "Total tasks",
+    "statsFailed": "Failed to load task stats.",
+    "status_backlog": "Backlog",
+    "status_planned": "Planned",
+    "status_in_progress": "In Progress",
+    "status_completed": "Completed",
+    "status": "Status",
+    "assignee": "Assignee",
+    "author": "Author",
+    "slug": "Slug",
+    "createdAt": "Created",
+    "updatedAt": "Updated",
+    "noDocuments": "No documents available.",
+    "docUnreadable": "Document unavailable: {{error}}",
+    "doc": {
+      "requirement": "Requirement",
+      "notes": "Notes",
+      "plan": "Plan",
+      "result": "Result"
+    },
+    "retry": "Retry",
+    "error401": "Your session has expired. Close this window and reopen it.",
+    "error403": "You do not have access to this workspace.",
+    "error404": "Not found.",
+    "error502": "Service temporarily unavailable. Please try again later.",
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }
