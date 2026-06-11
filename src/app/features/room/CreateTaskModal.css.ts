@@ -1,9 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { DefaultReset, color, config, toRem } from 'folds';
 
-/** Field label row above each control. */
-export const FieldLabel = style([DefaultReset, { marginBottom: config.space.S100 }]);
-
 /** Assignee trigger button: shows selected member or a placeholder. */
 export const AssigneeTrigger = style([
   DefaultReset,
@@ -30,6 +27,9 @@ export const AssigneeTrigger = style([
 
 /** Placeholder text inside the trigger when nothing is selected. */
 export const Placeholder = style([DefaultReset, { color: color.Surface.OnContainer }]);
+
+/** Floating member picker dropdown, overlaid on the field below. */
+export const PickerMenu = style([DefaultReset, { boxShadow: config.shadow.E200 }]);
 
 /** Member list inside the floating picker; height is capped by the Scroll. */
 export const MemberList = style([DefaultReset, { maxHeight: toRem(220) }]);

@@ -8,17 +8,17 @@ import {
   Box,
   Button,
   Checkbox,
+  Dialog,
+  Header,
   Icon,
+  IconButton,
   Icons,
   Input,
-  Line,
   Menu,
   MenuItem,
-  Modal,
   Overlay,
+  OverlayBackdrop,
   OverlayCenter,
-  PopOut,
-  RectCords,
   Scroll,
   Text,
   TextArea,
@@ -82,7 +82,7 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
   // member, the `assignee` lookup below resolves to undefined and the trigger
   // falls back to the placeholder.
   const [assigneeId, setAssigneeId] = useState<string | null>(() => getLastAssignee(room.roomId));
-  const [pickerAnchor, setPickerAnchor] = useState<RectCords>();
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [withPlan, setWithPlan] = useState(false);
   const [request, setRequest] = useState('');
@@ -145,7 +145,7 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
   };
 
   return (
-    <Overlay open>
+    <Overlay open backdrop={<OverlayBackdrop />}>
       <OverlayCenter>
         <FocusTrap
           focusTrapOptions={{
@@ -154,106 +154,40 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
             allowOutsideClick: true,
             clickOutsideDeactivates: true,
             onDeactivate: requestClose,
-            escapeDeactivates: (evt) => {
-              evt.stopPropagation();
-              return true;
-            },
+            escapeDeactivates: stopPropagation,
           }}
         >
-          <Modal size="400" style={{ borderRadius: config.radii.R500 }}>
-            <Box
-              shrink="No"
-              direction="Column"
-              gap="100"
-              style={{ padding: config.space.S400, paddingBottom: config.space.S200 }}
-            >
-              <Text size="H4">{t('taskBoard.createTask.title')}</Text>
-            </Box>
+          <Dialog variant="Surface">
+            <Header size="500" style={{ padding: `0 ${config.space.S200} 0 ${config.space.S400}` }}>
+              <Box grow="Yes">
+                <Text size="H4" truncate>
+                  {t('taskBoard.createTask.title')}
+                </Text>
+              </Box>
+              <Box shrink="No">
+                <IconButton size="300" radii="300" onClick={requestClose}>
+                  <Icon src={Icons.Cross} />
+                </IconButton>
+              </Box>
+            </Header>
 
             <Box
               direction="Column"
               gap="400"
-              style={{ padding: `0 ${config.space.S400} ${config.space.S400}` }}
+              style={{ padding: config.space.S400, width: toRem(400) }}
             >
               {/* Assignee */}
-              <Box direction="Column">
-                <Text className={css.FieldLabel} size="L400">
-                  {t('taskBoard.createTask.assignee')}
-                </Text>
-                <PopOut
-                  anchor={pickerAnchor}
-                  align="Start"
-                  position="Bottom"
-                  content={
-                    <FocusTrap
-                      focusTrapOptions={{
-                        initialFocus: false,
-                        onDeactivate: () => setPickerAnchor(undefined),
-                        clickOutsideDeactivates: true,
-                        escapeDeactivates: stopPropagation,
-                      }}
-                    >
-                      <Menu variant="Surface" style={{ width: toRem(280) }}>
-                        <Box direction="Column" gap="100" style={{ padding: config.space.S200 }}>
-                          <Input
-                            size="300"
-                            variant="Background"
-                            radii="400"
-                            outlined
-                            autoFocus
-                            before={<Icon size="100" src={Icons.Search} />}
-                            placeholder={t('taskBoard.createTask.searchMembers')}
-                            value={query}
-                            onChange={(e) => setQuery((e.target as HTMLInputElement).value)}
-                          />
-                          <Scroll size="300" hideTrack>
-                            <Box direction="Column" className={css.MemberList}>
-                              {filteredMembers.map((member) => (
-                                <MenuItem
-                                  key={member.userId}
-                                  variant="Surface"
-                                  radii="400"
-                                  size="300"
-                                  aria-pressed={member.userId === assigneeId}
-                                  onClick={() => {
-                                    setAssigneeId(member.userId);
-                                    setPickerAnchor(undefined);
-                                  }}
-                                  before={
-                                    <Avatar size="200" radii="Pill">
-                                      <UserAvatar
-                                        userId={member.userId}
-                                        src={avatarUrl(member)}
-                                        alt={memberName(room, member.userId)}
-                                        renderFallback={() => (
-                                          <Icon size="50" src={Icons.User} filled />
-                                        )}
-                                      />
-                                    </Avatar>
-                                  }
-                                >
-                                  <Box grow="Yes" style={{ minWidth: 0 }}>
-                                    <Text size="T300" truncate>
-                                      {memberName(room, member.userId)}
-                                    </Text>
-                                  </Box>
-                                </MenuItem>
-                              ))}
-                            </Box>
-                          </Scroll>
-                        </Box>
-                      </Menu>
-                    </FocusTrap>
-                  }
-                >
+              <Box direction="Column" gap="100">
+                <Text size="L400">{t('taskBoard.createTask.assignee')}</Text>
+                <div style={{ position: 'relative' }}>
                   <Box
                     as="button"
                     type="button"
                     className={css.AssigneeTrigger}
-                    aria-pressed={!!pickerAnchor}
-                    onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
+                    aria-pressed={pickerOpen}
+                    onClick={() => {
                       setQuery('');
-                      setPickerAnchor(evt.currentTarget.getBoundingClientRect());
+                      setPickerOpen((v) => !v);
                     }}
                   >
                     {assignee ? (
@@ -281,14 +215,78 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
                     )}
                     <Icon size="100" src={Icons.ChevronBottom} />
                   </Box>
-                </PopOut>
+                  {pickerOpen && (
+                    <FocusTrap
+                      focusTrapOptions={{
+                        initialFocus: false,
+                        onDeactivate: () => setPickerOpen(false),
+                        returnFocusOnDeactivate: false,
+                        clickOutsideDeactivates: true,
+                        allowOutsideClick: true,
+                        escapeDeactivates: stopPropagation,
+                      }}
+                    >
+                      <Menu
+                        className={css.PickerMenu}
+                        style={{ position: 'absolute', top: 0, zIndex: 1, width: '100%' }}
+                      >
+                        <Box direction="Column" gap="100" style={{ padding: config.space.S200 }}>
+                          <Input
+                            size="300"
+                            variant="Background"
+                            radii="400"
+                            outlined
+                            autoFocus
+                            before={<Icon size="100" src={Icons.Search} />}
+                            placeholder={t('taskBoard.createTask.searchMembers')}
+                            value={query}
+                            onChange={(e) => setQuery((e.target as HTMLInputElement).value)}
+                          />
+                          <Scroll size="300" hideTrack>
+                            <Box direction="Column" className={css.MemberList}>
+                              {filteredMembers.map((member) => (
+                                <MenuItem
+                                  key={member.userId}
+                                  variant="Surface"
+                                  radii="400"
+                                  size="300"
+                                  aria-pressed={member.userId === assigneeId}
+                                  onClick={() => {
+                                    setAssigneeId(member.userId);
+                                    setPickerOpen(false);
+                                  }}
+                                  before={
+                                    <Avatar size="200" radii="Pill">
+                                      <UserAvatar
+                                        userId={member.userId}
+                                        src={avatarUrl(member)}
+                                        alt={memberName(room, member.userId)}
+                                        renderFallback={() => (
+                                          <Icon size="50" src={Icons.User} filled />
+                                        )}
+                                      />
+                                    </Avatar>
+                                  }
+                                >
+                                  <Box grow="Yes" style={{ minWidth: 0 }}>
+                                    <Text size="T300" truncate>
+                                      {memberName(room, member.userId)}
+                                    </Text>
+                                  </Box>
+                                </MenuItem>
+                              ))}
+                            </Box>
+                          </Scroll>
+                        </Box>
+                      </Menu>
+                    </FocusTrap>
+                  )}
+                </div>
               </Box>
 
               {/* Requirement */}
-              <Box direction="Column">
-                <Text className={css.FieldLabel} size="L400">
-                  {t('taskBoard.createTask.request')}
-                </Text>
+              <Box direction="Column" gap="100">
+                <Text size="L400">{t('taskBoard.createTask.request')}</Text>
                 <TextArea
                   ref={requestRef}
                   className={css.TextAreaField}
@@ -313,24 +311,29 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
                 <Checkbox size="100" variant="Primary" checked={withPlan} readOnly />
                 <Text size="T300">{t('taskBoard.createTask.withPlan')}</Text>
               </Box>
-            </Box>
 
-            <Line size="300" />
-            <Box shrink="No" gap="200" justifyContent="End" style={{ padding: config.space.S300 }}>
-              <Button size="300" variant="Secondary" fill="Soft" radii="300" onClick={requestClose}>
-                <Text size="B300">{t('taskBoard.createTask.cancel')}</Text>
-              </Button>
-              <Button
-                size="300"
-                variant="Primary"
-                radii="300"
-                disabled={!canSubmit}
-                onClick={handleSubmit}
-              >
-                <Text size="B300">{t('taskBoard.createTask.submit')}</Text>
-              </Button>
+              <Box gap="200" justifyContent="End">
+                <Button
+                  size="300"
+                  variant="Secondary"
+                  fill="Soft"
+                  radii="300"
+                  onClick={requestClose}
+                >
+                  <Text size="B300">{t('taskBoard.createTask.cancel')}</Text>
+                </Button>
+                <Button
+                  size="300"
+                  variant="Primary"
+                  radii="300"
+                  disabled={!canSubmit}
+                  onClick={handleSubmit}
+                >
+                  <Text size="B300">{t('taskBoard.createTask.submit')}</Text>
+                </Button>
+              </Box>
             </Box>
-          </Modal>
+          </Dialog>
         </FocusTrap>
       </OverlayCenter>
     </Overlay>
