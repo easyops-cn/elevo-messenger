@@ -11,8 +11,9 @@ import { useStateEvent } from '../../../hooks/useStateEvent';
 import { usePowerLevels, readPowerLevel } from '../../../hooks/usePowerLevels';
 import { useElevoConfig } from '../../../hooks/useElevoConfig';
 import { useWorkspaceToken } from '../../../hooks/useWorkspaceToken';
-import { isDesktopTauri, openBridgeExplorer } from '../../../plugins/useTauriOpener';
+import { isDesktopTauri } from '../../../plugins/useTauriOpener';
 import { FolderOpenIcon } from '../../../icons/FolderOpenIcon';
+import { useOpenWorkspace } from '../../workspaces/useOpenWorkspace';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import {
   AddWorkspaceModal,
@@ -147,16 +148,15 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
   const linkedIds = new Set(linkedWorkspaces.map((w) => getWorkspaceKey(w)));
   const isConnecting = connectState.status === AsyncStatus.Loading;
 
+  const openWorkspace = useOpenWorkspace();
   const handleOpenExplorer = (ws: WorkspaceItem) => {
-    if (!ws.bridge_provider || !homeserverUrl || !matrixToken) return;
-    openBridgeExplorer({
-      workspaceId: ws.id,
-      workspaceName: ws.name,
-      bridgeProvider: ws.bridge_provider,
-      matrixToken,
-      homeserverUrl,
-    });
+    openWorkspace(ws, room.roomId);
   };
+  // Whether the "open" action should be shown for a workspace. Bridge
+  // workspaces open a desktop-only explorer window; others open the elevo
+  // workspace side panel, which needs a configured explorerUrl.
+  const canOpenWorkspace = (ws: WorkspaceItem): boolean =>
+    ws.bridge_provider ? isDesktopTauri : Boolean(elevoConfig.workspaces?.explorerUrl);
 
   return (
     <>
@@ -309,9 +309,9 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                             title={ws.name}
                             description={ws.description || undefined}
                             after={
-                              isModerator || (ws.bridge_provider && isDesktopTauri) ? (
+                              isModerator || canOpenWorkspace(ws) ? (
                                 <Box gap="100" shrink="No">
-                                  {ws.bridge_provider && isDesktopTauri && (
+                                  {canOpenWorkspace(ws) && (
                                     <IconButton
                                       size="300"
                                       variant="Secondary"

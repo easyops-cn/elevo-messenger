@@ -69,7 +69,8 @@ import { ContainerColor } from '../../styles/ContainerColor.css';
 import { RoomSettingsPage } from '../../state/roomSettings';
 import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
-import { openWorkspacePanel, openTasksPanel, isDesktopTauri } from '../../plugins/useTauriOpener';
+import { openTasksPanel, isDesktopTauri } from '../../plugins/useTauriOpener';
+import { useOpenWorkspace } from '../workspaces/useOpenWorkspace';
 import { ListTodoIcon } from '../../icons/ListTodoIcon';
 import { PanelRightIcon } from '../../icons/PanelRightIcon';
 import { EllipsisVerticalIcon } from '../../icons/EllipsisVerticalIcon';
@@ -286,10 +287,13 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
     (workspacesStateEvent?.getContent() as { workspaces?: WorkspaceItem[] } | undefined)
       ?.workspaces ?? [];
   const firstWorkspace = linkedWorkspaces[0];
-  const workspaceExplorerUrl =
-    elevoConfig.workspaces?.explorerUrl && firstWorkspace
-      ? `${elevoConfig.workspaces.explorerUrl}?ids=${firstWorkspace.id}`
-      : null;
+  const openWorkspace = useOpenWorkspace();
+  // The workspace button shows when the first linked workspace can be opened:
+  // bridge workspaces open a standalone explorer window; others need a
+  // configured explorerUrl for the side panel.
+  const canOpenWorkspace = Boolean(
+    firstWorkspace && (firstWorkspace.bridge_provider || elevoConfig.workspaces?.explorerUrl),
+  );
 
   const firstTenant = (elevoConfig.workspaces?.tenants ?? []).find(
     (tenant) => tenant.id === firstWorkspace?.owner_tenant_id,
@@ -512,7 +516,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
             </TooltipProvider>
           )}
 
-          {workspaceExplorerUrl && (
+          {canOpenWorkspace && (
             <TooltipProvider
               position="Bottom"
               offset={4}
@@ -527,7 +531,7 @@ export function RoomViewHeader({ callView }: { callView?: boolean }) {
                   size="300"
                   fill="None"
                   ref={triggerRef}
-                  onClick={() => openWorkspacePanel(workspaceExplorerUrl, room.roomId)}
+                  onClick={() => openWorkspace(firstWorkspace, room.roomId)}
                 >
                   <Icon size="100" src={LayoutGridIcon} />
                 </IconButton>
