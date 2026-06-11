@@ -157,7 +157,7 @@ function ViewerContent({ path, metadata, content, onDownload }: ViewerContentPro
     return (
       <Scroll size="300" hideTrack visibility="Hover">
         <pre className={css.Pre}>
-          <ShikiCode code={content.text} lang={path} />
+          <ShikiCode code={content.text} lang={path} showLineNumbers />
         </pre>
       </Scroll>
     );
