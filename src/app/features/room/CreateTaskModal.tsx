@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import FocusTrap from 'focus-trap-react';
 import { Room, RoomMember } from 'matrix-js-sdk';
 import { RoomMessageEventContent } from 'matrix-js-sdk/lib/types';
@@ -23,7 +23,6 @@ import {
   Text,
   TextArea,
   config,
-  toRem,
 } from 'folds';
 
 import * as css from './CreateTaskModal.css';
@@ -79,11 +78,12 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
   }, [members, room]);
 
   // Restore the last-used assignee for this room. If that user is no longer a
-  // member, the `assignee` lookup below resolves to undefined and the trigger
-  // falls back to the placeholder.
+  // member, the `assignee` lookup below resolves to undefined and the field
+  // falls back to empty.
   const [assigneeId, setAssigneeId] = useState<string | null>(() => getLastAssignee(room.roomId));
-  const [pickerOpen, setPickerOpen] = useState(false);
+  // Free-text shown in the assignee search input.
   const [query, setQuery] = useState('');
+  const [pickerOpen, setPickerOpen] = useState(false);
   const [withPlan, setWithPlan] = useState(false);
   const [request, setRequest] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -93,20 +93,36 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
     [sortedMembers, assigneeId],
   );
 
+  // Seed the input with the restored assignee's name once members load.
+  useEffect(() => {
+    if (assignee) setQuery(memberName(room, assignee.userId));
+    // Only run when the resolved assignee identity changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [assignee?.userId]);
+
+  // When the field text exactly matches the selected member, show the full
+  // list; otherwise filter by the typed query (display name or user id).
   const filteredMembers = useMemo(() => {
     const q = query.trim().toLowerCase();
-    if (!q) return sortedMembers;
+    const selectedName = assignee ? memberName(room, assignee.userId).toLowerCase() : null;
+    if (!q || q === selectedName) return sortedMembers;
     return sortedMembers.filter(
       (m) =>
         memberName(room, m.userId).toLowerCase().includes(q) || m.userId.toLowerCase().includes(q),
     );
-  }, [sortedMembers, query, room]);
+  }, [sortedMembers, query, assignee, room]);
 
   const avatarUrl = (member: RoomMember): string | undefined => {
     const mxc = member.getMxcAvatarUrl();
     return mxc
       ? (mx.mxcUrlToHttp(mxc, 100, 100, 'crop', undefined, false, useAuthentication) ?? undefined)
       : undefined;
+  };
+
+  const selectMember = (member: RoomMember) => {
+    setAssigneeId(member.userId);
+    setQuery(memberName(room, member.userId));
+    setPickerOpen(false);
   };
 
   const canSubmit = !!assignee && request.trim().length > 0 && !submitting;
@@ -171,27 +187,17 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
               </Box>
             </Header>
 
-            <Box
-              direction="Column"
-              gap="400"
-              style={{ padding: config.space.S400, width: toRem(400) }}
-            >
+            <Box direction="Column" gap="400" style={{ padding: config.space.S400 }}>
               {/* Assignee */}
               <Box direction="Column" gap="100">
                 <Text size="L400">{t('taskBoard.createTask.assignee')}</Text>
                 <div style={{ position: 'relative' }}>
-                  <Box
-                    as="button"
-                    type="button"
-                    className={css.AssigneeTrigger}
-                    aria-pressed={pickerOpen}
-                    onClick={() => {
-                      setQuery('');
-                      setPickerOpen((v) => !v);
-                    }}
-                  >
-                    {assignee ? (
-                      <>
+                  <Input
+                    size="500"
+                    variant="Background"
+                    autoComplete="off"
+                    before={
+                      assignee ? (
                         <Avatar size="200" radii="Pill">
                           <UserAvatar
                             userId={assignee.userId}
@@ -200,22 +206,20 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
                             renderFallback={() => <Icon size="50" src={Icons.User} filled />}
                           />
                         </Avatar>
-                        <Box grow="Yes" style={{ minWidth: 0 }}>
-                          <Text size="T300" truncate>
-                            {memberName(room, assignee.userId)}
-                          </Text>
-                        </Box>
-                      </>
-                    ) : (
-                      <Box grow="Yes" style={{ minWidth: 0 }}>
-                        <Text className={css.Placeholder} size="T300" truncate>
-                          {t('taskBoard.createTask.assigneePlaceholder')}
-                        </Text>
-                      </Box>
-                    )}
-                    <Icon size="100" src={Icons.ChevronBottom} />
-                  </Box>
-                  {pickerOpen && (
+                      ) : (
+                        <Icon size="100" src={Icons.User} />
+                      )
+                    }
+                    placeholder={t('taskBoard.createTask.assigneePlaceholder')}
+                    value={query}
+                    onFocus={() => setPickerOpen(true)}
+                    onChange={(e) => {
+                      setQuery((e.target as HTMLInputElement).value);
+                      setAssigneeId(null);
+                      setPickerOpen(true);
+                    }}
+                  />
+                  {pickerOpen && filteredMembers.length > 0 && (
                     <FocusTrap
                       focusTrapOptions={{
                         initialFocus: false,
@@ -226,35 +230,19 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
                         escapeDeactivates: stopPropagation,
                       }}
                     >
-                      <Menu
-                        className={css.PickerMenu}
-                        style={{ position: 'absolute', top: 0, zIndex: 1, width: '100%' }}
-                      >
-                        <Box direction="Column" gap="100" style={{ padding: config.space.S200 }}>
-                          <Input
-                            size="300"
-                            variant="Background"
-                            radii="400"
-                            outlined
-                            autoFocus
-                            before={<Icon size="100" src={Icons.Search} />}
-                            placeholder={t('taskBoard.createTask.searchMembers')}
-                            value={query}
-                            onChange={(e) => setQuery((e.target as HTMLInputElement).value)}
-                          />
-                          <Scroll size="300" hideTrack>
-                            <Box direction="Column" className={css.MemberList}>
+                      <Box style={{ position: 'relative' }}>
+                        <Menu style={{ position: 'absolute', top: 0, zIndex: 1, width: '100%' }}>
+                          <Scroll hideTrack size="300" className={css.MemberList}>
+                            <Box direction="Column" style={{ padding: config.space.S100 }}>
                               {filteredMembers.map((member) => (
                                 <MenuItem
                                   key={member.userId}
+                                  type="button"
                                   variant="Surface"
-                                  radii="400"
+                                  radii="300"
                                   size="300"
                                   aria-pressed={member.userId === assigneeId}
-                                  onClick={() => {
-                                    setAssigneeId(member.userId);
-                                    setPickerOpen(false);
-                                  }}
+                                  onClick={() => selectMember(member)}
                                   before={
                                     <Avatar size="200" radii="Pill">
                                       <UserAvatar
@@ -267,6 +255,11 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
                                       />
                                     </Avatar>
                                   }
+                                  after={
+                                    <Text size="T200" priority="300" truncate>
+                                      {getMxIdLocalPart(member.userId) ?? member.userId}
+                                    </Text>
+                                  }
                                 >
                                   <Box grow="Yes" style={{ minWidth: 0 }}>
                                     <Text size="T300" truncate>
@@ -277,8 +270,8 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
                               ))}
                             </Box>
                           </Scroll>
-                        </Box>
-                      </Menu>
+                        </Menu>
+                      </Box>
                     </FocusTrap>
                   )}
                 </div>
@@ -291,7 +284,6 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
                   ref={requestRef}
                   className={css.TextAreaField}
                   variant="Background"
-                  radii="400"
                   resize="Vertical"
                   rows={4}
                   placeholder={t('taskBoard.createTask.requestPlaceholder')}
