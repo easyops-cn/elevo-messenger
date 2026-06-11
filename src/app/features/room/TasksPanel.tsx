@@ -9,6 +9,8 @@ import { useStateEvent } from '../../hooks/useStateEvent';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
+import { CreateTaskModal } from './CreateTaskModal';
+import { PlusIcon } from '../../icons/PlusIcon';
 import { useOpenTaskBoard } from '../task-board/useOpenTaskBoard';
 import { fetchWorkspaceTaskStats, getTaskBoardBaseUrl } from '../task-board/api';
 import { STATUS_ICON } from '../task-board/statusIcons';
@@ -43,6 +45,7 @@ export function TasksPanel({ room }: TasksPanelProps) {
   const [stats, setStats] = useState<TaskStats | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const homeserverUrl = mx.getHomeserverUrl();
 
@@ -80,9 +83,21 @@ export function TasksPanel({ room }: TasksPanelProps) {
 
   return (
     <Box direction="Column" gap="100">
-      <Text className={panelCss.MembersGroupLabel} size="L400" priority="300">
-        {t('taskBoard.panelTitle')}
-      </Text>
+      <Box className={css.HeaderRow} alignItems="Center">
+        <Text className={panelCss.MembersGroupLabel} size="L400" priority="300">
+          {t('taskBoard.panelTitle')}
+        </Text>
+        <Box
+          as="button"
+          type="button"
+          className={css.CreateButton}
+          title={t('taskBoard.createTask.title')}
+          aria-label={t('taskBoard.createTask.title')}
+          onClick={() => setCreateOpen(true)}
+        >
+          <Icon size="100" src={PlusIcon} />
+        </Box>
+      </Box>
 
       {loading && (
         <Box justifyContent="Center" className={css.StateBox}>
@@ -142,6 +157,8 @@ export function TasksPanel({ room }: TasksPanelProps) {
           })}
         </Box>
       )}
+
+      {createOpen && <CreateTaskModal room={room} requestClose={() => setCreateOpen(false)} />}
     </Box>
   );
 }

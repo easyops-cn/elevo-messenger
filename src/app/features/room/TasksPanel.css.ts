@@ -11,6 +11,37 @@ export const StateBox = style([
 
 export const ErrorText = style([DefaultReset, { color: color.Critical.Main }]);
 
+/** Panel header row: title on the left, create button on the right. */
+export const HeaderRow = style([
+  DefaultReset,
+  {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingInline: config.space.S200,
+  },
+]);
+
+/** Small borderless icon button to open the create-task dialog. */
+export const CreateButton = style([
+  DefaultReset,
+  {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: config.space.S100,
+    borderRadius: config.radii.R300,
+    color: color.Surface.OnContainer,
+    cursor: 'pointer',
+    selectors: {
+      '&:hover': { backgroundColor: color.Surface.ContainerHover },
+      '&:focus-visible': {
+        outline: `${config.borderWidth.B400} solid ${color.Primary.Main}`,
+      },
+    },
+  },
+]);
+
 export const StatsGrid = style([
   DefaultReset,
   {
