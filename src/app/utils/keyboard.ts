@@ -1,5 +1,6 @@
 import { isKeyHotkey } from 'is-hotkey';
 import { KeyboardEventHandler } from 'react';
+import { isComposingEvent } from '../hooks/useComposingCheck';
 
 export interface KeyboardEventLike {
   key: string;
@@ -8,6 +9,7 @@ export interface KeyboardEventLike {
   ctrlKey: boolean;
   metaKey: boolean;
   shiftKey: boolean;
+  isComposing?: boolean;
   preventDefault(): void;
   stopPropagation(): void;
 }
@@ -20,6 +22,10 @@ export const onTabPress = (evt: KeyboardEventLike, callback: () => void) => {
 };
 
 export const onAutocompleteItemKeyDown = (evt: KeyboardEventLike, callback: () => void) => {
+  // Ignore keydown while an IME composition is active/confirming, otherwise the
+  // Enter that confirms the composition would also select the autocomplete item.
+  if (isComposingEvent(evt)) return;
+
   onTabPress(evt, callback);
 
   if (isKeyHotkey('enter', evt)) {
@@ -40,6 +46,10 @@ export const onAutocompleteNavigation = (
   selectActiveItem: () => void,
 ) => {
   if (itemCount === 0) return;
+
+  // While composing with an IME, arrow/enter keys drive the IME candidate
+  // window, so they must not be hijacked for autocomplete navigation/selection.
+  if (isComposingEvent(evt)) return;
 
   if (isKeyHotkey('arrowdown', evt)) {
     evt.preventDefault();
