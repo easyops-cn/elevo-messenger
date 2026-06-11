@@ -71,6 +71,10 @@ export const Board = style([
   {
     display: 'grid',
     gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
+    // Constrain the single row to the container height; without this the auto
+    // row grows to the tallest column's content and the per-column scroll
+    // never kicks in, so cards overflow the column boundary.
+    gridTemplateRows: 'minmax(0, 1fr)',
     gap: config.space.S300,
     padding: config.space.S300,
     height: '100%',
