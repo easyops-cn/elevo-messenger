@@ -779,6 +779,7 @@ export type MessageProps = {
   onEditId?: (eventId?: string) => void;
   onReactionToggle: (targetEventId: string, key: string, shortcode?: string) => void;
   reply?: ReactNode;
+  fileReference?: ReactNode;
   reactions?: ReactNode;
   threadSummary?: ReactNode;
   hideReadReceipts?: boolean;
@@ -809,6 +810,7 @@ export const Message = as<'div', MessageProps>(
       onReactionToggle,
       onEditId,
       reply,
+      fileReference,
       reactions,
       threadSummary,
       hideReadReceipts,
@@ -941,6 +943,7 @@ export const Message = as<'div', MessageProps>(
         ) : (
           children
         )}
+        {fileReference}
         {reactions}
         {threadSummary}
       </Box>
@@ -978,6 +981,7 @@ export const Message = as<'div', MessageProps>(
 
     const bubbleAfterContentJSX = (
       <Box direction="Column" gap="0" alignItems={isOwn ? 'End' : 'Start'}>
+        {fileReference}
         {reactions}
         {threadSummary}
       </Box>
