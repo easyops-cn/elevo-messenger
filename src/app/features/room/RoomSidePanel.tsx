@@ -6,7 +6,6 @@ import classNames from 'classnames';
 import * as css from './RoomSidePanel.css';
 import { ContainerColor } from '../../styles/ContainerColor.css';
 import { MembersPanel } from './MembersPanel';
-import { FilesPanel } from './FilesPanel';
 import { ThreadsPanel } from './ThreadsPanel';
 
 type RoomSidePanelProps = {
@@ -26,7 +25,6 @@ export function RoomSidePanel({ room }: RoomSidePanelProps) {
         <Scroll ref={scrollRef} variant="Background" size="300" visibility="Hover" hideTrack>
           <Box className={css.MemberDrawerContent} direction="Column" gap="600">
             <MembersPanel room={room} />
-            <FilesPanel room={room} />
             {!isSpaceRoom && <ThreadsPanel room={room} />}
           </Box>
         </Scroll>
