@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Chip, Icon, Icons, IconButton, Scroll, Spinner, Text } from 'folds';
 import { useTranslation } from 'react-i18next';
-import { CopyIcon } from '../../icons/CopyIcon';
-import { copyToClipboard } from '../../utils/dom';
 import { saveFile } from '../../utils/file-saver';
 import { ShikiCode } from '../../plugins/shiki';
 import { fetchFileContent, fetchFileDownload, fetchFileMetadata } from './api';
@@ -43,7 +41,7 @@ export function FileViewer({ path }: FileViewerProps) {
         if (meta.canReadContent === false || meta.classification === 'binary') {
           return;
         }
-        const result = await fetchFileContent(baseUrl, workspaceId, path);
+        const result = await fetchFileContent(baseUrl, workspaceId, path, meta.classification);
         setContent(result);
       })
       .catch(setError)
@@ -101,15 +99,6 @@ export function FileViewer({ path }: FileViewerProps) {
             size="300"
             variant="Surface"
             radii="300"
-            title={t('bridgeExplorer.copyPath')}
-            onClick={() => copyToClipboard(path)}
-          >
-            <Icon size="100" src={CopyIcon} />
-          </IconButton>
-          <IconButton
-            size="300"
-            variant="Surface"
-            radii="300"
             title={t('bridgeExplorer.download')}
             onClick={handleDownload}
             disabled={downloading}
@@ -157,7 +146,7 @@ function ViewerContent({ path, metadata, content, onDownload }: ViewerContentPro
     return (
       <Scroll size="300" hideTrack visibility="Hover">
         <pre className={css.Pre}>
-          <ShikiCode code={content.text} lang={path} />
+          <ShikiCode code={content.text} path={path} showLineNumbers />
         </pre>
       </Scroll>
     );

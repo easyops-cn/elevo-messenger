@@ -147,8 +147,9 @@ function FileRow({
   onSelectFile,
 }: Omit<RowProps, 'selectedPath'> & { selected: boolean }) {
   const fullPath = joinPath(parentPath, entry.name);
-  // Align with folder rows: chevron width (~1rem) plus depth indent.
-  const indent = { paddingLeft: `${depth * 0.75 + 1.25}rem` };
+  // Match folder-row indent exactly; alignment with the folder icon is handled
+  // by rendering an invisible chevron-sized spacer below.
+  const indent = { paddingLeft: `${depth * 0.75 + 0.25}rem` };
 
   return (
     <button
@@ -158,6 +159,8 @@ function FileRow({
       aria-selected={selected}
       onClick={() => onSelectFile(fullPath)}
     >
+      {/* Spacer matching the folder chevron so file icons line up with folder icons. */}
+      <Icon size="50" src={Icons.ChevronRight} style={{ visibility: 'hidden' }} />
       <Icon size="50" src={FileIcon} />
       <Text size="T200" truncate>
         {entry.name}

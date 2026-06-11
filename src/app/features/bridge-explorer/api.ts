@@ -9,7 +9,13 @@
 
 import { trimLeadingSlash, trimTrailingSlash } from '../../utils/common';
 import { getToken, refreshToken } from './tokenRefresh';
-import type { DirectoryEntry, FileContentResult, FileMetadata, WorkspaceInfo } from './types';
+import type {
+  DirectoryEntry,
+  FileClassification,
+  FileContentResult,
+  FileMetadata,
+  WorkspaceInfo,
+} from './types';
 
 /** A typed error carrying the HTTP status for inline error rendering. */
 export class BridgeApiError extends Error {
@@ -107,16 +113,24 @@ export async function fetchFileMetadata(
 /**
  * GET `.../files/content?path=` — file content.
  * Returns text for text files and a blob (with object URL) for media.
+ *
+ * `classification` is the authoritative hint from file metadata. The server
+ * may serve text-like files (e.g. `.toml`, `.ini`) as
+ * `application/octet-stream`, so when metadata classified the file as `text`
+ * we render it as text regardless of the response Content-Type.
  */
 export async function fetchFileContent(
   baseUrl: string,
   workspaceId: string,
   path: string,
+  classification?: FileClassification,
 ): Promise<FileContentResult> {
   const url = `${fileApiBase(baseUrl, workspaceId)}/content?path=${encodeURIComponent(path)}`;
   const res = await authedFetch(url);
   const contentType = res.headers.get('Content-Type') ?? 'application/octet-stream';
-  if (contentType.startsWith('text/') || /\b(json|xml|javascript|ecmascript)\b/.test(contentType)) {
+  const isTextContentType =
+    contentType.startsWith('text/') || /\b(json|xml|javascript|ecmascript)\b/.test(contentType);
+  if (classification === 'text' || (classification !== 'media' && isTextContentType)) {
     return { kind: 'text', text: await res.text(), contentType };
   }
   const blob = await res.blob();
