@@ -102,6 +102,35 @@ export async function openBridgeExplorer(payload: BridgeExplorerPayload): Promis
   }
 }
 
+/** Payload for opening a task board window. */
+export type TaskBoardPayload = {
+  workspaceId: string;
+  workspaceName: string;
+  /** Verbatim bridge provider segment from room state (already includes `-bridge`). */
+  bridgeProvider: string;
+  matrixToken: string;
+  homeserverUrl: string;
+};
+
+/**
+ * Open a standalone read-only task board window for a bridge-provider
+ * workspace. Each workspace gets its own window; reopening the same workspace
+ * focuses the existing one (handled by the Tauri backend via a stable label).
+ *
+ * Returns `true` if the window was opened via Tauri, `false` otherwise
+ * (non-desktop environments cannot host the task board window).
+ */
+export async function openTaskBoard(payload: TaskBoardPayload): Promise<boolean> {
+  if (!isDesktopTauri) return false;
+  try {
+    await invoke('open_task_board_window', { payload });
+    return true;
+  } catch (error) {
+    console.error('Failed to open task board window:', error);
+    return false;
+  }
+}
+
 export type SdkMessagePayload<T = unknown> = {
   source: string;
   roomId: string;
