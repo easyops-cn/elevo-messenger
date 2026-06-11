@@ -21,7 +21,7 @@ export const StatsGrid = style([
   },
 ]);
 
-/** Borderless, tinted 2x2 stat card. Background/text tone set per status. */
+/** Borderless 2x2 stat card. Uniform Surface background; only the icon is toned. */
 export const StatCard = style([
   DefaultReset,
   {
@@ -29,27 +29,28 @@ export const StatCard = style([
     gap: config.space.S200,
     padding: config.space.S300,
     borderRadius: config.radii.R400,
+    backgroundColor: color.Surface.Container,
+    color: color.Surface.OnContainer,
   },
 ]);
 
+/** Clickable variant (desktop): opens the board window. */
+export const StatCardClickable = style({
+  cursor: 'pointer',
+  selectors: {
+    '&:hover': { backgroundColor: color.Surface.ContainerHover },
+    '&:focus-visible': {
+      outline: `${config.borderWidth.B400} solid ${color.Primary.Main}`,
+    },
+  },
+});
+
 export const StatCount = style([DefaultReset, { lineHeight: 1 }]);
 
-export const StatIcon = style([DefaultReset, { flexShrink: 0, opacity: config.opacity.P500 }]);
+export const StatIcon = style([DefaultReset, { flexShrink: 0 }]);
 
-/* Per-status tone: tinted container background + matching foreground. */
-export const toneBacklog = style({
-  backgroundColor: color.Secondary.Container,
-  color: color.Secondary.OnContainer,
-});
-export const tonePlanned = style({
-  backgroundColor: color.Primary.Container,
-  color: color.Primary.OnContainer,
-});
-export const toneInProgress = style({
-  backgroundColor: color.Warning.Container,
-  color: color.Warning.OnContainer,
-});
-export const toneCompleted = style({
-  backgroundColor: color.Success.Container,
-  color: color.Success.OnContainer,
-});
+/* Per-status icon tone (color only; card background stays uniform). */
+export const toneBacklog = style({ color: color.Secondary.Main });
+export const tonePlanned = style({ color: color.Primary.Main });
+export const toneInProgress = style({ color: color.Warning.Main });
+export const toneCompleted = style({ color: color.Success.Main });

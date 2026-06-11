@@ -7,7 +7,9 @@ import * as panelCss from './RoomSidePanel.css';
 import * as css from './TasksPanel.css';
 import { useStateEvent } from '../../hooks/useStateEvent';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
+import { isDesktopTauri } from '../../plugins/useTauriOpener';
 import { ELEVO_WORKSPACES_STATE_KEY, WorkspaceItem } from './WorkspacesModal';
+import { useOpenTaskBoard } from '../task-board/useOpenTaskBoard';
 import { fetchWorkspaceTaskStats, getTaskBoardBaseUrl } from '../task-board/api';
 import { STATUS_ICON } from '../task-board/statusIcons';
 import { TASK_STATUSES, type TaskStats, type TaskStatus } from '../task-board/types';
@@ -26,6 +28,7 @@ const STATUS_TONE: Record<TaskStatus, string> = {
 export function TasksPanel({ room }: TasksPanelProps) {
   const { t } = useTranslation();
   const mx = useMatrixClient();
+  const openTaskBoard = useOpenTaskBoard();
 
   const workspacesStateEvent = useStateEvent(room, ELEVO_WORKSPACES_STATE_KEY as never);
   // MVP: a room may bind several workspaces; surface the first bridge-provider
@@ -97,23 +100,46 @@ export function TasksPanel({ room }: TasksPanelProps) {
 
       {!loading && !error && (
         <Box className={css.StatsGrid}>
-          {TASK_STATUSES.map((status) => (
-            <Box
-              key={status}
-              className={`${css.StatCard} ${STATUS_TONE[status]}`}
-              alignItems="Center"
-            >
-              <Box grow="Yes" direction="Column" gap="100">
-                <Text className={css.StatCount} size="H3">
-                  {stats?.byStatus?.[status] ?? 0}
-                </Text>
-                <Text size="T200" priority="400">
-                  {t(`taskBoard.status_${status}`)}
-                </Text>
+          {TASK_STATUSES.map((status) => {
+            const inner = (
+              <>
+                <Box grow="Yes" direction="Column" gap="100">
+                  <Text className={css.StatCount} size="H3">
+                    {stats?.byStatus?.[status] ?? 0}
+                  </Text>
+                  <Text size="T200" priority="400">
+                    {t(`taskBoard.status_${status}`)}
+                  </Text>
+                </Box>
+                <Icon
+                  className={`${css.StatIcon} ${STATUS_TONE[status]}`}
+                  size="200"
+                  src={STATUS_ICON[status]}
+                />
+              </>
+            );
+
+            // Cards open the board window on desktop; web stays read-only.
+            if (isDesktopTauri) {
+              return (
+                <Box
+                  key={status}
+                  as="button"
+                  type="button"
+                  className={`${css.StatCard} ${css.StatCardClickable}`}
+                  alignItems="Center"
+                  onClick={() => openTaskBoard(workspace)}
+                >
+                  {inner}
+                </Box>
+              );
+            }
+            return (
+              <Box key={status} className={css.StatCard} alignItems="Center">
+                {inner}
               </Box>
-              <Icon className={css.StatIcon} size="200" src={STATUS_ICON[status]} />
-            </Box>
-          ))}
+            );
+          })}
         </Box>
       )}
     </Box>
