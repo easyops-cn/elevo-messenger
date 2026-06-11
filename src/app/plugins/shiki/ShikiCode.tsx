@@ -15,10 +15,18 @@ import * as css from './ShikiCode.css';
 type ShikiCodeProps = {
   code: string;
   lang?: string;
+  path?: string;
   showLineNumbers?: boolean;
 } & HTMLAttributes<HTMLElement>;
 
-export function ShikiCode({ code, lang, showLineNumbers, className, ...props }: ShikiCodeProps) {
+export function ShikiCode({
+  code,
+  lang,
+  path,
+  showLineNumbers,
+  className,
+  ...props
+}: ShikiCodeProps) {
   const theme = useTheme();
   const [tokenLines, setTokenLines] = useState<HighlightedTokenLines>(() =>
     getPlainTokenLines(code),
@@ -29,7 +37,7 @@ export function ShikiCode({ code, lang, showLineNumbers, className, ...props }: 
     const shikiTheme = getShikiThemeName(theme.kind);
 
     setTokenLines(getPlainTokenLines(code));
-    codeToTokensBase({ code, language: lang, theme: shikiTheme })
+    codeToTokensBase({ code, language: lang, path, theme: shikiTheme })
       .then((result) => {
         if (alive) setTokenLines(result);
       })
@@ -40,7 +48,7 @@ export function ShikiCode({ code, lang, showLineNumbers, className, ...props }: 
     return () => {
       alive = false;
     };
-  }, [code, lang, theme.kind]);
+  }, [code, lang, path, theme.kind]);
 
   const normalizedLang = normalizeLanguageName(lang);
   const codeClassName = className ?? (normalizedLang ? `language-${normalizedLang}` : undefined);
