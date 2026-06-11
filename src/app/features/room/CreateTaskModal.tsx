@@ -12,10 +12,13 @@ import {
   Icons,
   Input,
   Line,
+  Menu,
   MenuItem,
   Modal,
   Overlay,
   OverlayCenter,
+  PopOut,
+  RectCords,
   Scroll,
   Text,
   TextArea,
@@ -30,6 +33,7 @@ import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { getMemberDisplayName, getMentionContent } from '../../utils/room';
 import { getMxIdLocalPart } from '../../utils/matrix';
 import { sanitizeText } from '../../utils/sanitize';
+import { stopPropagation } from '../../utils/keyboard';
 import { UserAvatar } from '../../components/user-avatar';
 
 type CreateTaskModalProps = {
@@ -78,7 +82,7 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
   // member, the `assignee` lookup below resolves to undefined and the trigger
   // falls back to the placeholder.
   const [assigneeId, setAssigneeId] = useState<string | null>(() => getLastAssignee(room.roomId));
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [pickerAnchor, setPickerAnchor] = useState<RectCords>();
   const [query, setQuery] = useState('');
   const [withPlan, setWithPlan] = useState(false);
   const [request, setRequest] = useState('');
@@ -156,7 +160,7 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
             },
           }}
         >
-          <Modal size="400" style={{ maxHeight: toRem(560), borderRadius: config.radii.R500 }}>
+          <Modal size="400" style={{ borderRadius: config.radii.R500 }}>
             <Box
               shrink="No"
               direction="Column"
@@ -166,131 +170,150 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
               <Text size="H4">{t('taskBoard.createTask.title')}</Text>
             </Box>
 
-            <Scroll size="300" hideTrack>
-              <Box
-                direction="Column"
-                gap="400"
-                style={{ padding: `0 ${config.space.S400} ${config.space.S400}` }}
-              >
-                {/* Assignee */}
-                <Box direction="Column">
-                  <Text className={css.FieldLabel} size="L400">
-                    {t('taskBoard.createTask.assignee')}
-                  </Text>
-                  {!pickerOpen ? (
-                    <Box
-                      as="button"
-                      type="button"
-                      className={css.AssigneeTrigger}
-                      onClick={() => {
-                        setQuery('');
-                        setPickerOpen(true);
+            <Box
+              direction="Column"
+              gap="400"
+              style={{ padding: `0 ${config.space.S400} ${config.space.S400}` }}
+            >
+              {/* Assignee */}
+              <Box direction="Column">
+                <Text className={css.FieldLabel} size="L400">
+                  {t('taskBoard.createTask.assignee')}
+                </Text>
+                <PopOut
+                  anchor={pickerAnchor}
+                  align="Start"
+                  position="Bottom"
+                  content={
+                    <FocusTrap
+                      focusTrapOptions={{
+                        initialFocus: false,
+                        onDeactivate: () => setPickerAnchor(undefined),
+                        clickOutsideDeactivates: true,
+                        escapeDeactivates: stopPropagation,
                       }}
                     >
-                      {assignee ? (
-                        <>
-                          <Avatar size="200" radii="Pill">
-                            <UserAvatar
-                              userId={assignee.userId}
-                              src={avatarUrl(assignee)}
-                              alt={memberName(room, assignee.userId)}
-                              renderFallback={() => <Icon size="50" src={Icons.User} filled />}
-                            />
-                          </Avatar>
-                          <Box grow="Yes" style={{ minWidth: 0 }}>
-                            <Text size="T300" truncate>
-                              {memberName(room, assignee.userId)}
-                            </Text>
-                          </Box>
-                        </>
-                      ) : (
+                      <Menu variant="Surface" style={{ width: toRem(280) }}>
+                        <Box direction="Column" gap="100" style={{ padding: config.space.S200 }}>
+                          <Input
+                            size="300"
+                            variant="Background"
+                            radii="400"
+                            outlined
+                            autoFocus
+                            before={<Icon size="100" src={Icons.Search} />}
+                            placeholder={t('taskBoard.createTask.searchMembers')}
+                            value={query}
+                            onChange={(e) => setQuery((e.target as HTMLInputElement).value)}
+                          />
+                          <Scroll size="300" hideTrack>
+                            <Box direction="Column" className={css.MemberList}>
+                              {filteredMembers.map((member) => (
+                                <MenuItem
+                                  key={member.userId}
+                                  variant="Surface"
+                                  radii="400"
+                                  size="300"
+                                  aria-pressed={member.userId === assigneeId}
+                                  onClick={() => {
+                                    setAssigneeId(member.userId);
+                                    setPickerAnchor(undefined);
+                                  }}
+                                  before={
+                                    <Avatar size="200" radii="Pill">
+                                      <UserAvatar
+                                        userId={member.userId}
+                                        src={avatarUrl(member)}
+                                        alt={memberName(room, member.userId)}
+                                        renderFallback={() => (
+                                          <Icon size="50" src={Icons.User} filled />
+                                        )}
+                                      />
+                                    </Avatar>
+                                  }
+                                >
+                                  <Box grow="Yes" style={{ minWidth: 0 }}>
+                                    <Text size="T300" truncate>
+                                      {memberName(room, member.userId)}
+                                    </Text>
+                                  </Box>
+                                </MenuItem>
+                              ))}
+                            </Box>
+                          </Scroll>
+                        </Box>
+                      </Menu>
+                    </FocusTrap>
+                  }
+                >
+                  <Box
+                    as="button"
+                    type="button"
+                    className={css.AssigneeTrigger}
+                    aria-pressed={!!pickerAnchor}
+                    onClick={(evt: React.MouseEvent<HTMLButtonElement>) => {
+                      setQuery('');
+                      setPickerAnchor(evt.currentTarget.getBoundingClientRect());
+                    }}
+                  >
+                    {assignee ? (
+                      <>
+                        <Avatar size="200" radii="Pill">
+                          <UserAvatar
+                            userId={assignee.userId}
+                            src={avatarUrl(assignee)}
+                            alt={memberName(room, assignee.userId)}
+                            renderFallback={() => <Icon size="50" src={Icons.User} filled />}
+                          />
+                        </Avatar>
                         <Box grow="Yes" style={{ minWidth: 0 }}>
-                          <Text className={css.Placeholder} size="T300" truncate>
-                            {t('taskBoard.createTask.assigneePlaceholder')}
+                          <Text size="T300" truncate>
+                            {memberName(room, assignee.userId)}
                           </Text>
                         </Box>
-                      )}
-                      <Icon size="100" src={Icons.ChevronBottom} />
-                    </Box>
-                  ) : (
-                    <Box direction="Column" gap="200">
-                      <Input
-                        size="400"
-                        variant="Background"
-                        radii="400"
-                        outlined
-                        autoFocus
-                        before={<Icon size="100" src={Icons.Search} />}
-                        placeholder={t('taskBoard.createTask.searchMembers')}
-                        value={query}
-                        onChange={(e) => setQuery((e.target as HTMLInputElement).value)}
-                      />
-                      <div className={css.MemberList}>
-                        {filteredMembers.map((member) => (
-                          <MenuItem
-                            key={member.userId}
-                            variant="Surface"
-                            radii="400"
-                            size="300"
-                            aria-pressed={member.userId === assigneeId}
-                            onClick={() => {
-                              setAssigneeId(member.userId);
-                              setPickerOpen(false);
-                            }}
-                            before={
-                              <Avatar size="200" radii="Pill">
-                                <UserAvatar
-                                  userId={member.userId}
-                                  src={avatarUrl(member)}
-                                  alt={memberName(room, member.userId)}
-                                  renderFallback={() => <Icon size="50" src={Icons.User} filled />}
-                                />
-                              </Avatar>
-                            }
-                          >
-                            <Box grow="Yes" style={{ minWidth: 0 }}>
-                              <Text size="T300" truncate>
-                                {memberName(room, member.userId)}
-                              </Text>
-                            </Box>
-                          </MenuItem>
-                        ))}
-                      </div>
-                    </Box>
-                  )}
-                </Box>
-
-                {/* Requirement */}
-                <Box direction="Column">
-                  <Text className={css.FieldLabel} size="L400">
-                    {t('taskBoard.createTask.request')}
-                  </Text>
-                  <TextArea
-                    ref={requestRef}
-                    className={css.TextAreaField}
-                    variant="Background"
-                    radii="400"
-                    resize="Vertical"
-                    rows={4}
-                    placeholder={t('taskBoard.createTask.requestPlaceholder')}
-                    value={request}
-                    onChange={(e) => setRequest((e.target as HTMLTextAreaElement).value)}
-                    readOnly={submitting}
-                  />
-                </Box>
-
-                {/* With plan */}
-                <Box
-                  alignItems="Center"
-                  gap="200"
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => setWithPlan((v) => !v)}
-                >
-                  <Checkbox size="100" variant="Primary" checked={withPlan} readOnly />
-                  <Text size="T300">{t('taskBoard.createTask.withPlan')}</Text>
-                </Box>
+                      </>
+                    ) : (
+                      <Box grow="Yes" style={{ minWidth: 0 }}>
+                        <Text className={css.Placeholder} size="T300" truncate>
+                          {t('taskBoard.createTask.assigneePlaceholder')}
+                        </Text>
+                      </Box>
+                    )}
+                    <Icon size="100" src={Icons.ChevronBottom} />
+                  </Box>
+                </PopOut>
               </Box>
-            </Scroll>
+
+              {/* Requirement */}
+              <Box direction="Column">
+                <Text className={css.FieldLabel} size="L400">
+                  {t('taskBoard.createTask.request')}
+                </Text>
+                <TextArea
+                  ref={requestRef}
+                  className={css.TextAreaField}
+                  variant="Background"
+                  radii="400"
+                  resize="Vertical"
+                  rows={4}
+                  placeholder={t('taskBoard.createTask.requestPlaceholder')}
+                  value={request}
+                  onChange={(e) => setRequest((e.target as HTMLTextAreaElement).value)}
+                  readOnly={submitting}
+                />
+              </Box>
+
+              {/* With plan */}
+              <Box
+                alignItems="Center"
+                gap="200"
+                style={{ cursor: 'pointer' }}
+                onClick={() => setWithPlan((v) => !v)}
+              >
+                <Checkbox size="100" variant="Primary" checked={withPlan} readOnly />
+                <Text size="T300">{t('taskBoard.createTask.withPlan')}</Text>
+              </Box>
+            </Box>
 
             <Line size="300" />
             <Box shrink="No" gap="200" justifyContent="End" style={{ padding: config.space.S300 }}>

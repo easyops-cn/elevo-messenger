@@ -31,13 +31,7 @@ export const AssigneeTrigger = style([
 /** Placeholder text inside the trigger when nothing is selected. */
 export const Placeholder = style([DefaultReset, { color: color.Surface.OnContainer }]);
 
-/** Scrollable member list shown when picking an assignee. */
-export const MemberList = style([
-  DefaultReset,
-  {
-    maxHeight: toRem(220),
-    overflowY: 'auto',
-  },
-]);
+/** Member list inside the floating picker; height is capped by the Scroll. */
+export const MemberList = style([DefaultReset, { maxHeight: toRem(220) }]);
 
 export const TextAreaField = style([DefaultReset, { width: '100%' }]);
