@@ -1,5 +1,5 @@
-import React, { CSSProperties } from 'react';
-import { Box, Icon, Icons, Text } from 'folds';
+import React from 'react';
+import { Box, Icon, Icons, Text, toRem } from 'folds';
 import * as css from './FileReferenceCard.css';
 
 export type FileReference = {
@@ -30,22 +30,20 @@ function getBasename(path: string): string {
 
 type FileReferenceCardProps = {
   fileReference: FileReference;
-  style?: CSSProperties;
 };
 
-export function FileReferenceCard({ fileReference, style }: FileReferenceCardProps) {
+export function FileReferenceCard({ fileReference }: FileReferenceCardProps) {
   const basename = getBasename(fileReference.path);
 
   return (
     <Box
       className={css.FileReferenceCard}
+      shrink="No"
       alignItems="Center"
-      gap="100"
       title={fileReference.path}
-      style={style}
     >
-      <Icon size="50" src={Icons.File} />
-      <Text size="T300" truncate>
+      <Icon style={{ width: toRem(12), height: toRem(12) }} size="50" src={Icons.File} />
+      <Text size="T200" truncate>
         {basename}
       </Text>
     </Box>

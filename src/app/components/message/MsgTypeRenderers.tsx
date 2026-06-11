@@ -9,7 +9,6 @@ import { ReasoningCard } from './elevo/ReasoningCard';
 import { SseMarkdownBody, parseSseRender } from './elevo/SseMarkdownBody';
 import { OidcLoginCard, parseOidcLogin } from './elevo/OidcLoginCard';
 import { PlanCard, hasPlan } from './elevo/PlanCard';
-import { FileReferenceCard, parseFileReference } from './elevo/FileReferenceCard';
 import { trimReplyFromBody } from '../../utils/room';
 import { MessageTextBody } from './layout';
 import {
@@ -248,7 +247,6 @@ export function MText({
   const trimmedBody = trimReplyFromBody(body);
   const urlsMatch = renderUrlsPreview && trimmedBody.match(URL_REG);
   const urls = urlsMatch ? [...new Set(urlsMatch)] : undefined;
-  const fileReference = parseFileReference(content);
 
   return (
     <>
@@ -263,9 +261,6 @@ export function MText({
         })}
         {edited && !sseRender && <MessageEditedContent />}
       </MessageTextBody>
-      {fileReference && (
-        <FileReferenceCard fileReference={fileReference} style={{ marginTop: config.space.S100 }} />
-      )}
       {renderUrlsPreview && urls && urls.length > 0 && renderUrlsPreview(urls)}
     </>
   );
