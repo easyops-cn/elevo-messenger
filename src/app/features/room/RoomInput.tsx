@@ -125,7 +125,6 @@ import { ListTodoIcon } from '../../icons/ListTodoIcon';
 import { EyeOffIcon } from '../../icons/EyeOffIcon';
 import { useRoomScrollToBottom } from './RoomScrollToBottomContext';
 import { useRoomThread } from './RoomThreadContext';
-import { taskRefStatusColor } from '../../components/message/elevo/taskStatus';
 
 type SelectedFileReference = {
   path: string;
@@ -945,9 +944,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
                       maxWidth: toRem(180),
                       gap: config.space.S100,
                       opacity: taskRefActive ? 1 : 0.35,
-                      color: taskRefActive
-                        ? (taskRefStatusColor(selectedTaskRef.status) ?? color.Primary.Main)
-                        : undefined,
+                      color: taskRefActive ? color.Primary.Main : undefined,
                     }}
                   >
                     <Icon
