@@ -469,6 +469,13 @@ export const getThreadTopicContent = (eventId: string, topic: string): ThreadTop
   },
 });
 
+/**
+ * Whether a Matrix user id belongs to an agent/bot. Agents use the `@_`
+ * localpart prefix convention (e.g. `@_agent_claude:server`).
+ */
+export const isAgentSender = (userId: string | undefined): boolean =>
+  typeof userId === 'string' && userId.startsWith('@_');
+
 export const getLatestThreadTopic = (
   rootEvent: MatrixEvent | undefined,
   topicEvents: MatrixEvent[] | undefined,
@@ -477,22 +484,36 @@ export const getLatestThreadTopic = (
   const rootSender = rootEvent?.getSender();
   if (!rootEventId || !rootSender || !topicEvents) return undefined;
 
-  return topicEvents
-    .filter((event) => {
-      const content = event.getContent();
-      const topic = content.topic;
-      return (
-        event.getType() === MessageEvent.ThreadTopic &&
-        event.getSender() === rootSender &&
-        event.getAssociatedId() === rootEventId &&
-        !event.isRedacted() &&
-        typeof topic === 'string' &&
-        topic.trim().length > 0
-      );
-    })
-    .sort((eventA, eventB) => eventB.getTs() - eventA.getTs())[0]
-    ?.getContent()
-    .topic.trim();
+  const validEvents = topicEvents.filter((event) => {
+    const content = event.getContent();
+    const topic = content.topic;
+    return (
+      event.getType() === MessageEvent.ThreadTopic &&
+      event.getAssociatedId() === rootEventId &&
+      !event.isRedacted() &&
+      typeof topic === 'string' &&
+      topic.trim().length > 0
+    );
+  });
+
+  const pickLatestTopic = (events: MatrixEvent[]): string | undefined =>
+    events
+      .sort((eventA, eventB) => eventB.getTs() - eventA.getTs())[0]
+      ?.getContent()
+      .topic.trim();
+
+  // Priority 1: the thread root sender's own topic always wins.
+  const fromRoot = pickLatestTopic(validEvents.filter((event) => event.getSender() === rootSender));
+  if (fromRoot) return fromRoot;
+
+  // Priority 2: a topic set by an agent (`@_` prefixed user id).
+  const fromAgent = pickLatestTopic(
+    validEvents.filter((event) => isAgentSender(event.getSender() ?? undefined)),
+  );
+  if (fromAgent) return fromAgent;
+
+  // Topics from other regular members are ignored.
+  return undefined;
 };
 
 export const getLatestEdit = (

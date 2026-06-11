@@ -110,4 +110,69 @@ describe('thread topic helpers', () => {
 
     expect(topic).toBeUndefined();
   });
+
+  it('prefers the root sender topic over an agent topic', () => {
+    const rootEvent = makeEvent({ eventId: '$root', sender: '@alice:example.org' });
+    const topic = getLatestThreadTopic(rootEvent, [
+      makeEvent({
+        eventId: '$agent',
+        sender: '@_agent_claude:example.org',
+        ts: 30,
+        topic: 'Agent topic',
+      }),
+      makeEvent({
+        eventId: '$root-topic',
+        sender: '@alice:example.org',
+        ts: 10,
+        topic: 'Root topic',
+      }),
+    ]);
+
+    expect(topic).toBe('Root topic');
+  });
+
+  it('falls back to an agent topic when the root sender has none', () => {
+    const rootEvent = makeEvent({ eventId: '$root', sender: '@alice:example.org' });
+    const topic = getLatestThreadTopic(rootEvent, [
+      makeEvent({ eventId: '$bob', sender: '@bob:example.org', ts: 30, topic: 'Bob topic' }),
+      makeEvent({
+        eventId: '$agent',
+        sender: '@_agent_claude:example.org',
+        ts: 20,
+        topic: 'Agent topic',
+      }),
+    ]);
+
+    expect(topic).toBe('Agent topic');
+  });
+
+  it('ignores topics from regular members (neither root sender nor agent)', () => {
+    const rootEvent = makeEvent({ eventId: '$root', sender: '@alice:example.org' });
+    const topic = getLatestThreadTopic(rootEvent, [
+      makeEvent({ eventId: '$bob', sender: '@bob:example.org', ts: 30, topic: 'Bob topic' }),
+      makeEvent({ eventId: '$carol', sender: '@carol:example.org', ts: 40, topic: 'Carol topic' }),
+    ]);
+
+    expect(topic).toBeUndefined();
+  });
+
+  it('picks the latest agent topic among multiple agents', () => {
+    const rootEvent = makeEvent({ eventId: '$root', sender: '@alice:example.org' });
+    const topic = getLatestThreadTopic(rootEvent, [
+      makeEvent({
+        eventId: '$agent-old',
+        sender: '@_agent_eve:example.org',
+        ts: 10,
+        topic: 'Old agent topic',
+      }),
+      makeEvent({
+        eventId: '$agent-new',
+        sender: '@_agent_claude:example.org',
+        ts: 20,
+        topic: ' New agent topic ',
+      }),
+    ]);
+
+    expect(topic).toBe('New agent topic');
+  });
 });
