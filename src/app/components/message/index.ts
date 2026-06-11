@@ -13,5 +13,6 @@ export * from './elevo/SseMarkdownBody';
 export * from './elevo/OidcLoginCard';
 export * from './elevo/PlanCard';
 export * from './elevo/FileReferenceCard';
+export * from './elevo/TaskReferenceCard';
 export * from './FileHeader';
 export * from './RenderBody';

@@ -12,7 +12,7 @@ import { isKeyHotkey } from 'is-hotkey';
 import { EventType, IContent, MsgType, RelationType, Room } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/types';
 import { ReactEditor } from 'slate-react';
-import { Transforms, Editor, Element as SlateElement, Path, Node, Text as SlateText } from 'slate';
+import { Transforms, Editor } from 'slate';
 import {
   Box,
   Dialog,
@@ -56,8 +56,6 @@ import {
   getBeginCommand,
   trimCommand,
   getMentions,
-  getTaskReference,
-  createTaskRefElement,
 } from '../../components/editor';
 import { EmojiBoard, EmojiBoardTab } from '../../components/emoji-board';
 import { UseStateProvider } from '../../components/UseStateProvider';
@@ -123,6 +121,7 @@ import { MicIcon } from '../../icons/MicIcon';
 import { SendHorizontalIcon } from '../../icons/SendHorizontalIcon';
 import { CaseSensitiveIcon } from '../../icons/CaseSensitiveIcon';
 import { FileIcon } from '../../icons/FileIcon';
+import { ListTodoIcon } from '../../icons/ListTodoIcon';
 import { EyeOffIcon } from '../../icons/EyeOffIcon';
 import { useRoomScrollToBottom } from './RoomScrollToBottomContext';
 import { useRoomThread } from './RoomThreadContext';
@@ -139,13 +138,18 @@ interface WorkspaceExplorerMessage {
   file: null | SelectedFileReference;
 }
 
+type SelectedTaskReference = {
+  slug: string;
+  title: string;
+  status?: string;
+};
+
 interface TaskManagementMessage {
   type: 'select-task';
   task: null | {
-    id: string;
-    workspace_id: string;
+    slug: string;
     title: string;
-    status?: { category: 'todo' | 'in_progress' | 'done' | 'cancelled' };
+    status?: string;
   };
 }
 
@@ -201,6 +205,8 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
   const [, setBeginCommand] = useState(() => getBeginCommand(editor));
   const [selectedFileRef, setSelectedFileRef] = useState<SelectedFileReference | null>(null);
   const [fileRefActive, setFileRefActive] = useState(false);
+  const [selectedTaskRef, setSelectedTaskRef] = useState<SelectedTaskReference | null>(null);
+  const [taskRefActive, setTaskRefActive] = useState(false);
 
   const sendTypingStatus = useTypingStatusUpdater(mx, roomId);
 
@@ -222,50 +228,25 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
   );
   useSdkMessageListener<WorkspaceExplorerMessage>('workspace-explorer', handleWorkspaceFileSelect);
 
-  const removeExistingTaskRef = useCallback(() => {
-    const [taskRefEntry] = Editor.nodes(editor, {
-      at: [],
-      match: (n) => SlateElement.isElement(n) && n.type === 'task-ref',
-    });
-
-    if (taskRefEntry) {
-      const [, taskRefPath] = taskRefEntry;
-      const nextPath = Path.next(taskRefPath);
-
-      if (Node.has(editor, nextPath)) {
-        const nextNode = Node.get(editor, nextPath);
-        if (SlateText.isText(nextNode) && /^\s$/.test(nextNode.text)) {
-          Transforms.removeNodes(editor, { at: nextPath });
-        }
-      }
-
-      Transforms.removeNodes(editor, { at: taskRefPath });
-    }
-  }, [editor]);
-
   const handleTaskSelect = useCallback(
     (payload: SdkMessagePayload<TaskManagementMessage>) => {
       if (!enableSdkInputEvents) return;
 
       const { data } = payload;
       if (data?.type === 'select-task') {
-        removeExistingTaskRef();
-        if (data.task) {
-          const element = createTaskRefElement(
-            data.task.id,
-            data.task.workspace_id,
-            data.task.title,
-            data.task.status?.category,
-          );
-          ReactEditor.focus(editor);
-          Transforms.select(editor, Editor.end(editor, []));
-          Transforms.insertNodes(editor, element);
-          Transforms.collapse(editor, { edge: 'end' });
-          moveCursor(editor, true);
-        }
+        setSelectedTaskRef(
+          data.task
+            ? {
+                slug: data.task.slug,
+                title: data.task.title,
+                status: data.task.status,
+              }
+            : null,
+        );
+        setTaskRefActive(!!data.task);
       }
     },
-    [editor, enableSdkInputEvents, removeExistingTaskRef],
+    [enableSdkInputEvents],
   );
   useSdkMessageListener<TaskManagementMessage>('tasks-management', handleTaskSelect);
 
@@ -495,9 +476,18 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
           }
         : null;
 
-    if (plainText === '' && !fileRef) return;
+    const taskRef =
+      taskRefActive && selectedTaskRef
+        ? {
+            slug: selectedTaskRef.slug,
+            title: selectedTaskRef.title,
+            ...(selectedTaskRef.status ? { status: selectedTaskRef.status } : {}),
+          }
+        : null;
 
-    const body = plainText || selectedFileRef?.name || '';
+    if (plainText === '' && !fileRef && !taskRef) return;
+
+    const body = plainText || selectedFileRef?.name || selectedTaskRef?.title || '';
     const isForkCommand = /^\/fork\b/i.test(body.trimStart());
     const formattedBody = customHtml || body;
     const mentionData = getMentions(mx, roomId, editor);
@@ -511,7 +501,6 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
       content['vip.elevo.file_reference'] = fileRef;
     }
 
-    const taskRef = getTaskReference(editor);
     if (taskRef) {
       content['vip.elevo.task_reference'] = taskRef;
     }
@@ -559,6 +548,8 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     resetEditorHistory(editor);
     setSelectedFileRef(null);
     setFileRefActive(false);
+    setSelectedTaskRef(null);
+    setTaskRefActive(false);
     setReplyDraft(undefined);
     sendTypingStatus(false);
   }, [
@@ -573,6 +564,8 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     commands,
     selectedFileRef,
     fileRefActive,
+    selectedTaskRef,
+    taskRefActive,
     emitScrollToBottomRequest,
   ]);
 
@@ -928,6 +921,39 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
                     />
                     <Text size="T200" truncate>
                       {selectedFileRef.name}
+                    </Text>
+                  </IconButton>
+                </>
+              )}
+              {selectedTaskRef && (
+                <>
+                  <Line variant="Surface" direction="Vertical" style={{ height: toRem(12) }} />
+                  <IconButton
+                    variant="Surface"
+                    size="300"
+                    radii="300"
+                    fill="None"
+                    aria-label={selectedTaskRef.title}
+                    title={
+                      selectedTaskRef.status
+                        ? `${selectedTaskRef.title} (${selectedTaskRef.status})`
+                        : selectedTaskRef.title
+                    }
+                    onClick={() => setTaskRefActive((active) => !active)}
+                    style={{
+                      maxWidth: toRem(180),
+                      gap: config.space.S100,
+                      opacity: taskRefActive ? 1 : 0.35,
+                      color: taskRefActive ? color.Primary.Main : undefined,
+                    }}
+                  >
+                    <Icon
+                      size="50"
+                      src={taskRefActive ? ListTodoIcon : EyeOffIcon}
+                      filled={taskRefActive}
+                    />
+                    <Text size="T200" truncate>
+                      {selectedTaskRef.title}
                     </Text>
                   </IconButton>
                 </>

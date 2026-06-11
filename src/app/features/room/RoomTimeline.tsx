@@ -54,6 +54,8 @@ import {
   isUserAnswerEvent,
   FileReferenceCard,
   parseFileReference,
+  TaskReferenceCard,
+  parseTaskReference,
 } from '../../components/message';
 import { DiffSummaryCard } from '../../components/message/elevo/DiffSummaryCard';
 import {
@@ -1175,6 +1177,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
         const replyToThread = mEvent.getThread();
         const showThreadSummary = !thread && isThreadRoot && !!replyToThread;
         const fileReference = parseFileReference(getContent());
+        const taskReference = parseTaskReference(getContent());
 
         return (
           <Message
@@ -1211,6 +1214,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
               )
             }
             fileReference={fileReference && <FileReferenceCard fileReference={fileReference} />}
+            taskReference={taskReference && <TaskReferenceCard taskReference={taskReference} />}
             reactions={
               reactionRelations && (
                 <Reactions

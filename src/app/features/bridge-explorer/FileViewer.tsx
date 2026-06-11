@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Box, Chip, Icon, Icons, IconButton, Scroll, Spinner, Text } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { saveFile } from '../../utils/file-saver';
@@ -6,6 +6,7 @@ import { ShikiCode } from '../../plugins/shiki';
 import { fetchFileContent, fetchFileDownload, fetchFileMetadata } from './api';
 import { useBridgeExplorer } from './BridgeExplorerContext';
 import { InlineError, useErrorMessage } from './InlineError';
+import { sendSdkMessage } from './sdkBridge';
 import type { FileContentResult, FileMetadata } from './types';
 import * as css from './BridgeExplorer.css';
 
@@ -17,7 +18,7 @@ const basename = (path: string): string => path.split('/').pop() ?? path;
 
 export function FileViewer({ path }: FileViewerProps) {
   const { t } = useTranslation();
-  const { baseUrl, workspaceId } = useBridgeExplorer();
+  const { baseUrl, workspaceId, workspaceName } = useBridgeExplorer();
   const toMessage = useErrorMessage();
 
   const [metadata, setMetadata] = useState<FileMetadata | null>(null);
@@ -51,6 +52,24 @@ export function FileViewer({ path }: FileViewerProps) {
   useEffect(() => {
     load();
   }, [load]);
+
+  // Opening a file detail references it back to the host composer. Dedupe so the
+  // same path only emits once; switching to another file updates the reference.
+  const lastSentPathRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!path) return;
+    if (lastSentPathRef.current === path) return;
+    lastSentPathRef.current = path;
+    sendSdkMessage('workspace-explorer', {
+      type: 'select-file',
+      file: {
+        path,
+        name: basename(path),
+        workspaceId,
+        workspaceName,
+      },
+    }).catch((e) => console.error('[bridge-explorer] failed to send select-file', e));
+  }, [path, workspaceId, workspaceName]);
 
   // Revoke media object URLs when content changes / unmounts.
   useEffect(

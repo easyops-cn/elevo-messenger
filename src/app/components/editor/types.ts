@@ -21,5 +21,4 @@ export enum BlockType {
   Emoticon = 'emoticon',
   Link = 'link',
   Command = 'command',
-  TaskRef = 'task-ref',
 }

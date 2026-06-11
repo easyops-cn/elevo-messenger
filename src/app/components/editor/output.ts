@@ -81,8 +81,6 @@ const elementToCustomHtml = (node: CustomElement, children: string): string => {
       return `<a href="${encodeURI(node.href)}">${node.children}</a>`;
     case BlockType.Command:
       return `/${sanitizeText(node.command)}`;
-    case BlockType.TaskRef:
-      return `<span data-task-ref="${sanitizeText(node.id)}" data-task-status="${sanitizeText(node.status)}">[${sanitizeText(node.title)}]</span>`;
     default:
       return children;
   }
@@ -161,8 +159,6 @@ const elementToPlainText = (node: CustomElement, children: string): string => {
       return `[${node.children}](${node.href})`;
     case BlockType.Command:
       return `/${node.command}`;
-    case BlockType.TaskRef:
-      return `[Task: ${node.title}]`;
     default:
       return children;
   }
@@ -233,30 +229,4 @@ export const getMentions = (mx: MatrixClient, roomId: string, editor: Editor): M
   editor.children.forEach(parseMentions);
 
   return mentionData;
-};
-
-export type TaskRefData = {
-  id: string;
-  title: string;
-  workspaceId: string;
-};
-export const getTaskReference = (editor: Editor): TaskRefData | null => {
-  const collect = (node: Descendant): TaskRefData | null => {
-    if (Text.isText(node)) return null;
-    if (node.type === BlockType.TaskRef) {
-      return { id: node.id, title: node.title, workspaceId: node.workspaceId };
-    }
-
-    for (const child of node.children) {
-      const found = collect(child);
-      if (found) return found;
-    }
-    return null;
-  };
-
-  for (const child of editor.children) {
-    const found = collect(child);
-    if (found) return found;
-  }
-  return null;
 };
