@@ -161,7 +161,7 @@ function FileRow({
     >
       {/* Spacer matching the folder chevron so file icons line up with folder icons. */}
       <Icon size="50" src={Icons.ChevronRight} style={{ visibility: 'hidden' }} />
-      <Icon className={css.FileIconIndent} size="50" src={FileIcon} />
+      <Icon size="50" src={FileIcon} />
       <Text size="T200" truncate>
         {entry.name}
       </Text>

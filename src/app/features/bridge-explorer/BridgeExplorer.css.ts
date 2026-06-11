@@ -82,10 +82,6 @@ export const TreeRow = style([
 
 export const TreeChildren = style([DefaultReset, {}]);
 
-// Nudge the file icon slightly further right so files read as nested under
-// folders even though they share the same row indent.
-export const FileIconIndent = style([DefaultReset, { marginLeft: config.space.S100 }]);
-
 export const ViewerContent = style([
   DefaultReset,
   {
