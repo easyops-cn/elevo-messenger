@@ -274,7 +274,9 @@ export function ThreadChatView({ eventId, maximized, onMaximizedChange }: Thread
                 >
                   {(triggerRef) => (
                     <IconButton
-                      className={css.ThreadStarButton}
+                      className={`${css.ThreadStarButton} ${
+                        threadStarred ? css.ThreadStarButtonActive : ''
+                      }`}
                       ref={triggerRef}
                       variant="Surface"
                       onClick={() => toggle(room.roomId, threadRootEventId, threadTopic)}

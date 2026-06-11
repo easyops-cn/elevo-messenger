@@ -17,12 +17,14 @@ import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { RelativeTime } from '../../components/RelativeTime';
 import { MessageDeletedContent } from '../../components/message';
 import { useThreadTopic } from '../../hooks/useThreadTopic';
+import { StarIcon } from '../../icons/StarIcon';
 import * as css from './ThreadMenuItem.css';
 
 type ThreadMenuItemProps = {
   useAuthentication: boolean;
   room: Room;
   thread: Thread;
+  isStarred: boolean;
   onClick: MouseEventHandler<HTMLButtonElement>;
 };
 
@@ -48,7 +50,13 @@ function ThreadReplyRelationIcon() {
   );
 }
 
-export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: ThreadMenuItemProps) {
+export function ThreadMenuItem({
+  useAuthentication,
+  room,
+  thread,
+  isStarred,
+  onClick,
+}: ThreadMenuItemProps) {
   const mx = useMatrixClient();
   const { t } = useTranslation();
   const mEventId = thread.id;
@@ -173,6 +181,7 @@ export function ThreadMenuItem({ useAuthentication, room, thread, onClick }: Thr
               (rootSummary ?? t('message.threadLatestReplyFallback'))
             )}
           </Text>
+          {isStarred && <Icon className={css.StarredThreadIcon} src={StarIcon} filled size="50" />}
         </Box>
         <Box alignItems="Center" gap="100">
           <Box

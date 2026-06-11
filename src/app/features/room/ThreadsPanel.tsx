@@ -94,6 +94,7 @@ export function ThreadsPanel({ room }: ThreadsPanelProps) {
                 useAuthentication={useAuthentication}
                 room={room}
                 thread={thread}
+                isStarred={starredThreadIds.has(thread.id)}
                 onClick={handleThreadClick}
               />
             ))}

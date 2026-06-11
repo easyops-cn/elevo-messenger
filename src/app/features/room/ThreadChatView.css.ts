@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { color } from 'folds';
 
 export const ThreadTitle = style({
   minWidth: 0,
@@ -28,4 +29,9 @@ export const ThreadStarButton = style({
       opacity: 1,
     },
   },
+});
+
+export const ThreadStarButtonActive = style({
+  opacity: 1,
+  color: color.Warning.Main,
 });
