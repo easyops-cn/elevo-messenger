@@ -30,3 +30,12 @@ export function useCompositionEndTracking(): void {
 export function isComposing(evt: React.KeyboardEvent): boolean {
   return evt.nativeEvent.isComposing || _isComposing;
 }
+
+/**
+ * IME composition check for plain DOM KeyboardEvent (e.g. capture-phase
+ * window listeners) or any event-like object exposing `isComposing`.
+ * Mirrors `isComposing` but does not require a React synthetic event.
+ */
+export function isComposingEvent(evt: { isComposing?: boolean }): boolean {
+  return Boolean(evt.isComposing) || _isComposing;
+}
