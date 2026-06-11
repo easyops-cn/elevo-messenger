@@ -38,21 +38,26 @@ function DirectoryNode({ path, depth, selectedPath, onSelectFile }: DirectoryNod
   const toMessage = useErrorMessage();
   const [entries, setEntries] = useState<DirectoryEntry[] | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
 
+  // Keep error mapping out of `load`'s dependencies: `t` (and thus toMessage)
+  // changes once after i18n finishes loading, which would otherwise re-fire the
+  // effect and trigger a duplicate request. We store the raw error and map it
+  // at render time instead.
   const load = useCallback(() => {
     setLoading(true);
     setError(null);
     fetchDirectoryListing(baseUrl, workspaceId, path, token)
       .then(setEntries)
-      .catch((e) => setError(toMessage(e)))
+      .catch(setError)
       .finally(() => setLoading(false));
-  }, [baseUrl, workspaceId, token, path, toMessage]);
+  }, [baseUrl, workspaceId, token, path]);
 
-  // The root directory (depth 0) loads eagerly.
+  // A DirectoryNode is only rendered once its folder is expanded (the root is
+  // always rendered), so always load on mount regardless of depth.
   useEffect(() => {
-    if (depth === 0) load();
-  }, [depth, load]);
+    load();
+  }, [load]);
 
   if (loading && !entries) {
     return (
@@ -63,7 +68,7 @@ function DirectoryNode({ path, depth, selectedPath, onSelectFile }: DirectoryNod
   }
 
   if (error) {
-    return <InlineError message={error} onRetry={load} />;
+    return <InlineError message={toMessage(error)} onRetry={load} />;
   }
 
   if (!entries) return null;

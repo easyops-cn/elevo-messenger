@@ -25,9 +25,12 @@ export function FileViewer({ path }: FileViewerProps) {
   const [metadata, setMetadata] = useState<FileMetadata | null>(null);
   const [content, setContent] = useState<FileContentResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<unknown>(null);
   const [downloading, setDownloading] = useState(false);
 
+  // Keep error mapping out of `load`/`handleDownload` deps: `t` changes once
+  // after i18n finishes loading async, which would re-fire the load effect and
+  // trigger a duplicate request. Store the raw error and map at render time.
   const load = useCallback(() => {
     if (!path) return;
     setLoading(true);
@@ -43,9 +46,9 @@ export function FileViewer({ path }: FileViewerProps) {
         const result = await fetchFileContent(baseUrl, workspaceId, path, token);
         setContent(result);
       })
-      .catch((e) => setError(toMessage(e)))
+      .catch(setError)
       .finally(() => setLoading(false));
-  }, [baseUrl, workspaceId, token, path, toMessage]);
+  }, [baseUrl, workspaceId, token, path]);
 
   useEffect(() => {
     load();
@@ -64,9 +67,9 @@ export function FileViewer({ path }: FileViewerProps) {
     setDownloading(true);
     fetchFileDownload(baseUrl, workspaceId, path, token)
       .then((blob) => saveFile(blob, basename(path)))
-      .catch((e) => setError(toMessage(e)))
+      .catch(setError)
       .finally(() => setDownloading(false));
-  }, [baseUrl, workspaceId, token, path, toMessage]);
+  }, [baseUrl, workspaceId, token, path]);
 
   if (!path) {
     return (
@@ -126,7 +129,7 @@ export function FileViewer({ path }: FileViewerProps) {
             <Spinner size="400" variant="Secondary" />
           </Box>
         ) : error ? (
-          <InlineError message={error} onRetry={load} />
+          <InlineError message={toMessage(error)} onRetry={load} />
         ) : (
           <ViewerContent
             path={path}
