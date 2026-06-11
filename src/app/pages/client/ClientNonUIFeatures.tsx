@@ -308,6 +308,31 @@ function ClientToolSdkHandler() {
       .catch(console.error);
   });
 
+  // A child window (e.g. bridge explorer) asks for a currently-valid Matrix
+  // access token after hitting a 401. whoami() triggers matrix-js-sdk's
+  // internal OIDC refresh when the token is stale; we then reply with the
+  // refreshed token so the child can retry transparently.
+  useSdkMessageListener('bridge_token_refresh_request', (payload: SdkMessagePayload) => {
+    const { source, data } = payload;
+    const requestId = (data as { requestId?: string } | undefined)?.requestId;
+    const reply = (response: Record<string, unknown>) => {
+      invoke('send_to_webview', {
+        label: source,
+        channel: 'bridge_token_refresh_response',
+        data: { requestId, ...response },
+      }).catch((err) => console.error('Failed to reply with refreshed token:', err));
+    };
+
+    mx.whoami()
+      .then(() => reply({ token: mx.getAccessToken() ?? '' }))
+      .catch((err) => {
+        // whoami may still succeed against a cached token; fall back to it.
+        const token = mx.getAccessToken();
+        if (token) reply({ token });
+        else reply({ error: err instanceof Error ? err.message : 'Token refresh failed' });
+      });
+  });
+
   // When a webview is closed, unregister all its tools
   useEffect(() => {
     if (!isDesktopTauri) return undefined;

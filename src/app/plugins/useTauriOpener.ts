@@ -73,6 +73,35 @@ export function openTasksPanel(href: string, roomId: string): void {
   openSidePanel(href, roomId, `tasks-${sanitizeRoomId(roomId)}`);
 }
 
+/** Payload for opening a bridge workspace explorer window. */
+export type BridgeExplorerPayload = {
+  workspaceId: string;
+  workspaceName: string;
+  /** Verbatim bridge provider segment from room state (already includes `-bridge`). */
+  bridgeProvider: string;
+  matrixToken: string;
+  homeserverUrl: string;
+};
+
+/**
+ * Open a standalone read-only file explorer window for a bridge-provider
+ * workspace. Each workspace gets its own window; reopening the same workspace
+ * focuses the existing one (handled by the Tauri backend via a stable label).
+ *
+ * Returns `true` if the window was opened via Tauri, `false` otherwise
+ * (non-desktop environments cannot host the explorer window).
+ */
+export async function openBridgeExplorer(payload: BridgeExplorerPayload): Promise<boolean> {
+  if (!isDesktopTauri) return false;
+  try {
+    await invoke('open_bridge_explorer_window', { payload });
+    return true;
+  } catch (error) {
+    console.error('Failed to open bridge explorer window:', error);
+    return false;
+  }
+}
+
 export type SdkMessagePayload<T = unknown> = {
   source: string;
   roomId: string;

@@ -152,6 +152,7 @@ export default defineConfig({
         main: path.resolve(__dirname, 'index.html'),
         preview: path.resolve(__dirname, 'preview.html'),
         codeView: path.resolve(__dirname, 'code-view.html'),
+        bridgeExplorer: path.resolve(__dirname, 'bridge-explorer.html'),
         webviewTitlebar: path.resolve(__dirname, 'webview-titlebar.html'),
       },
     },

@@ -12,6 +12,8 @@ import { usePowerLevels, readPowerLevel } from '../../../hooks/usePowerLevels';
 import { useElevoConfig } from '../../../hooks/useElevoConfig';
 import { useWorkspaceToken } from '../../../hooks/useWorkspaceToken';
 import { isDesktopTauri } from '../../../plugins/useTauriOpener';
+import { FolderOpenIcon } from '../../../icons/FolderOpenIcon';
+import { useOpenWorkspace } from '../../workspaces/useOpenWorkspace';
 import { AsyncStatus, useAsyncCallback } from '../../../hooks/useAsyncCallback';
 import {
   AddWorkspaceModal,
@@ -145,6 +147,16 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
 
   const linkedIds = new Set(linkedWorkspaces.map((w) => getWorkspaceKey(w)));
   const isConnecting = connectState.status === AsyncStatus.Loading;
+
+  const openWorkspace = useOpenWorkspace();
+  const handleOpenExplorer = (ws: WorkspaceItem) => {
+    openWorkspace(ws, room.roomId);
+  };
+  // Whether the "open" action should be shown for a workspace. Bridge
+  // workspaces open a desktop-only explorer window; others open the elevo
+  // workspace side panel, which needs a configured explorerUrl.
+  const canOpenWorkspace = (ws: WorkspaceItem): boolean =>
+    ws.bridge_provider ? isDesktopTauri : Boolean(elevoConfig.workspaces?.explorerUrl);
 
   return (
     <>
@@ -297,33 +309,49 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
                             title={ws.name}
                             description={ws.description || undefined}
                             after={
-                              isModerator ? (
+                              isModerator || canOpenWorkspace(ws) ? (
                                 <Box gap="100" shrink="No">
-                                  <IconButton
-                                    size="300"
-                                    variant="Secondary"
-                                    fill="None"
-                                    radii="300"
-                                    onClick={() => handleSync(ws)}
-                                    disabled={syncingId === ws.id}
-                                    title={t('workspaces.sync')}
-                                  >
-                                    {syncingId === ws.id ? (
-                                      <Spinner size="100" variant="Secondary" />
-                                    ) : (
-                                      <Icon src={Icons.Reload} size="100" />
-                                    )}
-                                  </IconButton>
-                                  <IconButton
-                                    size="300"
-                                    variant="Critical"
-                                    fill="None"
-                                    radii="300"
-                                    onClick={() => handleRemove(ws.id)}
-                                    title={t('workspaces.remove')}
-                                  >
-                                    <Icon src={Icons.Cross} size="100" />
-                                  </IconButton>
+                                  {canOpenWorkspace(ws) && (
+                                    <IconButton
+                                      size="300"
+                                      variant="Secondary"
+                                      fill="None"
+                                      radii="300"
+                                      onClick={() => handleOpenExplorer(ws)}
+                                      title={t('workspaces.openExplorer')}
+                                    >
+                                      <Icon src={FolderOpenIcon} size="100" />
+                                    </IconButton>
+                                  )}
+                                  {isModerator && (
+                                    <>
+                                      <IconButton
+                                        size="300"
+                                        variant="Secondary"
+                                        fill="None"
+                                        radii="300"
+                                        onClick={() => handleSync(ws)}
+                                        disabled={syncingId === ws.id}
+                                        title={t('workspaces.sync')}
+                                      >
+                                        {syncingId === ws.id ? (
+                                          <Spinner size="100" variant="Secondary" />
+                                        ) : (
+                                          <Icon src={Icons.Reload} size="100" />
+                                        )}
+                                      </IconButton>
+                                      <IconButton
+                                        size="300"
+                                        variant="Critical"
+                                        fill="None"
+                                        radii="300"
+                                        onClick={() => handleRemove(ws.id)}
+                                        title={t('workspaces.remove')}
+                                      >
+                                        <Icon src={Icons.Cross} size="100" />
+                                      </IconButton>
+                                    </>
+                                  )}
                                 </Box>
                               ) : undefined
                             }

@@ -1117,7 +1117,8 @@
     "oauthExpired": "Connection Expired",
     "oauthExpiredDesc": "Your workspace token has expired. Please reconnect in Settings > Links.",
     "oauthNotConnected": "Workspace Not Connected",
-    "oauthNotConnectedDesc": "Connect your Elevo Workspace account to browse and bind workspaces."
+    "oauthNotConnectedDesc": "Connect your Elevo Workspace account to browse and bind workspaces.",
+    "openExplorer": "Open Explorer"
   },
   "links": {
     "connectionList": "Connection List",
@@ -1177,5 +1178,17 @@
     "step_find_device": "Find this device in Devices/Sessions section.",
     "step_initiate": "Initiate verification.",
     "logout": "Logout"
+  },
+  "bridgeExplorer": {
+    "selectFile": "Select a file to view its contents",
+    "copyPath": "Copy path",
+    "download": "Download",
+    "cannotPreview": "This file cannot be previewed",
+    "retry": "Retry",
+    "error401": "Your session has expired. Close this window and reopen it.",
+    "error403": "You do not have access to this workspace.",
+    "error404": "Not found.",
+    "error502": "Service temporarily unavailable. Please try again later.",
+    "errorGeneric": "Something went wrong. Please try again."
   }
 }
