@@ -1,6 +1,7 @@
 import React from 'react';
-import { Box, Icon, Icons, Text, toRem } from 'folds';
+import { Box, Icon, Text } from 'folds';
 import * as css from './FileReferenceCard.css';
+import { FileIcon } from '../../../icons/FileIcon';
 
 export type FileReference = {
   path: string;
@@ -42,7 +43,7 @@ export function FileReferenceCard({ fileReference }: FileReferenceCardProps) {
       alignItems="Center"
       title={fileReference.path}
     >
-      <Icon style={{ width: toRem(12), height: toRem(12) }} size="50" src={Icons.File} />
+      <Icon size="50" src={FileIcon} />
       <Text size="T200" truncate>
         {basename}
       </Text>

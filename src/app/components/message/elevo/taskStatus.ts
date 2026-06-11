@@ -17,7 +17,7 @@ export function taskRefStatusColor(status?: string): string | undefined {
     case 'planned':
       return color.Warning.Main;
     case 'backlog':
-      return color.SurfaceVariant.ContainerLine;
+      return color.Secondary.Main;
     default:
       return undefined;
   }
