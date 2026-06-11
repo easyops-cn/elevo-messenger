@@ -8,12 +8,12 @@ import {
 } from 'html-react-parser';
 import { MatrixClient } from 'matrix-js-sdk';
 import classNames from 'classnames';
-import { Box, Button, Chip, color, Header, Icon, Icons, Scroll, Text, toRem } from 'folds';
+import { Box, Button, Chip, Header, Icon, Icons, Scroll, Text } from 'folds';
 import { IntermediateRepresentation, Opts as LinkifyOpts, OptFn } from 'linkifyjs';
 import Linkify from 'linkify-react';
 import { ChildNode } from 'domhandler';
 import { useTranslation } from 'react-i18next';
-import { TaskRefStatus } from '../components/editor/slate';
+
 import * as css from '../styles/CustomHtml.css';
 import {
   getMxIdLocalPart,
@@ -506,34 +506,6 @@ export const getReactCustomHtmlParser = (
               style={{ cursor: 'pointer' }}
             >
               {domToReact(children, opts)}
-            </span>
-          );
-        }
-
-        if (name === 'span' && 'data-task-ref' in attribs) {
-          const taskId = attribs['data-task-ref'];
-          const taskStatus = attribs['data-task-status'] as TaskRefStatus | undefined;
-          const rawText = extractTextFromChildren(children);
-          const taskTitle = rawText.replace(/^\[/, '').replace(/\]$/, '');
-          const statusColor =
-            taskStatus === 'in_progress'
-              ? color.Primary.Main
-              : taskStatus === 'done'
-                ? color.Success.Main
-                : color.SurfaceVariant.ContainerLine;
-          return (
-            <span className={css.TaskRef()} title={taskTitle || taskId}>
-              <span
-                style={{
-                  display: 'inline-block',
-                  width: toRem(8),
-                  height: toRem(8),
-                  borderRadius: '50%',
-                  backgroundColor: statusColor,
-                  marginRight: toRem(4),
-                }}
-              />
-              {taskTitle || taskId}
             </span>
           );
         }

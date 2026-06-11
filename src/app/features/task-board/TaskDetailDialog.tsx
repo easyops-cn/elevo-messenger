@@ -20,6 +20,7 @@ import { stopPropagation } from '../../utils/keyboard';
 import { fetchWorkspaceTaskDetail } from './api';
 import { useTaskBoard } from './TaskBoardContext';
 import { InlineError, useErrorMessage } from './InlineError';
+import { sendSdkMessage } from '../bridge-explorer/sdkBridge';
 import { PRESET_DOCS, type PresetDoc, type TaskDetail, type TaskSummary } from './types';
 import * as css from './TaskBoard.css';
 
@@ -130,6 +131,18 @@ export function TaskDetailDialog({ task, requestClose }: TaskDetailDialogProps) 
       cancelled = true;
     };
   }, [baseUrl, workspaceId, task.slug]);
+
+  // Opening a task detail references it back to the host composer.
+  useEffect(() => {
+    sendSdkMessage('tasks-management', {
+      type: 'select-task',
+      task: {
+        slug: task.slug,
+        title: task.title,
+        status: task.status,
+      },
+    }).catch((e) => console.error('[task-board] failed to send select-task', e));
+  }, [task.slug, task.title, task.status]);
 
   const docs = detail?.docs;
   const visibleDocs = useMemo(

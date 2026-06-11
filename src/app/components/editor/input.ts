@@ -15,11 +15,9 @@ import {
   MentionElement,
   OrderedListElement,
   ParagraphElement,
-  TaskRefElement,
-  type TaskRefStatus,
   UnorderedListElement,
 } from './slate';
-import { createEmoticonElement, createMentionElement, createTaskRefElement } from './utils';
+import { createEmoticonElement, createMentionElement } from './utils';
 import {
   parseMatrixToRoom,
   parseMatrixToRoomEvent,
@@ -95,16 +93,7 @@ const getInlineMarkElement = (
   return children;
 };
 
-const getInlineNonMarkElement = (
-  node: Element,
-): MentionElement | EmoticonElement | TaskRefElement | undefined => {
-  if (node.name === 'span' && node.attribs['data-task-ref'] !== undefined) {
-    const id = node.attribs['data-task-ref'];
-    const status = node.attribs['data-task-status'] as TaskRefStatus | undefined;
-    const rawText = getText(node);
-    const title = rawText.replace(/^\[/, '').replace(/\]$/, '');
-    return createTaskRefElement(id, '', title || id, status);
-  }
+const getInlineNonMarkElement = (node: Element): MentionElement | EmoticonElement | undefined => {
   if (node.name === 'img' && node.attribs['data-mx-emoticon'] !== undefined) {
     const { src, alt } = node.attribs;
     if (!src) return undefined;

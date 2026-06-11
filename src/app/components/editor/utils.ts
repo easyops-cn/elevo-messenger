@@ -7,8 +7,6 @@ import {
   HeadingLevel,
   LinkElement,
   MentionElement,
-  TaskRefElement,
-  type TaskRefStatus,
 } from './slate';
 
 const ALL_MARK_TYPE: MarkType[] = [
@@ -191,20 +189,6 @@ export const createLinkElement = (
 export const createCommandElement = (command: string): CommandElement => ({
   type: BlockType.Command,
   command,
-  children: [{ text: '' }],
-});
-
-export const createTaskRefElement = (
-  id: string,
-  workspaceId: string,
-  title: string,
-  status?: TaskRefStatus,
-): TaskRefElement => ({
-  type: BlockType.TaskRef,
-  id,
-  workspaceId,
-  title,
-  status: status ?? 'todo',
   children: [{ text: '' }],
 });
 
