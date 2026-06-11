@@ -19,7 +19,7 @@ const basename = (path: string): string => path.split('/').pop() ?? path;
 
 export function FileViewer({ path }: FileViewerProps) {
   const { t } = useTranslation();
-  const { baseUrl, workspaceId, token } = useBridgeExplorer();
+  const { baseUrl, workspaceId } = useBridgeExplorer();
   const toMessage = useErrorMessage();
 
   const [metadata, setMetadata] = useState<FileMetadata | null>(null);
@@ -37,18 +37,18 @@ export function FileViewer({ path }: FileViewerProps) {
     setError(null);
     setContent(null);
     setMetadata(null);
-    fetchFileMetadata(baseUrl, workspaceId, path, token)
+    fetchFileMetadata(baseUrl, workspaceId, path)
       .then(async (meta) => {
         setMetadata(meta);
         if (meta.canReadContent === false || meta.classification === 'binary') {
           return;
         }
-        const result = await fetchFileContent(baseUrl, workspaceId, path, token);
+        const result = await fetchFileContent(baseUrl, workspaceId, path);
         setContent(result);
       })
       .catch(setError)
       .finally(() => setLoading(false));
-  }, [baseUrl, workspaceId, token, path]);
+  }, [baseUrl, workspaceId, path]);
 
   useEffect(() => {
     load();
@@ -65,11 +65,11 @@ export function FileViewer({ path }: FileViewerProps) {
   const handleDownload = useCallback(() => {
     if (!path) return;
     setDownloading(true);
-    fetchFileDownload(baseUrl, workspaceId, path, token)
+    fetchFileDownload(baseUrl, workspaceId, path)
       .then((blob) => saveFile(blob, basename(path)))
       .catch(setError)
       .finally(() => setDownloading(false));
-  }, [baseUrl, workspaceId, token, path]);
+  }, [baseUrl, workspaceId, path]);
 
   if (!path) {
     return (

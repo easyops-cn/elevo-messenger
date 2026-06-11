@@ -34,7 +34,7 @@ type DirectoryNodeProps = {
 };
 
 function DirectoryNode({ path, depth, selectedPath, onSelectFile }: DirectoryNodeProps) {
-  const { baseUrl, workspaceId, token } = useBridgeExplorer();
+  const { baseUrl, workspaceId } = useBridgeExplorer();
   const toMessage = useErrorMessage();
   const [entries, setEntries] = useState<DirectoryEntry[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -47,11 +47,11 @@ function DirectoryNode({ path, depth, selectedPath, onSelectFile }: DirectoryNod
   const load = useCallback(() => {
     setLoading(true);
     setError(null);
-    fetchDirectoryListing(baseUrl, workspaceId, path, token)
+    fetchDirectoryListing(baseUrl, workspaceId, path)
       .then(setEntries)
       .catch(setError)
       .finally(() => setLoading(false));
-  }, [baseUrl, workspaceId, token, path]);
+  }, [baseUrl, workspaceId, path]);
 
   // A DirectoryNode is only rendered once its folder is expanded (the root is
   // always rendered), so always load on mount regardless of depth.

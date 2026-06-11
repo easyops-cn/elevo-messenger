@@ -9,6 +9,7 @@ import './app/i18n';
 import { elevoConfig } from './config.css';
 import { DarkTheme, LightTheme, ThemeContextProvider, ThemeKind } from './app/hooks/useTheme';
 import { BridgeExplorer } from './app/features/bridge-explorer/BridgeExplorer';
+import { onSdkMessage } from './app/features/bridge-explorer/sdkBridge';
 import type { BridgeExplorerPayload } from './app/features/bridge-explorer/types';
 import * as css from './previewStyles.css';
 
@@ -44,13 +45,15 @@ function BridgeExplorerTheme({ children }: { children: React.ReactNode }) {
     applyTheme(themeKind);
   }, [themeKind]);
 
-  useEffect(() => {
-    window.__ElevoMessengerSDK_receive__ = (channel, data) => {
-      if (channel === 'theme_change' && (data === ThemeKind.Light || data === ThemeKind.Dark)) {
-        setThemeKind(data);
-      }
-    };
-  }, []);
+  useEffect(
+    () =>
+      onSdkMessage('theme_change', (data) => {
+        if (data === ThemeKind.Light || data === ThemeKind.Dark) {
+          setThemeKind(data);
+        }
+      }),
+    [],
+  );
 
   return <ThemeContextProvider value={theme}>{children}</ThemeContextProvider>;
 }

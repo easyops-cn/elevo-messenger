@@ -8,6 +8,7 @@
 // `-bridge` segment, so we never append it here.
 
 import { trimLeadingSlash, trimTrailingSlash } from '../../utils/common';
+import { getToken, refreshToken } from './tokenRefresh';
 import type { DirectoryEntry, FileContentResult, FileMetadata, WorkspaceInfo } from './types';
 
 /** A typed error carrying the HTTP status for inline error rendering. */
@@ -40,12 +41,27 @@ async function extractErrorMessage(res: Response): Promise<string> {
   return res.statusText || `HTTP ${res.status}`;
 }
 
-async function authedFetch(url: string, token: string): Promise<Response> {
-  let res: Response;
+async function rawFetch(url: string, token: string): Promise<Response> {
   try {
-    res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+    return await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
   } catch (e) {
     throw new BridgeApiError(e instanceof Error ? e.message : 'Network error', 0);
+  }
+}
+
+/**
+ * Fetch with the current Matrix access token. On a 401 (token expired), ask the
+ * main window for a fresh token and retry once, so refresh is transparent.
+ */
+async function authedFetch(url: string): Promise<Response> {
+  let res = await rawFetch(url, getToken());
+  if (res.status === 401) {
+    try {
+      const token = await refreshToken();
+      res = await rawFetch(url, token);
+    } catch {
+      // Refresh failed; fall through and surface the original 401 below.
+    }
   }
   if (!res.ok) {
     throw new BridgeApiError(await extractErrorMessage(res), res.status);
@@ -60,9 +76,8 @@ const fileApiBase = (baseUrl: string, workspaceId: string): string =>
 export async function fetchWorkspaceInfo(
   baseUrl: string,
   workspaceId: string,
-  token: string,
 ): Promise<WorkspaceInfo> {
-  const res = await authedFetch(`${baseUrl}/${encodeURIComponent(workspaceId)}`, token);
+  const res = await authedFetch(`${baseUrl}/${encodeURIComponent(workspaceId)}`);
   return res.json();
 }
 
@@ -71,10 +86,9 @@ export async function fetchDirectoryListing(
   baseUrl: string,
   workspaceId: string,
   path: string,
-  token: string,
 ): Promise<DirectoryEntry[]> {
   const url = `${fileApiBase(baseUrl, workspaceId)}/list?path=${encodeURIComponent(path)}`;
-  const res = await authedFetch(url, token);
+  const res = await authedFetch(url);
   const data = (await res.json()) as { path: string; entries: DirectoryEntry[] };
   return data.entries ?? [];
 }
@@ -84,10 +98,9 @@ export async function fetchFileMetadata(
   baseUrl: string,
   workspaceId: string,
   path: string,
-  token: string,
 ): Promise<FileMetadata> {
   const url = `${fileApiBase(baseUrl, workspaceId)}/metadata?path=${encodeURIComponent(path)}`;
-  const res = await authedFetch(url, token);
+  const res = await authedFetch(url);
   return res.json();
 }
 
@@ -99,10 +112,9 @@ export async function fetchFileContent(
   baseUrl: string,
   workspaceId: string,
   path: string,
-  token: string,
 ): Promise<FileContentResult> {
   const url = `${fileApiBase(baseUrl, workspaceId)}/content?path=${encodeURIComponent(path)}`;
-  const res = await authedFetch(url, token);
+  const res = await authedFetch(url);
   const contentType = res.headers.get('Content-Type') ?? 'application/octet-stream';
   if (contentType.startsWith('text/') || /\b(json|xml|javascript|ecmascript)\b/.test(contentType)) {
     return { kind: 'text', text: await res.text(), contentType };
@@ -122,8 +134,7 @@ export async function fetchFileDownload(
   baseUrl: string,
   workspaceId: string,
   path: string,
-  token: string,
 ): Promise<Blob> {
-  const res = await authedFetch(getDownloadUrl(baseUrl, workspaceId, path), token);
+  const res = await authedFetch(getDownloadUrl(baseUrl, workspaceId, path));
   return res.blob();
 }
