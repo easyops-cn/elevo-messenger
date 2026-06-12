@@ -188,7 +188,7 @@ export const DialogContent = style([
     width: toRem(960),
     maxWidth: 'calc(100vw - 48px)',
     height: 'calc(100vh - 48px)',
-    maxHeight: toRem(900),
+    maxHeight: 'none',
     backgroundColor: color.Surface.Container,
     color: color.Surface.OnContainer,
   },
