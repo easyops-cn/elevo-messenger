@@ -639,7 +639,10 @@ export const CodeView = as<'div', CodeViewProps>(
                             try {
                               matrixToken = await bridge.refreshMatrixToken();
                             } catch (error) {
-                              console.error('Failed to refresh Matrix token for bridge explorer:', error);
+                              console.error(
+                                'Failed to refresh Matrix token for bridge explorer:',
+                                error,
+                              );
                             }
                           }
                           openBridgeExplorer({

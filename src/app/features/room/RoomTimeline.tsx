@@ -43,7 +43,6 @@ import {
   FORKS_FROM_RELATION,
   Reply,
   MessageBase,
-  MessageBrokenContent,
   MessageUnsupportedContent,
   Time,
   MessageNotDecryptedContent,
@@ -227,6 +226,11 @@ const getTimelineRelativeIndex = (absoluteIndex: number, timelineBaseIndex: numb
 
 const getTimelineEvent = (timeline: EventTimeline, index: number): MatrixEvent | undefined =>
   timeline.getEvents()[index];
+
+const getElevoDiffContent = (content: unknown): unknown => {
+  if (typeof content !== 'object' || content === null) return undefined;
+  return (content as Record<string, unknown>)['vip.elevo.diff'];
+};
 
 const getEventIdAbsoluteIndex = (
   timelines: EventTimeline[],
@@ -1198,6 +1202,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
         const showThreadSummary = !thread && isThreadRoot && !!replyToThread;
         const fileReference = parseFileReference(getContent());
         const taskReference = parseTaskReference(getContent());
+        const diffSummary = summarizeElevoDiffContent(getElevoDiffContent(getContent()));
 
         return (
           <Message
@@ -1265,6 +1270,8 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
           >
             {mEvent.isRedacted() ? (
               <RedactedContent reason={mEvent.getUnsigned().redacted_because?.content.reason} />
+            ) : diffSummary ? (
+              <DiffSummaryCard summary={diffSummary} codeViewWorkspace={codeViewWorkspace} />
             ) : (
               <RenderMessageContent
                 displayName={senderDisplayName}
@@ -1380,11 +1387,14 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
                   const getContent = (() =>
                     editedEvent?.getContent()['m.new_content'] ??
                     mEvent.getContent()) as GetContentCallback;
+                  const diffSummary = summarizeElevoDiffContent(getElevoDiffContent(getContent()));
 
                   const senderId = mEvent.getSender() ?? '';
                   const senderDisplayName =
                     getMemberDisplayName(room, senderId) ?? getMxIdLocalPart(senderId) ?? senderId;
-                  return (
+                  return diffSummary ? (
+                    <DiffSummaryCard summary={diffSummary} codeViewWorkspace={codeViewWorkspace} />
+                  ) : (
                     <RenderMessageContent
                       displayName={senderDisplayName}
                       msgType={mEvent.getContent().msgtype ?? ''}
@@ -1474,64 +1484,6 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
                   />
                 )}
               />
-            )}
-          </Message>
-        );
-      },
-      [MessageEvent.ElevoDiff]: (mEventId, mEvent, item, timelineSet, collapse) => {
-        const reactionRelations = getEventReactions(timelineSet, mEventId);
-        const reactions = reactionRelations && reactionRelations.getSortedAnnotationsByKey();
-        const hasReactions = reactions && reactions.length > 0;
-        const highlighted = focusItem?.eventId === mEventId && focusItem.highlight;
-        const content = mEvent.getContent<Record<string, unknown>>();
-        const diffSummary = summarizeElevoDiffContent(content);
-
-        return (
-          <Message
-            key={mEvent.getId()}
-            data-message-item={item}
-            data-message-id={mEventId}
-            room={room}
-            mEvent={mEvent}
-            messageSpacing={messageSpacing}
-            messageLayout={messageLayout}
-            collapse={collapse}
-            highlight={highlighted}
-            canDelete={canRedact || (canDeleteOwn && mEvent.getSender() === mx.getUserId())}
-            canSendReaction={canSendReaction}
-            canPinEvent={false}
-            canReplyInThread={false}
-            imagePackRooms={imagePackRooms}
-            relations={hasReactions ? reactionRelations : undefined}
-            onUserClick={handleUserClick}
-            onUsernameClick={handleUsernameClick}
-            onReplyClick={handleReplyClick}
-            onReactionToggle={handleReactionToggle}
-            reactions={
-              reactionRelations && (
-                <Reactions
-                  style={{ marginTop: config.space.S200 }}
-                  room={room}
-                  relations={reactionRelations}
-                  mEventId={mEventId}
-                  canSendReaction={canSendReaction}
-                  onReactionToggle={handleReactionToggle}
-                />
-              )
-            }
-            hideReadReceipts={hideActivity}
-            showDeveloperTools={showDeveloperTools}
-            hour24Clock={hour24Clock}
-            dateFormatString={dateFormatString}
-          >
-            {mEvent.isRedacted() ? (
-              <RedactedContent reason={mEvent.getUnsigned().redacted_because?.content.reason} />
-            ) : diffSummary ? (
-              <DiffSummaryCard summary={diffSummary} codeViewWorkspace={codeViewWorkspace} />
-            ) : (
-              <Text>
-                <MessageBrokenContent />
-              </Text>
             )}
           </Message>
         );

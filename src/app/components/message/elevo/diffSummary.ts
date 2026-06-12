@@ -26,6 +26,12 @@ export type DiffSummary = {
   truncated?: boolean;
   added: number;
   deleted: number;
+  diffRef?: DiffRef;
+};
+
+export type DiffRef = {
+  diffPath: string;
+  bridgeId: string;
 };
 
 export type DiffHunkMetadata = {
@@ -38,11 +44,9 @@ export type DiffHunkMetadata = {
 
 export type ElevoDiffContent = {
   body?: unknown;
-  diff?: unknown;
   summary?: unknown;
   files?: unknown;
-  remainingFiles?: unknown;
-  limits?: unknown;
+  ref?: unknown;
 };
 
 type StructuredDiffFile = {
@@ -105,6 +109,14 @@ function parseStructuredSummary(value: unknown): StructuredDiffSummary | undefin
   return { files, detailedFiles, remainingFiles, tooLargeFiles, added, deleted, truncated };
 }
 
+function parseDiffRef(value: unknown): DiffRef | undefined {
+  if (!isRecord(value)) return undefined;
+  const diffPath = getString(value.diffPath);
+  const bridgeId = getString(value.bridgeId);
+  if (!diffPath || !bridgeId || !/^[a-zA-Z0-9_-]+$/.test(bridgeId)) return undefined;
+  return { diffPath, bridgeId };
+}
+
 function parseHunks(value: unknown): DiffHunkMetadata[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -157,6 +169,23 @@ function parseStructuredFile(value: unknown): StructuredDiffFile | undefined {
   };
 }
 
+function parseLightweightFile(value: unknown): DiffFileSummary | undefined {
+  if (!isRecord(value)) return undefined;
+  const path = getString(value.path);
+  const added = getNumber(value.added);
+  const deleted = getNumber(value.deleted);
+  if (!path || added === undefined || deleted === undefined) return undefined;
+  return {
+    path,
+    oldPath: getString(value.oldPath),
+    status: getString(value.status),
+    added,
+    deleted,
+    lines: [],
+    sizeBytes: getNumber(value.sizeBytes),
+  };
+}
+
 function parseRemainingFile(value: unknown): DiffRemainingFileSummary | undefined {
   if (!isRecord(value)) return undefined;
   const path = getString(value.path);
@@ -180,13 +209,51 @@ function buildOmittedPatchLines(file: StructuredDiffFile): string[] {
   ];
 }
 
-export function summarizeElevoDiffContent(content: ElevoDiffContent): DiffSummary | undefined {
+export function summarizeElevoDiffContent(content: unknown): DiffSummary | undefined {
+  if (!isRecord(content)) return undefined;
+  const diffRef = parseDiffRef(content.ref);
+  const structuredSummary = parseStructuredSummary(content.summary);
+  const lightweightFiles = Array.isArray(content.files)
+    ? content.files
+        .map(parseLightweightFile)
+        .filter((file): file is DiffFileSummary => file !== undefined)
+    : [];
+
+  if (structuredSummary && diffRef && lightweightFiles.length === structuredSummary.files) {
+    return {
+      files: lightweightFiles,
+      remainingFiles: [],
+      totalFiles: structuredSummary.files,
+      tooLargeFiles: structuredSummary.tooLargeFiles,
+      truncated: structuredSummary.truncated,
+      added: structuredSummary.added,
+      deleted: structuredSummary.deleted,
+      diffRef,
+    };
+  }
+
+  return undefined;
+}
+
+export type ElevoDiffResponseContent = ElevoDiffContent & {
+  diff?: unknown;
+  remainingFiles?: unknown;
+  limits?: unknown;
+};
+
+export function summarizeElevoDiffResponseContent(
+  content: ElevoDiffResponseContent,
+): DiffSummary | undefined {
   const structuredSummary = parseStructuredSummary(content.summary);
   const structuredFiles = Array.isArray(content.files)
     ? content.files.map(parseStructuredFile).filter((file): file is StructuredDiffFile => !!file)
     : [];
 
-  if (structuredSummary && structuredFiles.length === structuredSummary.detailedFiles) {
+  if (
+    structuredSummary &&
+    structuredFiles.length > 0 &&
+    structuredFiles.length === structuredSummary.detailedFiles
+  ) {
     const remainingFiles = Array.isArray(content.remainingFiles)
       ? content.remainingFiles
           .map(parseRemainingFile)
