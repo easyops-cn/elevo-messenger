@@ -17,6 +17,10 @@ import { useTranslation } from 'react-i18next';
 import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { stopPropagation } from '../../utils/keyboard';
+import { copyToClipboard } from '../../utils/dom';
+import { useTimeoutToggle } from '../../hooks/useTimeoutToggle';
+import { CopyIcon } from '../../icons/CopyIcon';
+import { CheckIcon } from '../../icons/CheckIcon';
 import { fetchWorkspaceTaskDetail } from './api';
 import { useTaskBoard } from './TaskBoardContext';
 import { InlineError, useErrorMessage } from './InlineError';
@@ -68,6 +72,15 @@ function DocSection({
 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(defaultExpanded);
+  const [copied, setCopied] = useTimeoutToggle(2000);
+
+  const copyText = typeof content === 'string' ? content : '';
+  const handleCopy: React.MouseEventHandler<HTMLButtonElement> = (evt) => {
+    evt.stopPropagation();
+    if (!copyText) return;
+    copyToClipboard(copyText);
+    setCopied();
+  };
 
   const body = (() => {
     if (typeof content === 'string') return <MarkdownDoc content={content} />;
@@ -83,20 +96,38 @@ function DocSection({
 
   return (
     <Box className={css.DocSection} direction="Column">
-      <Box
-        as="button"
-        type="button"
-        className={css.DocHeader}
-        alignItems="Center"
-        onClick={() => setExpanded((prev) => !prev)}
-        aria-expanded={expanded}
-      >
-        <Icon
-          className={`${css.DocChevron}${expanded ? '' : ` ${css.DocChevronCollapsed}`}`}
-          size="100"
-          src={Icons.ChevronBottom}
-        />
-        <Text size="H6">{title}</Text>
+      <Box className={css.DocHeader} alignItems="Center">
+        <Box
+          as="button"
+          type="button"
+          className={css.DocToggle}
+          alignItems="Center"
+          onClick={() => setExpanded((prev) => !prev)}
+          aria-expanded={expanded}
+        >
+          <Icon
+            className={`${css.DocChevron}${expanded ? '' : ` ${css.DocChevronCollapsed}`}`}
+            size="100"
+            src={Icons.ChevronBottom}
+          />
+          <Box grow="Yes" style={{ minWidth: 0 }}>
+            <Text size="H6" truncate>
+              {title}
+            </Text>
+          </Box>
+        </Box>
+        {copyText && (
+          <IconButton
+            size="300"
+            radii="300"
+            fill="None"
+            onClick={handleCopy}
+            aria-label={copied ? t('codeBlock.copied') : t('common.copy')}
+            title={copied ? t('codeBlock.copied') : t('common.copy')}
+          >
+            <Icon size="50" src={copied ? CheckIcon : CopyIcon} />
+          </IconButton>
+        )}
       </Box>
       {expanded && <Box className={css.DocBody}>{body}</Box>}
     </Box>
@@ -186,10 +217,10 @@ export function TaskDetailDialog({ task, requestClose }: TaskDetailDialogProps) 
             <Scroll size="300" hideTrack visibility="Hover">
               <Box className={css.DialogBody} direction="Column">
                 <Box className={css.MetaGrid}>
+                  <MetaItem label={t('taskBoard.slug')} value={task.slug} />
                   <MetaItem label={t('taskBoard.status')} value={task.status} />
                   <MetaItem label={t('taskBoard.assignee')} value={task.assignee ?? ''} />
                   <MetaItem label={t('taskBoard.author')} value={task.author} />
-                  <MetaItem label={t('taskBoard.slug')} value={task.slug} />
                   <MetaItem
                     label={t('taskBoard.createdAt')}
                     value={formatDateTime(task.createdAt)}
