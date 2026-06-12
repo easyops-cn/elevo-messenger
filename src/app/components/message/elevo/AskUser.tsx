@@ -36,6 +36,7 @@ import { MessageEvent } from '../../../../types/matrix/room';
 import { useRoomThread } from '../../../features/room/RoomThreadContext';
 import { sanitizeText } from '../../../utils/sanitize';
 import { getMatrixToUser } from '../../../plugins/matrix-to';
+import { isComposing } from '../../../hooks/useComposingCheck';
 
 // Schemas & Types
 
@@ -164,6 +165,7 @@ function AskUserSelect({
   labelledBy,
   onToggle,
   onOtherTextChange,
+  onOtherInputEnter,
 }: {
   options: AskUserSelectOption[];
   selectedValues: string[];
@@ -177,6 +179,7 @@ function AskUserSelect({
   labelledBy?: string;
   onToggle: (label: string, isOther: boolean) => void;
   onOtherTextChange: (value: string) => void;
+  onOtherInputEnter?: () => void;
 }) {
   const hasOtherSelected = selectedValues.includes(OTHER_OPTION_VALUE);
   const optionRole = multiSelect ? 'checkbox' : 'radio';
@@ -224,7 +227,14 @@ function AskUserSelect({
               value={otherText}
               onChange={(e) => onOtherTextChange(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (isComposing(e)) return;
+                  onOtherInputEnter?.();
+                  return;
+                }
+                if (e.key === ' ') {
                   e.stopPropagation();
                 }
               }}
@@ -354,7 +364,6 @@ export function AskUserQuestionCard({
           const field = q.fields[j];
           if (field.required && !formAnswers[i]?.[field.name]?.trim()) return false;
           if (
-            field.required &&
             showOtherOption &&
             field.type === 'select' &&
             formAnswers[i]?.[field.name] === OTHER_OPTION_VALUE &&
@@ -519,6 +528,27 @@ export function AskUserQuestionCard({
     showOtherOption,
   ]);
 
+  const handleCurrentQuestionEnter = useCallback(() => {
+    if (isDisabled || submitting || submitted) return;
+    if (!isQuestionAnswered(activeTab)) return;
+    if (activeTab < data.questions.length - 1) {
+      setActiveTab(activeTab + 1);
+      return;
+    }
+    if (canSubmit) {
+      handleSubmit();
+    }
+  }, [
+    activeTab,
+    canSubmit,
+    data.questions.length,
+    handleSubmit,
+    isDisabled,
+    isQuestionAnswered,
+    submitting,
+    submitted,
+  ]);
+
   const currentQuestion = data.questions[activeTab];
   const currentSel = selections[activeTab] ?? [];
 
@@ -585,6 +615,7 @@ export function AskUserQuestionCard({
                             [`${activeTab}:${field.name}`]: nextValue,
                           }))
                         }
+                        onOtherInputEnter={handleCurrentQuestionEnter}
                       />
                     ) : field.type === 'textarea' ? (
                       <textarea
@@ -642,6 +673,7 @@ export function AskUserQuestionCard({
               onOtherTextChange={(nextValue) =>
                 setOtherTexts((prev) => ({ ...prev, [String(activeTab)]: nextValue }))
               }
+              onOtherInputEnter={handleCurrentQuestionEnter}
             />
           )}
         </div>
