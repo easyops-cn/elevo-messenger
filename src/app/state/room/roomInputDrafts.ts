@@ -50,7 +50,7 @@ export type IReplyDraft = {
   formattedBody?: string | undefined;
   relation?: IEventRelation | undefined;
   agentSession?: {
-    provider: 'codex-agent';
+    provider: 'coding-agent';
     conversationId: string;
     threadId: string;
     turnId: string;
