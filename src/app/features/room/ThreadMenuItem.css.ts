@@ -3,6 +3,11 @@ import { color } from 'folds';
 
 export const ThreadMenuItem = style({
   position: 'relative',
+  selectors: {
+    '&[aria-selected=true]': {
+      backgroundColor: color.Background.ContainerActive,
+    },
+  },
 });
 
 export const ThreadMenuItemButton = style({
