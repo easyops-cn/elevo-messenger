@@ -526,12 +526,30 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
       ?.workspaces ?? [];
   const firstWorkspace = linkedWorkspaces[0];
   const codeViewWorkspace = useMemo<CodeViewWorkspaceContext | undefined>(() => {
-    if (!elevoConfig.workspaces?.explorerUrl || !firstWorkspace) return undefined;
+    if (!firstWorkspace) return undefined;
+
+    if (firstWorkspace.bridge_provider) {
+      const homeserverUrl = mx.getHomeserverUrl();
+      const matrixToken = mx.getAccessToken() ?? '';
+      if (!homeserverUrl || !matrixToken) return undefined;
+      return {
+        roomId: room.roomId,
+        bridge: {
+          workspaceId: firstWorkspace.id,
+          workspaceName: firstWorkspace.name,
+          bridgeProvider: firstWorkspace.bridge_provider,
+          matrixToken,
+          homeserverUrl,
+        },
+      };
+    }
+
+    if (!elevoConfig.workspaces?.explorerUrl) return undefined;
     return {
       roomId: room.roomId,
       workspaceExplorerUrl: `${elevoConfig.workspaces.explorerUrl}?ids=${firstWorkspace.id}`,
     };
-  }, [elevoConfig.workspaces?.explorerUrl, firstWorkspace, room.roomId]);
+  }, [elevoConfig.workspaces?.explorerUrl, firstWorkspace, room.roomId, mx]);
 
   const [hour24Clock] = useSetting(settingsAtom, 'hour24Clock');
   const [dateFormatString] = useSetting(settingsAtom, 'dateFormatString');

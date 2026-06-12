@@ -14,6 +14,8 @@ export type BridgeExplorerPayload = {
   matrixToken: string;
   /** Matrix homeserver base URL, e.g. https://m.elevo.vip */
   homeserverUrl: string;
+  /** Optional file path to select when the explorer opens. */
+  initialFilePath?: string;
 };
 
 export type FileClassification = 'text' | 'media' | 'binary';
