@@ -1,4 +1,4 @@
-import { style } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 import { DefaultReset, color, config } from 'folds';
 
 export const StateBox = style([
@@ -22,6 +22,15 @@ export const HeaderRow = style([
   },
 ]);
 
+export const HeaderActions = style([
+  DefaultReset,
+  {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: config.space.S100,
+  },
+]);
+
 /** Small borderless icon button to open the create-task dialog. */
 export const CreateButton = style([
   DefaultReset,
@@ -35,6 +44,10 @@ export const CreateButton = style([
     cursor: 'pointer',
     selectors: {
       '&:hover': { backgroundColor: color.Surface.ContainerHover },
+      '&:disabled': {
+        cursor: 'not-allowed',
+        opacity: config.opacity.Disabled,
+      },
       '&:focus-visible': {
         outline: `${config.borderWidth.B400} solid ${color.Primary.Main}`,
       },
@@ -90,6 +103,19 @@ export const StatCardClickable = style({
 export const StatCount = style([DefaultReset, { lineHeight: 1 }]);
 
 export const StatIcon = style([DefaultReset, { flexShrink: 0 }]);
+
+const refreshSpin = keyframes({
+  from: { transform: 'rotate(0deg)' },
+  to: { transform: 'rotate(360deg)' },
+});
+
+export const RefreshingIcon = style({
+  animation: `${refreshSpin} 0.8s linear infinite`,
+});
+
+export const RefreshSuccessIcon = style({
+  color: color.Success.Main,
+});
 
 /* Per-status icon tone (color only; card background stays uniform). */
 export const toneBacklog = style({ color: color.Secondary.Main });
