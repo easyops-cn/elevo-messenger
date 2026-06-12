@@ -120,6 +120,7 @@ import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { useStateEvent } from '../../hooks/useStateEvent';
 import type { WorkspaceItem } from './WorkspacesModal';
 import type { CodeViewWorkspaceContext } from '../../components/code-view';
+import { refreshMatrixTokenOrCurrent } from '../../utils/matrixTokenRefresh';
 
 const TimelineFloat = as<'div', css.TimelineFloatVariants>(
   ({ position, className, ...props }, ref) => (
@@ -540,6 +541,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
           bridgeProvider: firstWorkspace.bridge_provider,
           matrixToken,
           homeserverUrl,
+          refreshMatrixToken: () => refreshMatrixTokenOrCurrent(mx),
         },
       };
     }

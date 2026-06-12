@@ -12,3 +12,18 @@ export async function refreshMatrixToken(mx: MatrixClient): Promise<string> {
   }
   return token;
 }
+
+/**
+ * Refresh the Matrix token when possible, but return the currently cached token
+ * if the refresh request itself fails. This is only for bridge-window handoff
+ * paths where a still-valid current token is better than failing the open/reply.
+ */
+export async function refreshMatrixTokenOrCurrent(mx: MatrixClient): Promise<string> {
+  try {
+    return await refreshMatrixToken(mx);
+  } catch (error) {
+    const token = mx.getAccessToken();
+    if (token) return token;
+    throw error;
+  }
+}
