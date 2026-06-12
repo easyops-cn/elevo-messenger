@@ -11,6 +11,13 @@ import { getCurrentWindow } from '@tauri-apps/api/window';
 
 type Handler = (data: unknown) => void;
 
+/**
+ * Channel used by the main window to ask an already-open bridge explorer window
+ * to select (switch to) a specific file path. Must stay in sync with the Rust
+ * backend (`open_bridge_explorer_window`).
+ */
+export const BRIDGE_EXPLORER_SELECT_FILE_CHANNEL = 'bridge-explorer-select-file';
+
 const handlers = new Map<string, Set<Handler>>();
 let installed = false;
 

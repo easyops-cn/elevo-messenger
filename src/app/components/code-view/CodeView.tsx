@@ -19,7 +19,8 @@ import { FilePlusIcon } from '../../icons/FilePlusIcon';
 import { FolderOpenIcon } from '../../icons/FolderOpenIcon';
 import { UNKNOWN_FILE } from '../message/elevo/diffSummary';
 import { useTheme } from '../../hooks/useTheme';
-import { openWorkspacePanel } from '../../plugins/useTauriOpener';
+import { openBridgeExplorer, openWorkspacePanel } from '../../plugins/useTauriOpener';
+import { canViewFullFile } from './canViewFullFile';
 import {
   codeToTokensBase,
   getPlainTokenLines,
@@ -622,11 +623,23 @@ export const CodeView = as<'div', CodeViewProps>(
                     {fileEntries.map((entry) => {
                       const { file, label } = entry;
                       const expanded = expandedFiles.has(entry.key);
+                      const roomId = payload.roomId;
+                      const bridge = payload.bridge;
                       const fullFileUrl =
                         payload.workspaceExplorerUrl && file.path !== UNKNOWN_FILE
                           ? getFullFileUrl(payload.workspaceExplorerUrl, file.path)
                           : undefined;
-                      const roomId = payload.roomId;
+                      const canOpenFullFile =
+                        canViewFullFile(file.path) && (!!bridge || (!!roomId && !!fullFileUrl));
+                      const openFullFile = () => {
+                        if (bridge) {
+                          openBridgeExplorer({ ...bridge, initialFilePath: file.path });
+                          return;
+                        }
+                        if (roomId && fullFileUrl) {
+                          openWorkspacePanel(fullFileUrl, roomId);
+                        }
+                      };
                       return (
                         <section
                           className={css.FilePanel}
@@ -655,14 +668,14 @@ export const CodeView = as<'div', CodeViewProps>(
                                 />
                               </span>
                             </button>
-                            {roomId && fullFileUrl && (
+                            {canOpenFullFile && (
                               <Button
                                 className={css.FullFileButton}
                                 size="300"
                                 radii="300"
                                 variant="Secondary"
                                 fill="Soft"
-                                onClick={() => openWorkspacePanel(fullFileUrl, roomId)}
+                                onClick={openFullFile}
                               >
                                 <Text size="T200">{t('message.viewFullFile')}</Text>
                                 <Icon src={ExternalLinkIcon} size="50" />
