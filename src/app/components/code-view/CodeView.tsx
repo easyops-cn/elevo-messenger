@@ -20,7 +20,7 @@ import { FolderOpenIcon } from '../../icons/FolderOpenIcon';
 import { UNKNOWN_FILE } from '../message/elevo/diffSummary';
 import { useTheme } from '../../hooks/useTheme';
 import { openBridgeExplorer, openWorkspacePanel } from '../../plugins/useTauriOpener';
-import { canViewFullFile } from './canViewFullFile';
+import { getViewFullFilePath } from './canViewFullFile';
 import {
   codeToTokensBase,
   getPlainTokenLines,
@@ -625,15 +625,16 @@ export const CodeView = as<'div', CodeViewProps>(
                       const expanded = expandedFiles.has(entry.key);
                       const roomId = payload.roomId;
                       const bridge = payload.bridge;
+                      const viewFullFilePath = getViewFullFilePath(file.path);
                       const fullFileUrl =
-                        payload.workspaceExplorerUrl && file.path !== UNKNOWN_FILE
-                          ? getFullFileUrl(payload.workspaceExplorerUrl, file.path)
+                        payload.workspaceExplorerUrl && viewFullFilePath
+                          ? getFullFileUrl(payload.workspaceExplorerUrl, viewFullFilePath)
                           : undefined;
                       const canOpenFullFile =
-                        canViewFullFile(file.path) && (!!bridge || (!!roomId && !!fullFileUrl));
+                        !!viewFullFilePath && (!!bridge || (!!roomId && !!fullFileUrl));
                       const openFullFile = () => {
-                        if (bridge) {
-                          openBridgeExplorer({ ...bridge, initialFilePath: file.path });
+                        if (bridge && viewFullFilePath) {
+                          openBridgeExplorer({ ...bridge, initialFilePath: viewFullFilePath });
                           return;
                         }
                         if (roomId && fullFileUrl) {

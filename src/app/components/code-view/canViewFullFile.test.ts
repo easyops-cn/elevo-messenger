@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canViewFullFile } from './canViewFullFile';
+import { canViewFullFile, getViewFullFilePath } from './canViewFullFile';
 import { UNKNOWN_FILE } from '../message/elevo/diffSummary';
 
 describe('canViewFullFile', () => {
@@ -31,5 +31,23 @@ describe('canViewFullFile', () => {
   it('hides unknown files and empty paths', () => {
     expect(canViewFullFile(UNKNOWN_FILE)).toBe(false);
     expect(canViewFullFile('')).toBe(false);
+  });
+});
+
+describe('getViewFullFilePath', () => {
+  it('keeps relative paths unchanged', () => {
+    expect(getViewFullFilePath('src/index.ts')).toBe('src/index.ts');
+    expect(getViewFullFilePath('a/b/c.txt')).toBe('a/b/c.txt');
+  });
+
+  it('removes the workspace mount directory from allowed absolute paths', () => {
+    expect(getViewFullFilePath('/workspaces/a/b.txt')).toBe('a/b.txt');
+    expect(getViewFullFilePath('/workspace/project/src/main.rs')).toBe('project/src/main.rs');
+  });
+
+  it('rejects unknown, empty, and disallowed absolute paths', () => {
+    expect(getViewFullFilePath(UNKNOWN_FILE)).toBeUndefined();
+    expect(getViewFullFilePath('')).toBeUndefined();
+    expect(getViewFullFilePath('/etc/passwd')).toBeUndefined();
   });
 });

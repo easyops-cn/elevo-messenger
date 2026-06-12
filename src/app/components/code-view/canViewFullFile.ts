@@ -19,7 +19,22 @@ const ALLOWED_ABSOLUTE_PREFIXES = ['/workspaces/', '/workspace/'];
  *   entry is hidden.
  */
 export function canViewFullFile(path: string): boolean {
-  if (!path || path === UNKNOWN_FILE) return false;
-  if (!path.startsWith('/')) return true;
-  return ALLOWED_ABSOLUTE_PREFIXES.some((prefix) => path.startsWith(prefix));
+  return getViewFullFilePath(path) !== undefined;
+}
+
+/**
+ * Convert a diff file path into the path accepted by the workspace explorers.
+ *
+ * Relative paths are already workspace-relative and are returned unchanged.
+ * Absolute paths under a known workspace mount drop the mount directory, e.g.
+ * `/workspaces/a/b.txt` becomes `a/b.txt`.
+ */
+export function getViewFullFilePath(path: string): string | undefined {
+  if (!path || path === UNKNOWN_FILE) return undefined;
+  if (!path.startsWith('/')) return path;
+  const prefix = ALLOWED_ABSOLUTE_PREFIXES.find((absolutePrefix) =>
+    path.startsWith(absolutePrefix),
+  );
+  if (!prefix) return undefined;
+  return path.slice(prefix.length);
 }
