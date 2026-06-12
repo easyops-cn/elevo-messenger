@@ -19,7 +19,7 @@ const THREAD_PREVIEW_THRESHOLD = 10;
 export function ThreadsPanel({ room }: ThreadsPanelProps) {
   const { t } = useTranslation();
   const useAuthentication = useMediaAuthentication();
-  const [, setThreadChat] = useThreadChat(room.roomId);
+  const [threadChat, setThreadChat] = useThreadChat(room.roomId);
   const [showAllThreads, setShowAllThreads] = useState(false);
   const { threadIds: starredThreadIds } = useStarredThreadsByRoom(room.roomId);
 
@@ -95,6 +95,7 @@ export function ThreadsPanel({ room }: ThreadsPanelProps) {
                 room={room}
                 thread={thread}
                 isStarred={starredThreadIds.has(thread.id)}
+                selected={threadChat.open && threadChat.threadRootId === thread.id}
                 onClick={handleThreadClick}
               />
             ))}

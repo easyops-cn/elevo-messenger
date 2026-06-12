@@ -25,6 +25,7 @@ type ThreadMenuItemProps = {
   room: Room;
   thread: Thread;
   isStarred: boolean;
+  selected: boolean;
   onClick: MouseEventHandler<HTMLButtonElement>;
 };
 
@@ -55,6 +56,7 @@ export function ThreadMenuItem({
   room,
   thread,
   isStarred,
+  selected,
   onClick,
 }: ThreadMenuItemProps) {
   const mx = useMatrixClient();
@@ -149,6 +151,7 @@ export function ThreadMenuItem({
       style={{ padding: `0 ${config.space.S200}`, height: toRem(52) }}
       variant="Background"
       radii="400"
+      aria-selected={selected}
     >
       <Box
         as="button"
