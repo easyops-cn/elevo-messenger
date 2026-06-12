@@ -881,6 +881,8 @@
     "diffPatchOmitted": "Patch 已省略",
     "diffTruncated": "已裁剪",
     "diffUnknownFile": "未知文件",
+    "diffLoading": "正在加载 diff...",
+    "diffLoadError": "加载 diff 失败。",
     "viewFullFile": "查看完整文件",
     "expandFileDiff": "展开 {{path}} 的变更",
     "collapseFileDiff": "收起 {{path}} 的变更",

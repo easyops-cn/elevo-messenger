@@ -881,6 +881,8 @@
     "diffPatchOmitted": "Patch omitted",
     "diffTruncated": "Truncated",
     "diffUnknownFile": "Unknown files",
+    "diffLoading": "Loading diff...",
+    "diffLoadError": "Failed to load diff.",
     "viewFullFile": "View full file",
     "expandFileDiff": "Expand changes for {{path}}",
     "collapseFileDiff": "Collapse changes for {{path}}",
