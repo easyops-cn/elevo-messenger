@@ -46,6 +46,7 @@ import { useAllHomeRooms } from './home/useAllHomeRooms';
 import { sendSystemNotification, type SystemNotificationHandle } from '../../utils/notification';
 import { TodosSyncFeature } from './todos/TodosSyncFeature';
 import { RoomMediaIndexSyncFeature } from './RoomMediaIndexSyncFeature';
+import { refreshMatrixTokenOrCurrent } from '../../utils/matrixTokenRefresh';
 
 function SystemEmojiFeature() {
   const [twitterEmoji] = useSetting(settingsAtom, 'twitterEmoji');
@@ -308,10 +309,8 @@ function ClientToolSdkHandler() {
       .catch(console.error);
   });
 
-  // A child window (e.g. bridge explorer) asks for a currently-valid Matrix
-  // access token after hitting a 401. whoami() triggers matrix-js-sdk's
-  // internal OIDC refresh when the token is stale; we then reply with the
-  // refreshed token so the child can retry transparently.
+  // A child bridge window asks the main Matrix client for a currently-valid
+  // access token after hitting a 401, then retries with the returned token.
   useSdkMessageListener('bridge_token_refresh_request', (payload: SdkMessagePayload) => {
     const { source, data } = payload;
     const requestId = (data as { requestId?: string } | undefined)?.requestId;
@@ -323,13 +322,10 @@ function ClientToolSdkHandler() {
       }).catch((err) => console.error('Failed to reply with refreshed token:', err));
     };
 
-    mx.whoami()
-      .then(() => reply({ token: mx.getAccessToken() ?? '' }))
+    refreshMatrixTokenOrCurrent(mx)
+      .then((token) => reply({ token }))
       .catch((err) => {
-        // whoami may still succeed against a cached token; fall back to it.
-        const token = mx.getAccessToken();
-        if (token) reply({ token });
-        else reply({ error: err instanceof Error ? err.message : 'Token refresh failed' });
+        reply({ error: err instanceof Error ? err.message : 'Token refresh failed' });
       });
   });
 

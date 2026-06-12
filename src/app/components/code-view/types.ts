@@ -8,6 +8,7 @@ export type CodeViewBridgeContext = {
   bridgeProvider: string;
   matrixToken: string;
   homeserverUrl: string;
+  refreshMatrixToken?: () => Promise<string>;
 };
 
 export type CodeViewWorkspaceContext = {

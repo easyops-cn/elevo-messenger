@@ -632,9 +632,24 @@ export const CodeView = as<'div', CodeViewProps>(
                           : undefined;
                       const canOpenFullFile =
                         !!viewFullFilePath && (!!bridge || (!!roomId && !!fullFileUrl));
-                      const openFullFile = () => {
+                      const openFullFile = async () => {
                         if (bridge && viewFullFilePath) {
-                          openBridgeExplorer({ ...bridge, initialFilePath: viewFullFilePath });
+                          let matrixToken = bridge.matrixToken;
+                          if (bridge.refreshMatrixToken) {
+                            try {
+                              matrixToken = await bridge.refreshMatrixToken();
+                            } catch (error) {
+                              console.error('Failed to refresh Matrix token for bridge explorer:', error);
+                            }
+                          }
+                          openBridgeExplorer({
+                            workspaceId: bridge.workspaceId,
+                            workspaceName: bridge.workspaceName,
+                            bridgeProvider: bridge.bridgeProvider,
+                            homeserverUrl: bridge.homeserverUrl,
+                            matrixToken,
+                            initialFilePath: viewFullFilePath,
+                          });
                           return;
                         }
                         if (roomId && fullFileUrl) {

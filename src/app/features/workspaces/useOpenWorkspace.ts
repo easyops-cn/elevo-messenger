@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { useElevoConfig } from '../../hooks/useElevoConfig';
 import { openBridgeExplorer, openWorkspacePanel } from '../../plugins/useTauriOpener';
+import { refreshMatrixTokenOrCurrent } from '../../utils/matrixTokenRefresh';
 import type { WorkspaceItem } from '../room/WorkspacesModal';
 
 /**
@@ -15,24 +16,30 @@ import type { WorkspaceItem } from '../room/WorkspacesModal';
  *
  * Returns `false` if the workspace cannot be opened (missing config/token).
  */
-export function useOpenWorkspace(): (ws: WorkspaceItem, roomId: string) => boolean {
+export function useOpenWorkspace(): (ws: WorkspaceItem, roomId: string) => Promise<boolean> {
   const mx = useMatrixClient();
   const elevoConfig = useElevoConfig();
 
   return useCallback(
-    (ws: WorkspaceItem, roomId: string): boolean => {
+    async (ws: WorkspaceItem, roomId: string): Promise<boolean> => {
       if (ws.bridge_provider) {
         const homeserverUrl = mx.getHomeserverUrl();
-        const matrixToken = mx.getAccessToken() ?? '';
-        if (!homeserverUrl || !matrixToken) return false;
-        openBridgeExplorer({
+        if (!homeserverUrl) return false;
+        let matrixToken: string;
+        try {
+          matrixToken = await refreshMatrixTokenOrCurrent(mx);
+        } catch (error) {
+          console.error('Failed to get Matrix token for bridge explorer:', error);
+          return false;
+        }
+        if (!matrixToken) return false;
+        return openBridgeExplorer({
           workspaceId: ws.id,
           workspaceName: ws.name,
           bridgeProvider: ws.bridge_provider,
           matrixToken,
           homeserverUrl,
         });
-        return true;
       }
 
       const explorerUrl = elevoConfig.workspaces?.explorerUrl;
