@@ -1,4 +1,4 @@
-import React, { HTMLAttributes, useEffect, useState } from 'react';
+import React, { HTMLAttributes, useCallback, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import type { ThemedToken } from 'shiki';
 import { useTheme } from '../../hooks/useTheme';
@@ -25,6 +25,7 @@ export function ShikiCode({
   path,
   showLineNumbers,
   className,
+  onCopy,
   ...props
 }: ShikiCodeProps) {
   const theme = useTheme();
@@ -52,14 +53,67 @@ export function ShikiCode({
 
   const normalizedLang = normalizeLanguageName(lang);
   const codeClassName = className ?? (normalizedLang ? `language-${normalizedLang}` : undefined);
+  const handleNumberedCopy = useCallback(
+    (event: React.ClipboardEvent<HTMLElement>) => {
+      onCopy?.(event);
+      if (event.defaultPrevented) return;
+
+      const root = event.currentTarget;
+      const selection = window.getSelection();
+      if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
+
+      const ranges = Array.from({ length: selection.rangeCount }, (_, index) =>
+        selection.getRangeAt(index),
+      ).filter((range) => range.intersectsNode(root));
+      if (ranges.length === 0) return;
+
+      const selectedText = Array.from(
+        root.querySelectorAll<HTMLElement>('[data-shiki-line-content="true"]'),
+      )
+        .flatMap((line) => {
+          const lineText = ranges
+            .map((range) => {
+              if (!range.intersectsNode(line)) return '';
+
+              const lineRange = document.createRange();
+              lineRange.selectNodeContents(line);
+              if (line.contains(range.startContainer)) {
+                lineRange.setStart(range.startContainer, range.startOffset);
+              }
+              if (line.contains(range.endContainer)) {
+                lineRange.setEnd(range.endContainer, range.endOffset);
+              }
+
+              const text = lineRange.toString().replace(/\n$/, '');
+              lineRange.detach();
+              return text;
+            })
+            .join('');
+
+          return ranges.some((range) => range.intersectsNode(line)) ? [lineText] : [];
+        })
+        .join('\n');
+
+      if (selectedText.length === 0) return;
+      event.clipboardData.setData('text/plain', selectedText);
+      event.preventDefault();
+    },
+    [onCopy],
+  );
 
   if (showLineNumbers) {
     return (
-      <code {...props} className={classNames(css.NumberedCode, codeClassName)}>
+      <code
+        {...props}
+        className={classNames(css.NumberedCode, codeClassName)}
+        onCopy={handleNumberedCopy}
+      >
         {tokenLines.map((line, lineIndex) => (
           <span key={lineIndex} className={css.Line}>
-            <span className={css.LineNo}>{lineIndex + 1}</span>
-            <span className={css.LineContent}>
+            <span className={css.LineNo} aria-hidden="true">
+              {lineIndex + 1}
+            </span>
+            <span className={css.LineContent} data-shiki-line-content="true">
               {line.map((token: ThemedToken, tokenIndex) => (
                 <span key={tokenIndex} style={getTokenStyle(token)}>
                   {token.content}

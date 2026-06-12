@@ -5,6 +5,8 @@ export const NumberedCode = style([
   DefaultReset,
   {
     display: 'block',
+    userSelect: 'none',
+    WebkitUserSelect: 'none',
   },
 ]);
 
@@ -29,6 +31,7 @@ export const LineNo = style([
     paddingRight: config.space.S300,
     textAlign: 'right',
     userSelect: 'none',
+    WebkitUserSelect: 'none',
     opacity: 0.5,
   },
 ]);
@@ -37,5 +40,7 @@ export const LineContent = style([
   DefaultReset,
   {
     whiteSpace: 'pre',
+    userSelect: 'text',
+    WebkitUserSelect: 'text',
   },
 ]);
