@@ -1197,6 +1197,7 @@
     "panelTitle": "Tasks",
     "totalTasks": "Total tasks",
     "statsFailed": "Failed to load task stats.",
+    "refreshStats": "Refresh",
     "status_backlog": "Backlog",
     "status_planned": "Planned",
     "status_in_progress": "In Progress",

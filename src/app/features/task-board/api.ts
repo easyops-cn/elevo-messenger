@@ -16,6 +16,11 @@ import { trimLeadingSlash, trimTrailingSlash } from '../../utils/common';
 import { getToken, refreshToken } from '../bridge-explorer/tokenRefresh';
 import type { TaskDetail, TaskListResponse, TaskStats, TaskSummary } from './types';
 
+export type TaskAuth = {
+  token: string;
+  refresh: () => Promise<string>;
+};
+
 /** A typed error carrying the HTTP status for inline error rendering. */
 export class TaskApiError extends Error {
   status: number;
@@ -54,16 +59,16 @@ async function rawFetch(url: string, token: string): Promise<Response> {
   }
 }
 
-/**
- * Fetch with the current Matrix access token. On a 401 (token expired), ask the
- * main window for a fresh token and retry once, so refresh is transparent.
- */
-async function authedFetch(url: string): Promise<Response> {
-  let res = await rawFetch(url, getToken());
+async function authedFetchWith(
+  url: string,
+  token: string,
+  refresh: () => Promise<string>,
+): Promise<Response> {
+  let res = await rawFetch(url, token);
   if (res.status === 401) {
     try {
-      const token = await refreshToken();
-      res = await rawFetch(url, token);
+      const freshToken = await refresh();
+      res = await rawFetch(url, freshToken);
     } catch {
       // Refresh failed; fall through and surface the original 401 below.
     }
@@ -74,27 +79,33 @@ async function authedFetch(url: string): Promise<Response> {
   return res;
 }
 
+/**
+ * Fetch with the current Matrix access token. On a 401 (token expired), ask the
+ * main window for a fresh token and retry once, so refresh is transparent.
+ */
+async function authedFetch(url: string): Promise<Response> {
+  return authedFetchWith(url, getToken(), refreshToken);
+}
+
 const tasksApiBase = (baseUrl: string, workspaceId: string): string =>
   `${baseUrl}/${encodeURIComponent(workspaceId)}/tasks`;
 
 /**
  * GET `.../tasks/stats` — counts aggregated by status.
  *
- * When `token` is provided (e.g. the main-window side panel, which holds the
- * live Matrix token directly), it is used as the Bearer token. Otherwise the
- * shared token cache is used with transparent refresh (the board window path).
+ * When `auth` is provided (e.g. the main-window side panel, which holds the
+ * live Matrix token directly), it supplies the Bearer token and refresh
+ * callback. Otherwise the shared token cache is used with transparent refresh
+ * (the board window path).
  */
 export async function fetchWorkspaceTaskStats(
   baseUrl: string,
   workspaceId: string,
-  token?: string,
+  auth?: TaskAuth,
 ): Promise<TaskStats> {
   const url = `${tasksApiBase(baseUrl, workspaceId)}/stats`;
-  if (token != null) {
-    const res = await rawFetch(url, token);
-    if (!res.ok) {
-      throw new TaskApiError(await extractErrorMessage(res), res.status);
-    }
+  if (auth) {
+    const res = await authedFetchWith(url, auth.token, auth.refresh);
     return res.json();
   }
   const res = await authedFetch(url);

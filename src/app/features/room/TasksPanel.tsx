@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Box, Icon, Spinner, Text } from 'folds';
 import { Room } from 'matrix-js-sdk';
 import { useTranslation } from 'react-i18next';
@@ -15,6 +15,9 @@ import { useOpenTaskBoard } from '../task-board/useOpenTaskBoard';
 import { fetchWorkspaceTaskStats, getTaskBoardBaseUrl } from '../task-board/api';
 import { STATUS_ICON } from '../task-board/statusIcons';
 import { TASK_STATUSES, type TaskStats, type TaskStatus } from '../task-board/types';
+import { refreshMatrixToken } from '../../utils/matrixTokenRefresh';
+import { RefreshCwIcon } from '../../icons/RefreshCwIcon';
+import { CheckIcon } from '../../icons/CheckIcon';
 
 type TasksPanelProps = {
   room: Room;
@@ -44,10 +47,93 @@ export function TasksPanel({ room }: TasksPanelProps) {
 
   const [stats, setStats] = useState<TaskStats | null>(null);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshSucceeded, setRefreshSucceeded] = useState(false);
   const [error, setError] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
+  const refreshSuccessTimerRef = useRef<number | undefined>(undefined);
 
   const homeserverUrl = mx.getHomeserverUrl();
+
+  const clearRefreshSuccess = useCallback(() => {
+    if (refreshSuccessTimerRef.current !== undefined) {
+      window.clearTimeout(refreshSuccessTimerRef.current);
+      refreshSuccessTimerRef.current = undefined;
+    }
+    setRefreshSucceeded(false);
+  }, []);
+
+  const showRefreshSuccess = useCallback(() => {
+    clearRefreshSuccess();
+    setRefreshSucceeded(true);
+    refreshSuccessTimerRef.current = window.setTimeout(() => {
+      setRefreshSucceeded(false);
+      refreshSuccessTimerRef.current = undefined;
+    }, 2000);
+  }, [clearRefreshSuccess]);
+
+  const loadStats = useCallback(
+    (mode: 'initial' | 'refresh', isCancelled: () => boolean = () => false) => {
+      if (!workspace?.bridge_provider || !homeserverUrl) return;
+      const token = mx.getAccessToken();
+      if (!token) {
+        setError(true);
+        return;
+      }
+      clearRefreshSuccess();
+      if (mode === 'initial') {
+        setLoading(true);
+      } else {
+        setRefreshing(true);
+      }
+      setError(false);
+      const baseUrl = getTaskBoardBaseUrl(homeserverUrl, workspace.bridge_provider);
+      // The side panel lives in the main window and holds the live Matrix token
+      // directly, so provide the Matrix-client refresh path explicitly rather
+      // than relying on the board window's SDK-bridge token cache.
+      fetchWorkspaceTaskStats(baseUrl, workspace.id, {
+        token,
+        refresh: () => refreshMatrixToken(mx),
+      })
+        .then((data) => {
+          if (!isCancelled()) {
+            setStats(data);
+            if (mode === 'refresh') {
+              showRefreshSuccess();
+            }
+          }
+        })
+        .catch(() => {
+          if (!isCancelled()) setError(true);
+        })
+        .finally(() => {
+          if (!isCancelled()) {
+            if (mode === 'initial') {
+              setLoading(false);
+            } else {
+              setRefreshing(false);
+            }
+          }
+        });
+    },
+    [
+      workspace?.id,
+      workspace?.bridge_provider,
+      homeserverUrl,
+      mx,
+      clearRefreshSuccess,
+      showRefreshSuccess,
+    ],
+  );
+
+  useEffect(
+    () => () => {
+      if (refreshSuccessTimerRef.current !== undefined) {
+        window.clearTimeout(refreshSuccessTimerRef.current);
+      }
+    },
+    [],
+  );
 
   useEffect(() => {
     if (!workspace?.bridge_provider || !homeserverUrl) return undefined;
@@ -57,26 +143,11 @@ export function TasksPanel({ room }: TasksPanelProps) {
       return undefined;
     }
     let cancelled = false;
-    setLoading(true);
-    setError(false);
-    const baseUrl = getTaskBoardBaseUrl(homeserverUrl, workspace.bridge_provider);
-    // The side panel lives in the main window and holds the live Matrix token
-    // directly, so pass it explicitly rather than relying on the board
-    // window's SDK-bridge token cache.
-    fetchWorkspaceTaskStats(baseUrl, workspace.id, token)
-      .then((data) => {
-        if (!cancelled) setStats(data);
-      })
-      .catch(() => {
-        if (!cancelled) setError(true);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    loadStats('initial', () => cancelled);
     return () => {
       cancelled = true;
     };
-  }, [workspace?.id, workspace?.bridge_provider, homeserverUrl, mx]);
+  }, [workspace?.bridge_provider, homeserverUrl, mx, loadStats]);
 
   // Shown wherever the room is bound to a bridge workspace (desktop + web).
   if (!workspace?.bridge_provider) return null;
@@ -87,15 +158,38 @@ export function TasksPanel({ room }: TasksPanelProps) {
         <Text className={panelCss.MembersGroupLabel} size="L400" priority="300">
           {t('taskBoard.panelTitle')}
         </Text>
-        <Box
-          as="button"
-          type="button"
-          className={css.CreateButton}
-          title={t('taskBoard.createTask.title')}
-          aria-label={t('taskBoard.createTask.title')}
-          onClick={() => setCreateOpen(true)}
-        >
-          <Icon size="100" src={PlusIcon} />
+        <Box className={css.HeaderActions} alignItems="Center">
+          <Box
+            as="button"
+            type="button"
+            className={css.CreateButton}
+            disabled={refreshing}
+            title={t('taskBoard.refreshStats')}
+            aria-label={t('taskBoard.refreshStats')}
+            onClick={() => loadStats('refresh')}
+          >
+            <Icon
+              className={
+                refreshing
+                  ? css.RefreshingIcon
+                  : refreshSucceeded
+                    ? css.RefreshSuccessIcon
+                    : undefined
+              }
+              size="100"
+              src={refreshSucceeded ? CheckIcon : RefreshCwIcon}
+            />
+          </Box>
+          <Box
+            as="button"
+            type="button"
+            className={css.CreateButton}
+            title={t('taskBoard.createTask.title')}
+            aria-label={t('taskBoard.createTask.title')}
+            onClick={() => setCreateOpen(true)}
+          >
+            <Icon size="100" src={PlusIcon} />
+          </Box>
         </Box>
       </Box>
 

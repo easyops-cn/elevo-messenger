@@ -1197,6 +1197,7 @@
     "panelTitle": "任务",
     "totalTasks": "任务总数",
     "statsFailed": "加载任务统计失败。",
+    "refreshStats": "刷新",
     "status_backlog": "待办",
     "status_planned": "已计划",
     "status_in_progress": "进行中",
