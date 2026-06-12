@@ -8,6 +8,7 @@ import { InlineError, useErrorMessage } from './InlineError';
 import { fetchWorkspaceTasks } from './api';
 import { STATUS_ICON } from './statusIcons';
 import { TASK_STATUSES, type TaskStatus, type TaskBoardPayload, type TaskSummary } from './types';
+import { onSdkMessage, TASK_BOARD_SELECT_TASK_CHANNEL } from '../bridge-explorer/sdkBridge';
 import * as css from './TaskBoard.css';
 
 type TaskBoardProps = {
@@ -54,6 +55,9 @@ export function TaskBoard({ payload }: TaskBoardProps) {
   const [error, setError] = useState<unknown>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [selected, setSelected] = useState<TaskSummary | null>(null);
+  const [pendingTaskSlug, setPendingTaskSlug] = useState<string | undefined>(
+    payload.initialTaskSlug,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -73,6 +77,25 @@ export function TaskBoard({ payload }: TaskBoardProps) {
       cancelled = true;
     };
   }, [ctx.baseUrl, ctx.workspaceId, reloadKey]);
+
+  useEffect(
+    () =>
+      onSdkMessage(TASK_BOARD_SELECT_TASK_CHANNEL, (data) => {
+        if (typeof data === 'string' && data.length > 0) {
+          setPendingTaskSlug(data);
+        }
+      }),
+    [],
+  );
+
+  useEffect(() => {
+    if (!pendingTaskSlug || loading || error != null) return;
+    const task = tasks.find((item) => item.slug === pendingTaskSlug);
+    setPendingTaskSlug(undefined);
+    if (task) {
+      setSelected(task);
+    }
+  }, [error, loading, pendingTaskSlug, tasks]);
 
   // Group by the four known statuses; unknown statuses are not shown in a
   // column (they still count toward the side-panel total), matching the

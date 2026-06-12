@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Icon, Text } from 'folds';
+import classNames from 'classnames';
 import * as css from './TaskReferenceCard.css';
 import { taskRefStatusColor } from './taskStatus';
 import { ListTodoIcon } from '../../../icons/ListTodoIcon';
@@ -33,16 +34,30 @@ export function parseTaskReference(content: Record<string, unknown>): TaskRefere
 
 type TaskReferenceCardProps = {
   taskReference: TaskReference;
+  onClick?: () => void;
 };
 
-export function TaskReferenceCard({ taskReference }: TaskReferenceCardProps) {
+export function TaskReferenceCard({ taskReference, onClick }: TaskReferenceCardProps) {
   const accent = taskRefStatusColor(taskReference.status);
   const tooltip = taskReference.status
     ? `${taskReference.title} (${taskReference.status})`
     : taskReference.title;
+  const interactiveProps = onClick
+    ? ({
+        as: 'button',
+        type: 'button',
+        onClick,
+      } as const)
+    : {};
 
   return (
-    <Box className={css.TaskReferenceCard} shrink="No" alignItems="Center" title={tooltip}>
+    <Box
+      className={classNames(css.TaskReferenceCard, onClick && css.InteractiveTaskReferenceCard)}
+      shrink="No"
+      alignItems="Center"
+      title={tooltip}
+      {...interactiveProps}
+    >
       <Icon style={{ color: accent }} size="50" src={ListTodoIcon} />
       <Text size="T200" truncate>
         {taskReference.title}

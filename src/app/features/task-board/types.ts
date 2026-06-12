@@ -19,6 +19,8 @@ export type TaskBoardPayload = {
   matrixToken: string;
   /** Matrix homeserver base URL, e.g. https://m.elevo.vip */
   homeserverUrl: string;
+  /** Optional task slug to open on launch. */
+  initialTaskSlug?: string;
 };
 
 /** A single task summary entry from `.tasks/tasks.yaml`. */

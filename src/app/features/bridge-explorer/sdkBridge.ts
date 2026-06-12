@@ -17,6 +17,7 @@ type Handler = (data: unknown) => void;
  * backend (`open_bridge_explorer_window`).
  */
 export const BRIDGE_EXPLORER_SELECT_FILE_CHANNEL = 'bridge-explorer-select-file';
+export const TASK_BOARD_SELECT_TASK_CHANNEL = 'task-board-select-task';
 
 const handlers = new Map<string, Set<Handler>>();
 let installed = false;
