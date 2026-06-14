@@ -1,5 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import DOMPurify from 'dompurify';
 import { Box, Chip, Icon, Icons, IconButton, Scroll, Spinner, Text } from 'folds';
+import { marked } from 'marked';
 import { useTranslation } from 'react-i18next';
 import { saveFile } from '../../utils/file-saver';
 import { ShikiCode } from '../../plugins/shiki';
@@ -15,6 +17,7 @@ type FileViewerProps = {
 };
 
 const basename = (path: string): string => path.split('/').pop() ?? path;
+const isMarkdownPath = (path: string): boolean => /\.(md|markdown|mdown|mkdn|mdx)$/i.test(path);
 
 export function FileViewer({ path }: FileViewerProps) {
   const { t } = useTranslation();
@@ -26,6 +29,10 @@ export function FileViewer({ path }: FileViewerProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
   const [downloading, setDownloading] = useState(false);
+  const [markdownMode, setMarkdownMode] = useState<'preview' | 'code'>('preview');
+  const showMarkdownModeToggle = Boolean(
+    path && isMarkdownPath(path) && content?.kind === 'text' && !loading && !error,
+  );
 
   // Keep error mapping out of `load`/`handleDownload` deps: `t` changes once
   // after i18n finishes loading async, which would re-fire the load effect and
@@ -52,6 +59,10 @@ export function FileViewer({ path }: FileViewerProps) {
   useEffect(() => {
     load();
   }, [load]);
+
+  useEffect(() => {
+    setMarkdownMode('preview');
+  }, [path]);
 
   // Opening a file detail references it back to the host composer. Dedupe so the
   // same path only emits once; switching to another file updates the reference.
@@ -114,6 +125,30 @@ export function FileViewer({ path }: FileViewerProps) {
           </Text>
         </Box>
         <Box shrink="No" gap="100" alignItems="Center">
+          {showMarkdownModeToggle && (
+            <Box
+              className={css.SegmentedControl}
+              role="group"
+              aria-label={t('bridgeExplorer.viewMode')}
+            >
+              <button
+                className={css.SegmentedButton}
+                type="button"
+                aria-pressed={markdownMode === 'preview'}
+                onClick={() => setMarkdownMode('preview')}
+              >
+                {t('bridgeExplorer.preview')}
+              </button>
+              <button
+                className={css.SegmentedButton}
+                type="button"
+                aria-pressed={markdownMode === 'code'}
+                onClick={() => setMarkdownMode('code')}
+              >
+                {t('bridgeExplorer.code')}
+              </button>
+            </Box>
+          )}
           <IconButton
             size="300"
             variant="Surface"
@@ -143,6 +178,7 @@ export function FileViewer({ path }: FileViewerProps) {
             path={path}
             metadata={metadata}
             content={content}
+            markdownMode={markdownMode}
             onDownload={handleDownload}
           />
         )}
@@ -155,19 +191,41 @@ type ViewerContentProps = {
   path: string;
   metadata: FileMetadata | null;
   content: FileContentResult | null;
+  markdownMode: 'preview' | 'code';
   onDownload: () => void;
 };
 
-function ViewerContent({ path, metadata, content, onDownload }: ViewerContentProps) {
+function ViewerContent({ path, metadata, content, markdownMode, onDownload }: ViewerContentProps) {
   const { t } = useTranslation();
+  const isMarkdown = isMarkdownPath(path);
+
+  const markdownHtml = useMemo(() => {
+    if (!isMarkdown || content?.kind !== 'text' || markdownMode !== 'preview') {
+      return '';
+    }
+
+    const parsed = marked.parse(content.text, { gfm: true, breaks: true }) as string;
+    return DOMPurify.sanitize(typeof parsed === 'string' ? parsed : '');
+  }, [content, isMarkdown, markdownMode]);
 
   if (content?.kind === 'text') {
     return (
-      <Scroll size="300" hideTrack visibility="Hover">
-        <pre className={css.Pre}>
-          <ShikiCode code={content.text} path={path} showLineNumbers />
-        </pre>
-      </Scroll>
+      <Box className={css.TextViewer} direction="Column">
+        {isMarkdown && markdownMode === 'preview' ? (
+          <Scroll size="300" hideTrack visibility="Hover">
+            <div
+              className={css.MarkdownPreview}
+              dangerouslySetInnerHTML={{ __html: markdownHtml }}
+            />
+          </Scroll>
+        ) : (
+          <Scroll size="300" hideTrack visibility="Hover">
+            <pre className={css.Pre}>
+              <ShikiCode code={content.text} path={path} showLineNumbers />
+            </pre>
+          </Scroll>
+        )}
+      </Box>
     );
   }
 
