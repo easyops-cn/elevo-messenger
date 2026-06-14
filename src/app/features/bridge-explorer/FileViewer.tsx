@@ -124,7 +124,7 @@ export function FileViewer({ path }: FileViewerProps) {
             {path}
           </Text>
         </Box>
-        <Box shrink="No" gap="100" alignItems="Center">
+        <Box shrink="No" gap="200" alignItems="Center">
           {showMarkdownModeToggle && (
             <Box
               className={css.SegmentedControl}

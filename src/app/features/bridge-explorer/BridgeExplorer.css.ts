@@ -116,8 +116,8 @@ export const SegmentedControl = style([
 export const SegmentedButton = style([
   DefaultReset,
   {
-    height: toRem(30),
-    paddingInline: config.space.S100,
+    height: toRem(24),
+    paddingInline: config.space.S300,
     border: 0,
     borderRadius: 0,
     backgroundColor: 'transparent',
