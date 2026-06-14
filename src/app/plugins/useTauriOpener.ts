@@ -115,6 +115,11 @@ export type TaskBoardPayload = {
   bridgeProvider: string;
   matrixToken: string;
   homeserverUrl: string;
+  /**
+   * Optional task slug to open on launch. When the window already exists, the
+   * backend pushes this slug to it so it opens the task detail.
+   */
+  initialTaskSlug?: string;
 };
 
 /**

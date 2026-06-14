@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Icon, Text } from 'folds';
+import classNames from 'classnames';
 import * as css from './FileReferenceCard.css';
 import { FileIcon } from '../../../icons/FileIcon';
 
@@ -31,17 +32,26 @@ function getBasename(path: string): string {
 
 type FileReferenceCardProps = {
   fileReference: FileReference;
+  onClick?: () => void;
 };
 
-export function FileReferenceCard({ fileReference }: FileReferenceCardProps) {
+export function FileReferenceCard({ fileReference, onClick }: FileReferenceCardProps) {
   const basename = getBasename(fileReference.path);
+  const interactiveProps = onClick
+    ? ({
+        as: 'button',
+        type: 'button',
+        onClick,
+      } as const)
+    : {};
 
   return (
     <Box
-      className={css.FileReferenceCard}
+      className={classNames(css.FileReferenceCard, onClick && css.InteractiveFileReferenceCard)}
       shrink="No"
       alignItems="Center"
       title={fileReference.path}
+      {...interactiveProps}
     >
       <Icon size="50" src={FileIcon} />
       <Text size="T200" truncate>

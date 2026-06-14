@@ -18,10 +18,31 @@ function joinPath(parent: string, name: string): string {
   return parent ? `${parent}/${name}` : name;
 }
 
+function getAncestorPaths(path: string | null): Set<string> {
+  if (!path) return new Set();
+
+  const parts = path.split('/').filter(Boolean);
+  const ancestors = new Set<string>();
+
+  for (let i = 1; i < parts.length; i += 1) {
+    ancestors.add(parts.slice(0, i).join('/'));
+  }
+
+  return ancestors;
+}
+
 export function FileTree({ selectedPath, onSelectFile }: FileTreeProps) {
+  const selectedAncestorPaths = getAncestorPaths(selectedPath);
+
   return (
     <Box className={css.TreeList} direction="Column">
-      <DirectoryNode path="" depth={0} selectedPath={selectedPath} onSelectFile={onSelectFile} />
+      <DirectoryNode
+        path=""
+        depth={0}
+        selectedPath={selectedPath}
+        selectedAncestorPaths={selectedAncestorPaths}
+        onSelectFile={onSelectFile}
+      />
     </Box>
   );
 }
@@ -30,10 +51,17 @@ type DirectoryNodeProps = {
   path: string;
   depth: number;
   selectedPath: string | null;
+  selectedAncestorPaths: Set<string>;
   onSelectFile: (path: string) => void;
 };
 
-function DirectoryNode({ path, depth, selectedPath, onSelectFile }: DirectoryNodeProps) {
+function DirectoryNode({
+  path,
+  depth,
+  selectedPath,
+  selectedAncestorPaths,
+  onSelectFile,
+}: DirectoryNodeProps) {
   const { baseUrl, workspaceId } = useBridgeExplorer();
   const toMessage = useErrorMessage();
   const [entries, setEntries] = useState<DirectoryEntry[] | null>(null);
@@ -83,6 +111,7 @@ function DirectoryNode({ path, depth, selectedPath, onSelectFile }: DirectoryNod
             parentPath={path}
             depth={depth}
             selectedPath={selectedPath}
+            selectedAncestorPaths={selectedAncestorPaths}
             onSelectFile={onSelectFile}
           />
         ) : (
@@ -105,12 +134,22 @@ type RowProps = {
   parentPath: string;
   depth: number;
   selectedPath: string | null;
+  selectedAncestorPaths: Set<string>;
   onSelectFile: (path: string) => void;
 };
 
-function FolderRow({ entry, parentPath, depth, selectedPath, onSelectFile }: RowProps) {
+function FolderRow({
+  entry,
+  parentPath,
+  depth,
+  selectedPath,
+  selectedAncestorPaths,
+  onSelectFile,
+}: RowProps) {
   const [expanded, setExpanded] = useState(false);
   const fullPath = joinPath(parentPath, entry.name);
+  const shouldRevealSelectedPath = selectedAncestorPaths.has(fullPath);
+  const isExpanded = expanded || shouldRevealSelectedPath;
   const indent = { paddingLeft: `${depth * 0.75 + 0.25}rem` };
 
   return (
@@ -127,11 +166,12 @@ function FolderRow({ entry, parentPath, depth, selectedPath, onSelectFile }: Row
           {entry.name}
         </Text>
       </button>
-      {expanded && (
+      {isExpanded && (
         <DirectoryNode
           path={fullPath}
           depth={depth + 1}
           selectedPath={selectedPath}
+          selectedAncestorPaths={selectedAncestorPaths}
           onSelectFile={onSelectFile}
         />
       )}
@@ -145,7 +185,7 @@ function FileRow({
   depth,
   selected,
   onSelectFile,
-}: Omit<RowProps, 'selectedPath'> & { selected: boolean }) {
+}: Omit<RowProps, 'selectedPath' | 'selectedAncestorPaths'> & { selected: boolean }) {
   const fullPath = joinPath(parentPath, entry.name);
   // Match folder-row indent exactly; alignment with the folder icon is handled
   // by rendering an invisible chevron-sized spacer below.

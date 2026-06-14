@@ -16,3 +16,18 @@ export const FileReferenceCard = style({
   maxWidth: toRem(320),
   width: 'fit-content',
 });
+
+export const InteractiveFileReferenceCard = style({
+  cursor: 'pointer',
+  font: 'inherit',
+  textAlign: 'left',
+  selectors: {
+    '&:hover': {
+      backgroundColor: color.SurfaceVariant.ContainerHover,
+    },
+    '&:focus-visible': {
+      outline: `${config.borderWidth.B600} solid ${color.Primary.Main}`,
+      outlineOffset: toRem(2),
+    },
+  },
+});

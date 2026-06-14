@@ -185,10 +185,10 @@ export const DialogContent = style([
   {
     display: 'flex',
     flexDirection: 'column',
-    width: toRem(720),
-    maxWidth: '90vw',
-    height: toRem(640),
-    maxHeight: '85vh',
+    width: toRem(960),
+    maxWidth: 'calc(100vw - 48px)',
+    height: 'calc(100vh - 48px)',
+    maxHeight: 'none',
     backgroundColor: color.Surface.Container,
     color: color.Surface.OnContainer,
   },
@@ -252,14 +252,34 @@ export const DocHeader = style([
     alignItems: 'center',
     gap: config.space.S200,
     width: '100%',
-    cursor: 'pointer',
     paddingInline: config.space.S300,
     height: toRem(40),
+    flexShrink: 0,
     backgroundColor: color.SurfaceVariant.Container,
     color: color.SurfaceVariant.OnContainer,
-    textAlign: 'left',
     selectors: {
       '&:hover': { backgroundColor: color.SurfaceVariant.ContainerHover },
+    },
+  },
+]);
+
+export const DocToggle = style([
+  DefaultReset,
+  {
+    display: 'flex',
+    alignItems: 'center',
+    gap: config.space.S200,
+    flexGrow: 1,
+    minWidth: 0,
+    height: '100%',
+    cursor: 'pointer',
+    color: 'inherit',
+    textAlign: 'left',
+    selectors: {
+      '&:focus-visible': {
+        outline: `${config.borderWidth.B400} solid ${color.Primary.Main}`,
+        outlineOffset: toRem(-2),
+      },
     },
   },
 ]);

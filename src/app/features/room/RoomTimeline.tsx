@@ -120,6 +120,8 @@ import { useStateEvent } from '../../hooks/useStateEvent';
 import type { WorkspaceItem } from './WorkspacesModal';
 import type { CodeViewWorkspaceContext } from '../../components/code-view';
 import { refreshMatrixTokenOrCurrent } from '../../utils/matrixTokenRefresh';
+import { openBridgeExplorer, openTaskBoard } from '../../plugins/useTauriOpener';
+import { resolveBridgeReferenceWorkspace } from './resolveBridgeReferenceWorkspace';
 
 const TimelineFloat = as<'div', css.TimelineFloatVariants>(
   ({ position, className, ...props }, ref) => (
@@ -556,6 +558,46 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
       workspaceExplorerUrl: `${elevoConfig.workspaces.explorerUrl}?ids=${firstWorkspace.id}`,
     };
   }, [elevoConfig.workspaces?.explorerUrl, firstWorkspace, room.roomId, mx]);
+
+  const openBridgeWorkspaceReference = useCallback(
+    async (
+      workspace: WorkspaceItem,
+      options: { initialFilePath?: string; initialTaskSlug?: string },
+    ) => {
+      if (!workspace.bridge_provider) return false;
+      const homeserverUrl = mx.getHomeserverUrl();
+      if (!homeserverUrl) return false;
+      let matrixToken: string;
+      try {
+        matrixToken = await refreshMatrixTokenOrCurrent(mx);
+      } catch (error) {
+        console.error('Failed to get Matrix token for bridge workspace reference:', error);
+        return false;
+      }
+      if (!matrixToken) return false;
+
+      const payload = {
+        workspaceId: workspace.id,
+        workspaceName: workspace.name,
+        bridgeProvider: workspace.bridge_provider,
+        matrixToken,
+        homeserverUrl,
+      };
+
+      if (options.initialTaskSlug) {
+        return openTaskBoard({
+          ...payload,
+          initialTaskSlug: options.initialTaskSlug,
+        });
+      }
+
+      return openBridgeExplorer({
+        ...payload,
+        initialFilePath: options.initialFilePath,
+      });
+    },
+    [mx],
+  );
 
   const [hour24Clock] = useSetting(settingsAtom, 'hour24Clock');
   const [dateFormatString] = useSetting(settingsAtom, 'dateFormatString');
@@ -1204,6 +1246,11 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
         const fileReference = parseFileReference(getContent());
         const taskReference = parseTaskReference(getContent());
         const diffSummary = summarizeElevoDiffContent(getElevoDiffContent(getContent()));
+        const fileReferenceWorkspace =
+          fileReference &&
+          resolveBridgeReferenceWorkspace(linkedWorkspaces, fileReference.workspaceId);
+        const taskReferenceWorkspace =
+          taskReference && resolveBridgeReferenceWorkspace(linkedWorkspaces);
 
         return (
           <Message
@@ -1239,8 +1286,38 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
                 />
               )
             }
-            fileReference={fileReference && <FileReferenceCard fileReference={fileReference} />}
-            taskReference={taskReference && <TaskReferenceCard taskReference={taskReference} />}
+            fileReference={
+              fileReference && (
+                <FileReferenceCard
+                  fileReference={fileReference}
+                  onClick={
+                    fileReferenceWorkspace
+                      ? () => {
+                          openBridgeWorkspaceReference(fileReferenceWorkspace, {
+                            initialFilePath: fileReference.path,
+                          });
+                        }
+                      : undefined
+                  }
+                />
+              )
+            }
+            taskReference={
+              taskReference && (
+                <TaskReferenceCard
+                  taskReference={taskReference}
+                  onClick={
+                    taskReferenceWorkspace
+                      ? () => {
+                          openBridgeWorkspaceReference(taskReferenceWorkspace, {
+                            initialTaskSlug: taskReference.slug,
+                          });
+                        }
+                      : undefined
+                  }
+                />
+              )
+            }
             reactions={
               reactionRelations && (
                 <Reactions
