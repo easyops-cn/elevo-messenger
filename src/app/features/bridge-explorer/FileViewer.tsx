@@ -30,6 +30,7 @@ export function FileViewer({ path }: FileViewerProps) {
   const [error, setError] = useState<unknown>(null);
   const [downloading, setDownloading] = useState(false);
   const [markdownMode, setMarkdownMode] = useState<'preview' | 'code'>('preview');
+  const [retryKey, setRetryKey] = useState(0);
   const showMarkdownModeToggle = Boolean(
     path && isMarkdownPath(path) && content?.kind === 'text' && !loading && !error,
   );
@@ -37,28 +38,41 @@ export function FileViewer({ path }: FileViewerProps) {
   // Keep error mapping out of `load`/`handleDownload` deps: `t` changes once
   // after i18n finishes loading async, which would re-fire the load effect and
   // trigger a duplicate request. Store the raw error and map at render time.
-  const load = useCallback(() => {
+  useEffect(() => {
     if (!path) return;
+    let disposed = false;
     setLoading(true);
     setError(null);
     setContent(null);
     setMetadata(null);
+
     fetchFileMetadata(baseUrl, workspaceId, path)
       .then(async (meta) => {
+        if (disposed) return;
         setMetadata(meta);
         if (meta.canReadContent === false || meta.classification === 'binary') {
           return;
         }
         const result = await fetchFileContent(baseUrl, workspaceId, path, meta.classification);
+        if (disposed) return;
         setContent(result);
       })
-      .catch(setError)
-      .finally(() => setLoading(false));
-  }, [baseUrl, workspaceId, path]);
+      .catch((e) => {
+        if (!disposed) setError(e);
+      })
+      .finally(() => {
+        if (disposed) return;
+        setLoading(false);
+      });
 
-  useEffect(() => {
-    load();
-  }, [load]);
+    return () => {
+      disposed = true;
+    };
+  }, [baseUrl, workspaceId, path, retryKey]);
+
+  const retryLoad = useCallback(() => {
+    setRetryKey((key) => key + 1);
+  }, []);
 
   useEffect(() => {
     setMarkdownMode('preview');
@@ -172,7 +186,7 @@ export function FileViewer({ path }: FileViewerProps) {
             <Spinner size="400" variant="Secondary" />
           </Box>
         ) : error ? (
-          <InlineError message={toMessage(error)} onRetry={load} />
+          <InlineError message={toMessage(error)} onRetry={retryLoad} />
         ) : (
           <ViewerContent
             path={path}
