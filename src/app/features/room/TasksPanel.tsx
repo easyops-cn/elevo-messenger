@@ -236,7 +236,7 @@ export function TasksPanel({ room }: TasksPanelProps) {
                   as="button"
                   type="button"
                   className={`${css.StatCard} ${css.StatCardClickable}`}
-                  onClick={() => openTaskBoard(workspace)}
+                  onClick={() => openTaskBoard(workspace, { initialStatus: status })}
                 >
                   {inner}
                 </Box>
