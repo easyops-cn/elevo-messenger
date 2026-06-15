@@ -78,6 +78,19 @@ import {
   threadOrRoomIdToUploadItemsAtomFamily,
   roomUploadAtomFamily,
 } from '../../state/room/roomInputDrafts';
+import {
+  SelectedFileReference,
+  activateFileReference,
+  activateTaskReference,
+  clearInputReferenceActivity,
+  clearInputReferences,
+  roomIdToInputReferencesAtomFamily,
+  setFileReference,
+  setTaskReference,
+  threadOrRoomIdToInputReferenceActivityAtomFamily,
+  toggleFileReferenceActive,
+  toggleTaskReferenceActive,
+} from '../../state/room/roomInputReferences';
 import { UploadCardRenderer } from '../../components/upload-card';
 import {
   UploadBoard,
@@ -126,23 +139,10 @@ import { EyeOffIcon } from '../../icons/EyeOffIcon';
 import { useRoomScrollToBottom } from './RoomScrollToBottomContext';
 import { useRoomThread } from './RoomThreadContext';
 
-type SelectedFileReference = {
-  path: string;
-  name: string;
-  workspaceId: string;
-  workspaceName: string;
-};
-
 interface WorkspaceExplorerMessage {
   type: 'select-file';
   file: null | SelectedFileReference;
 }
-
-type SelectedTaskReference = {
-  slug: string;
-  title: string;
-  status?: string;
-};
 
 interface TaskManagementMessage {
   type: 'select-task';
@@ -203,10 +203,16 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
   const [autocompleteQuery, setAutocompleteQuery] =
     useState<AutocompleteQuery<AutocompletePrefix>>();
   const [, setBeginCommand] = useState(() => getBeginCommand(editor));
-  const [selectedFileRef, setSelectedFileRef] = useState<SelectedFileReference | null>(null);
-  const [fileRefActive, setFileRefActive] = useState(false);
-  const [selectedTaskRef, setSelectedTaskRef] = useState<SelectedTaskReference | null>(null);
-  const [taskRefActive, setTaskRefActive] = useState(false);
+  const [inputReferences, setInputReferences] = useAtom(roomIdToInputReferencesAtomFamily(roomId));
+  const [inputReferenceActivity, setInputReferenceActivity] = useAtom(
+    threadOrRoomIdToInputReferenceActivityAtomFamily(threadOrRoomId),
+  );
+  const [, setMainInputReferenceActivity] = useAtom(
+    threadOrRoomIdToInputReferenceActivityAtomFamily(roomId),
+  );
+  const { fileReference: selectedFileRef, taskReference: selectedTaskRef } = inputReferences;
+  const { fileReferenceActive: fileRefActive, taskReferenceActive: taskRefActive } =
+    inputReferenceActivity;
 
   const sendTypingStatus = useTypingStatusUpdater(mx, roomId);
 
@@ -220,11 +226,19 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
 
       const { data } = payload;
       if (data?.type === 'select-file') {
-        setSelectedFileRef(data.file);
-        setFileRefActive(!!data.file);
+        setInputReferences((references) => setFileReference(references, data.file));
+        if (data.file) {
+          setMainInputReferenceActivity((activity) => activateFileReference(activity));
+          setInputReferenceActivity((activity) => activateFileReference(activity));
+        }
       }
     },
-    [enableSdkInputEvents],
+    [
+      enableSdkInputEvents,
+      setInputReferences,
+      setInputReferenceActivity,
+      setMainInputReferenceActivity,
+    ],
   );
   useSdkMessageListener<WorkspaceExplorerMessage>('workspace-explorer', handleWorkspaceFileSelect);
 
@@ -234,19 +248,19 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
 
       const { data } = payload;
       if (data?.type === 'select-task') {
-        setSelectedTaskRef(
-          data.task
-            ? {
-                slug: data.task.slug,
-                title: data.task.title,
-                status: data.task.status,
-              }
-            : null,
-        );
-        setTaskRefActive(!!data.task);
+        setInputReferences((references) => setTaskReference(references, data.task));
+        if (data.task) {
+          setMainInputReferenceActivity((activity) => activateTaskReference(activity));
+          setInputReferenceActivity((activity) => activateTaskReference(activity));
+        }
       }
     },
-    [enableSdkInputEvents],
+    [
+      enableSdkInputEvents,
+      setInputReferences,
+      setInputReferenceActivity,
+      setMainInputReferenceActivity,
+    ],
   );
   useSdkMessageListener<TaskManagementMessage>('tasks-management', handleTaskSelect);
 
@@ -546,10 +560,9 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     );
     resetEditor(editor);
     resetEditorHistory(editor);
-    setSelectedFileRef(null);
-    setFileRefActive(false);
-    setSelectedTaskRef(null);
-    setTaskRefActive(false);
+    setInputReferences(clearInputReferences());
+    setMainInputReferenceActivity(clearInputReferenceActivity());
+    setInputReferenceActivity(clearInputReferenceActivity());
     setReplyDraft(undefined);
     sendTypingStatus(false);
   }, [
@@ -566,6 +579,9 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     fileRefActive,
     selectedTaskRef,
     taskRefActive,
+    setInputReferences,
+    setInputReferenceActivity,
+    setMainInputReferenceActivity,
     emitScrollToBottomRequest,
   ]);
 
@@ -906,7 +922,9 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
                     fill="None"
                     aria-label={selectedFileRef.name}
                     title={selectedFileRef.path}
-                    onClick={() => setFileRefActive((active) => !active)}
+                    onClick={() =>
+                      setInputReferenceActivity((activity) => toggleFileReferenceActive(activity))
+                    }
                     style={{
                       maxWidth: toRem(180),
                       gap: config.space.S100,
@@ -939,7 +957,9 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
                         ? `${selectedTaskRef.title} (${selectedTaskRef.status})`
                         : selectedTaskRef.title
                     }
-                    onClick={() => setTaskRefActive((active) => !active)}
+                    onClick={() =>
+                      setInputReferenceActivity((activity) => toggleTaskReferenceActive(activity))
+                    }
                     style={{
                       maxWidth: toRem(180),
                       gap: config.space.S100,
