@@ -150,3 +150,9 @@ export const PageMainSidePanel = style({
   flexShrink: 0,
   flexGrow: 0,
 });
+
+export const PageMainNarrow = style({
+  width: `max(${toRem(456)}, 33vw)`,
+  flexShrink: 0,
+  flexGrow: 0,
+});

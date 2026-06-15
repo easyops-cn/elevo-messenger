@@ -227,7 +227,7 @@ export function ThreadChatView({ eventId, maximized, onMaximizedChange }: Thread
   const threadStarred = !!threadRootEventId && isStarred(room.roomId, threadRootEventId);
 
   return (
-    <PageMain isSidePanel={!maximized}>
+    <PageMain>
       <Page>
         <PageHeader className={css.ThreadHeader}>
           <Box grow="Yes" alignItems="Center" gap="200">
