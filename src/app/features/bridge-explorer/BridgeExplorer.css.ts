@@ -24,6 +24,14 @@ export const Header = style([
   },
 ]);
 
+export const HeaderTitle = style([
+  DefaultReset,
+  {
+    flexGrow: 1,
+    minWidth: 0,
+  },
+]);
+
 export const Body = style([
   DefaultReset,
   {

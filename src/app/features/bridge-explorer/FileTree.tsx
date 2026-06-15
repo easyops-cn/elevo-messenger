@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Box, Icon, Icons, Spinner, Text } from 'folds';
 import { FolderOpenIcon } from '../../icons/FolderOpenIcon';
 import { FileIcon } from '../../icons/FileIcon';
@@ -18,7 +18,7 @@ function joinPath(parent: string, name: string): string {
   return parent ? `${parent}/${name}` : name;
 }
 
-function getAncestorPaths(path: string | null): Set<string> {
+export function getAncestorPaths(path: string | null): Set<string> {
   if (!path) return new Set();
 
   const parts = path.split('/').filter(Boolean);
@@ -67,18 +67,27 @@ function DirectoryNode({
   const [entries, setEntries] = useState<DirectoryEntry[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
+  const requestIdRef = useRef(0);
 
   // Keep error mapping out of `load`'s dependencies: `t` (and thus toMessage)
   // changes once after i18n finishes loading, which would otherwise re-fire the
   // effect and trigger a duplicate request. We store the raw error and map it
   // at render time instead.
   const load = useCallback(() => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
     setLoading(true);
     setError(null);
     fetchDirectoryListing(baseUrl, workspaceId, path)
-      .then(setEntries)
-      .catch(setError)
-      .finally(() => setLoading(false));
+      .then((nextEntries) => {
+        if (requestIdRef.current === requestId) setEntries(nextEntries);
+      })
+      .catch((e) => {
+        if (requestIdRef.current === requestId) setError(e);
+      })
+      .finally(() => {
+        if (requestIdRef.current === requestId) setLoading(false);
+      });
   }, [baseUrl, workspaceId, path]);
 
   // A DirectoryNode is only rendered once its folder is expanded (the root is
@@ -160,7 +169,7 @@ function FolderRow({
         style={indent}
         onClick={() => setExpanded((v) => !v)}
       >
-        <Icon size="50" src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} />
+        <Icon size="50" src={isExpanded ? Icons.ChevronBottom : Icons.ChevronRight} />
         <Icon size="50" src={FolderOpenIcon} />
         <Text size="T200" truncate>
           {entry.name}

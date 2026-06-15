@@ -1186,6 +1186,7 @@
   "bridgeExplorer": {
     "selectFile": "Select a file to view its contents",
     "copyPath": "Copy path",
+    "refresh": "Refresh",
     "download": "Download",
     "viewMode": "View mode",
     "preview": "Preview",
