@@ -94,22 +94,23 @@ export function PageNavContent({
 export function PageMain({
   children,
   isSidePanel,
+  isNarrow,
 }: {
   children: ReactNode;
   isSidePanel?: boolean;
+  isNarrow?: boolean;
 }) {
   const screenSize = useScreenSizeContext();
+  const isDesktop = screenSize === ScreenSize.Desktop;
 
   return (
     <Box
       grow="Yes"
       direction="Column"
-      className={classNames(
-        screenSize !== ScreenSize.Mobile ? css.PageMainFloating : undefined,
-        {
-          [css.PageMainSidePanel]: isSidePanel && screenSize === ScreenSize.Desktop,
-        },
-      )}
+      className={classNames(screenSize !== ScreenSize.Mobile ? css.PageMainFloating : undefined, {
+        [css.PageMainSidePanel]: isSidePanel && isDesktop,
+        [css.PageMainNarrow]: isNarrow && isDesktop,
+      })}
     >
       {children}
     </Box>

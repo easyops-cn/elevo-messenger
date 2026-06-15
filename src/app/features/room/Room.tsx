@@ -82,6 +82,7 @@ export function Room() {
     showThreadPanel && threadMaximized && screenSize === ScreenSize.Desktop;
   const showMainRoomView =
     !showThreadPanel || (screenSize === ScreenSize.Desktop && !maximizedThreadPanel);
+  const narrowMainRoomView = showThreadPanel && screenSize === ScreenSize.Desktop;
 
   const showCallView = callView && (screenSize === ScreenSize.Desktop || !chat);
   const showRoomView = !callView && showMainRoomView;
@@ -89,13 +90,13 @@ export function Room() {
     !callView &&
     screenSize === ScreenSize.Desktop &&
     showSidePanel &&
-    (!showThreadPanel || (screenWidth >= WIDE_DESKTOP_BREAKPOINT && !maximizedThreadPanel));
+    (!showThreadPanel || screenWidth >= WIDE_DESKTOP_BREAKPOINT || maximizedThreadPanel);
 
   return (
     <PowerLevelsContextProvider value={powerLevels}>
       <Box grow="Yes">
         {(showCallView || showRoomView) && (
-          <PageMain>
+          <PageMain isNarrow={narrowMainRoomView}>
             {showCallView && (
               <Box grow="Yes" direction="Column">
                 <RoomViewHeader callView />
