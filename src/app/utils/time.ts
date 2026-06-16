@@ -31,6 +31,8 @@ export const timeDayMonYear = (ts: number, dateFormatString: string): string =>
 export const timeDayMonthYear = (ts: number, dateFormatString: string): string =>
   dayjs(ts).format(dateFormatString);
 
+export const relativeTimeFromNow = (ts: number | string | Date): string => dayjs(ts).fromNow();
+
 export const daysInMonth = (month: number, year: number): number =>
   dayjs(`${year}-${month}-1`).daysInMonth();
 

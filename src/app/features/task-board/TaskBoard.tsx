@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import dayjs from 'dayjs';
 import { Box, Icon, Scroll, Spinner, Text } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { FolderOpenIcon } from '../../icons/FolderOpenIcon';
+import { relativeTimeFromNow } from '../../utils/time';
 import { TaskBoardProvider, createContextValue } from './TaskBoardContext';
 import { TaskDetailDialog } from './TaskDetailDialog';
 import { InlineError, useErrorMessage } from './InlineError';
@@ -176,7 +176,7 @@ function TaskList({
               truncate
               title={task.updatedAt}
             >
-              {task.updatedAt ? dayjs(task.updatedAt).fromNow() : '-'}
+              {task.updatedAt ? relativeTimeFromNow(task.updatedAt) : '-'}
             </Text>
           </Box>
         ))}
