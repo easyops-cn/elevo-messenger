@@ -2,9 +2,11 @@ import { describe, expect, it } from 'vitest';
 import {
   boardStatuses,
   filterTasks,
+  getUserLocalpart,
   initialStatusFilter,
   normalizeInitialView,
   parseTaskBoardSelectMessage,
+  resolveInitialView,
 } from './filter';
 import type { TaskSummary } from './types';
 
@@ -42,6 +44,8 @@ describe('task board filtering', () => {
   it('defaults to list view and active tasks', () => {
     expect(normalizeInitialView(undefined)).toBe('list');
     expect(normalizeInitialView('board')).toBe('board');
+    expect(resolveInitialView({ initialView: 'board' })).toBe('board');
+    expect(resolveInitialView({ initialStatus: 'completed', initialView: 'board' })).toBe('list');
     expect(initialStatusFilter(undefined)).toBe('active');
   });
 
@@ -53,9 +57,14 @@ describe('task board filtering', () => {
     expect(filterTasks(tasks, 'completed').map((task) => task.slug)).toEqual(['done']);
   });
 
-  it('hides the completed board column until explicitly enabled', () => {
-    expect(boardStatuses(false)).toEqual(['backlog', 'planned', 'in_progress']);
-    expect(boardStatuses(true)).toEqual(['backlog', 'planned', 'in_progress', 'completed']);
+  it('always hides the completed board column', () => {
+    expect(boardStatuses()).toEqual(['backlog', 'planned', 'in_progress']);
+  });
+
+  it('formats assignees as localparts', () => {
+    expect(getUserLocalpart('@stevewang:m.elevo.vip')).toBe('stevewang');
+    expect(getUserLocalpart('plain-user')).toBe('plain-user');
+    expect(getUserLocalpart(undefined)).toBe('-');
   });
 
   it('parses old and new select-task messages', () => {

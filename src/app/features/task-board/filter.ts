@@ -27,6 +27,12 @@ export function normalizeInitialView(value: TaskBoardPayload['initialView']): Ta
   return isTaskBoardView(value) ? value : 'list';
 }
 
+export function resolveInitialView(
+  payload: Pick<TaskBoardPayload, 'initialStatus' | 'initialView'>,
+): TaskBoardView {
+  return isTaskStatus(payload.initialStatus) ? 'list' : normalizeInitialView(payload.initialView);
+}
+
 export function initialStatusFilter(status: TaskBoardPayload['initialStatus']): TaskStatusFilter {
   return isTaskStatus(status) ? status : 'active';
 }
@@ -59,6 +65,13 @@ export function filterTasks(tasks: TaskSummary[], filter: TaskStatusFilter): Tas
     .sort((a, b) => (b.updatedAt || '').localeCompare(a.updatedAt || ''));
 }
 
-export function boardStatuses(showCompleted: boolean): TaskStatus[] {
-  return showCompleted ? [...TASK_STATUSES] : ACTIVE_TASK_STATUSES;
+export function boardStatuses(): TaskStatus[] {
+  return ACTIVE_TASK_STATUSES;
+}
+
+export function getUserLocalpart(userId: string | undefined): string {
+  if (!userId) return '-';
+  const withoutSigil = userId.startsWith('@') ? userId.slice(1) : userId;
+  const [localpart] = withoutSigil.split(':');
+  return localpart || userId;
 }

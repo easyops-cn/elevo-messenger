@@ -154,7 +154,7 @@ export const TaskRow = style([
       'minmax(280px, 1fr) minmax(132px, 160px) minmax(132px, 180px) minmax(180px, 220px)',
     gap: config.space.S300,
     width: '100%',
-    minHeight: toRem(48),
+    minHeight: toRem(44),
     paddingBlock: config.space.S200,
     paddingInline: config.space.S300,
     borderWidth: 0,
@@ -205,8 +205,10 @@ export const StatusBadge = style([
     paddingBlock: config.space.S100,
     paddingInline: config.space.S200,
     borderRadius: config.radii.R300,
-    backgroundColor: color.SurfaceVariant.Container,
-    color: color.SurfaceVariant.OnContainer,
+    borderWidth: config.borderWidth.B300,
+    borderStyle: 'solid',
+    borderColor: 'currentColor',
+    backgroundColor: 'transparent',
   },
 ]);
 
@@ -240,7 +242,7 @@ export const Board = style([
     gap: config.space.S300,
     padding: config.space.S300,
     height: '100%',
-    minWidth: toRem(960),
+    minWidth: toRem(720),
   },
 ]);
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import dayjs from 'dayjs';
 import { Box, Icon, Scroll, Spinner, Text } from 'folds';
 import { useTranslation } from 'react-i18next';
 import { FolderOpenIcon } from '../../icons/FolderOpenIcon';
@@ -19,9 +20,10 @@ import { onSdkMessage, TASK_BOARD_SELECT_TASK_CHANNEL } from '../bridge-explorer
 import {
   boardStatuses,
   filterTasks,
+  getUserLocalpart,
   initialStatusFilter,
-  normalizeInitialView,
   parseTaskBoardSelectMessage,
+  resolveInitialView,
 } from './filter';
 import * as css from './TaskBoard.css';
 
@@ -108,13 +110,13 @@ function TaskStatusBadge({ status }: { status: string }) {
   const { t } = useTranslation();
   const knownStatus = TASK_STATUSES.includes(status as TaskStatus) ? (status as TaskStatus) : null;
   return (
-    <Box className={css.StatusBadge} alignItems="Center" gap="100">
+    <Box
+      className={`${css.StatusBadge} ${knownStatus ? STATUS_TONE[knownStatus] : ''}`}
+      alignItems="Center"
+      gap="100"
+    >
       {knownStatus && (
-        <Icon
-          className={`${css.StatusBadgeIcon} ${STATUS_TONE[knownStatus]}`}
-          size="50"
-          src={STATUS_ICON[knownStatus]}
-        />
+        <Icon className={css.StatusBadgeIcon} size="50" src={STATUS_ICON[knownStatus]} />
       )}
       <Text size="T200">{knownStatus ? t(`taskBoard.status_${knownStatus}`) : status}</Text>
     </Box>
@@ -162,18 +164,19 @@ function TaskList({
               <Text size="T300" truncate title={task.title}>
                 {task.title}
               </Text>
-              {task.summary && (
-                <Text className={css.ClampTwo} size="T200" priority="300">
-                  {task.summary}
-                </Text>
-              )}
             </Box>
             <TaskStatusBadge status={task.status} />
             <Text className={css.TableCellText} size="T200" priority="300" truncate>
-              {task.assignee || '-'}
+              {getUserLocalpart(task.assignee)}
             </Text>
-            <Text className={css.TableCellText} size="T200" priority="300" truncate>
-              {task.updatedAt || '-'}
+            <Text
+              className={css.TableCellText}
+              size="T200"
+              priority="300"
+              truncate
+              title={task.updatedAt}
+            >
+              {task.updatedAt ? dayjs(task.updatedAt).fromNow() : '-'}
             </Text>
           </Box>
         ))}
@@ -195,12 +198,9 @@ export function TaskBoard({ payload }: TaskBoardProps) {
   const [pendingTaskSlug, setPendingTaskSlug] = useState<string | undefined>(
     payload.initialTaskSlug,
   );
-  const [view, setView] = useState<TaskBoardView>(() => normalizeInitialView(payload.initialView));
+  const [view, setView] = useState<TaskBoardView>(() => resolveInitialView(payload));
   const [statusFilter, setStatusFilter] = useState<TaskStatusFilter>(() =>
     initialStatusFilter(payload.initialStatus),
-  );
-  const [showCompletedColumn, setShowCompletedColumn] = useState(
-    payload.initialStatus === 'completed',
   );
 
   useEffect(() => {
@@ -231,10 +231,8 @@ export function TaskBoard({ payload }: TaskBoardProps) {
           setView(message.initialView);
         }
         if (message.initialStatus) {
+          setView('list');
           setStatusFilter(message.initialStatus);
-          if (message.initialStatus === 'completed') {
-            setShowCompletedColumn(true);
-          }
         }
         if (message.initialTaskSlug) {
           setPendingTaskSlug(message.initialTaskSlug);
@@ -253,10 +251,7 @@ export function TaskBoard({ payload }: TaskBoardProps) {
   }, [error, loading, pendingTaskSlug, tasks]);
 
   const filteredTasks = useMemo(() => filterTasks(tasks, statusFilter), [statusFilter, tasks]);
-  const visibleBoardStatuses = useMemo(
-    () => boardStatuses(showCompletedColumn),
-    [showCompletedColumn],
-  );
+  const visibleBoardStatuses = useMemo(() => boardStatuses(), []);
 
   // Group by the known board statuses; unknown statuses are shown in the list
   // but not in board columns, matching the workspace-explorer board behavior.
@@ -288,38 +283,25 @@ export function TaskBoard({ payload }: TaskBoardProps) {
             </Box>
           </Box>
         </Box>
-        <Box className={css.FilterBar} shrink="No" alignItems="Center" gap="200">
-          <Box className={css.FilterScroll} alignItems="Center" gap="100">
-            <StatusPill
-              status="active"
-              active={statusFilter === 'active'}
-              onClick={() => setStatusFilter('active')}
-            />
-            {TASK_STATUSES.map((status) => (
+        {view === 'list' && (
+          <Box className={css.FilterBar} shrink="No" alignItems="Center" gap="200">
+            <Box className={css.FilterScroll} alignItems="Center" gap="100">
               <StatusPill
-                key={status}
-                status={status}
-                active={statusFilter === status}
-                onClick={() => {
-                  setStatusFilter(status);
-                  if (status === 'completed') {
-                    setShowCompletedColumn(true);
-                  }
-                }}
+                status="active"
+                active={statusFilter === 'active'}
+                onClick={() => setStatusFilter('active')}
               />
-            ))}
-          </Box>
-          {view === 'board' && (
-            <Box
-              as="button"
-              type="button"
-              className={`${css.ControlButton} ${showCompletedColumn ? css.ControlButtonActive : ''}`}
-              onClick={() => setShowCompletedColumn((value) => !value)}
-            >
-              <Text size="B300">{t('taskBoard.showCompleted')}</Text>
+              {TASK_STATUSES.map((status) => (
+                <StatusPill
+                  key={status}
+                  status={status}
+                  active={statusFilter === status}
+                  onClick={() => setStatusFilter(status)}
+                />
+              ))}
             </Box>
-          )}
-        </Box>
+          </Box>
+        )}
         <Box className={css.Body} grow="Yes">
           {loading && (
             <Box className={css.Centered} justifyContent="Center" alignItems="Center">
