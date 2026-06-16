@@ -3,6 +3,12 @@ import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { openTaskBoard } from '../../plugins/useTauriOpener';
 import { refreshMatrixTokenOrCurrent } from '../../utils/matrixTokenRefresh';
 import type { WorkspaceItem } from '../room/WorkspacesModal';
+import type { TaskBoardView, TaskStatus } from './types';
+
+export type OpenTaskBoardOptions = {
+  initialStatus?: TaskStatus;
+  initialView?: TaskBoardView;
+};
 
 /**
  * Returns a handler that opens the standalone task board window for a
@@ -11,11 +17,14 @@ import type { WorkspaceItem } from '../room/WorkspacesModal';
  * Returns `false` if the board cannot be opened (no bridge provider, missing
  * homeserver/token, or non-desktop environment).
  */
-export function useOpenTaskBoard(): (ws: WorkspaceItem) => Promise<boolean> {
+export function useOpenTaskBoard(): (
+  ws: WorkspaceItem,
+  options?: OpenTaskBoardOptions,
+) => Promise<boolean> {
   const mx = useMatrixClient();
 
   return useCallback(
-    async (ws: WorkspaceItem): Promise<boolean> => {
+    async (ws: WorkspaceItem, options: OpenTaskBoardOptions = {}): Promise<boolean> => {
       if (!ws.bridge_provider) return false;
       const homeserverUrl = mx.getHomeserverUrl();
       if (!homeserverUrl) return false;
@@ -33,6 +42,7 @@ export function useOpenTaskBoard(): (ws: WorkspaceItem) => Promise<boolean> {
         bridgeProvider: ws.bridge_provider,
         matrixToken,
         homeserverUrl,
+        ...options,
       });
     },
     [mx],

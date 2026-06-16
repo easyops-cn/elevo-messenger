@@ -120,6 +120,8 @@ export type TaskBoardPayload = {
    * backend pushes this slug to it so it opens the task detail.
    */
   initialTaskSlug?: string;
+  initialStatus?: 'backlog' | 'planned' | 'in_progress' | 'completed';
+  initialView?: 'list' | 'board';
 };
 
 /**

@@ -21,6 +21,10 @@ export type TaskBoardPayload = {
   homeserverUrl: string;
   /** Optional task slug to open on launch. */
   initialTaskSlug?: string;
+  /** Optional status filter to apply on launch. */
+  initialStatus?: TaskStatus;
+  /** Optional initial board view. Defaults to list. */
+  initialView?: TaskBoardView;
 };
 
 /** A single task summary entry from `.tasks/tasks.yaml`. */
@@ -65,6 +69,10 @@ export type TaskListResponse = {
 export const TASK_STATUSES = ['backlog', 'planned', 'in_progress', 'completed'] as const;
 
 export type TaskStatus = (typeof TASK_STATUSES)[number];
+
+export type TaskBoardView = 'list' | 'board';
+
+export type TaskStatusFilter = 'active' | TaskStatus;
 
 /** The preset documents, in display order. */
 export const PRESET_DOCS: PresetDoc[] = ['requirement', 'notes', 'plan', 'result'];

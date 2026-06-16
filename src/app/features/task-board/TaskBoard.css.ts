@@ -24,6 +24,79 @@ export const Header = style([
   },
 ]);
 
+export const HeaderControls = style([
+  DefaultReset,
+  {
+    marginLeft: 'auto',
+    flexShrink: 0,
+  },
+]);
+
+export const FilterBar = style([
+  DefaultReset,
+  {
+    minHeight: toRem(44),
+    paddingInline: config.space.S300,
+    borderBottomWidth: config.borderWidth.B300,
+    borderBottomStyle: 'solid',
+    borderBottomColor: color.Surface.ContainerLine,
+    gap: config.space.S200,
+  },
+]);
+
+export const FilterScroll = style([
+  DefaultReset,
+  {
+    minWidth: 0,
+    flexGrow: 1,
+    overflowX: 'auto',
+  },
+]);
+
+export const Segmented = style([
+  DefaultReset,
+  {
+    borderRadius: config.radii.R300,
+    borderWidth: config.borderWidth.B300,
+    borderStyle: 'solid',
+    borderColor: color.Surface.ContainerLine,
+    overflow: 'hidden',
+  },
+]);
+
+export const ControlButton = style([
+  DefaultReset,
+  {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: toRem(28),
+    minWidth: toRem(44),
+    paddingInline: config.space.S200,
+    borderWidth: 0,
+    borderRadius: config.radii.R300,
+    color: color.Surface.OnContainer,
+    backgroundColor: 'transparent',
+    whiteSpace: 'nowrap',
+    cursor: 'pointer',
+    selectors: {
+      '&:hover': { backgroundColor: color.Surface.ContainerHover },
+      '&:focus-visible': {
+        outline: `${config.borderWidth.B400} solid ${color.Primary.Main}`,
+        outlineOffset: toRem(1),
+      },
+    },
+  },
+]);
+
+export const ControlButtonActive = style({
+  color: color.Primary.OnContainer,
+  backgroundColor: color.Primary.Container,
+  selectors: {
+    '&:hover': { backgroundColor: color.Primary.Container },
+  },
+});
+
 export const Body = style([
   DefaultReset,
   {
@@ -54,6 +127,102 @@ export const InlineError = style([
   },
 ]);
 
+/* ---- Task list ---- */
+
+export const ListScroll = style([
+  DefaultReset,
+  {
+    width: '100%',
+    height: '100%',
+    overflow: 'auto',
+  },
+]);
+
+export const TaskTable = style([
+  DefaultReset,
+  {
+    minWidth: toRem(760),
+    padding: config.space.S300,
+  },
+]);
+
+export const TaskRow = style([
+  DefaultReset,
+  {
+    display: 'grid',
+    gridTemplateColumns:
+      'minmax(280px, 1fr) minmax(132px, 160px) minmax(132px, 180px) minmax(180px, 220px)',
+    gap: config.space.S300,
+    width: '100%',
+    minHeight: toRem(44),
+    paddingBlock: config.space.S200,
+    paddingInline: config.space.S300,
+    borderWidth: 0,
+    borderBottomWidth: config.borderWidth.B300,
+    borderBottomStyle: 'solid',
+    borderBottomColor: color.Surface.ContainerLine,
+    backgroundColor: 'transparent',
+    color: color.Surface.OnContainer,
+    textAlign: 'left',
+  },
+]);
+
+export const TaskDataRow = style({
+  cursor: 'pointer',
+  selectors: {
+    '&:hover': { backgroundColor: color.Surface.ContainerHover },
+    '&:focus-visible': {
+      outline: `${config.borderWidth.B400} solid ${color.Primary.Main}`,
+      outlineOffset: toRem(-2),
+    },
+  },
+});
+
+export const TaskHeaderRow = style({
+  minHeight: toRem(36),
+  color: color.Surface.OnContainer,
+  backgroundColor: color.Background.Container,
+  position: 'sticky',
+  top: 0,
+  zIndex: 1,
+});
+
+export const ListTitleCell = style([
+  DefaultReset,
+  {
+    minWidth: 0,
+  },
+]);
+
+export const TableCellText = style({ minWidth: 0 });
+
+export const StatusBadge = style([
+  DefaultReset,
+  {
+    width: 'fit-content',
+    minWidth: 0,
+    maxWidth: '100%',
+    paddingBlock: config.space.S100,
+    paddingInline: config.space.S200,
+    borderRadius: config.radii.R300,
+    borderWidth: config.borderWidth.B300,
+    borderStyle: 'solid',
+    borderColor: 'currentColor',
+    backgroundColor: 'transparent',
+  },
+]);
+
+export const StatusBadgeIcon = style([DefaultReset, { flexShrink: 0 }]);
+
+export const EmptyState = style([
+  DefaultReset,
+  {
+    height: '100%',
+    padding: config.space.S700,
+    textAlign: 'center',
+  },
+]);
+
 /* ---- Kanban board ---- */
 
 export const BoardScroll = style([
@@ -70,11 +239,10 @@ export const Board = style([
   DefaultReset,
   {
     display: 'grid',
-    gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
     gap: config.space.S300,
     padding: config.space.S300,
     height: '100%',
-    minWidth: toRem(960),
+    minWidth: toRem(720),
   },
 ]);
 
