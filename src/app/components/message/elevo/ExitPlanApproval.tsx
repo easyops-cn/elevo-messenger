@@ -1,4 +1,4 @@
-import React, { CSSProperties, useCallback, useMemo, useState } from 'react';
+import React, { CSSProperties, useCallback, useState } from 'react';
 import { Box, Text, config } from 'folds';
 import { MsgType } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/types';
@@ -21,18 +21,6 @@ type ExitPlanApprovalProps = {
   style?: CSSProperties;
 };
 
-function approvalStatusText(toolCall: ToolCallData): string | undefined {
-  if (toolCall.state === 'approval-responded') {
-    if (toolCall.approval?.approved === false) {
-      return toolCall.approval.reason ? `Rejected: ${toolCall.approval.reason}` : 'Rejected';
-    }
-    return 'Approved';
-  }
-  if (toolCall.status === 'completed') return 'Approved and completed';
-  if (toolCall.status === 'failed') return 'Failed';
-  return undefined;
-}
-
 export function ExitPlanApprovalCard({
   toolCall,
   eventId,
@@ -54,7 +42,6 @@ export function ExitPlanApprovalCard({
     !!eventId &&
     isAssignedUser &&
     !submitted;
-  const statusText = useMemo(() => approvalStatusText(toolCall), [toolCall]);
 
   const sendApproval = useCallback(
     async (approved: boolean) => {
@@ -100,7 +87,7 @@ export function ExitPlanApprovalCard({
     [canRespond, eventId, mx, room.roomId, thread, toolCall, toolSenderId],
   );
 
-  if (toolCall.state !== 'approval-requested' && !statusText) return null;
+  if (toolCall.state !== 'approval-requested') return null;
 
   return (
     <Box direction="Column" gap="100" style={style}>
@@ -124,11 +111,6 @@ export function ExitPlanApprovalCard({
               Reject
             </button>
           </>
-        )}
-        {statusText && (
-          <Text size="T300" priority="400">
-            {statusText}
-          </Text>
         )}
       </Box>
       {!isAssignedUser && toolCall.state === 'approval-requested' && (
