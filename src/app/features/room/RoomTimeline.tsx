@@ -51,6 +51,7 @@ import {
   ImageContent,
   EventContent,
   isUserAnswerEvent,
+  isToolApprovalEvent,
   FileReferenceCard,
   parseFileReference,
   TaskReferenceCard,
@@ -1907,7 +1908,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
       secondDifference(prevRenderedEvent.getTs(), mEvent.getTs()) <= 90;
 
     const eventJSX =
-      reactionOrEditEvent(mEvent) || isUserAnswerEvent(mEvent)
+      reactionOrEditEvent(mEvent) || isUserAnswerEvent(mEvent) || isToolApprovalEvent(mEvent)
         ? null
         : renderMatrixEvent(
             mEvent.getType(),

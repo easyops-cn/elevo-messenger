@@ -1163,6 +1163,15 @@
     "questionTab": "Q{{index}}/{{total}}",
     "assignedTo": "This question should be answered by {{name}}"
   },
+  "exitPlanApproval": {
+    "approve": "Implement plan",
+    "reject": "Reject",
+    "approvedPlan": "Implement plan",
+    "rejectedPlan": "Rejected plan",
+    "rejectedByUser": "Rejected by user",
+    "assignedOnly": "Only the requesting user can respond.",
+    "submitted": "Response submitted."
+  },
   "toolCall": {
     "inprogressDescription": "Running...",
     "completedDescription": "Completed",

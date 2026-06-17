@@ -7,6 +7,7 @@ export * from './content';
 export * from './Time';
 export * from './MsgTypeRenderers';
 export * from './elevo/AskUser';
+export * from './elevo/ExitPlanApproval';
 export * from './elevo/ToolCallCard';
 export * from './elevo/ReasoningCard';
 export * from './elevo/SseMarkdownBody';

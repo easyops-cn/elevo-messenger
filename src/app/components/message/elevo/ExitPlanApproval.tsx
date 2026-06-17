@@ -1,6 +1,7 @@
 import React, { CSSProperties, useCallback, useState } from 'react';
-import { Box, Text, config } from 'folds';
-import { MsgType } from 'matrix-js-sdk';
+import { useTranslation } from 'react-i18next';
+import { Box, Button, Text, config } from 'folds';
+import { MsgType, type MatrixEvent } from 'matrix-js-sdk';
 import type { RoomMessageEventContent } from 'matrix-js-sdk/lib/types';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useRoom } from '../../../hooks/useRoom';
@@ -8,10 +9,24 @@ import { useRoomThread } from '../../../features/room/RoomThreadContext';
 import { sanitizeText } from '../../../utils/sanitize';
 import { getMentionContent } from '../../../utils/room';
 import { getMatrixToUser } from '../../../plugins/matrix-to';
-import { SubmitButton, ContinueButton, AssignedHint } from './AskUser.css';
+import { AssignedHint } from './AskUser.css';
 import type { ToolCallData } from './ToolCallCard';
+import { MessageEvent } from '../../../../types/matrix/room';
 
 const TOOL_APPROVAL_KEY = 'vip.elevo.tool_approval';
+
+export function isToolApprovalEvent(mEvent: MatrixEvent) {
+  const content = mEvent.getContent();
+  return (
+    mEvent.getType() === MessageEvent.RoomMessage &&
+    content.msgtype === MsgType.Text &&
+    !!content[TOOL_APPROVAL_KEY]
+  );
+}
+
+export function hasToolApproval(content: Record<string, unknown>) {
+  return !!content[TOOL_APPROVAL_KEY];
+}
 
 type ExitPlanApprovalProps = {
   toolCall: ToolCallData;
@@ -28,6 +43,7 @@ export function ExitPlanApprovalCard({
   toolSenderId,
   style,
 }: ExitPlanApprovalProps) {
+  const { t } = useTranslation();
   const mx = useMatrixClient();
   const room = useRoom();
   const thread = useRoomThread();
@@ -48,7 +64,9 @@ export function ExitPlanApprovalCard({
       if (!canRespond || !eventId || !toolCall.approval?.id) return;
       const kind = approved ? 'approve' : 'reject';
       setSubmitting(kind);
-      const answerBody = approved ? 'Approved plan' : 'Rejected plan';
+      const answerBody = approved
+        ? t('exitPlanApproval.approvedPlan')
+        : t('exitPlanApproval.rejectedPlan');
       const body = toolSenderId ? `@${toolSenderId} ${answerBody}` : answerBody;
       const content = {
         msgtype: MsgType.Text,
@@ -67,7 +85,7 @@ export function ExitPlanApprovalCard({
           tool_call_id: toolCall.toolCallId,
           approve_id: toolCall.approval.id,
           approved,
-          ...(approved ? {} : { reason: 'Rejected by user' }),
+          ...(approved ? {} : { reason: t('exitPlanApproval.rejectedByUser') }),
         },
       } as unknown as RoomMessageEventContent;
 
@@ -84,7 +102,7 @@ export function ExitPlanApprovalCard({
         setSubmitting(undefined);
       }
     },
-    [canRespond, eventId, mx, room.roomId, thread, toolCall, toolSenderId],
+    [canRespond, eventId, mx, room.roomId, t, thread, toolCall, toolSenderId],
   );
 
   if (toolCall.state !== 'approval-requested') return null;
@@ -94,33 +112,39 @@ export function ExitPlanApprovalCard({
       <Box alignItems="Center" gap="200">
         {toolCall.state === 'approval-requested' && (
           <>
-            <button
+            <Button
               type="button"
-              className={SubmitButton({ disabled: !canRespond || submitting === 'approve' })}
+              variant="Primary"
+              fill="Solid"
+              size="300"
+              radii="300"
               disabled={!canRespond || !!submitting}
               onClick={() => sendApproval(true)}
             >
-              Approve
-            </button>
-            <button
+              {t('exitPlanApproval.approve')}
+            </Button>
+            <Button
               type="button"
-              className={ContinueButton({ disabled: !canRespond || submitting === 'reject' })}
+              variant="Secondary"
+              fill="Soft"
+              size="300"
+              radii="300"
               disabled={!canRespond || !!submitting}
               onClick={() => sendApproval(false)}
             >
-              Reject
-            </button>
+              {t('exitPlanApproval.reject')}
+            </Button>
           </>
         )}
       </Box>
       {!isAssignedUser && toolCall.state === 'approval-requested' && (
         <Text size="T200" priority="300" className={AssignedHint}>
-          Only the requesting user can respond.
+          {t('exitPlanApproval.assignedOnly')}
         </Text>
       )}
       {submitted && (
         <Text size="T200" priority="300" style={{ marginTop: config.space.S100 }}>
-          Response submitted.
+          {t('exitPlanApproval.submitted')}
         </Text>
       )}
     </Box>

@@ -1163,6 +1163,15 @@
     "questionTab": "第{{index}}/{{total}}题",
     "assignedTo": "该问题由 {{name}} 回答"
   },
+  "exitPlanApproval": {
+    "approve": "实施计划",
+    "reject": "驳回",
+    "approvedPlan": "实施计划",
+    "rejectedPlan": "已驳回计划",
+    "rejectedByUser": "用户已驳回",
+    "assignedOnly": "只有发起请求的用户可以响应。",
+    "submitted": "响应已提交。"
+  },
   "toolCall": {
     "inprogressDescription": "执行中...",
     "completedDescription": "已完成",
