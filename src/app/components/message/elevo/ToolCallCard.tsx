@@ -15,12 +15,30 @@ import type { DiffFileSummary } from './diffSummary';
 import type { CodeViewWorkspaceContext } from '../../code-view';
 
 const ToolCallSchema = z.object({
+  toolCallId: z.string().optional(),
+  conversationId: z.string().optional(),
   name: z.string(),
   title: z.string().optional(),
   input: z.unknown(),
   output: z.unknown().optional(),
   error: z.unknown().optional(),
   status: z.enum(['inprogress', 'completed', 'failed']),
+  state: z
+    .enum([
+      'input-available',
+      'approval-requested',
+      'approval-responded',
+      'output-available',
+      'output-error',
+    ])
+    .optional(),
+  approval: z
+    .object({
+      id: z.string(),
+      approved: z.boolean().optional(),
+      reason: z.string().optional(),
+    })
+    .optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
