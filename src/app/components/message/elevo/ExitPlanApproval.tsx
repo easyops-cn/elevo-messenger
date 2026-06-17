@@ -22,7 +22,7 @@ type ExitPlanApprovalProps = {
 };
 
 function approvalStatusText(toolCall: ToolCallData): string | undefined {
-  if (toolCall.status === 'approval-responded') {
+  if (toolCall.state === 'approval-responded') {
     if (toolCall.approval?.approved === false) {
       return toolCall.approval.reason ? `Rejected: ${toolCall.approval.reason}` : 'Rejected';
     }
@@ -49,7 +49,7 @@ export function ExitPlanApprovalCard({
   const userId = mx.getUserId();
   const isAssignedUser = !initialHumanSender || initialHumanSender === userId;
   const canRespond =
-    toolCall.status === 'approval-requested' &&
+    toolCall.state === 'approval-requested' &&
     !!toolCall.approval?.id &&
     !!eventId &&
     isAssignedUser &&
@@ -100,12 +100,12 @@ export function ExitPlanApprovalCard({
     [canRespond, eventId, mx, room.roomId, thread, toolCall, toolSenderId],
   );
 
-  if (toolCall.status !== 'approval-requested' && !statusText) return null;
+  if (toolCall.state !== 'approval-requested' && !statusText) return null;
 
   return (
     <Box direction="Column" gap="100" style={style}>
       <Box alignItems="Center" gap="200">
-        {toolCall.status === 'approval-requested' && (
+        {toolCall.state === 'approval-requested' && (
           <>
             <button
               type="button"
@@ -131,7 +131,7 @@ export function ExitPlanApprovalCard({
           </Text>
         )}
       </Box>
-      {!isAssignedUser && toolCall.status === 'approval-requested' && (
+      {!isAssignedUser && toolCall.state === 'approval-requested' && (
         <Text size="T200" priority="300" className={AssignedHint}>
           Only the requesting user can respond.
         </Text>

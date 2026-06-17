@@ -22,7 +22,16 @@ const ToolCallSchema = z.object({
   input: z.unknown(),
   output: z.unknown().optional(),
   error: z.unknown().optional(),
-  status: z.enum(['inprogress', 'approval-requested', 'approval-responded', 'completed', 'failed']),
+  status: z.enum(['inprogress', 'completed', 'failed']),
+  state: z
+    .enum([
+      'input-available',
+      'approval-requested',
+      'approval-responded',
+      'output-available',
+      'output-error',
+    ])
+    .optional(),
   approval: z
     .object({
       id: z.string(),
@@ -418,10 +427,8 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
   const iconClassName = classNames(
     css.ToolCallHeaderIcon,
     data.status === 'completed' && css.ToolCallHeaderIconCompleted,
-    data.status === 'approval-responded' && css.ToolCallHeaderIconCompleted,
     data.status === 'failed' && css.ToolCallHeaderIconFailed,
-    (data.status === 'inprogress' || data.status === 'approval-requested') &&
-      css.ToolCallHeaderIconInprogress,
+    data.status === 'inprogress' && css.ToolCallHeaderIconInprogress,
     {
       [css.ToolCallHeaderIconOffset]: messageLayout === MessageLayout.Modern,
     },
