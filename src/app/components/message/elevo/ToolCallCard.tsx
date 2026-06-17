@@ -15,12 +15,21 @@ import type { DiffFileSummary } from './diffSummary';
 import type { CodeViewWorkspaceContext } from '../../code-view';
 
 const ToolCallSchema = z.object({
+  toolCallId: z.string().optional(),
+  conversationId: z.string().optional(),
   name: z.string(),
   title: z.string().optional(),
   input: z.unknown(),
   output: z.unknown().optional(),
   error: z.unknown().optional(),
-  status: z.enum(['inprogress', 'completed', 'failed']),
+  status: z.enum(['inprogress', 'approval-requested', 'approval-responded', 'completed', 'failed']),
+  approval: z
+    .object({
+      id: z.string(),
+      approved: z.boolean().optional(),
+      reason: z.string().optional(),
+    })
+    .optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
@@ -409,8 +418,10 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
   const iconClassName = classNames(
     css.ToolCallHeaderIcon,
     data.status === 'completed' && css.ToolCallHeaderIconCompleted,
+    data.status === 'approval-responded' && css.ToolCallHeaderIconCompleted,
     data.status === 'failed' && css.ToolCallHeaderIconFailed,
-    data.status === 'inprogress' && css.ToolCallHeaderIconInprogress,
+    (data.status === 'inprogress' || data.status === 'approval-requested') &&
+      css.ToolCallHeaderIconInprogress,
     {
       [css.ToolCallHeaderIconOffset]: messageLayout === MessageLayout.Modern,
     },

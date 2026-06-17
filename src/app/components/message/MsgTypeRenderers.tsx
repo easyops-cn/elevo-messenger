@@ -5,6 +5,7 @@ import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
 import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { AskUserQuestionCard, QuestionAnsweredCard, parseAskUser } from './elevo/AskUser';
 import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
+import { ExitPlanApprovalCard } from './elevo/ExitPlanApproval';
 import { ReasoningCard } from './elevo/ReasoningCard';
 import { SseMarkdownBody, parseSseRender } from './elevo/SseMarkdownBody';
 import { OidcLoginCard, parseOidcLogin } from './elevo/OidcLoginCard';
@@ -206,6 +207,12 @@ export function MText({
             }}
             renderBody={renderBody}
             renderUrlsPreview={renderUrlsPreview}
+          />
+          <ExitPlanApprovalCard
+            toolCall={toolCall}
+            eventId={eventId}
+            initialHumanSender={initialHumanSender}
+            toolSenderId={senderId}
           />
         </Box>
       );
