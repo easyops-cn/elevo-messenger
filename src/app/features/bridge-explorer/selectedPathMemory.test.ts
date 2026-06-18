@@ -1,6 +1,12 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { getRememberedSelectedPath, rememberSelectedPath } from './selectedPathMemory';
+import {
+  createSelection,
+  getRememberedSelectedPath,
+  getRememberedSelection,
+  rememberSelectedPath,
+  rememberSelection,
+} from './selectedPathMemory';
 
 function createStorage() {
   const items = new Map<string, string>();
@@ -42,5 +48,32 @@ describe('bridge explorer selected path memory', () => {
     expect(storage.removeItem).toHaveBeenCalledWith(
       'elevo.bridgeExplorer.selectedPath:workspace-a',
     );
+  });
+
+  it('stores and restores directory selection kind', () => {
+    const storage = createStorage();
+
+    rememberSelection('workspace-a', { path: 'src/app', kind: 'directory' }, storage);
+    expect(storage.setItem).toHaveBeenCalledWith(
+      'elevo.bridgeExplorer.selectedPathKind:workspace-a',
+      'directory',
+    );
+    expect(getRememberedSelection('workspace-a', null, storage)).toEqual({
+      path: 'src/app',
+      kind: 'directory',
+    });
+  });
+
+  it('uses the injected selection kind when the initial path wins', () => {
+    expect(
+      getRememberedSelection(
+        'workspace-a',
+        createSelection('src/app', 'directory'),
+        createStorage(),
+      ),
+    ).toEqual({
+      path: 'src/app',
+      kind: 'directory',
+    });
   });
 });

@@ -3,11 +3,15 @@ import { Box, Icon, Text } from 'folds';
 import classNames from 'classnames';
 import * as css from './FileReferenceCard.css';
 import { FileIcon } from '../../../icons/FileIcon';
+import { FolderOpenIcon } from '../../../icons/FolderOpenIcon';
+
+export type FileReferenceKind = 'file' | 'directory';
 
 export type FileReference = {
   path: string;
   workspaceId?: string;
   workspaceName?: string;
+  kind: FileReferenceKind;
 };
 
 export function parseFileReference(content: Record<string, unknown>): FileReference | undefined {
@@ -17,11 +21,12 @@ export function parseFileReference(content: Record<string, unknown>): FileRefere
   const { path } = raw as Record<string, unknown>;
   if (typeof path !== 'string' || path.trim() === '') return undefined;
 
-  const { workspaceId, workspaceName } = raw as Record<string, unknown>;
+  const { workspaceId, workspaceName, kind } = raw as Record<string, unknown>;
   return {
     path,
     workspaceId: typeof workspaceId === 'string' ? workspaceId : undefined,
     workspaceName: typeof workspaceName === 'string' ? workspaceName : undefined,
+    kind: kind === 'directory' ? 'directory' : 'file',
   };
 }
 
@@ -37,6 +42,7 @@ type FileReferenceCardProps = {
 
 export function FileReferenceCard({ fileReference, onClick }: FileReferenceCardProps) {
   const basename = getBasename(fileReference.path);
+  const isDirectory = fileReference.kind === 'directory';
   const interactiveProps = onClick
     ? ({
         as: 'button',
@@ -50,10 +56,10 @@ export function FileReferenceCard({ fileReference, onClick }: FileReferenceCardP
       className={classNames(css.FileReferenceCard, onClick && css.InteractiveFileReferenceCard)}
       shrink="No"
       alignItems="Center"
-      title={fileReference.path}
+      title={isDirectory ? `${fileReference.path}/` : fileReference.path}
       {...interactiveProps}
     >
-      <Icon size="50" src={FileIcon} />
+      <Icon size="50" src={isDirectory ? FolderOpenIcon : FileIcon} />
       <Text size="T200" truncate>
         {basename}
       </Text>
