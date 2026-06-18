@@ -5,6 +5,7 @@ export enum AutocompletePrefix {
   UserMention = '@',
   Emoticon = ':',
   Command = '/',
+  RecentMessage = 'recent-message',
 }
 export const AUTOCOMPLETE_PREFIXES: readonly AutocompletePrefix[] = [
   AutocompletePrefix.RoomMention,

@@ -41,6 +41,7 @@ import {
   AUTOCOMPLETE_PREFIXES,
   AutocompletePrefix,
   AutocompleteQuery,
+  RecentMessageAutocomplete,
   getAutocompleteQuery,
   getPrevWorldRange,
   resetEditor,
@@ -57,6 +58,10 @@ import {
   trimCommand,
   getMentions,
 } from '../../components/editor';
+import {
+  getRoomInputRecentMessages,
+  putRoomInputRecentMessage,
+} from '../../components/editor/autocomplete/recentRoomInputMessages';
 import { EmojiBoard, EmojiBoardTab } from '../../components/emoji-board';
 import { UseStateProvider } from '../../components/UseStateProvider';
 import {
@@ -202,6 +207,9 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
   const [toolbar, setToolbar] = useSetting(settingsAtom, 'editorToolbar');
   const [autocompleteQuery, setAutocompleteQuery] =
     useState<AutocompleteQuery<AutocompletePrefix>>();
+  const [recentMessages, setRecentMessages] = useState(() =>
+    getRoomInputRecentMessages(mx.getUserId(), roomId, threadRootId),
+  );
   const [, setBeginCommand] = useState(() => getBeginCommand(editor));
   const [inputReferences, setInputReferences] = useAtom(roomIdToInputReferencesAtomFamily(roomId));
   const [inputReferenceActivity, setInputReferenceActivity] = useAtom(
@@ -215,6 +223,10 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     inputReferenceActivity;
 
   const sendTypingStatus = useTypingStatusUpdater(mx, roomId);
+
+  useEffect(() => {
+    setRecentMessages(getRoomInputRecentMessages(mx.getUserId(), roomId, threadRootId));
+  }, [mx, roomId, threadRootId]);
 
   const updateBeginCommand = useCallback(() => {
     setBeginCommand(getBeginCommand(editor));
@@ -558,6 +570,14 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
       isForkCommand ? null : threadRootId || null,
       content as RoomMessageEventContent,
     );
+    if (plainText.trim().length > 0) {
+      setRecentMessages(
+        putRoomInputRecentMessage(mx.getUserId(), roomId, threadRootId, {
+          body,
+          formattedBody: content.formatted_body,
+        }),
+      );
+    }
     resetEditor(editor);
     resetEditorHistory(editor);
     setInputReferences(clearInputReferences());
@@ -587,6 +607,21 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
 
   const handleKeyDown: KeyboardEventHandler = useCallback(
     (evt) => {
+      if (
+        !autocompleteQuery &&
+        isKeyHotkey('arrowup', evt) &&
+        isEmptyEditor(editor) &&
+        recentMessages.length > 0
+      ) {
+        evt.preventDefault();
+        setAutocompleteQuery({
+          prefix: AutocompletePrefix.RecentMessage,
+          text: '',
+          range: Editor.range(editor, []),
+        });
+        return;
+      }
+
       if (isKeyHotkey('mod+enter', evt) || (!enterForNewline && isKeyHotkey('enter', evt))) {
         if (isComposing(evt)) {
           // IME confirming keydown (Safari): block Slate's default newline insertion
@@ -605,7 +640,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
         setReplyDraft(undefined);
       }
     },
-    [submit, setReplyDraft, enterForNewline, autocompleteQuery],
+    [submit, setReplyDraft, enterForNewline, autocompleteQuery, editor, recentMessages.length],
   );
 
   const handleKeyUp: KeyboardEventHandler = useCallback(
@@ -619,6 +654,14 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
         sendTypingStatus(!isEmptyEditor(editor));
       }
 
+      if (autocompleteQuery?.prefix === AutocompletePrefix.RecentMessage) {
+        if (!isEmptyEditor(editor)) {
+          setAutocompleteQuery(undefined);
+        }
+        updateBeginCommand();
+        return;
+      }
+
       const prevWordRange = getPrevWorldRange(editor);
       const query = prevWordRange
         ? getAutocompleteQuery<AutocompletePrefix>(editor, prevWordRange, AUTOCOMPLETE_PREFIXES)
@@ -626,7 +669,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
       setAutocompleteQuery(query);
       updateBeginCommand();
     },
-    [editor, sendTypingStatus, hideActivity, updateBeginCommand],
+    [editor, sendTypingStatus, hideActivity, updateBeginCommand, autocompleteQuery],
   );
 
   const handleCloseAutocomplete = useCallback(() => {
@@ -754,6 +797,15 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
           room={room}
           editor={editor}
           query={autocompleteQuery}
+          requestClose={handleCloseAutocomplete}
+        />
+      )}
+      {autocompleteQuery?.prefix === AutocompletePrefix.RecentMessage && (
+        <RecentMessageAutocomplete
+          editor={editor}
+          query={autocompleteQuery}
+          messages={recentMessages}
+          isMarkdown={isMarkdown}
           requestClose={handleCloseAutocomplete}
         />
       )}
