@@ -37,6 +37,7 @@ import { useRoomThread } from '../../../features/room/RoomThreadContext';
 import { sanitizeText } from '../../../utils/sanitize';
 import { getMatrixToUser } from '../../../plugins/matrix-to';
 import { isComposing } from '../../../hooks/useComposingCheck';
+import { parseToolCall } from './ToolCallCard';
 
 // Schemas & Types
 
@@ -117,6 +118,11 @@ export function parseAskUser(content: Record<string, unknown>): AskUserQuestionD
   if (!askUserContent) return undefined;
   const result = AskUserQuestionSchema.safeParse(askUserContent);
   if (result.success) {
+    const toolCall = parseToolCall(content);
+    if (toolCall && toolCall.status === 'failed') {
+      // If the tool call has failed, it means the question is no longer valid.
+      return undefined;
+    }
     return result.data;
   }
 
