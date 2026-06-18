@@ -42,12 +42,26 @@ export const useMediaDownload = (
       if (!mediaUrl) throw new Error('Invalid media URL');
 
       if (isDesktopTauri) {
-        const filePath = await loadMediaFilePath(mediaUrl, mimeType, encInfo, createdAt);
+        const filePath = await loadMediaFilePath(
+          mediaUrl,
+          mimeType,
+          encInfo,
+          createdAt,
+          undefined,
+          mx,
+        );
         await revealItemInDir(filePath);
         return;
       }
 
-      const fileContent = await loadMediaBlob(mediaUrl, mimeType, encInfo, createdAt);
+      const fileContent = await loadMediaBlob(
+        mediaUrl,
+        mimeType,
+        encInfo,
+        createdAt,
+        undefined,
+        mx,
+      );
 
       await saveFile(fileContent, fileName);
     }, [mx, url, useAuth, mimeType, encInfo, createdAt, fileName]),

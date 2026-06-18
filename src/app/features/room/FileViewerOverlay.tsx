@@ -207,9 +207,9 @@ export function FileViewerOverlay({ fileEvent, requestClose }: FileViewerOverlay
   const loadBlob = useCallback(async () => {
     if (!mediaUrl) throw new Error('Invalid media URL');
     return encInfo
-      ? downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimetype, encInfo))
-      : downloadMedia(mediaUrl);
-  }, [encInfo, mediaUrl, mimetype]);
+      ? downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimetype, encInfo), mx)
+      : downloadMedia(mediaUrl, mx);
+  }, [encInfo, mediaUrl, mimetype, mx]);
   const previewItem = useMemo<FilePreviewItem | undefined>(() => {
     if (!mediaUrl) return undefined;
     return {
@@ -273,6 +273,7 @@ export function RoomMediaViewerOverlay({
   mediaUrl,
   requestClose,
 }: RoomMediaViewerOverlayProps) {
+  const mx = useMatrixClient();
   const {
     filename,
     mimetype,
@@ -285,9 +286,9 @@ export function RoomMediaViewerOverlay({
   } = getRoomMediaViewerInfo(file);
   const loadBlob = useCallback(async () => {
     return encInfo
-      ? downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimetype, encInfo))
-      : downloadMedia(mediaUrl);
-  }, [encInfo, mediaUrl, mimetype]);
+      ? downloadEncryptedMedia(mediaUrl, (encBuf) => decryptFile(encBuf, mimetype, encInfo), mx)
+      : downloadMedia(mediaUrl, mx);
+  }, [encInfo, mediaUrl, mimetype, mx]);
   const previewItem = useMemo<FilePreviewItem>(
     () => ({
       viewerType: desktopViewerType,

@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import React, { useState } from 'react';
+import { Method } from 'matrix-js-sdk';
 import { Badge, Box, Text, Icon, Icons, IconButton, Button, Spinner, Scroll, color } from 'folds';
 import { Page, PageContent, PageHeader } from '../../../components/page';
 import { SequenceCard } from '../../../components/sequence-card';
@@ -35,7 +36,6 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
   const elevoConfig = useElevoConfig();
   const baseUrl = elevoConfig.workspaces?.apiBaseUrl ?? '';
   const homeserverUrl = mx.getHomeserverUrl();
-  const matrixToken = mx.getAccessToken() ?? '';
   const bridgeProvider = elevoConfig.workspaces?.bridgeProvider;
   const tenantsById = new Map(
     (elevoConfig.workspaces?.tenants ?? []).map((tenant) => [tenant.id, tenant.name]),
@@ -99,7 +99,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
 
   const handleSync = async (ws: WorkspaceItem) => {
     if (ws.bridge_provider) {
-      if (!homeserverUrl || !matrixToken) return;
+      if (!homeserverUrl) return;
     } else if (!baseUrl || !token) return;
 
     setSyncingId(ws.id);
@@ -107,14 +107,16 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
     try {
       let fresh: WorkspaceItem;
       if (ws.bridge_provider) {
-        const res = await fetch(
-          `${getBridgeWorkspacesUrl(homeserverUrl, ws.bridge_provider)}/${encodeURIComponent(ws.id)}`,
-          {
-            headers: { Authorization: `Bearer ${matrixToken}` },
-          },
+        const workspacesPath = new URL(getBridgeWorkspacesUrl(homeserverUrl, ws.bridge_provider))
+          .pathname;
+        const path = `${workspacesPath}/${encodeURIComponent(ws.id)}`;
+        const data = await mx.http.authedRequest<{ id: string; name: string }>(
+          Method.Get,
+          path,
+          undefined,
+          undefined,
+          { prefix: '' },
         );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data = await res.json();
         fresh = {
           id: data.id,
           name: data.name,
@@ -414,7 +416,7 @@ export function Workspaces({ requestClose }: WorkspacesProps) {
           baseUrl={baseUrl}
           token={token ?? ''}
           homeserverUrl={homeserverUrl}
-          matrixToken={matrixToken}
+          mx={mx}
           bridgeProvider={bridgeProvider}
           tenantNames={tenantsById}
           onAdd={handleAdd}

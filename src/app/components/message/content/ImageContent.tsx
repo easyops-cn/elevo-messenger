@@ -107,7 +107,14 @@ export const ImageContent = as<'div', ImageContentProps>(
         const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
         if (!mediaUrl) throw new Error('Invalid media URL');
         if (!encInfo && !NO_SERVICE_WORKER && !isDesktopTauri) return mediaUrl;
-        return loadMediaBlobUrl(mediaUrl, mimeType ?? FALLBACK_MIMETYPE, encInfo, createdAt);
+        return loadMediaBlobUrl(
+          mediaUrl,
+          mimeType ?? FALLBACK_MIMETYPE,
+          encInfo,
+          createdAt,
+          undefined,
+          mx,
+        );
       }, [mx, url, useAuthentication, mimeType, encInfo, createdAt]),
     );
 

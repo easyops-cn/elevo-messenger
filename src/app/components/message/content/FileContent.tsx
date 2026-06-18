@@ -96,7 +96,14 @@ export function ReadTextFile({
     useCallback(async () => {
       const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
-      const fileContent = await loadMediaBlob(mediaUrl, mimeType, encInfo, createdAt);
+      const fileContent = await loadMediaBlob(
+        mediaUrl,
+        mimeType,
+        encInfo,
+        createdAt,
+        undefined,
+        mx,
+      );
 
       const text = fileContent.text();
       setTextViewer(true);
@@ -201,7 +208,7 @@ export function ReadPdfFile({
       const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
       setPdfViewer(true);
-      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo, createdAt);
+      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo, createdAt, undefined, mx);
     }, [mx, url, useAuthentication, mimeType, encInfo, createdAt]),
   );
 

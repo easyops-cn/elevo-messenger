@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Method, type MatrixClient } from 'matrix-js-sdk';
 import {
   Box,
   Text,
@@ -43,7 +44,7 @@ type AddWorkspaceModalProps = {
   baseUrl: string;
   token: string;
   homeserverUrl: string;
-  matrixToken: string;
+  mx: MatrixClient;
   bridgeProvider?: BridgeProviderConfig;
   tenantNames: Map<string, string>;
   onAdd: (ws: WorkspaceItem) => Promise<void>;
@@ -66,7 +67,7 @@ export function AddWorkspaceModal({
   baseUrl,
   token,
   homeserverUrl,
-  matrixToken,
+  mx,
   bridgeProvider,
   tenantNames,
   onAdd,
@@ -87,7 +88,7 @@ export function AddWorkspaceModal({
     async (page: number) => {
       const canFetchElevo = !!baseUrl && !!token;
       const bridgeProviderId = bridgeProvider?.id;
-      const canFetchBridge = !!homeserverUrl && !!matrixToken && !!bridgeProviderId;
+      const canFetchBridge = !!homeserverUrl && !!bridgeProviderId;
       if (!canFetchElevo && !canFetchBridge) return;
       setLoadingAvailable(true);
       setAvailableError(null);
@@ -109,17 +110,21 @@ export function AddWorkspaceModal({
         }
 
         if (canFetchBridge) {
-          bridgeRequest = fetch(getBridgeWorkspacesUrl(homeserverUrl, bridgeProviderId), {
-            headers: { Authorization: `Bearer ${matrixToken}` },
-          }).then(async (res) => {
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
-            const data = await res.json();
-            return ((data.workspaces ?? []) as BridgeWorkspace[]).map((ws) => ({
+          const path = new URL(getBridgeWorkspacesUrl(homeserverUrl, bridgeProviderId)).pathname;
+          bridgeRequest = (async () => {
+            const data = await mx.http.authedRequest<{ workspaces?: BridgeWorkspace[] }>(
+              Method.Get,
+              path,
+              undefined,
+              undefined,
+              { prefix: '' },
+            );
+            return (data.workspaces ?? []).map((ws) => ({
               id: ws.id,
               name: ws.name,
               bridge_provider: bridgeProviderId,
             }));
-          });
+          })();
         }
 
         const [bridgeWorkspaces = [], elevoResult] = await Promise.all([
@@ -135,7 +140,7 @@ export function AddWorkspaceModal({
         setLoadingAvailable(false);
       }
     },
-    [baseUrl, token, homeserverUrl, matrixToken, bridgeProvider, t],
+    [baseUrl, token, homeserverUrl, mx, bridgeProvider, t],
   );
 
   useEffect(() => {
@@ -143,7 +148,7 @@ export function AddWorkspaceModal({
   }, [fetchAvailable]);
 
   const canFetchWorkspaceSource =
-    (!!baseUrl && !!token) || (!!homeserverUrl && !!matrixToken && !!bridgeProvider?.id);
+    (!!baseUrl && !!token) || (!!homeserverUrl && !!bridgeProvider?.id);
   const totalPages = Math.ceil(availableTotal / PAGE_SIZE);
 
   const filteredWorkspaces = availableWorkspaces.filter((ws) => {
