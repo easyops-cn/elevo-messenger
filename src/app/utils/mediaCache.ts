@@ -1,4 +1,5 @@
 import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
+import type { MatrixClient } from 'matrix-js-sdk';
 import { decryptFile, downloadEncryptedMedia, downloadMedia } from './matrix';
 import { FALLBACK_MIMETYPE, mimeTypeToExt } from './mimeTypes';
 
@@ -6,6 +7,7 @@ export type CachedMediaRequest = {
   mediaUrl: string;
   mimeType: string;
   encInfo?: EncryptedAttachmentInfo;
+  mx?: MatrixClient;
   cacheScope?: 'dated' | 'avatar';
   createdAt?: number;
 };
@@ -249,14 +251,17 @@ const readCachedBlob = async (
 
 const downloadRequestBlob = async (request: CachedMediaRequest): Promise<Blob> =>
   request.encInfo
-    ? downloadEncryptedMedia(request.mediaUrl, (encBuf) =>
-        decryptFile(
-          encBuf,
-          request.mimeType || FALLBACK_MIMETYPE,
-          request.encInfo as EncryptedAttachmentInfo,
-        ),
+    ? downloadEncryptedMedia(
+        request.mediaUrl,
+        (encBuf) =>
+          decryptFile(
+            encBuf,
+            request.mimeType || FALLBACK_MIMETYPE,
+            request.encInfo as EncryptedAttachmentInfo,
+          ),
+        request.mx,
       )
-    : downloadMedia(request.mediaUrl);
+    : downloadMedia(request.mediaUrl, request.mx);
 
 const writeCachedBlob = async (
   fs: TauriFs,

@@ -1,3 +1,5 @@
+import type { MatrixClient } from 'matrix-js-sdk';
+import { Method } from 'matrix-js-sdk';
 import { NO_SERVICE_WORKER } from './noServiceWorker';
 
 export const targetFromEvent = (evt: Event, selector: string): Element | undefined => {
@@ -91,15 +93,19 @@ export const getDataTransferFiles = (dataTransfer: DataTransfer): File[] | undef
 export const renameFile = (file: File, name: string): File =>
   new File([file], name, { type: file.type });
 
-export const getImageUrlBlob = async (url: string) => {
-  const headers: Record<string, string> = {};
+export const getImageUrlBlob = async (url: string, mx?: MatrixClient) => {
   if (NO_SERVICE_WORKER) {
-    const accessToken = localStorage.getItem('elevo_access_token');
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
-    }
+    if (!mx) throw new Error('Matrix client is required to fetch authenticated media');
+    const requestUrl = new URL(url);
+    return mx.http.authedRequest<Blob>(
+      Method.Get,
+      requestUrl.pathname,
+      Object.fromEntries(requestUrl.searchParams.entries()),
+      undefined,
+      { baseUrl: requestUrl.origin, prefix: '', rawResponseBody: true },
+    );
   }
-  const res = await fetch(url, { headers });
+  const res = await fetch(url);
   const blob = await res.blob();
   return blob;
 };

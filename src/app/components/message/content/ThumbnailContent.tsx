@@ -35,6 +35,8 @@ export function ThumbnailContent({ info, createdAt, renderImage }: ThumbnailCont
         thumbInfo.mimetype ?? FALLBACK_MIMETYPE,
         encInfo,
         createdAt,
+        undefined,
+        mx,
       );
     }, [mx, info, useAuthentication, createdAt]),
   );

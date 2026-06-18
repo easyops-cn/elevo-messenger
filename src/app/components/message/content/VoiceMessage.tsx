@@ -32,7 +32,7 @@ export function VoiceMessage({
     useCallback(async () => {
       const mediaUrl = mxcUrlToHttp(mx, url, useAuthentication);
       if (!mediaUrl) throw new Error('Invalid media URL');
-      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo, createdAt);
+      return loadMediaBlobUrl(mediaUrl, mimeType, encInfo, createdAt, undefined, mx);
     }, [mx, url, useAuthentication, mimeType, encInfo, createdAt]),
   );
 

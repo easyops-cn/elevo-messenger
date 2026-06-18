@@ -4,10 +4,11 @@ import { RoomEvent, type RoomEventHandlerMap } from 'matrix-js-sdk';
 import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import { useElevoConfig } from '../../../hooks/useElevoConfig';
 import { todosAtom } from '../../../state/todos/todosAtom';
-import type { TodoItem, TodosResponse } from './useTodosApi';
+import { fetchTodosPage, type TodoItem } from './useTodosApi';
 import { parseAskUser, parseToolCall } from '../../../components/message';
 
 function TodosApiSync() {
+  const mx = useMatrixClient();
   const setTodos = useSetAtom(todosAtom);
   const { todos } = useElevoConfig();
   const apiUrl = todos?.api;
@@ -20,17 +21,7 @@ function TodosApiSync() {
       setTodos({ type: 'SET_FETCHING', isFetching: true });
       setTodos({ type: 'SET_ERROR', error: null });
       try {
-        const token = localStorage.getItem('elevo_access_token');
-        if (!token) throw new Error('No access token');
-        const params = new URLSearchParams({ limit: '20' });
-        const res = await fetch(`${apiUrl}?${params}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        if (!res.ok) throw new Error(`Todos API error: ${res.status}`);
-        const data: TodosResponse = await res.json();
+        const data = await fetchTodosPage(mx, apiUrl);
         if (!cancelled) {
           setTodos({
             type: 'SET_API_PAGE',
@@ -58,7 +49,7 @@ function TodosApiSync() {
     return () => {
       cancelled = true;
     };
-  }, [apiUrl, setTodos]);
+  }, [mx, apiUrl, setTodos]);
 
   useEffect(
     () => () => {
@@ -71,6 +62,7 @@ function TodosApiSync() {
 }
 
 export function useFetchTodosNextPage() {
+  const mx = useMatrixClient();
   const setTodos = useSetAtom(todosAtom);
   const todosState = useAtomValue(todosAtom);
   const { todos } = useElevoConfig();
@@ -82,17 +74,7 @@ export function useFetchTodosNextPage() {
     fetchingRef.current = true;
     setTodos({ type: 'SET_FETCHING', isFetching: true });
     try {
-      const token = localStorage.getItem('elevo_access_token');
-      if (!token) throw new Error('No access token');
-      const params = new URLSearchParams({ limit: '20', cursor: todosState.nextCursor });
-      const res = await fetch(`${apiUrl}?${params}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      if (!res.ok) throw new Error(`Todos API error: ${res.status}`);
-      const data: TodosResponse = await res.json();
+      const data = await fetchTodosPage(mx, apiUrl, todosState.nextCursor);
       setTodos({
         type: 'SET_API_PAGE',
         items: data.todos,
@@ -105,7 +87,7 @@ export function useFetchTodosNextPage() {
       fetchingRef.current = false;
       setTodos({ type: 'SET_FETCHING', isFetching: false });
     }
-  }, [apiUrl, todosState.nextCursor, todosState.isFetching, setTodos]);
+  }, [mx, apiUrl, todosState.nextCursor, todosState.isFetching, setTodos]);
 }
 
 function TodosTimelineSync() {

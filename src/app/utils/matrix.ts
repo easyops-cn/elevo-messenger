@@ -8,6 +8,7 @@ import {
   MatrixClient,
   MatrixError,
   MatrixEvent,
+  Method,
   Room,
   RoomMember,
   UploadProgress,
@@ -295,15 +296,19 @@ export const mxcUrlToHttp = (
     useAuthentication,
   );
 
-export const downloadMedia = async (src: string): Promise<Blob> => {
-  const headers: Record<string, string> = {};
+export const downloadMedia = async (src: string, mx?: MatrixClient): Promise<Blob> => {
   if (NO_SERVICE_WORKER) {
-    const accessToken = localStorage.getItem('elevo_access_token');
-    if (accessToken) {
-      headers.Authorization = `Bearer ${accessToken}`;
-    }
+    if (!mx) throw new Error('Matrix client is required to download authenticated media');
+    const url = new URL(src);
+    return mx.http.authedRequest<Blob>(
+      Method.Get,
+      url.pathname,
+      Object.fromEntries(url.searchParams.entries()),
+      undefined,
+      { baseUrl: url.origin, prefix: '', rawResponseBody: true },
+    );
   }
-  const res = await fetch(src, { method: 'GET', headers });
+  const res = await fetch(src, { method: 'GET' });
   if (!res.ok) {
     throw new Error(`Failed to download media: ${res.status} ${res.statusText}`);
   }
@@ -314,8 +319,9 @@ export const downloadMedia = async (src: string): Promise<Blob> => {
 export const downloadEncryptedMedia = async (
   src: string,
   decryptContent: (buf: ArrayBuffer) => Promise<Blob>,
+  mx?: MatrixClient,
 ): Promise<Blob> => {
-  const encryptedContent = await downloadMedia(src);
+  const encryptedContent = await downloadMedia(src, mx);
   const decryptedContent = await decryptContent(await encryptedContent.arrayBuffer());
 
   return decryptedContent;

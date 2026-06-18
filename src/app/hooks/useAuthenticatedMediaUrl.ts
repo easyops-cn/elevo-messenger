@@ -52,18 +52,13 @@ export function useAuthenticatedMediaUrl(
       return undefined;
     }
 
-    const accessToken = mx.getAccessToken();
-    if (!accessToken) {
-      setBlobUrl(url);
-      return undefined;
-    }
-
     let cancelled = false;
 
     loadCachedMediaUrl({
       mediaUrl: url,
       mimeType: cacheScope === 'avatar' ? 'image/*' : 'application/octet-stream',
       cacheScope,
+      mx,
     })
       .then((newUrl) => {
         if (!cancelled) {

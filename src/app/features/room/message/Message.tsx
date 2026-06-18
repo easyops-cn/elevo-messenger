@@ -409,7 +409,14 @@ export const MessageCopyImageItem = as<
       const mediaUrl = mxcUrlToHttp(mx, url, useAuth);
       if (!mediaUrl) throw new Error('Invalid media URL');
 
-      const blob = await loadMediaBlob(mediaUrl, mimeType, content.file, mEvent.getTs());
+      const blob = await loadMediaBlob(
+        mediaUrl,
+        mimeType,
+        content.file,
+        mEvent.getTs(),
+        undefined,
+        mx,
+      );
       await writeImage(await imageBlobToPngBytes(blob));
       onClose?.();
     }, [content.file, mEvent, mimeType, mx, onClose, url, useAuth]),

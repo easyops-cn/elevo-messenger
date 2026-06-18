@@ -1,4 +1,5 @@
 import type { EncryptedAttachmentInfo } from 'browser-encrypt-attachment';
+import type { MatrixClient } from 'matrix-js-sdk';
 import {
   CachedMediaRequest,
   loadCachedMediaBlob,
@@ -12,6 +13,7 @@ export const loadMediaBlob = async (
   encInfo?: EncryptedAttachmentInfo,
   createdAt?: number,
   cacheScope?: CachedMediaRequest['cacheScope'],
+  mx?: MatrixClient,
 ): Promise<Blob> =>
   loadCachedMediaBlob({
     mediaUrl,
@@ -19,6 +21,7 @@ export const loadMediaBlob = async (
     encInfo,
     createdAt,
     cacheScope,
+    mx,
   });
 
 export const loadMediaBlobUrl = async (
@@ -27,6 +30,7 @@ export const loadMediaBlobUrl = async (
   encInfo?: EncryptedAttachmentInfo,
   createdAt?: number,
   cacheScope?: CachedMediaRequest['cacheScope'],
+  mx?: MatrixClient,
 ): Promise<string> =>
   loadCachedMediaUrl({
     mediaUrl,
@@ -34,6 +38,7 @@ export const loadMediaBlobUrl = async (
     encInfo,
     createdAt,
     cacheScope,
+    mx,
   });
 
 export const loadMediaFilePath = async (
@@ -42,6 +47,7 @@ export const loadMediaFilePath = async (
   encInfo?: EncryptedAttachmentInfo,
   createdAt?: number,
   cacheScope?: CachedMediaRequest['cacheScope'],
+  mx?: MatrixClient,
 ): Promise<string> =>
   loadCachedMediaFilePath({
     mediaUrl,
@@ -49,4 +55,5 @@ export const loadMediaFilePath = async (
     encInfo,
     createdAt,
     cacheScope,
+    mx,
   });

@@ -6,6 +6,7 @@ import { saveFile } from '../../utils/file-saver';
 import * as css from './ImageViewer.css';
 import { useZoom } from '../../hooks/useZoom';
 import { usePan } from '../../hooks/usePan';
+import { useMatrixClient } from '../../hooks/useMatrixClient';
 import { downloadMedia } from '../../utils/matrix';
 
 export type ImageViewerProps = {
@@ -19,6 +20,7 @@ export type ImageViewerProps = {
 export const ImageViewer = as<'div', ImageViewerProps>(
   ({ className, alt, src, hideCloseButton, onDownload, requestClose, ...props }, ref) => {
     const { t } = useTranslation();
+    const mx = useMatrixClient();
     const { zoom, zoomIn, zoomOut, setZoom } = useZoom(0.2);
     const { pan, cursor, onMouseDown } = usePan(zoom !== 1);
 
@@ -27,7 +29,7 @@ export const ImageViewer = as<'div', ImageViewerProps>(
         await onDownload();
         return;
       }
-      const fileContent = await downloadMedia(src);
+      const fileContent = await downloadMedia(src, mx);
       await saveFile(fileContent, alt);
     };
 
