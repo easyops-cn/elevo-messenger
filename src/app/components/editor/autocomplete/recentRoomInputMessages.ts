@@ -11,9 +11,19 @@ export type RecentRoomInputMessageStorage = Pick<Storage, 'getItem' | 'setItem'>
 export const RECENT_ROOM_INPUT_MESSAGE_LIMIT = 10;
 
 const STORAGE_KEY_PREFIX = 'recentRoomInputMessages';
+const MAIN_TIMELINE_KEY = 'main';
 
-const getStorageKey = (currentUserId: string): string =>
-  `${STORAGE_KEY_PREFIX}:${encodeURIComponent(currentUserId)}`;
+const getStorageKey = (
+  currentUserId: string,
+  roomId: string,
+  threadRootId: string | null | undefined,
+): string =>
+  [
+    STORAGE_KEY_PREFIX,
+    encodeURIComponent(currentUserId),
+    encodeURIComponent(roomId),
+    encodeURIComponent(threadRootId ?? MAIN_TIMELINE_KEY),
+  ].join(':');
 
 const getLocalStorage = (): RecentRoomInputMessageStorage | undefined => {
   if (typeof window === 'undefined') return undefined;
@@ -55,11 +65,13 @@ export const sanitizeRoomInputRecentMessages = (value: unknown): RoomInputRecent
 
 export const getRoomInputRecentMessages = (
   currentUserId: string | null | undefined,
+  roomId: string | null | undefined,
+  threadRootId: string | null | undefined,
   storage: RecentRoomInputMessageStorage | undefined = getLocalStorage(),
 ): RoomInputRecentMessages => {
-  if (!currentUserId || !storage) return [];
+  if (!currentUserId || !roomId || !storage) return [];
 
-  const item = storage.getItem(getStorageKey(currentUserId));
+  const item = storage.getItem(getStorageKey(currentUserId, roomId, threadRootId));
   if (!item) return [];
 
   try {
@@ -71,20 +83,22 @@ export const getRoomInputRecentMessages = (
 
 export const putRoomInputRecentMessage = (
   currentUserId: string | null | undefined,
+  roomId: string | null | undefined,
+  threadRootId: string | null | undefined,
   message: Pick<RecentRoomInputMessage, 'body' | 'formattedBody'>,
   storage: RecentRoomInputMessageStorage | undefined = getLocalStorage(),
   updatedAt = Date.now(),
 ): RoomInputRecentMessages => {
-  if (!currentUserId || !storage || message.body.trim().length === 0) return [];
+  if (!currentUserId || !roomId || !storage || message.body.trim().length === 0) return [];
 
-  const recentMessages = getRoomInputRecentMessages(currentUserId, storage);
+  const recentMessages = getRoomInputRecentMessages(currentUserId, roomId, threadRootId, storage);
   const messageKey = getMessageKey(message);
   const nextMessages = [
     { ...message, updatedAt },
     ...recentMessages.filter((entry) => getMessageKey(entry) !== messageKey),
   ].slice(0, RECENT_ROOM_INPUT_MESSAGE_LIMIT);
 
-  storage.setItem(getStorageKey(currentUserId), JSON.stringify(nextMessages));
+  storage.setItem(getStorageKey(currentUserId, roomId, threadRootId), JSON.stringify(nextMessages));
 
   return nextMessages;
 };

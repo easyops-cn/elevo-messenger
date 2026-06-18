@@ -208,7 +208,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
   const [autocompleteQuery, setAutocompleteQuery] =
     useState<AutocompleteQuery<AutocompletePrefix>>();
   const [recentMessages, setRecentMessages] = useState(() =>
-    getRoomInputRecentMessages(mx.getUserId()),
+    getRoomInputRecentMessages(mx.getUserId(), roomId, threadRootId),
   );
   const [, setBeginCommand] = useState(() => getBeginCommand(editor));
   const [inputReferences, setInputReferences] = useAtom(roomIdToInputReferencesAtomFamily(roomId));
@@ -225,8 +225,8 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
   const sendTypingStatus = useTypingStatusUpdater(mx, roomId);
 
   useEffect(() => {
-    setRecentMessages(getRoomInputRecentMessages(mx.getUserId()));
-  }, [mx]);
+    setRecentMessages(getRoomInputRecentMessages(mx.getUserId(), roomId, threadRootId));
+  }, [mx, roomId, threadRootId]);
 
   const updateBeginCommand = useCallback(() => {
     setBeginCommand(getBeginCommand(editor));
@@ -572,7 +572,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     );
     if (plainText.trim().length > 0) {
       setRecentMessages(
-        putRoomInputRecentMessage(mx.getUserId(), {
+        putRoomInputRecentMessage(mx.getUserId(), roomId, threadRootId, {
           body,
           formattedBody: content.formatted_body,
         }),
