@@ -33,7 +33,7 @@ import React, {
 import { useTranslation } from 'react-i18next';
 import FocusTrap from 'focus-trap-react';
 import { useHover, useFocusWithin } from 'react-aria';
-import { MatrixEvent, Room, MsgType } from 'matrix-js-sdk';
+import { EventStatus, MatrixEvent, Room, MsgType } from 'matrix-js-sdk';
 import { Relations } from 'matrix-js-sdk/lib/models/relations';
 import classNames from 'classnames';
 import { RoomPinnedEventsEventContent } from 'matrix-js-sdk/lib/types';
@@ -94,8 +94,53 @@ import { useRoomThread } from '../RoomThreadContext';
 import { isDesktopTauri } from '../../../plugins/useTauriOpener';
 import { FALLBACK_MIMETYPE } from '../../../utils/mimeTypes';
 import { loadMediaBlob } from '../../../utils/mediaDownload';
+import { shouldShowResendMessageButton } from './sendStatus';
 
 export type ReactionHandler = (keyOrMxc: string, shortcode: string) => void;
+
+type ResendMessageButtonProps = {
+  room: Room;
+  mEvent: MatrixEvent;
+};
+
+function ResendMessageButton({ room, mEvent }: ResendMessageButtonProps) {
+  const mx = useMatrixClient();
+  const { t } = useTranslation();
+  const [retrying, setRetrying] = useState(false);
+
+  const handleRetry: MouseEventHandler<HTMLButtonElement> = async (evt) => {
+    evt.preventDefault();
+    evt.stopPropagation();
+
+    if (retrying || mEvent.status !== EventStatus.NOT_SENT) return;
+
+    setRetrying(true);
+    try {
+      await mx.resendEvent(mEvent, room);
+    } catch (error) {
+      console.error('Failed to resend message:', error);
+    } finally {
+      setRetrying(false);
+    }
+  };
+
+  return (
+    <IconButton
+      className={css.ResendMessageButton}
+      size="300"
+      variant="Critical"
+      fill="Soft"
+      radii="Pill"
+      title={t('message.resendMessage')}
+      aria-label={t('message.resendMessage')}
+      aria-busy={retrying}
+      disabled={retrying}
+      onClick={handleRetry}
+    >
+      <Icon src={CircleAlertIcon} size="100" />
+    </IconButton>
+  );
+}
 
 type MessageQuickReactionsProps = {
   onReaction: ReactionHandler;
@@ -836,6 +881,7 @@ export const Message = as<'div', MessageProps>(
     const useAuthentication = useMediaAuthentication();
     const senderId = mEvent.getSender() ?? '';
     const isOwn = senderId === mx.getUserId();
+    const showResendMessage = shouldShowResendMessageButton(mEvent, mx.getUserId());
 
     const [hover, setHover] = useState(false);
     const { hoverProps } = useHover({ onHoverChange: setHover });
@@ -931,62 +977,64 @@ export const Message = as<'div', MessageProps>(
     );
 
     const msgCompactContentJSX = (
-      <Box
-        direction="Column"
-        alignSelf={isOwn && messageLayout !== MessageLayout.Compact ? 'End' : 'Start'}
-        style={{ maxWidth: '100%' }}
-      >
-        {reply}
-        {edit && onEditId ? (
-          <MessageEditor
-            style={{
-              maxWidth: '100%',
-              width: '100vw',
-            }}
-            roomId={room.roomId}
-            room={room}
-            mEvent={mEvent}
-            imagePackRooms={imagePackRooms}
-            onCancel={() => onEditId()}
-          />
-        ) : (
-          children
-        )}
-        {fileReference}
-        {taskReference}
-        {reactions}
-        {threadSummary}
-      </Box>
+      <div className={css.ResendMessageContent}>
+        {showResendMessage && <ResendMessageButton room={room} mEvent={mEvent} />}
+        <Box
+          direction="Column"
+          className={css.ResendMessageContentBody}
+          alignSelf={isOwn && messageLayout !== MessageLayout.Compact ? 'End' : 'Start'}
+        >
+          {reply}
+          {edit && onEditId ? (
+            <MessageEditor
+              style={{
+                maxWidth: '100%',
+                width: '100vw',
+              }}
+              roomId={room.roomId}
+              room={room}
+              mEvent={mEvent}
+              imagePackRooms={imagePackRooms}
+              onCancel={() => onEditId()}
+            />
+          ) : (
+            children
+          )}
+          {fileReference}
+          {taskReference}
+          {reactions}
+          {threadSummary}
+        </Box>
+      </div>
     );
 
     const msgBubbleContentJSX = (
-      <Box
-        direction="Column"
-        className={
-          isOwn && messageLayout === MessageLayout.Modern
-            ? layoutCss.ModernOwnContent({
-                transparent,
-              })
-            : undefined
-        }
-        style={{ maxWidth: '100%' }}
-      >
-        {edit && onEditId ? (
-          <MessageEditor
-            style={{
-              maxWidth: '100%',
-              width: '100vw',
-            }}
-            roomId={room.roomId}
-            room={room}
-            mEvent={mEvent}
-            imagePackRooms={imagePackRooms}
-            onCancel={() => onEditId()}
-          />
-        ) : (
-          children
-        )}
-      </Box>
+      <div className={css.ResendMessageContent}>
+        {showResendMessage && <ResendMessageButton room={room} mEvent={mEvent} />}
+        <Box
+          direction="Column"
+          className={classNames(css.ResendMessageContentBody, {
+            [layoutCss.ModernOwnContent({ transparent })]:
+              isOwn && messageLayout === MessageLayout.Modern,
+          })}
+        >
+          {edit && onEditId ? (
+            <MessageEditor
+              style={{
+                maxWidth: '100%',
+                width: '100vw',
+              }}
+              roomId={room.roomId}
+              room={room}
+              mEvent={mEvent}
+              imagePackRooms={imagePackRooms}
+              onCancel={() => onEditId()}
+            />
+          ) : (
+            children
+          )}
+        </Box>
+      </div>
     );
 
     const bubbleAfterContentJSX = (

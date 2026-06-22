@@ -63,6 +63,23 @@ export const MessageQuickReaction = style({
   minWidth: toRem(32),
 });
 
+export const ResendMessageContent = style({
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  gap: config.space.S200,
+  maxWidth: '100%',
+});
+
+export const ResendMessageContentBody = style({
+  minWidth: 0,
+  maxWidth: '100%',
+});
+
+export const ResendMessageButton = style({
+  flexShrink: 0,
+});
+
 export const MessageMenuGroup = style({
   padding: config.space.S100,
 });

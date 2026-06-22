@@ -909,6 +909,7 @@
     "reportedMessage": "Message has been reported to server.",
     "reporting": "Reporting...",
     "report": "Report",
+    "resendMessage": "Resend message",
     "noReason": "No reason provided",
     "addReaction": "Add Reaction",
     "replyInThread": "Reply in Thread",

@@ -123,6 +123,7 @@ import type { CodeViewWorkspaceContext } from '../../components/code-view';
 import { refreshMatrixTokenOrCurrent } from '../../utils/matrixTokenRefresh';
 import { openBridgeExplorer, openTaskBoard } from '../../plugins/useTauriOpener';
 import { resolveBridgeReferenceWorkspace } from './resolveBridgeReferenceWorkspace';
+import { eventBelongsToTimelineView, refreshTimelineForLocalEcho } from './timelineLocalEcho';
 
 const TimelineFloat = as<'div', css.TimelineFloatVariants>(
   ({ position, className, ...props }, ref) => (
@@ -412,24 +413,12 @@ const useLiveEventArrive = (
       data,
     ) => {
       if (eventRoom?.roomId !== room.roomId || !data.liveEvent) return;
-      if (
-        thread
-          ? mEvent.getId() !== thread.id && mEvent.threadRootId !== thread.id
-          : !!mEvent.threadRootId
-      ) {
-        return;
-      }
+      if (!eventBelongsToTimelineView(mEvent, thread?.id)) return;
       onArrive(mEvent);
     };
     const handleRedaction: RoomEventHandlerMap[RoomEvent.Redaction] = (mEvent, eventRoom) => {
       if (eventRoom?.roomId !== room.roomId) return;
-      if (
-        thread
-          ? mEvent.getId() !== thread.id && mEvent.threadRootId !== thread.id
-          : !!mEvent.threadRootId
-      ) {
-        return;
-      }
+      if (!eventBelongsToTimelineView(mEvent, thread?.id)) return;
       onArrive(mEvent);
     };
 
@@ -440,6 +429,46 @@ const useLiveEventArrive = (
       room.removeListener(RoomEvent.Redaction, handleRedaction);
     };
   }, [room, onArrive, thread]);
+};
+
+const useLocalEchoTimelineRefresh = (
+  room: Room,
+  thread: Thread | undefined,
+  setTimeline: Dispatch<SetStateAction<Timeline>>,
+  onScrollToBottom: () => void,
+  wasAtLiveEnd: () => boolean,
+) => {
+  useEffect(() => {
+    const handleLocalEchoUpdated: RoomEventHandlerMap[RoomEvent.LocalEchoUpdated] = (
+      mEvent,
+      eventRoom,
+    ) => {
+      if (eventRoom?.roomId !== room.roomId) return;
+      if (!eventBelongsToTimelineView(mEvent, thread?.id)) return;
+
+      const liveTimeline = getLiveTimeline(room, thread);
+      let shouldScrollToBottom = false;
+
+      setTimeline((currentTimeline) => {
+        const refresh = refreshTimelineForLocalEcho({
+          timeline: currentTimeline,
+          liveTimeline,
+          wasAtLiveEnd: wasAtLiveEnd(),
+        });
+        shouldScrollToBottom = refresh.scrollToBottom;
+        return refresh.timeline;
+      });
+
+      if (shouldScrollToBottom) {
+        onScrollToBottom();
+      }
+    };
+
+    room.on(RoomEvent.LocalEchoUpdated, handleLocalEchoUpdated);
+    return () => {
+      room.removeListener(RoomEvent.LocalEchoUpdated, handleLocalEchoUpdated);
+    };
+  }, [room, thread, setTimeline, onScrollToBottom, wasAtLiveEnd]);
 };
 
 const useLiveTimelineRefresh = (room: Room, onRefresh: () => void) => {
@@ -823,6 +852,17 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
       },
       [mx, room, thread, unreadInfo, hideActivity],
     ),
+  );
+
+  useLocalEchoTimelineRefresh(
+    room,
+    thread,
+    setTimeline,
+    useCallback(() => {
+      scrollToBottomRef.current.count += 1;
+      scrollToBottomRef.current.smooth = true;
+    }, []),
+    useCallback(() => atLiveEndRef.current, []),
   );
 
   const handleOpenEvent = useCallback(

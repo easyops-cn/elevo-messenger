@@ -909,6 +909,7 @@
     "reportedMessage": "消息已举报到服务器。",
     "reporting": "举报中...",
     "report": "举报",
+    "resendMessage": "重新发送消息",
     "noReason": "未提供原因",
     "addReaction": "添加表情反应",
     "replyInThread": "在子话题中回复",
