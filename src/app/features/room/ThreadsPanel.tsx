@@ -5,6 +5,7 @@ import { useTranslation } from 'react-i18next';
 
 import * as css from './RoomSidePanel.css';
 import { ThreadMenuItem } from './ThreadMenuItem';
+import { sortThreadsForPanel } from './sortThreadsForPanel';
 import { useRoomThreads } from '../../hooks/useRoomThreads';
 import { useMediaAuthentication } from '../../hooks/useMediaAuthentication';
 import { useThreadChat } from '../../state/threadChat';
@@ -21,22 +22,15 @@ export function ThreadsPanel({ room }: ThreadsPanelProps) {
   const useAuthentication = useMediaAuthentication();
   const [threadChat, setThreadChat] = useThreadChat(room.roomId);
   const [showAllThreads, setShowAllThreads] = useState(false);
-  const { threadIds: starredThreadIds } = useStarredThreadsByRoom(room.roomId);
+  const { threads: starredThreads, threadIds: starredThreadIds } = useStarredThreadsByRoom(
+    room.roomId,
+  );
 
   const { threads, loading, error, retry } = useRoomThreads(room);
 
   const sortedThreads = useMemo(
-    () =>
-      [...threads].sort((a, b) => {
-        const aStarred = starredThreadIds.has(a.id);
-        const bStarred = starredThreadIds.has(b.id);
-        if (aStarred !== bStarred) return aStarred ? -1 : 1;
-
-        const aTs = a.replyToEvent?.getTs() ?? a.rootEvent?.getTs() ?? 0;
-        const bTs = b.replyToEvent?.getTs() ?? b.rootEvent?.getTs() ?? 0;
-        return bTs - aTs;
-      }),
-    [starredThreadIds, threads],
+    () => sortThreadsForPanel(threads, starredThreads),
+    [starredThreads, threads],
   );
 
   const shouldShowThreadsPreview =
