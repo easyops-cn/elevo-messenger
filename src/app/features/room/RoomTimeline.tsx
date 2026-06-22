@@ -592,7 +592,11 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
   const openBridgeWorkspaceReference = useCallback(
     async (
       workspace: WorkspaceItem,
-      options: { initialFilePath?: string; initialTaskSlug?: string },
+      options: {
+        initialFilePath?: string;
+        initialPathKind?: 'file' | 'directory';
+        initialTaskSlug?: string;
+      },
     ) => {
       if (!workspace.bridge_provider) return false;
       const homeserverUrl = mx.getHomeserverUrl();
@@ -624,6 +628,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
       return openBridgeExplorer({
         ...payload,
         initialFilePath: options.initialFilePath,
+        initialPathKind: options.initialPathKind,
       });
     },
     [mx],
@@ -1336,6 +1341,7 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
                       ? () => {
                           openBridgeWorkspaceReference(fileReferenceWorkspace, {
                             initialFilePath: fileReference.path,
+                            initialPathKind: fileReference.kind,
                           });
                         }
                       : undefined

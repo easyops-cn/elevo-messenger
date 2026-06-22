@@ -5,24 +5,27 @@ import { marked } from 'marked';
 import { useTranslation } from 'react-i18next';
 import { saveFile } from '../../utils/file-saver';
 import { ShikiCode } from '../../plugins/shiki';
+import { FolderOpenIcon } from '../../icons/FolderOpenIcon';
 import { fetchFileContent, fetchFileDownload, fetchFileMetadata } from './api';
 import { useBridgeExplorer } from './BridgeExplorerContext';
 import { InlineError, useErrorMessage } from './InlineError';
 import { sendSdkMessage } from './sdkBridge';
-import type { FileContentResult, FileMetadata } from './types';
+import type { BridgeExplorerSelection, FileContentResult, FileMetadata } from './types';
 import * as css from './BridgeExplorer.css';
 
 type FileViewerProps = {
-  path: string | null;
+  selection: BridgeExplorerSelection | null;
 };
 
 const basename = (path: string): string => path.split('/').pop() ?? path;
 const isMarkdownPath = (path: string): boolean => /\.(md|markdown|mdown|mkdn|mdx)$/i.test(path);
 
-export function FileViewer({ path }: FileViewerProps) {
+export function FileViewer({ selection }: FileViewerProps) {
   const { t } = useTranslation();
   const { baseUrl, workspaceId, workspaceName } = useBridgeExplorer();
   const toMessage = useErrorMessage();
+  const path = selection?.path ?? null;
+  const isDirectory = selection?.kind === 'directory';
 
   const [metadata, setMetadata] = useState<FileMetadata | null>(null);
   const [content, setContent] = useState<FileContentResult | null>(null);
@@ -39,7 +42,7 @@ export function FileViewer({ path }: FileViewerProps) {
   // after i18n finishes loading async, which would re-fire the load effect and
   // trigger a duplicate request. Store the raw error and map at render time.
   useEffect(() => {
-    if (!path) return;
+    if (!path || isDirectory) return;
     let disposed = false;
     setLoading(true);
     setError(null);
@@ -68,7 +71,7 @@ export function FileViewer({ path }: FileViewerProps) {
     return () => {
       disposed = true;
     };
-  }, [baseUrl, workspaceId, path, retryKey]);
+  }, [baseUrl, workspaceId, path, isDirectory, retryKey]);
 
   const retryLoad = useCallback(() => {
     setRetryKey((key) => key + 1);
@@ -76,25 +79,27 @@ export function FileViewer({ path }: FileViewerProps) {
 
   useEffect(() => {
     setMarkdownMode('preview');
-  }, [path]);
+  }, [path, isDirectory]);
 
-  // Opening a file detail references it back to the host composer. Dedupe so the
-  // same path only emits once; switching to another file updates the reference.
-  const lastSentPathRef = useRef<string | null>(null);
+  // Opening a path detail references it back to the host composer. Dedupe so the
+  // same path/kind only emits once; switching to another path updates the reference.
+  const lastSentRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!path) return;
-    if (lastSentPathRef.current === path) return;
-    lastSentPathRef.current = path;
+    if (!selection) return;
+    const dedupeKey = `${selection.kind}:${selection.path}`;
+    if (lastSentRef.current === dedupeKey) return;
+    lastSentRef.current = dedupeKey;
     sendSdkMessage('workspace-explorer', {
       type: 'select-file',
       file: {
-        path,
-        name: basename(path),
+        path: selection.path,
+        name: basename(selection.path),
         workspaceId,
         workspaceName,
+        kind: selection.kind,
       },
     }).catch((e) => console.error('[bridge-explorer] failed to send select-file', e));
-  }, [path, workspaceId, workspaceName]);
+  }, [selection, workspaceId, workspaceName]);
 
   // Revoke media object URLs when content changes / unmounts.
   useEffect(
@@ -105,13 +110,13 @@ export function FileViewer({ path }: FileViewerProps) {
   );
 
   const handleDownload = useCallback(() => {
-    if (!path) return;
+    if (!path || isDirectory) return;
     setDownloading(true);
     fetchFileDownload(baseUrl, workspaceId, path)
       .then((blob) => saveFile(blob, basename(path)))
       .catch(setError)
       .finally(() => setDownloading(false));
-  }, [baseUrl, workspaceId, path]);
+  }, [baseUrl, workspaceId, path, isDirectory]);
 
   if (!path) {
     return (
@@ -126,6 +131,34 @@ export function FileViewer({ path }: FileViewerProps) {
         <Text size="T300" priority="300">
           {t('bridgeExplorer.selectFile')}
         </Text>
+      </Box>
+    );
+  }
+
+  if (isDirectory) {
+    return (
+      <Box className={css.Viewer} direction="Column">
+        <Box className={css.Header} shrink="No" alignItems="Center">
+          <Box grow="Yes" alignItems="Center" gap="100" style={{ minWidth: 0 }}>
+            <Text size="T300" truncate title={path}>
+              {path}
+            </Text>
+          </Box>
+        </Box>
+        <Box className={css.ViewerContent} grow="Yes">
+          <Box
+            className={css.Centered}
+            direction="Column"
+            justifyContent="Center"
+            alignItems="Center"
+            gap="200"
+          >
+            <Icon size="600" src={FolderOpenIcon} />
+            <Text size="T300" priority="300">
+              {t('bridgeExplorer.directorySelected')}
+            </Text>
+          </Box>
+        </Box>
       </Box>
     );
   }

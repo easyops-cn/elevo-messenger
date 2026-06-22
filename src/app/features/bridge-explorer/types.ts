@@ -16,11 +16,19 @@ export type BridgeExplorerPayload = {
   homeserverUrl: string;
   /** Optional file path to select when the explorer opens. */
   initialFilePath?: string;
+  /** Optional type of the initial path; missing means file for older callers. */
+  initialPathKind?: BridgeExplorerSelectionKind;
 };
 
 export type FileClassification = 'text' | 'media' | 'binary';
 
 export type FileType = 'file' | 'dir';
+export type BridgeExplorerSelectionKind = 'file' | 'directory';
+
+export type BridgeExplorerSelection = {
+  path: string;
+  kind: BridgeExplorerSelectionKind;
+};
 
 /** A single entry in a directory listing. */
 export type DirectoryEntry = {

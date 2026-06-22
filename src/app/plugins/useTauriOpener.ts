@@ -82,10 +82,11 @@ export type BridgeExplorerPayload = {
   matrixToken: string;
   homeserverUrl: string;
   /**
-   * Optional file path to select on open. When the window already exists, the
-   * backend pushes this path to it so it switches to the file.
+   * Optional path to select on open. When the window already exists, the
+   * backend pushes this path to it so it switches to the path.
    */
   initialFilePath?: string;
+  initialPathKind?: 'file' | 'directory';
 };
 
 /**

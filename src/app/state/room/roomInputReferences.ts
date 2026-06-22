@@ -6,6 +6,7 @@ export type SelectedFileReference = {
   name: string;
   workspaceId: string;
   workspaceName: string;
+  kind?: 'file' | 'directory';
 };
 
 export type SelectedTaskReference = {

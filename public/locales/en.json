@@ -1195,6 +1195,7 @@
   },
   "bridgeExplorer": {
     "selectFile": "Select a file to view its contents",
+    "directorySelected": "Directory selected",
     "copyPath": "Copy path",
     "refresh": "Refresh",
     "download": "Download",

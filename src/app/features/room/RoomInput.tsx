@@ -139,6 +139,7 @@ import { MicIcon } from '../../icons/MicIcon';
 import { SendHorizontalIcon } from '../../icons/SendHorizontalIcon';
 import { CaseSensitiveIcon } from '../../icons/CaseSensitiveIcon';
 import { FileIcon } from '../../icons/FileIcon';
+import { FolderOpenIcon } from '../../icons/FolderOpenIcon';
 import { ListTodoIcon } from '../../icons/ListTodoIcon';
 import { EyeOffIcon } from '../../icons/EyeOffIcon';
 import { useRoomScrollToBottom } from './RoomScrollToBottomContext';
@@ -499,6 +500,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
             path: selectedFileRef.path,
             workspaceId: selectedFileRef.workspaceId,
             workspaceName: selectedFileRef.workspaceName,
+            kind: selectedFileRef.kind ?? 'file',
           }
         : null;
 
@@ -973,7 +975,11 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
                     radii="300"
                     fill="None"
                     aria-label={selectedFileRef.name}
-                    title={selectedFileRef.path}
+                    title={
+                      selectedFileRef.kind === 'directory'
+                        ? `${selectedFileRef.path}/`
+                        : selectedFileRef.path
+                    }
                     onClick={() =>
                       setInputReferenceActivity((activity) => toggleFileReferenceActive(activity))
                     }
@@ -986,7 +992,13 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
                   >
                     <Icon
                       size="50"
-                      src={fileRefActive ? FileIcon : EyeOffIcon}
+                      src={
+                        fileRefActive
+                          ? selectedFileRef.kind === 'directory'
+                            ? FolderOpenIcon
+                            : FileIcon
+                          : EyeOffIcon
+                      }
                       filled={fileRefActive}
                     />
                     <Text size="T200" truncate>

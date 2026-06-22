@@ -5,12 +5,12 @@ import { FileIcon } from '../../icons/FileIcon';
 import { fetchDirectoryListing } from './api';
 import { useBridgeExplorer } from './BridgeExplorerContext';
 import { InlineError, useErrorMessage } from './InlineError';
-import type { DirectoryEntry } from './types';
+import type { BridgeExplorerSelection, DirectoryEntry } from './types';
 import * as css from './BridgeExplorer.css';
 
 type FileTreeProps = {
-  selectedPath: string | null;
-  onSelectFile: (path: string) => void;
+  selection: BridgeExplorerSelection | null;
+  onSelect: (selection: BridgeExplorerSelection) => void;
 };
 
 /** Join a parent directory path with a child name into a normalized rel path. */
@@ -31,7 +31,8 @@ export function getAncestorPaths(path: string | null): Set<string> {
   return ancestors;
 }
 
-export function FileTree({ selectedPath, onSelectFile }: FileTreeProps) {
+export function FileTree({ selection, onSelect }: FileTreeProps) {
+  const selectedPath = selection?.path ?? null;
   const selectedAncestorPaths = getAncestorPaths(selectedPath);
 
   return (
@@ -41,7 +42,7 @@ export function FileTree({ selectedPath, onSelectFile }: FileTreeProps) {
         depth={0}
         selectedPath={selectedPath}
         selectedAncestorPaths={selectedAncestorPaths}
-        onSelectFile={onSelectFile}
+        onSelect={onSelect}
       />
     </Box>
   );
@@ -52,7 +53,7 @@ type DirectoryNodeProps = {
   depth: number;
   selectedPath: string | null;
   selectedAncestorPaths: Set<string>;
-  onSelectFile: (path: string) => void;
+  onSelect: (selection: BridgeExplorerSelection) => void;
 };
 
 function DirectoryNode({
@@ -60,7 +61,7 @@ function DirectoryNode({
   depth,
   selectedPath,
   selectedAncestorPaths,
-  onSelectFile,
+  onSelect,
 }: DirectoryNodeProps) {
   const { baseUrl, workspaceId } = useBridgeExplorer();
   const toMessage = useErrorMessage();
@@ -121,7 +122,7 @@ function DirectoryNode({
             depth={depth}
             selectedPath={selectedPath}
             selectedAncestorPaths={selectedAncestorPaths}
-            onSelectFile={onSelectFile}
+            onSelect={onSelect}
           />
         ) : (
           <FileRow
@@ -130,7 +131,7 @@ function DirectoryNode({
             parentPath={path}
             depth={depth}
             selected={selectedPath === joinPath(path, entry.name)}
-            onSelectFile={onSelectFile}
+            onSelect={onSelect}
           />
         ),
       )}
@@ -144,7 +145,7 @@ type RowProps = {
   depth: number;
   selectedPath: string | null;
   selectedAncestorPaths: Set<string>;
-  onSelectFile: (path: string) => void;
+  onSelect: (selection: BridgeExplorerSelection) => void;
 };
 
 function FolderRow({
@@ -153,7 +154,7 @@ function FolderRow({
   depth,
   selectedPath,
   selectedAncestorPaths,
-  onSelectFile,
+  onSelect,
 }: RowProps) {
   const [expanded, setExpanded] = useState(false);
   const fullPath = joinPath(parentPath, entry.name);
@@ -167,9 +168,17 @@ function FolderRow({
         type="button"
         className={css.TreeRow}
         style={indent}
-        onClick={() => setExpanded((v) => !v)}
+        aria-selected={selectedPath === fullPath}
+        onClick={() => onSelect({ path: fullPath, kind: 'directory' })}
       >
-        <Icon size="50" src={isExpanded ? Icons.ChevronBottom : Icons.ChevronRight} />
+        <Icon
+          size="50"
+          src={isExpanded ? Icons.ChevronBottom : Icons.ChevronRight}
+          onClick={(event) => {
+            event.stopPropagation();
+            setExpanded((v) => !v);
+          }}
+        />
         <Icon size="50" src={FolderOpenIcon} />
         <Text size="T200" truncate>
           {entry.name}
@@ -181,7 +190,7 @@ function FolderRow({
           depth={depth + 1}
           selectedPath={selectedPath}
           selectedAncestorPaths={selectedAncestorPaths}
-          onSelectFile={onSelectFile}
+          onSelect={onSelect}
         />
       )}
     </>
@@ -193,7 +202,7 @@ function FileRow({
   parentPath,
   depth,
   selected,
-  onSelectFile,
+  onSelect,
 }: Omit<RowProps, 'selectedPath' | 'selectedAncestorPaths'> & { selected: boolean }) {
   const fullPath = joinPath(parentPath, entry.name);
   // Match folder-row indent exactly; alignment with the folder icon is handled
@@ -206,7 +215,7 @@ function FileRow({
       className={css.TreeRow}
       style={indent}
       aria-selected={selected}
-      onClick={() => onSelectFile(fullPath)}
+      onClick={() => onSelect({ path: fullPath, kind: 'file' })}
     >
       {/* Spacer matching the folder chevron so file icons line up with folder icons. */}
       <Icon size="50" src={Icons.ChevronRight} style={{ visibility: 'hidden' }} />

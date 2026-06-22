@@ -1195,6 +1195,7 @@
   },
   "bridgeExplorer": {
     "selectFile": "选择一个文件以查看内容",
+    "directorySelected": "已选择目录",
     "copyPath": "复制路径",
     "refresh": "刷新",
     "download": "下载",
