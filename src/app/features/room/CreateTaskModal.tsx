@@ -138,7 +138,7 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
     // Plain `body` uses the stable user id prefix; the real mention is carried
     // by `m.mentions`, and the bot's /thread detection strips any leading
     // `@...` prefix before matching the command.
-    const body = `@${assignee.userId} /thread 创建任务${planSuffix}：\n${requestText}`;
+    const body = `${assignee.userId} /thread 创建任务${planSuffix}：\n${requestText}`;
 
     const safeName = sanitizeText(name);
     const safeRequest = sanitizeText(requestText).replace(/\n/g, '<br/>');
