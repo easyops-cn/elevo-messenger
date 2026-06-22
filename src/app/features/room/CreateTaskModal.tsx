@@ -132,7 +132,7 @@ export function CreateTaskModal({ room, requestClose }: CreateTaskModalProps) {
     setSubmitting(true);
 
     const name = memberName(room, assignee.userId);
-    const planSuffix = withPlan ? '并写好计划' : '';
+    const planSuffix = withPlan ? '、调研相关代码实现并写好可执行的计划' : '';
     const requestText = request.trim();
 
     // Plain `body` uses the stable user id prefix; the real mention is carried
