@@ -97,9 +97,8 @@ export function ExitPlanApprovalCard({
         }
         setSubmitted(true);
       } catch (err) {
-        console.error('Failed to submit plan approval:', err);
-      } finally {
         setSubmitting(undefined);
+        console.error('Failed to submit plan approval:', err);
       }
     },
     [canRespond, eventId, mx, room.roomId, t, thread, toolCall, toolSenderId],
