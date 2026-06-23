@@ -128,57 +128,52 @@ function getExitPlanModePlan(toolCall: ReturnType<typeof parseToolCall>): string
 }
 
 type ReasoningDetailBodyProps = {
-  refData: ReasoningRef;
+  body: string;
   renderBody: (props: RenderBodyProps) => ReactNode;
 };
 
-function ReasoningDetailBody({ refData, renderBody }: ReasoningDetailBodyProps) {
-  const mx = useMatrixClient();
-  const [body, setBody] = useState<string>();
-  const [error, setError] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    setBody(undefined);
-    setError(false);
-
-    fetchReasoningDetail(mx, refData.bridgeId, refData.reasoningPath)
-      .then((detail) => {
-        if (active) setBody(detail.text);
-      })
-      .catch((err) => {
-        if (!active) return;
-        setError(true);
-        console.error('Failed to fetch reasoning detail:', err);
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [mx, refData.bridgeId, refData.reasoningPath]);
-
-  if (error) {
-    return (
-      <Text size="T300" style={{ color: color.Critical.Main, fontStyle: 'italic' }}>
-        Failed to load reasoning.
-      </Text>
-    );
-  }
-
-  if (body === undefined) {
-    return (
-      <Text size="T300" priority="300" style={{ fontStyle: 'italic' }}>
-        Loading...
-      </Text>
-    );
-  }
-
+function ReasoningDetailBody({ body, renderBody }: ReasoningDetailBodyProps) {
   const trimmedBody = trimReplyFromBody(body);
   return (
     <MessageTextBody preWrap jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}>
       {renderBody({ body: trimmedBody })}
     </MessageTextBody>
   );
+}
+
+function useReasoningDetail(refData: ReasoningRef | undefined) {
+  const mx = useMatrixClient();
+  const [body, setBody] = useState<string>();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
+
+  useEffect(() => {
+    setBody(undefined);
+    setLoading(false);
+    setError(undefined);
+  }, [refData?.bridgeId, refData?.reasoningPath]);
+
+  const load = async (): Promise<string | undefined> => {
+    if (body !== undefined) return body;
+    if (!refData || loading) return undefined;
+
+    setLoading(true);
+    setError(undefined);
+    try {
+      const detail = await fetchReasoningDetail(mx, refData.bridgeId, refData.reasoningPath);
+      setBody(detail.text);
+      return detail.text;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+      console.error('Failed to fetch reasoning detail:', err);
+      return undefined;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { body, loading, error, load };
 }
 
 export function MText({
@@ -204,6 +199,15 @@ export function MText({
   const toolCall = useMemo(() => parseToolCall(content), [content]);
   const plan = hasPlan(content);
   const isToolApproval = hasToolApproval(content);
+  const [reasoningExpanded, setReasoningExpanded] = useState(false);
+  const reasoningContent = content['vip.elevo.reasoning'] as undefined | ReasoningMetadata;
+  const reasoning = !!reasoningContent;
+  const reasoningRef = parseReasoningRef(reasoningContent?.ref);
+  const reasoningDetail = useReasoningDetail(reasoningRef);
+
+  useEffect(() => {
+    setReasoningExpanded(false);
+  }, [body, reasoningRef?.bridgeId, reasoningRef?.reasoningPath]);
 
   if (isToolApproval) return null;
 
@@ -245,9 +249,6 @@ export function MText({
   if (oidcLogin && (!oidcLogin.userId || oidcLogin.userId === mx.getUserId())) {
     return <OidcLoginCard data={oidcLogin} style={style} />;
   }
-
-  const reasoningContent = content['vip.elevo.reasoning'] as undefined | ReasoningMetadata;
-  const reasoning = !!reasoningContent;
 
   if (sseRender?.streaming) {
     return (
@@ -297,17 +298,33 @@ export function MText({
         ? Number(reasoningContent.duration_ms)
         : undefined;
     const reasoningStreaming = reasoningContent?.streaming;
-    const reasoningRef = parseReasoningRef(reasoningContent?.ref);
     const isEmpty = isReasoningEmpty(reasoningContent, trimmedBody);
+    const toggleReasoning = async () => {
+      if (reasoningDetail.loading) return;
+      if (reasoningExpanded) {
+        setReasoningExpanded(false);
+        return;
+      }
+      if (reasoningRef && reasoningDetail.body === undefined) {
+        const detailBody = await reasoningDetail.load();
+        if (detailBody === undefined) return;
+      }
+      setReasoningExpanded(true);
+    };
+
     return (
       <ReasoningCard
         style={style}
         durationMs={durationMs}
         streaming={reasoningStreaming}
         empty={isEmpty}
+        expanded={reasoningExpanded}
+        loading={reasoningDetail.loading}
+        error={reasoningDetail.error}
+        onToggle={isEmpty ? undefined : toggleReasoning}
       >
-        {!isEmpty && reasoningRef ? (
-          <ReasoningDetailBody refData={reasoningRef} renderBody={renderBody} />
+        {!isEmpty && reasoningRef && reasoningDetail.body !== undefined ? (
+          <ReasoningDetailBody body={reasoningDetail.body} renderBody={renderBody} />
         ) : (
           !isEmpty && (
             <MessageTextBody

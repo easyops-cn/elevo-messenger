@@ -1,6 +1,8 @@
-import React, { CSSProperties, ReactNode, useState } from 'react';
+import React, { CSSProperties, ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Box, Icon, Icons, Text } from 'folds';
+import { CircleAlertIcon } from '../../../icons/CircleAlertIcon';
+import { LoaderCircleIcon } from '../../../icons/LoaderCircleIcon';
 import * as css from './ReasoningCard.css';
 
 type ReasoningCardProps = {
@@ -9,6 +11,10 @@ type ReasoningCardProps = {
   durationMs?: number;
   streaming?: boolean;
   empty?: boolean;
+  expanded: boolean;
+  loading?: boolean;
+  error?: string;
+  onToggle?: () => void;
 };
 export function ReasoningCard({
   style,
@@ -16,9 +22,13 @@ export function ReasoningCard({
   durationMs,
   streaming,
   empty,
+  expanded,
+  loading,
+  error,
+  onToggle,
 }: ReasoningCardProps) {
   const { t } = useTranslation();
-  const [expanded, setExpanded] = useState(false);
+  const interactive = !empty && !!onToggle;
 
   const label =
     typeof durationMs === 'number'
@@ -30,25 +40,36 @@ export function ReasoningCard({
   return (
     <Box className={css.ReasoningWrapper} style={style} direction="Column" gap="100">
       <div
-        className={empty ? css.ReasoningToggleEmpty : css.ReasoningToggle}
-        onClick={empty ? undefined : () => setExpanded((v) => !v)}
+        className={interactive ? css.ReasoningToggle : css.ReasoningToggleEmpty}
+        onClick={interactive ? onToggle : undefined}
         onKeyDown={
-          empty
-            ? undefined
-            : (e) => {
+          interactive
+            ? (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();
-                  setExpanded((v) => !v);
+                  onToggle();
                 }
               }
+            : undefined
         }
-        role={empty ? undefined : 'button'}
-        tabIndex={empty ? undefined : 0}
+        role={interactive ? 'button' : undefined}
+        tabIndex={interactive ? 0 : undefined}
+        aria-busy={loading || undefined}
       >
         <Text priority="300" size="T300">
           {label}
         </Text>
-        {!empty && <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="100" />}
+        {!empty && loading && (
+          <Icon src={LoaderCircleIcon} size="100" className={css.ReasoningStatusSpinner} />
+        )}
+        {!empty && !loading && error && (
+          <span title={error}>
+            <Icon src={CircleAlertIcon} size="100" className={css.ReasoningStatusError} />
+          </span>
+        )}
+        {!empty && !loading && !error && (
+          <Icon src={expanded ? Icons.ChevronBottom : Icons.ChevronRight} size="100" />
+        )}
       </div>
       {expanded && !empty && children}
     </Box>
