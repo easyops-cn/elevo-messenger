@@ -7,6 +7,8 @@ import { structuredPatch } from 'diff';
 import * as css from './ToolCallCard.css';
 import { DisabledCheckboxIcon } from '../../../icons/DisabledCheckboxIcon';
 import { SquareAsteriskIcon } from '../../../icons/SquareAsteriskIcon';
+import { LoaderCircleIcon } from '../../../icons/LoaderCircleIcon';
+import { CircleAlertIcon } from '../../../icons/CircleAlertIcon';
 import { elevoColor } from '../../../../config.css';
 import { MessageLayout, settingsAtom } from '../../../state/settings';
 import { useSetting } from '../../../state/hooks/settings';
@@ -100,6 +102,30 @@ type PatchSummaryOperation = {
 };
 
 type TodoItem = z.infer<typeof TodoItemSchema>;
+
+function ToolCallSpinner({ className }: { className: string }) {
+  return (
+    <svg viewBox="0 0 8 8" className={className}>
+      <circle className={css.ToolCallSpinnerArc} cx="4" cy="4" r="3" />
+    </svg>
+  );
+}
+
+function ToolCallTitleStatus({ loading, error }: { loading?: boolean; error?: string }) {
+  if (loading) {
+    return <Icon src={LoaderCircleIcon} size="50" className={css.ToolCallTitleSpinnerSvg} />;
+  }
+
+  if (error) {
+    return (
+      <span title={error}>
+        <Icon src={CircleAlertIcon} size="50" className={css.ToolCallTitleErrorIcon} />
+      </span>
+    );
+  }
+
+  return null;
+}
 
 export function parseToolCall(content: Record<string, unknown>): ToolCallData | undefined {
   const result = ToolCallSchema.safeParse(content['vip.elevo.tool_call']);
@@ -366,6 +392,8 @@ type PatchSummaryOperationCardProps = {
   operation: PatchSummaryOperation;
   iconClassName: string;
   status: ToolCallData['status'];
+  loading?: boolean;
+  error?: string;
   onOpen?: () => void;
 };
 
@@ -381,6 +409,8 @@ function PatchSummaryOperationCard({
   operation,
   iconClassName,
   status,
+  loading,
+  error,
   onOpen,
 }: PatchSummaryOperationCardProps) {
   const path = typeof operation.path === 'string' ? operation.path : '';
@@ -403,13 +433,10 @@ function PatchSummaryOperationCard({
         }}
         role={interactive ? 'button' : undefined}
         tabIndex={interactive ? 0 : undefined}
+        aria-busy={loading || undefined}
       >
         <div className={iconClassName}>
-          {status === 'inprogress' && (
-            <svg viewBox="0 0 8 8" className={css.ToolCallSpinnerSvg}>
-              <circle className={css.ToolCallSpinnerArc} cx="4" cy="4" r="3" />
-            </svg>
-          )}
+          {status === 'inprogress' && <ToolCallSpinner className={css.ToolCallSpinnerSvg} />}
         </div>
         <Text size="T300" truncate>
           <span style={{ fontWeight: 500 }}>{patchSummaryLabel(operation)}</span>
@@ -418,6 +445,7 @@ function PatchSummaryOperationCard({
             {path ? getBaseName(path) : ''}
           </span>
         </Text>
+        <ToolCallTitleStatus loading={loading} error={error} />
         {newPath && (
           <>
             <Icon src={Icons.ArrowRight} size="50" />
@@ -495,11 +523,7 @@ function ApplyPatchOperationCard({
         }
       >
         <div className={iconClassName}>
-          {status === 'inprogress' && (
-            <svg viewBox="0 0 8 8" className={css.ToolCallSpinnerSvg}>
-              <circle className={css.ToolCallSpinnerArc} cx="4" cy="4" r="3" />
-            </svg>
-          )}
+          {status === 'inprogress' && <ToolCallSpinner className={css.ToolCallSpinnerSvg} />}
         </div>
         <Text size="T300" truncate>
           <span style={{ fontWeight: 500 }}>{label}</span>
@@ -555,6 +579,8 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
   const [detail, setDetail] = useState<ToolCallDetail | undefined>();
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | undefined>();
+  const [loadingPatchSummaryIndex, setLoadingPatchSummaryIndex] = useState<number | undefined>();
+  const [errorPatchSummaryIndex, setErrorPatchSummaryIndex] = useState<number | undefined>();
   const effectiveData = useMemo(
     () => (detail ? mergeToolCallDetail(data, detail) : data),
     [data, detail],
@@ -572,6 +598,7 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
   const loadDetail = async (): Promise<ToolCallDetail | undefined> => {
     if (detail) return detail;
     if (!data.ref) return undefined;
+    if (detailLoading) return undefined;
     setDetailLoading(true);
     setDetailError(undefined);
     try {
@@ -584,6 +611,21 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
     } finally {
       setDetailLoading(false);
     }
+  };
+
+  const toggleToolDetails = async () => {
+    if (detailLoading) return;
+
+    if (bodyExpanded) {
+      setBodyExpanded(false);
+      return;
+    }
+
+    if (data.ref && !detail) {
+      const nextDetail = await loadDetail();
+      if (!nextDetail) return;
+    }
+    setBodyExpanded(true);
   };
 
   const prettierInput = useMemo(() => tryJsonPrettier(effectiveData.input), [effectiveData.input]);
@@ -725,28 +767,39 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
 
   if (patchSummaryOperations) {
     const openFullPatch = async (summaryIndex: number) => {
-      const nextDetail = await loadDetail();
-      if (!nextDetail) return;
-      const fullData = mergeToolCallDetail(data, nextDetail);
-      const fullOperations = getApplyPatchForRender(fullData) ?? getToolCallDiffForRender(fullData);
-      const firstOpenable =
-        fullOperations?.[summaryIndex]?.kind !== 'delete'
-          ? fullOperations?.[summaryIndex]
-          : fullOperations?.find((op) => op.kind !== 'delete');
-      if (!firstOpenable) return;
-      const body = firstOpenable.kind === 'add' ? firstOpenable.content : firstOpenable.diff;
-      const path =
-        firstOpenable.kind === 'update'
-          ? (firstOpenable.moveTo ?? firstOpenable.path)
-          : firstOpenable.path;
-      const file = buildApplyPatchFileSummary(path, body);
-      openCodeView({
-        title: t('message.diffEditedFile', { count: 1 }),
-        files: [file],
-        added: file.added,
-        deleted: file.deleted,
-        ...codeViewWorkspace,
-      });
+      if (detailLoading) return;
+      setErrorPatchSummaryIndex(undefined);
+      setLoadingPatchSummaryIndex(summaryIndex);
+      try {
+        const nextDetail = await loadDetail();
+        if (!nextDetail) {
+          setErrorPatchSummaryIndex(summaryIndex);
+          return;
+        }
+        const fullData = mergeToolCallDetail(data, nextDetail);
+        const fullOperations =
+          getApplyPatchForRender(fullData) ?? getToolCallDiffForRender(fullData);
+        const firstOpenable =
+          fullOperations?.[summaryIndex]?.kind !== 'delete'
+            ? fullOperations?.[summaryIndex]
+            : fullOperations?.find((op) => op.kind !== 'delete');
+        if (!firstOpenable) return;
+        const body = firstOpenable.kind === 'add' ? firstOpenable.content : firstOpenable.diff;
+        const path =
+          firstOpenable.kind === 'update'
+            ? (firstOpenable.moveTo ?? firstOpenable.path)
+            : firstOpenable.path;
+        const file = buildApplyPatchFileSummary(path, body);
+        openCodeView({
+          title: t('message.diffEditedFile', { count: 1 }),
+          files: [file],
+          added: file.added,
+          deleted: file.deleted,
+          ...codeViewWorkspace,
+        });
+      } finally {
+        setLoadingPatchSummaryIndex(undefined);
+      }
     };
 
     return (
@@ -757,6 +810,8 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
             operation={op}
             iconClassName={iconClassName}
             status={effectiveData.status}
+            loading={loadingPatchSummaryIndex === index}
+            error={errorPatchSummaryIndex === index ? detailError : undefined}
             onOpen={data.ref ? () => openFullPatch(index) : undefined}
           />
         ))}
@@ -771,8 +826,7 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
         onClick={
           showToolDetails
             ? () => {
-                setBodyExpanded((v) => !v);
-                if (!bodyExpanded) void loadDetail();
+                void toggleToolDetails();
               }
             : undefined
         }
@@ -780,8 +834,7 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
           if (!showToolDetails) return;
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            setBodyExpanded((v) => !v);
-            if (!bodyExpanded) void loadDetail();
+            void toggleToolDetails();
           }
         }}
         role={showToolDetails ? 'button' : undefined}
@@ -789,9 +842,7 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
       >
         <div className={iconClassName}>
           {effectiveData.status === 'inprogress' && (
-            <svg viewBox="0 0 8 8" className={css.ToolCallSpinnerSvg}>
-              <circle className={css.ToolCallSpinnerArc} cx="4" cy="4" r="3" />
-            </svg>
+            <ToolCallSpinner className={css.ToolCallSpinnerSvg} />
           )}
         </div>
         <Text size="T300" truncate>
@@ -800,6 +851,7 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
             <span style={{ color: elevoColor.Text.Secondary }}>{` ${toolTitle}`}</span>
           ) : null}
         </Text>
+        <ToolCallTitleStatus loading={detailLoading} error={detailError} />
       </div>
       {showToolDetails && bodyExpanded && (
         <div className={css.ToolCallBody}>
@@ -808,7 +860,7 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
               IN
             </Text>
             <pre className={css.InlineContent} title={prettierInput}>
-              {detailLoading ? 'Loading...' : detailError || prettierInput}
+              {prettierInput}
             </pre>
           </div>
           {(effectiveData.status === 'completed' || effectiveData.status === 'failed') &&

@@ -61,6 +61,17 @@ export const ToolCallSpinnerSvg = style({
   animation: `${toolCallSpinner} 0.8s linear infinite`,
 });
 
+export const ToolCallTitleSpinnerSvg = style({
+  color: elevoColor.Text.Muted,
+  flexShrink: 0,
+  animation: `${toolCallSpinner} 0.8s linear infinite`,
+});
+
+export const ToolCallTitleErrorIcon = style({
+  color: color.Critical.Main,
+  flexShrink: 0,
+});
+
 export const ToolCallSpinnerArc = style({
   fill: 'none',
   stroke: color.Primary.Main,
