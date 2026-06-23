@@ -11,15 +11,17 @@ import { elevoColor } from '../../../../config.css';
 import { MessageLayout, settingsAtom } from '../../../state/settings';
 import { useSetting } from '../../../state/hooks/settings';
 import { useOpenCodeView } from '../../../utils/codeView';
+import { useMatrixClient } from '../../../hooks/useMatrixClient';
 import type { DiffFileSummary } from './diffSummary';
 import type { CodeViewWorkspaceContext } from '../../code-view';
+import { fetchToolCallDetail, type ToolCallDetail } from './toolCallApi';
 
 const ToolCallSchema = z.object({
   toolCallId: z.string().optional(),
   conversationId: z.string().optional(),
   name: z.string(),
   title: z.string().optional(),
-  input: z.unknown(),
+  input: z.unknown().optional(),
   output: z.unknown().optional(),
   error: z.unknown().optional(),
   status: z.enum(['inprogress', 'completed', 'failed']),
@@ -40,6 +42,13 @@ const ToolCallSchema = z.object({
     })
     .optional(),
   metadata: z.record(z.string(), z.unknown()).optional(),
+  summary: z.unknown().optional(),
+  ref: z
+    .object({
+      toolCallPath: z.string(),
+      bridgeId: z.string(),
+    })
+    .optional(),
 });
 
 export type ToolCallData = z.infer<typeof ToolCallSchema>;
@@ -82,6 +91,14 @@ type ApplyPatchOperation =
   | { kind: 'delete'; path: string }
   | { kind: 'update'; path: string; moveTo?: string; diff: string };
 
+type PatchSummaryOperation = {
+  type?: unknown;
+  path?: unknown;
+  newPath?: unknown;
+  added?: unknown;
+  deleted?: unknown;
+};
+
 type TodoItem = z.infer<typeof TodoItemSchema>;
 
 export function parseToolCall(content: Record<string, unknown>): ToolCallData | undefined {
@@ -90,6 +107,7 @@ export function parseToolCall(content: Record<string, unknown>): ToolCallData | 
 }
 
 function tryJsonPrettier(val: unknown): string {
+  if (val === undefined) return '';
   if (typeof val !== 'string') return JSON.stringify(val, null, 2);
   try {
     const data = JSON.parse(val);
@@ -98,6 +116,21 @@ function tryJsonPrettier(val: unknown): string {
   } catch {
     return val.trim();
   }
+}
+
+function mergeToolCallDetail(data: ToolCallData, detail: ToolCallDetail): ToolCallData {
+  return {
+    ...data,
+    conversationId: detail.conversationId ?? data.conversationId,
+    name: detail.name || data.name,
+    title: detail.title ?? data.title,
+    input: detail.input ?? data.input,
+    output: detail.output ?? data.output,
+    error: detail.error ?? data.error,
+    status: detail.status ?? data.status,
+    state: detail.state ?? data.state,
+    metadata: detail.metadata ?? data.metadata,
+  };
 }
 
 function tryParseJson(val: unknown): unknown {
@@ -284,6 +317,25 @@ function getToolCallDiffForRender(data: ToolCallData): ApplyPatchOperation[] | u
   return undefined;
 }
 
+function getPatchSummaryForRender(data: ToolCallData): PatchSummaryOperation[] | undefined {
+  if (
+    data.name !== 'apply_patch' &&
+    data.name !== 'Edit' &&
+    data.name !== 'Write' &&
+    data.name !== 'Add'
+  ) {
+    return undefined;
+  }
+  const summary = data.summary;
+  if (!summary || typeof summary !== 'object' || Array.isArray(summary)) return undefined;
+  const operations = (summary as { operations?: unknown }).operations;
+  if (!Array.isArray(operations)) return undefined;
+  return operations.filter(
+    (operation): operation is PatchSummaryOperation =>
+      !!operation && typeof operation === 'object' && !Array.isArray(operation),
+  );
+}
+
 function applyPatchOperationKey(op: ApplyPatchOperation): string {
   if (op.kind === 'add') return `add:${op.path}:${op.content.length}`;
   if (op.kind === 'delete') return `delete:${op.path}`;
@@ -309,6 +361,80 @@ type ApplyPatchOperationCardProps = {
   status: ToolCallData['status'];
   codeViewWorkspace?: CodeViewWorkspaceContext;
 };
+
+type PatchSummaryOperationCardProps = {
+  operation: PatchSummaryOperation;
+  iconClassName: string;
+  status: ToolCallData['status'];
+  onOpen?: () => void;
+};
+
+function patchSummaryLabel(operation: PatchSummaryOperation): string {
+  if (operation.type === 'add') return 'Add';
+  if (operation.type === 'delete') return 'Delete';
+  if (operation.type === 'move') return 'Move';
+  if (operation.type === 'write') return 'Write';
+  return 'Edit';
+}
+
+function PatchSummaryOperationCard({
+  operation,
+  iconClassName,
+  status,
+  onOpen,
+}: PatchSummaryOperationCardProps) {
+  const path = typeof operation.path === 'string' ? operation.path : '';
+  const newPath = typeof operation.newPath === 'string' ? operation.newPath : undefined;
+  const added = typeof operation.added === 'number' ? operation.added : undefined;
+  const deleted = typeof operation.deleted === 'number' ? operation.deleted : undefined;
+  const interactive = !!onOpen;
+
+  return (
+    <Box direction="Column" gap="200">
+      <div
+        className={css.ToolCallHeader({ interactive })}
+        onClick={onOpen}
+        onKeyDown={(e) => {
+          if (!interactive) return;
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onOpen?.();
+          }
+        }}
+        role={interactive ? 'button' : undefined}
+        tabIndex={interactive ? 0 : undefined}
+      >
+        <div className={iconClassName}>
+          {status === 'inprogress' && (
+            <svg viewBox="0 0 8 8" className={css.ToolCallSpinnerSvg}>
+              <circle className={css.ToolCallSpinnerArc} cx="4" cy="4" r="3" />
+            </svg>
+          )}
+        </div>
+        <Text size="T300" truncate>
+          <span style={{ fontWeight: 500 }}>{patchSummaryLabel(operation)}</span>
+          <span className={interactive ? css.ApplyPatchTitleLink : undefined}>
+            {' '}
+            {path ? getBaseName(path) : ''}
+          </span>
+        </Text>
+        {newPath && (
+          <>
+            <Icon src={Icons.ArrowRight} size="50" />
+            <Text size="T200" priority="300" as="span" className={css.ApplyPatchMoveTo}>
+              {newPath}
+            </Text>
+          </>
+        )}
+        {(added !== undefined || deleted !== undefined) && (
+          <Text size="T200" priority="300" as="span">
+            {` +${added ?? 0} -${deleted ?? 0}`}
+          </Text>
+        )}
+      </div>
+    </Box>
+  );
+}
 
 function ApplyPatchOperationCard({
   operation,
@@ -421,40 +547,70 @@ type ToolCallCardProps = {
 };
 export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardProps) {
   const { t } = useTranslation();
+  const mx = useMatrixClient();
+  const openCodeView = useOpenCodeView();
   const [messageLayout] = useSetting(settingsAtom, 'messageLayout');
 
   const [bodyExpanded, setBodyExpanded] = useState(false);
+  const [detail, setDetail] = useState<ToolCallDetail | undefined>();
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | undefined>();
+  const effectiveData = useMemo(
+    () => (detail ? mergeToolCallDetail(data, detail) : data),
+    [data, detail],
+  );
   const iconClassName = classNames(
     css.ToolCallHeaderIcon,
-    data.status === 'completed' && css.ToolCallHeaderIconCompleted,
-    data.status === 'failed' && css.ToolCallHeaderIconFailed,
-    data.status === 'inprogress' && css.ToolCallHeaderIconInprogress,
+    effectiveData.status === 'completed' && css.ToolCallHeaderIconCompleted,
+    effectiveData.status === 'failed' && css.ToolCallHeaderIconFailed,
+    effectiveData.status === 'inprogress' && css.ToolCallHeaderIconInprogress,
     {
       [css.ToolCallHeaderIconOffset]: messageLayout === MessageLayout.Modern,
     },
   );
 
-  const prettierInput = useMemo(() => tryJsonPrettier(data.input), [data.input]);
+  const loadDetail = async (): Promise<ToolCallDetail | undefined> => {
+    if (detail) return detail;
+    if (!data.ref) return undefined;
+    setDetailLoading(true);
+    setDetailError(undefined);
+    try {
+      const nextDetail = await fetchToolCallDetail(mx, data.ref.bridgeId, data.ref.toolCallPath);
+      setDetail(nextDetail);
+      return nextDetail;
+    } catch (error) {
+      setDetailError(error instanceof Error ? error.message : String(error));
+      return undefined;
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const prettierInput = useMemo(() => tryJsonPrettier(effectiveData.input), [effectiveData.input]);
   const prettierOutput = useMemo(
-    () => tryJsonPrettier(data.output ?? data.error),
-    [data.output, data.error],
+    () => tryJsonPrettier(effectiveData.output ?? effectiveData.error),
+    [effectiveData.output, effectiveData.error],
   );
-  const todos = useMemo(() => getTodosForRender(data), [data]);
+  const todos = useMemo(() => getTodosForRender(effectiveData), [effectiveData]);
   const patchOperations = useMemo(
-    () => getApplyPatchForRender(data) ?? getToolCallDiffForRender(data),
-    [data],
+    () => getApplyPatchForRender(effectiveData) ?? getToolCallDiffForRender(effectiveData),
+    [effectiveData],
   );
-  const showToolDetails = data.name !== 'ExitPlanMode';
+  const patchSummaryOperations = useMemo(
+    () => (patchOperations ? undefined : getPatchSummaryForRender(effectiveData)),
+    [effectiveData, patchOperations],
+  );
+  const showToolDetails = effectiveData.name !== 'ExitPlanMode';
 
   const prettierToolName = useMemo(
     () =>
-      data.name.charAt(0).toUpperCase() +
-      data.name.slice(1).replace(/_([a-z])?/g, (_, c) => ` ${c ? c.toUpperCase() : ''}`),
-    [data.name],
+      effectiveData.name.charAt(0).toUpperCase() +
+      effectiveData.name.slice(1).replace(/_([a-z])?/g, (_, c) => ` ${c ? c.toUpperCase() : ''}`),
+    [effectiveData.name],
   );
 
   const toolTitle = useMemo(() => {
-    if (data.title) return data.title;
+    if (effectiveData.title) return effectiveData.title;
 
     switch (prettierToolName) {
       case 'EnterPlanMode':
@@ -462,9 +618,9 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
         return '';
     }
 
-    if (typeof data.input === 'string') {
+    if (typeof effectiveData.input === 'string') {
       try {
-        const input = JSON.parse(data.input);
+        const input = JSON.parse(effectiveData.input);
         let title = '';
         switch (prettierToolName) {
           case 'Agent':
@@ -498,12 +654,14 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
             }
             break;
         }
-        return title.trim() || data.input;
+        return title.trim() || effectiveData.input;
       } catch {
-        return data.input.length > 72 ? `${data.input.slice(0, 72)}...` : data.input;
+        return effectiveData.input.length > 72
+          ? `${effectiveData.input.slice(0, 72)}...`
+          : effectiveData.input;
       }
     }
-  }, [data.title, data.input, prettierToolName]);
+  }, [effectiveData.title, effectiveData.input, prettierToolName]);
 
   if (todos) {
     return (
@@ -557,8 +715,49 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
             key={applyPatchOperationKey(op)}
             operation={op}
             iconClassName={iconClassName}
-            status={data.status}
+            status={effectiveData.status}
             codeViewWorkspace={codeViewWorkspace}
+          />
+        ))}
+      </Box>
+    );
+  }
+
+  if (patchSummaryOperations) {
+    const openFullPatch = async (summaryIndex: number) => {
+      const nextDetail = await loadDetail();
+      if (!nextDetail) return;
+      const fullData = mergeToolCallDetail(data, nextDetail);
+      const fullOperations = getApplyPatchForRender(fullData) ?? getToolCallDiffForRender(fullData);
+      const firstOpenable =
+        fullOperations?.[summaryIndex]?.kind !== 'delete'
+          ? fullOperations?.[summaryIndex]
+          : fullOperations?.find((op) => op.kind !== 'delete');
+      if (!firstOpenable) return;
+      const body = firstOpenable.kind === 'add' ? firstOpenable.content : firstOpenable.diff;
+      const path =
+        firstOpenable.kind === 'update'
+          ? (firstOpenable.moveTo ?? firstOpenable.path)
+          : firstOpenable.path;
+      const file = buildApplyPatchFileSummary(path, body);
+      openCodeView({
+        title: t('message.diffEditedFile', { count: 1 }),
+        files: [file],
+        added: file.added,
+        deleted: file.deleted,
+        ...codeViewWorkspace,
+      });
+    };
+
+    return (
+      <Box style={style} direction="Column" gap="300">
+        {patchSummaryOperations.map((op, index) => (
+          <PatchSummaryOperationCard
+            key={`${String(op.type)}:${String(op.path)}:${index}`}
+            operation={op}
+            iconClassName={iconClassName}
+            status={effectiveData.status}
+            onOpen={data.ref ? () => openFullPatch(index) : undefined}
           />
         ))}
       </Box>
@@ -569,19 +768,27 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
     <Box style={style} direction="Column" gap="200">
       <div
         className={css.ToolCallHeader({ interactive: showToolDetails })}
-        onClick={showToolDetails ? () => setBodyExpanded((v) => !v) : undefined}
+        onClick={
+          showToolDetails
+            ? () => {
+                setBodyExpanded((v) => !v);
+                if (!bodyExpanded) void loadDetail();
+              }
+            : undefined
+        }
         onKeyDown={(e) => {
           if (!showToolDetails) return;
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             setBodyExpanded((v) => !v);
+            if (!bodyExpanded) void loadDetail();
           }
         }}
         role={showToolDetails ? 'button' : undefined}
         tabIndex={showToolDetails ? 0 : undefined}
       >
         <div className={iconClassName}>
-          {data.status === 'inprogress' && (
+          {effectiveData.status === 'inprogress' && (
             <svg viewBox="0 0 8 8" className={css.ToolCallSpinnerSvg}>
               <circle className={css.ToolCallSpinnerArc} cx="4" cy="4" r="3" />
             </svg>
@@ -601,11 +808,11 @@ export function ToolCallCard({ data, codeViewWorkspace, style }: ToolCallCardPro
               IN
             </Text>
             <pre className={css.InlineContent} title={prettierInput}>
-              {prettierInput}
+              {detailLoading ? 'Loading...' : detailError || prettierInput}
             </pre>
           </div>
-          {(data.status === 'completed' || data.status === 'failed') &&
-            (data.output !== undefined || data.error !== undefined) && (
+          {(effectiveData.status === 'completed' || effectiveData.status === 'failed') &&
+            (effectiveData.output !== undefined || effectiveData.error !== undefined) && (
               <>
                 <div className={css.InlineDivider} />
                 <div className={css.InlineRowTop}>
