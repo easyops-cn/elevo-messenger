@@ -39,6 +39,7 @@ import { Attachment, AttachmentBox, AttachmentContent, AttachmentHeader } from '
 import { FileHeader, FileDownloadButton } from './FileHeader';
 import { VoiceMessage } from './content/VoiceMessage';
 import type { CodeViewWorkspaceContext } from '../code-view';
+import { isReasoningEmpty, type ReasoningMetadata } from './reasoning';
 
 export function MBadEncrypted() {
   return (
@@ -79,6 +80,7 @@ type RenderBodyProps = {
   body: string;
   customBody?: string;
 };
+
 type MTextProps = {
   edited?: boolean;
   content: Record<string, unknown>;
@@ -184,12 +186,7 @@ export function MText({
     return <OidcLoginCard data={oidcLogin} style={style} />;
   }
 
-  const reasoningContent = content['vip.elevo.reasoning'] as
-    | undefined
-    | {
-        duration_ms?: number;
-        streaming?: boolean;
-      };
+  const reasoningContent = content['vip.elevo.reasoning'] as undefined | ReasoningMetadata;
   const reasoning = !!reasoningContent;
 
   if (sseRender?.streaming) {
@@ -240,7 +237,7 @@ export function MText({
         ? Number(reasoningContent.duration_ms)
         : undefined;
     const reasoningStreaming = reasoningContent?.streaming;
-    const isEmpty = trimmedBody === '';
+    const isEmpty = isReasoningEmpty(reasoningContent, trimmedBody);
     return (
       <ReasoningCard
         style={style}
