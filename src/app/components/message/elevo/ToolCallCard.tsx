@@ -385,8 +385,8 @@ function PatchSummaryOperationCard({
 }: PatchSummaryOperationCardProps) {
   const path = typeof operation.path === 'string' ? operation.path : '';
   const newPath = typeof operation.newPath === 'string' ? operation.newPath : undefined;
-  const added = typeof operation.added === 'number' ? operation.added : undefined;
-  const deleted = typeof operation.deleted === 'number' ? operation.deleted : undefined;
+  // const added = typeof operation.added === 'number' ? operation.added : undefined;
+  // const deleted = typeof operation.deleted === 'number' ? operation.deleted : undefined;
   const interactive = !!onOpen;
 
   return (
@@ -426,11 +426,11 @@ function PatchSummaryOperationCard({
             </Text>
           </>
         )}
-        {(added !== undefined || deleted !== undefined) && (
+        {/* {(added !== undefined || deleted !== undefined) && (
           <Text size="T200" priority="300" as="span">
             {` +${added ?? 0} -${deleted ?? 0}`}
           </Text>
-        )}
+        )} */}
       </div>
     </Box>
   );
