@@ -1,4 +1,4 @@
-import React, { CSSProperties, ReactNode, useMemo } from 'react';
+import React, { CSSProperties, ReactNode, useEffect, useMemo, useState } from 'react';
 import { Box, Chip, Icon, Icons, Text, color, config } from 'folds';
 import { IContent } from 'matrix-js-sdk';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
@@ -8,6 +8,7 @@ import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
 import { ExitPlanApprovalCard, hasToolApproval } from './elevo/ExitPlanApproval';
 import { ReasoningCard } from './elevo/ReasoningCard';
 import { SseMarkdownBody, parseSseRender } from './elevo/SseMarkdownBody';
+import { fetchReasoningDetail } from './elevo/reasoningApi';
 import { OidcLoginCard, parseOidcLogin } from './elevo/OidcLoginCard';
 import { PlanCard, hasPlan } from './elevo/PlanCard';
 import { trimReplyFromBody } from '../../utils/room';
@@ -39,7 +40,12 @@ import { Attachment, AttachmentBox, AttachmentContent, AttachmentHeader } from '
 import { FileHeader, FileDownloadButton } from './FileHeader';
 import { VoiceMessage } from './content/VoiceMessage';
 import type { CodeViewWorkspaceContext } from '../code-view';
-import { isReasoningEmpty, type ReasoningMetadata } from './reasoning';
+import {
+  isReasoningEmpty,
+  parseReasoningRef,
+  type ReasoningMetadata,
+  type ReasoningRef,
+} from './reasoning';
 
 export function MBadEncrypted() {
   return (
@@ -121,6 +127,55 @@ function getExitPlanModePlan(toolCall: ReturnType<typeof parseToolCall>): string
   return typeof plan === 'string' && plan.trim() ? plan : undefined;
 }
 
+type ReasoningDetailBodyProps = {
+  body: string;
+  renderBody: (props: RenderBodyProps) => ReactNode;
+};
+
+function ReasoningDetailBody({ body, renderBody }: ReasoningDetailBodyProps) {
+  const trimmedBody = trimReplyFromBody(body);
+  return (
+    <MessageTextBody preWrap jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}>
+      {renderBody({ body: trimmedBody })}
+    </MessageTextBody>
+  );
+}
+
+function useReasoningDetail(refData: ReasoningRef | undefined) {
+  const mx = useMatrixClient();
+  const [body, setBody] = useState<string>();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>();
+
+  useEffect(() => {
+    setBody(undefined);
+    setLoading(false);
+    setError(undefined);
+  }, [refData?.bridgeId, refData?.reasoningPath]);
+
+  const load = async (): Promise<string | undefined> => {
+    if (body !== undefined) return body;
+    if (!refData || loading) return undefined;
+
+    setLoading(true);
+    setError(undefined);
+    try {
+      const detail = await fetchReasoningDetail(mx, refData.bridgeId, refData.reasoningPath);
+      setBody(detail.text);
+      return detail.text;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
+      console.error('Failed to fetch reasoning detail:', err);
+      return undefined;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { body, loading, error, load };
+}
+
 export function MText({
   edited,
   content,
@@ -144,6 +199,15 @@ export function MText({
   const toolCall = useMemo(() => parseToolCall(content), [content]);
   const plan = hasPlan(content);
   const isToolApproval = hasToolApproval(content);
+  const [reasoningExpanded, setReasoningExpanded] = useState(false);
+  const reasoningContent = content['vip.elevo.reasoning'] as undefined | ReasoningMetadata;
+  const reasoning = !!reasoningContent;
+  const reasoningRef = parseReasoningRef(reasoningContent?.ref);
+  const reasoningDetail = useReasoningDetail(reasoningRef);
+
+  useEffect(() => {
+    setReasoningExpanded(false);
+  }, [body, reasoningRef?.bridgeId, reasoningRef?.reasoningPath]);
 
   if (isToolApproval) return null;
 
@@ -185,9 +249,6 @@ export function MText({
   if (oidcLogin && (!oidcLogin.userId || oidcLogin.userId === mx.getUserId())) {
     return <OidcLoginCard data={oidcLogin} style={style} />;
   }
-
-  const reasoningContent = content['vip.elevo.reasoning'] as undefined | ReasoningMetadata;
-  const reasoning = !!reasoningContent;
 
   if (sseRender?.streaming) {
     return (
@@ -238,23 +299,44 @@ export function MText({
         : undefined;
     const reasoningStreaming = reasoningContent?.streaming;
     const isEmpty = isReasoningEmpty(reasoningContent, trimmedBody);
+    const toggleReasoning = async () => {
+      if (reasoningDetail.loading) return;
+      if (reasoningExpanded) {
+        setReasoningExpanded(false);
+        return;
+      }
+      if (reasoningRef && reasoningDetail.body === undefined) {
+        const detailBody = await reasoningDetail.load();
+        if (detailBody === undefined) return;
+      }
+      setReasoningExpanded(true);
+    };
+
     return (
       <ReasoningCard
         style={style}
         durationMs={durationMs}
         streaming={reasoningStreaming}
         empty={isEmpty}
+        expanded={reasoningExpanded}
+        loading={reasoningDetail.loading}
+        error={reasoningDetail.error}
+        onToggle={isEmpty ? undefined : toggleReasoning}
       >
-        {!isEmpty && (
-          <MessageTextBody
-            preWrap={typeof customBody !== 'string'}
-            jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
-          >
-            {renderBody({
-              body: trimmedBody,
-              customBody: typeof customBody === 'string' ? customBody : undefined,
-            })}
-          </MessageTextBody>
+        {!isEmpty && reasoningRef && reasoningDetail.body !== undefined ? (
+          <ReasoningDetailBody body={reasoningDetail.body} renderBody={renderBody} />
+        ) : (
+          !isEmpty && (
+            <MessageTextBody
+              preWrap={typeof customBody !== 'string'}
+              jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
+            >
+              {renderBody({
+                body: trimmedBody,
+                customBody: typeof customBody === 'string' ? customBody : undefined,
+              })}
+            </MessageTextBody>
+          )
         )}
       </ReasoningCard>
     );
