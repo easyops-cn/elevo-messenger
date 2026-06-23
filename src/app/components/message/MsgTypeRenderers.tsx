@@ -103,6 +103,15 @@ function parseJsonInput(input: unknown): unknown {
 function getExitPlanModePlan(toolCall: ReturnType<typeof parseToolCall>): string | undefined {
   if (!toolCall || toolCall.name !== 'ExitPlanMode') return undefined;
 
+  if (
+    toolCall.summary &&
+    typeof toolCall.summary === 'object' &&
+    !Array.isArray(toolCall.summary)
+  ) {
+    const plan = (toolCall.summary as Record<string, unknown>).plan;
+    if (typeof plan === 'string' && plan.trim()) return plan;
+  }
+
   const input = parseJsonInput(toolCall.input);
   if (typeof input !== 'object' || input === null || Array.isArray(input)) return undefined;
 
