@@ -1,4 +1,4 @@
-import React, { CSSProperties, ReactNode, useMemo } from 'react';
+import React, { CSSProperties, ReactNode, useEffect, useMemo, useState } from 'react';
 import { Box, Chip, Icon, Icons, Text, color, config } from 'folds';
 import { IContent } from 'matrix-js-sdk';
 import { JUMBO_EMOJI_REG, URL_REG } from '../../utils/regex';
@@ -8,6 +8,7 @@ import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
 import { ExitPlanApprovalCard, hasToolApproval } from './elevo/ExitPlanApproval';
 import { ReasoningCard } from './elevo/ReasoningCard';
 import { SseMarkdownBody, parseSseRender } from './elevo/SseMarkdownBody';
+import { fetchReasoningDetail } from './elevo/reasoningApi';
 import { OidcLoginCard, parseOidcLogin } from './elevo/OidcLoginCard';
 import { PlanCard, hasPlan } from './elevo/PlanCard';
 import { trimReplyFromBody } from '../../utils/room';
@@ -39,7 +40,12 @@ import { Attachment, AttachmentBox, AttachmentContent, AttachmentHeader } from '
 import { FileHeader, FileDownloadButton } from './FileHeader';
 import { VoiceMessage } from './content/VoiceMessage';
 import type { CodeViewWorkspaceContext } from '../code-view';
-import { isReasoningEmpty, type ReasoningMetadata } from './reasoning';
+import {
+  isReasoningEmpty,
+  parseReasoningRef,
+  type ReasoningMetadata,
+  type ReasoningRef,
+} from './reasoning';
 
 export function MBadEncrypted() {
   return (
@@ -119,6 +125,60 @@ function getExitPlanModePlan(toolCall: ReturnType<typeof parseToolCall>): string
 
   const plan = (input as Record<string, unknown>).plan;
   return typeof plan === 'string' && plan.trim() ? plan : undefined;
+}
+
+type ReasoningDetailBodyProps = {
+  refData: ReasoningRef;
+  renderBody: (props: RenderBodyProps) => ReactNode;
+};
+
+function ReasoningDetailBody({ refData, renderBody }: ReasoningDetailBodyProps) {
+  const mx = useMatrixClient();
+  const [body, setBody] = useState<string>();
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    setBody(undefined);
+    setError(false);
+
+    fetchReasoningDetail(mx, refData.bridgeId, refData.reasoningPath)
+      .then((detail) => {
+        if (active) setBody(detail.text);
+      })
+      .catch((err) => {
+        if (!active) return;
+        setError(true);
+        console.error('Failed to fetch reasoning detail:', err);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [mx, refData.bridgeId, refData.reasoningPath]);
+
+  if (error) {
+    return (
+      <Text size="T300" style={{ color: color.Critical.Main, fontStyle: 'italic' }}>
+        Failed to load reasoning.
+      </Text>
+    );
+  }
+
+  if (body === undefined) {
+    return (
+      <Text size="T300" priority="300" style={{ fontStyle: 'italic' }}>
+        Loading...
+      </Text>
+    );
+  }
+
+  const trimmedBody = trimReplyFromBody(body);
+  return (
+    <MessageTextBody preWrap jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}>
+      {renderBody({ body: trimmedBody })}
+    </MessageTextBody>
+  );
 }
 
 export function MText({
@@ -237,6 +297,7 @@ export function MText({
         ? Number(reasoningContent.duration_ms)
         : undefined;
     const reasoningStreaming = reasoningContent?.streaming;
+    const reasoningRef = parseReasoningRef(reasoningContent?.ref);
     const isEmpty = isReasoningEmpty(reasoningContent, trimmedBody);
     return (
       <ReasoningCard
@@ -245,16 +306,20 @@ export function MText({
         streaming={reasoningStreaming}
         empty={isEmpty}
       >
-        {!isEmpty && (
-          <MessageTextBody
-            preWrap={typeof customBody !== 'string'}
-            jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
-          >
-            {renderBody({
-              body: trimmedBody,
-              customBody: typeof customBody === 'string' ? customBody : undefined,
-            })}
-          </MessageTextBody>
+        {!isEmpty && reasoningRef ? (
+          <ReasoningDetailBody refData={reasoningRef} renderBody={renderBody} />
+        ) : (
+          !isEmpty && (
+            <MessageTextBody
+              preWrap={typeof customBody !== 'string'}
+              jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
+            >
+              {renderBody({
+                body: trimmedBody,
+                customBody: typeof customBody === 'string' ? customBody : undefined,
+              })}
+            </MessageTextBody>
+          )
         )}
       </ReasoningCard>
     );
