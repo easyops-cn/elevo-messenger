@@ -8,6 +8,7 @@ import { ToolCallCard, parseToolCall } from './elevo/ToolCallCard';
 import { ExitPlanApprovalCard, hasToolApproval } from './elevo/ExitPlanApproval';
 import { ReasoningCard } from './elevo/ReasoningCard';
 import { SseMarkdownBody, parseSseRender } from './elevo/SseMarkdownBody';
+import { ProcessSseMessageContent, parseProcessSseRender } from './elevo/ProcessSseMessageContent';
 import { fetchReasoningDetail } from './elevo/reasoningApi';
 import { OidcLoginCard, parseOidcLogin } from './elevo/OidcLoginCard';
 import { PlanCard, hasPlan } from './elevo/PlanCard';
@@ -195,6 +196,7 @@ export function MText({
 
   const askUser = useMemo(() => parseAskUser(content), [content]);
   const oidcLogin = useMemo(() => parseOidcLogin(content), [content]);
+  const processSseRender = useMemo(() => parseProcessSseRender(content), [content]);
   const sseRender = useMemo(() => parseSseRender(content), [content]);
   const toolCall = useMemo(() => parseToolCall(content), [content]);
   const plan = hasPlan(content);
@@ -248,6 +250,20 @@ export function MText({
 
   if (oidcLogin && (!oidcLogin.userId || oidcLogin.userId === mx.getUserId())) {
     return <OidcLoginCard data={oidcLogin} style={style} />;
+  }
+
+  if (processSseRender) {
+    return (
+      <ProcessSseMessageContent
+        processSse={processSseRender}
+        body={body}
+        customBody={typeof customBody === 'string' ? customBody : undefined}
+        renderBody={renderBody}
+        renderUrlsPreview={renderUrlsPreview}
+        codeViewWorkspace={codeViewWorkspace}
+        style={style}
+      />
+    );
   }
 
   if (sseRender?.streaming) {
