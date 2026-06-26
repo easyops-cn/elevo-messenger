@@ -24,7 +24,7 @@ export const ProcessSseDetailsToggle = style({
   display: 'inline-flex',
   font: 'inherit',
   gap: config.space.S100,
-  opacity: config.opacity.P300,
+  opacity: 0.49,
   padding: 0,
   width: 'fit-content',
 });
@@ -33,9 +33,11 @@ export const ProcessSseDetails = style({
   borderLeft: `${config.borderWidth.B300} solid ${color.Surface.ContainerLine}`,
   display: 'flex',
   flexDirection: 'column',
-  gap: config.space.S200,
+  gap: config.space.S300,
   marginTop: config.space.S200,
   paddingLeft: config.space.S300,
+  paddingTop: config.space.S100,
+  paddingBottom: config.space.S100,
 });
 
 export const ProcessSseStatus = style({
