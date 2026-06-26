@@ -11,6 +11,7 @@ export * from './elevo/ExitPlanApproval';
 export * from './elevo/ToolCallCard';
 export * from './elevo/ReasoningCard';
 export * from './elevo/SseMarkdownBody';
+export * from './elevo/ProcessSseMessageContent';
 export * from './elevo/OidcLoginCard';
 export * from './elevo/PlanCard';
 export * from './elevo/FileReferenceCard';
