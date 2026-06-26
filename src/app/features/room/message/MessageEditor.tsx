@@ -38,9 +38,11 @@ import {
   getAutocompleteQuery,
   getPrevWorldRange,
   htmlToEditorInput,
+  hasTextFormatting,
   moveCursor,
   plainToEditorInput,
   toMatrixCustomHTML,
+  toMarkdownBody,
   toPlainText,
   trimCustomHtml,
   useEditor,
@@ -103,6 +105,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
     const [saveState, save] = useAsyncCallback(
       useCallback(async () => {
         const plainText = toPlainText(editor.children, isMarkdown).trim();
+        const markdownBody = toMarkdownBody(editor.children, isMarkdown).trim();
         const customHtml = trimCustomHtml(
           toMatrixCustomHTML(editor.children, {
             allowTextFormatting: true,
@@ -129,7 +132,7 @@ export const MessageEditor = as<'div', MessageEditorProps>(
 
         const newContent: IContent = {
           msgtype: mEvent.getContent().msgtype,
-          body: plainText,
+          body: markdownBody,
         };
 
         const mentionData = getMentions(mx, roomId, editor);
@@ -141,9 +144,14 @@ export const MessageEditor = as<'div', MessageEditorProps>(
         const mMentions = getMentionContent(Array.from(mentionData.users), mentionData.room);
         newContent['m.mentions'] = mMentions;
 
-        if (!customHtmlEqualsPlainText(customHtml, plainText)) {
+        if (
+          hasTextFormatting(editor.children) &&
+          !customHtmlEqualsPlainText(customHtml, plainText)
+        ) {
           newContent.format = 'org.matrix.custom.html';
           newContent.formatted_body = customHtml;
+        } else {
+          newContent['vip.elevo.markdown'] = {};
         }
 
         const content: IContent = {

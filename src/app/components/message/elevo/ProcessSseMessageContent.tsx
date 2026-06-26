@@ -13,6 +13,7 @@ import { trimTrailingSlash } from '../../../utils/common';
 import { LoaderCircleIcon } from '../../../icons/LoaderCircleIcon';
 import { CircleAlertIcon } from '../../../icons/CircleAlertIcon';
 import * as css from './ProcessSseMessageContent.css';
+import { markdownToCustomHtml } from './markdownContent';
 
 const ProcessSseRenderSchema = z.object({
   kind: z.literal('agent-process'),
@@ -442,21 +443,7 @@ function ProcessSseBlockView({
   }
 
   if (block.kind === 'reasoning') {
-    const trimmedBody = trimReplyFromBody(block.text);
-    return (
-      <ReasoningCard
-        durationMs={block.durationMs ?? undefined}
-        streaming={block.active}
-        empty={!trimmedBody}
-        expanded={!!trimmedBody}
-      >
-        {trimmedBody && (
-          <MessageTextBody preWrap jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}>
-            {renderBody({ body: trimmedBody })}
-          </MessageTextBody>
-        )}
-      </ReasoningCard>
-    );
+    return <ProcessSseReasoningBlock block={block} renderBody={renderBody} />;
   }
 
   if (!includeResponseBlocks) return null;
@@ -466,12 +453,39 @@ function ProcessSseBlockView({
 
   return (
     <MessageTextBody
-      preWrap
+      preWrap={false}
       jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
       style={block.kind === 'error' ? { color: color.Critical.Main } : undefined}
     >
-      {renderBody({ body: trimmedBody })}
+      {renderBody({ body: trimmedBody, customBody: markdownToCustomHtml(trimmedBody) })}
     </MessageTextBody>
+  );
+}
+
+function ProcessSseReasoningBlock({
+  block,
+  renderBody,
+}: {
+  block: ProcessSseTextBlock;
+  renderBody: (props: RenderBodyProps) => ReactNode;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const trimmedBody = trimReplyFromBody(block.text);
+
+  return (
+    <ReasoningCard
+      durationMs={block.durationMs ?? undefined}
+      streaming={block.active}
+      empty={!trimmedBody}
+      expanded={expanded}
+      onToggle={() => setExpanded((value) => !value)}
+    >
+      {trimmedBody && (
+        <MessageTextBody preWrap={false} jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}>
+          {renderBody({ body: trimmedBody, customBody: markdownToCustomHtml(trimmedBody) })}
+        </MessageTextBody>
+      )}
+    </ReasoningCard>
   );
 }
 

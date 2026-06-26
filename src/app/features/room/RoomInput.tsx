@@ -37,6 +37,7 @@ import {
   CustomEditor,
   Toolbar,
   toMatrixCustomHTML,
+  toMarkdownBody,
   toPlainText,
   AUTOCOMPLETE_PREFIXES,
   AutocompletePrefix,
@@ -52,6 +53,7 @@ import {
   moveCursor,
   resetEditorHistory,
   customHtmlEqualsPlainText,
+  hasTextFormatting,
   trimCustomHtml,
   isEmptyEditor,
   getBeginCommand,
@@ -448,6 +450,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
 
     const commandName = getBeginCommand(editor);
     let plainText = toPlainText(editor.children, isMarkdown).trim();
+    let markdownBody = toMarkdownBody(editor.children, isMarkdown).trim();
     let customHtml = trimCustomHtml(
       toMatrixCustomHTML(editor.children, {
         allowTextFormatting: true,
@@ -460,25 +463,33 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     if (commandName === 'me' && commands.me) {
       msgType = MsgType.Emote;
       plainText = trimCommand(commandName, plainText);
+      markdownBody = trimCommand(commandName, markdownBody);
       customHtml = trimCommand(commandName, customHtml);
     } else if (commandName === 'notice' && commands.notice) {
       msgType = MsgType.Notice;
       plainText = trimCommand(commandName, plainText);
+      markdownBody = trimCommand(commandName, markdownBody);
       customHtml = trimCommand(commandName, customHtml);
     } else if (commandName === 'shrug' && commands.shrug) {
       plainText = trimCommand(commandName, plainText);
+      markdownBody = trimCommand(commandName, markdownBody);
       customHtml = trimCommand(commandName, customHtml);
       plainText = `${SHRUG} ${plainText}`;
+      markdownBody = `${SHRUG} ${markdownBody}`;
       customHtml = `${SHRUG} ${customHtml}`;
     } else if (commandName === 'tableflip' && commands.tableflip) {
       plainText = trimCommand(commandName, plainText);
+      markdownBody = trimCommand(commandName, markdownBody);
       customHtml = trimCommand(commandName, customHtml);
       plainText = `${TABLEFLIP} ${plainText}`;
+      markdownBody = `${TABLEFLIP} ${markdownBody}`;
       customHtml = `${TABLEFLIP} ${customHtml}`;
     } else if (commandName === 'unflip' && commands.unflip) {
       plainText = trimCommand(commandName, plainText);
+      markdownBody = trimCommand(commandName, markdownBody);
       customHtml = trimCommand(commandName, customHtml);
       plainText = `${UNFLIP} ${plainText}`;
+      markdownBody = `${UNFLIP} ${markdownBody}`;
       customHtml = `${UNFLIP} ${customHtml}`;
     } else if (commandName) {
       const commandContent = commands[commandName];
@@ -515,10 +526,13 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
 
     if (plainText === '' && !fileRef && !taskRef) return;
 
-    const body = plainText || selectedFileRef?.name || selectedTaskRef?.title || '';
+    const body = markdownBody || selectedFileRef?.name || selectedTaskRef?.title || '';
     const isForkCommand = /^\/fork\b/i.test(body.trimStart());
     const formattedBody = customHtml || body;
     const mentionData = getMentions(mx, roomId, editor);
+    const shouldSendFormattedBody =
+      replyDraft ||
+      (hasTextFormatting(editor.children) && !customHtmlEqualsPlainText(formattedBody, plainText));
 
     const content: IContent = {
       msgtype: msgType,
@@ -540,9 +554,11 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(function Leg
     const mMentions = getMentionContent(Array.from(mentionData.users), mentionData.room);
     content['m.mentions'] = mMentions;
 
-    if (replyDraft || !customHtmlEqualsPlainText(formattedBody, body)) {
+    if (shouldSendFormattedBody) {
       content.format = 'org.matrix.custom.html';
       content.formatted_body = formattedBody;
+    } else {
+      content['vip.elevo.markdown'] = {};
     }
     if (replyDraft) {
       if (isForkCommand) {

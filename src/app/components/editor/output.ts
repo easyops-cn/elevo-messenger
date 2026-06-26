@@ -175,6 +175,43 @@ export const toPlainText = (node: Descendant | Descendant[], isMarkdown: boolean
   return elementToPlainText(node, children);
 };
 
+const elementToMarkdownBody = (node: CustomElement, children: string): string => {
+  if (node.type === BlockType.Mention) {
+    if (node.name === '@room') return '@room';
+    if (isUserId(node.id)) {
+      return `[@${node.name.replace(/^@/, '').replace(/\]/g, '\\]')}](${node.id})`;
+    }
+  }
+  return elementToPlainText(node, children);
+};
+
+export const toMarkdownBody = (node: Descendant | Descendant[], isMarkdown: boolean): string => {
+  if (Array.isArray(node)) return node.map((n) => toMarkdownBody(n, isMarkdown)).join('');
+  if (Text.isText(node)) {
+    return isMarkdown
+      ? unescapeMarkdownBlockSequences(node.text, unescapeMarkdownInlineSequences)
+      : node.text;
+  }
+
+  const children = node.children.map((n) => toMarkdownBody(n, isMarkdown)).join('');
+  return elementToMarkdownBody(node, children);
+};
+
+export const hasTextFormatting = (node: Descendant | Descendant[]): boolean => {
+  if (Array.isArray(node)) return node.some(hasTextFormatting);
+  if (Text.isText(node)) {
+    return !!(
+      node.bold ||
+      node.italic ||
+      node.underline ||
+      node.strikeThrough ||
+      node.code ||
+      node.spoiler
+    );
+  }
+  return node.children.some(hasTextFormatting);
+};
+
 /**
  * Check if customHtml is equals to plainText
  * by replacing `<br/>` with `/n` in customHtml

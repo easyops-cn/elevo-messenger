@@ -12,6 +12,7 @@ import { ProcessSseMessageContent, parseProcessSseRender } from './elevo/Process
 import { fetchReasoningDetail } from './elevo/reasoningApi';
 import { OidcLoginCard, parseOidcLogin } from './elevo/OidcLoginCard';
 import { PlanCard, hasPlan } from './elevo/PlanCard';
+import { isElevoMarkdownContent, markdownToCustomHtml } from './elevo/markdownContent';
 import { trimReplyFromBody } from '../../utils/room';
 import { MessageTextBody } from './layout';
 import {
@@ -55,6 +56,16 @@ export function MBadEncrypted() {
     </Text>
   );
 }
+
+const renderableCustomBody = (
+  content: Record<string, unknown>,
+  body: string,
+  customBody: unknown,
+): string | undefined => {
+  if (typeof customBody === 'string') return customBody;
+  if (isElevoMarkdownContent(content)) return markdownToCustomHtml(trimReplyFromBody(body));
+  return undefined;
+};
 
 type RedactedContentProps = {
   reason?: string;
@@ -257,7 +268,7 @@ export function MText({
       <ProcessSseMessageContent
         processSse={processSseRender}
         body={body}
-        customBody={typeof customBody === 'string' ? customBody : undefined}
+        customBody={renderableCustomBody(content, body, customBody)}
         renderBody={renderBody}
         renderUrlsPreview={renderUrlsPreview}
         codeViewWorkspace={codeViewWorkspace}
@@ -359,19 +370,20 @@ export function MText({
   }
 
   const trimmedBody = trimReplyFromBody(body);
+  const renderedCustomBody = renderableCustomBody(content, body, customBody);
   const urlsMatch = renderUrlsPreview && trimmedBody.match(URL_REG);
   const urls = urlsMatch ? [...new Set(urlsMatch)] : undefined;
 
   return (
     <>
       <MessageTextBody
-        preWrap={typeof customBody !== 'string'}
+        preWrap={typeof renderedCustomBody !== 'string'}
         jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
         style={style}
       >
         {renderBody({
           body: trimmedBody,
-          customBody: typeof customBody === 'string' ? customBody : undefined,
+          customBody: renderedCustomBody,
         })}
         {edited && !sseRender && <MessageEditedContent />}
       </MessageTextBody>
@@ -398,6 +410,7 @@ export function MEmote({
 
   if (typeof body !== 'string') return <BrokenContent />;
   const trimmedBody = trimReplyFromBody(body);
+  const renderedCustomBody = renderableCustomBody(content, body, customBody);
   const urlsMatch = renderUrlsPreview && trimmedBody.match(URL_REG);
   const urls = urlsMatch ? [...new Set(urlsMatch)] : undefined;
 
@@ -405,13 +418,13 @@ export function MEmote({
     <>
       <MessageTextBody
         emote
-        preWrap={typeof customBody !== 'string'}
+        preWrap={typeof renderedCustomBody !== 'string'}
         jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
       >
         <b>{`${displayName} `}</b>
         {renderBody({
           body: trimmedBody,
-          customBody: typeof customBody === 'string' ? customBody : undefined,
+          customBody: renderedCustomBody,
         })}
         {edited && <MessageEditedContent />}
       </MessageTextBody>
@@ -431,6 +444,7 @@ export function MNotice({ edited, content, renderBody, renderUrlsPreview }: MNot
 
   if (typeof body !== 'string') return <BrokenContent />;
   const trimmedBody = trimReplyFromBody(body);
+  const renderedCustomBody = renderableCustomBody(content, body, customBody);
   const urlsMatch = renderUrlsPreview && trimmedBody.match(URL_REG);
   const urls = urlsMatch ? [...new Set(urlsMatch)] : undefined;
 
@@ -438,12 +452,12 @@ export function MNotice({ edited, content, renderBody, renderUrlsPreview }: MNot
     <>
       <MessageTextBody
         notice
-        preWrap={typeof customBody !== 'string'}
+        preWrap={typeof renderedCustomBody !== 'string'}
         jumboEmoji={JUMBO_EMOJI_REG.test(trimmedBody)}
       >
         {renderBody({
           body: trimmedBody,
-          customBody: typeof customBody === 'string' ? customBody : undefined,
+          customBody: renderedCustomBody,
         })}
         {edited && <MessageEditedContent />}
       </MessageTextBody>

@@ -39,7 +39,9 @@ export type MatrixToRoomEvent = MatrixToRoom & {
 };
 
 const MATRIX_TO = /^https?:\/\/matrix\.to\S*$/;
-export const testMatrixTo = (href: string): boolean => MATRIX_TO.test(href);
+const MATRIX_USER_ID = /^@[^:\s]+:[^\s]+$/;
+export const testMatrixTo = (href: string): boolean =>
+  MATRIX_TO.test(href) || MATRIX_USER_ID.test(href);
 
 const MATRIX_TO_USER = /^https?:\/\/matrix\.to\/#\/(@[^:\s]+:[^?/\s]+)\/?$/;
 const MATRIX_TO_ROOM = /^https?:\/\/matrix\.to\/#\/([#!][^?/\s]+)\/?(\?[\S]*)?$/;
@@ -47,6 +49,7 @@ const MATRIX_TO_ROOM_EVENT =
   /^https?:\/\/matrix\.to\/#\/([#!][^?/\s]+)\/(\$[^?/\s]+)\/?(\?[\S]*)?$/;
 
 export const parseMatrixToUser = (href: string): string | undefined => {
+  if (MATRIX_USER_ID.test(href)) return href;
   const match = href.match(MATRIX_TO_USER);
   if (!match) return undefined;
   const userId = match[1];
