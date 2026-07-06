@@ -900,7 +900,6 @@ export const Message = as<'div', MessageProps>(
       agentSession &&
       typeof agentSession === 'object' &&
       (agentSession as { provider?: unknown }).provider === 'coding-agent' &&
-      typeof (agentSession as { conversationId?: unknown }).conversationId === 'string' &&
       typeof (agentSession as { threadId?: unknown }).threadId === 'string' &&
       typeof (agentSession as { turnId?: unknown }).turnId === 'string';
     const transparent =
