@@ -1188,14 +1188,11 @@ export function RoomTimeline({ room, eventId, editor }: RoomTimelineProps) {
         typeof content['vip.elevo.agent_session'] === 'object' &&
         (content['vip.elevo.agent_session'] as { provider?: unknown }).provider ===
           'coding-agent' &&
-        typeof (content['vip.elevo.agent_session'] as { conversationId?: unknown })
-          .conversationId === 'string' &&
         typeof (content['vip.elevo.agent_session'] as { threadId?: unknown }).threadId ===
           'string' &&
         typeof (content['vip.elevo.agent_session'] as { turnId?: unknown }).turnId === 'string'
           ? (content['vip.elevo.agent_session'] as {
               provider: 'coding-agent';
-              conversationId: string;
               threadId: string;
               turnId: string;
             })

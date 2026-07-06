@@ -51,7 +51,6 @@ export type IReplyDraft = {
   relation?: IEventRelation | undefined;
   agentSession?: {
     provider: 'coding-agent';
-    conversationId: string;
     threadId: string;
     turnId: string;
   };
